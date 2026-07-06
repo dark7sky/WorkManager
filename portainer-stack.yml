@@ -17,6 +17,7 @@ services:
       AI_API_KEY: ${AI_API_KEY:-}
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
       AI_MODEL: ${AI_MODEL:-gpt-5-mini}
+      AI_TIMEOUT_SECONDS: ${AI_TIMEOUT_SECONDS:-30}
       TZ: Asia/Seoul
     volumes:
       - workmanager_data:/data

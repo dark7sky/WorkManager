@@ -1,32 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
-import AppShell from './components/AppShell'
-import Login from './components/Login'
-import Modal from './components/Modal'
-import TaskForm from './components/TaskForm'
-import Today from './screens/Today'
-import Tasks from './screens/Tasks'
-import Calendar from './screens/Calendar'
-import AIAssistant from './screens/AIAssistant'
+import { useTheme } from './hooks/useTheme'
+import AppShell from './components/AppShell'; import Login from './components/Login'; import Modal from './components/Modal'; import TaskForm from './components/TaskForm'; import Toast from './components/Toast'
+import Today from './screens/Today'; import Tasks from './screens/Tasks'; import Calendar from './screens/Calendar'; import AIAssistant from './screens/AIAssistant'; import Settings from './screens/Settings'
 
-export default function App() {
-  const [user, setUser] = useState(null), [checking, setChecking] = useState(true)
-  const [page, setPage] = useState('today'), [tasks, setTasks] = useState([]), [events, setEvents] = useState([]), [notes, setNotes] = useState([])
-  const [loginState, setLoginState] = useState({busy:false,error:'',google:false}), [modal, setModal] = useState(false)
-  const [aiText, setAiText] = useState(''), [preview, setPreview] = useState(null), [aiBusy, setAiBusy] = useState(false)
-
-  useEffect(() => { Promise.all([api.config().catch(()=>({google_enabled:false})), api.me().catch(()=>null)]).then(([c,m]) => { setLoginState(s=>({...s,google:c.google_enabled})); setUser(m?.user||null); setChecking(false) }) }, [])
-  useEffect(() => { if(user) refresh() }, [user])
-  const refresh = async () => { const [t,e,today] = await Promise.all([api.tasks(),api.events(),api.today()]); setTasks(t); setEvents(e.map((x,i)=>({...x,start:x.start_at,end:x.end_at,color:['blue','purple','orange'][i%3]}))); setNotes(today.work_logs.map(x=>x.content)) }
-  const login = async (id,password) => { setLoginState(s=>({...s,busy:true,error:''})); try { const r=await api.login(id,password); setUser(r.user) } catch(e){ setLoginState(s=>({...s,error:e.message})) } finally { setLoginState(s=>({...s,busy:false})) } }
-  const logout = async()=>{ await api.logout(); setUser(null) }
-  const saveTask = async data=>{ await api.createTask({...data,priority:data.priority==='medium'?'normal':data.priority,tags:data.category?[data.category]:[]}); setModal(false); refresh() }
-  const progress = async(task,value)=>{ setTasks(xs=>xs.map(x=>x.id===task.id?{...x,progress:value}:x)); await api.updateTask(task.id,{progress:value,status:value===100?'done':value>0?'doing':'todo'}) }
-  const addNote = async content=>{ await api.createLog({content,log_date:new Date().toISOString().slice(0,10)}); refresh() }
-  const analyze = async()=>{ setAiBusy(true); try{ const r=await api.aiPreview(aiText); setPreview({...r,...r.data,title:r.data?.title,description:r.data?.description,start_date:r.data?.start_date,due_date:r.data?.due_date,confidence:Math.round((r.confidence||0)*100)}) } finally{setAiBusy(false)} }
-  const apply=async()=>{ if(!preview)return; await api.aiApply({action:preview.action,entity:preview.entity,id:preview.id,data:preview.data}); setPreview(null); setAiText(''); await refresh(); setPage('today') }
-  if(checking) return <div className="app-loading">WorkManager</div>
-  if(!user) return <Login onLogin={login} busy={loginState.busy} error={loginState.error} googleEnabled={loginState.google}/>
-  const screens={today:<Today tasks={tasks} events={events.filter(e=>e.start?.slice(0,10)===new Date().toISOString().slice(0,10))} notes={notes} onAddNote={addNote} onToggleTask={t=>progress(t,t.progress===100?0:100)} goAI={()=>setPage('ai')}/>,tasks:<Tasks tasks={tasks} onNew={()=>setModal(true)} onProgress={progress}/>,calendar:<Calendar events={events}/>,ai:<AIAssistant text={aiText} setText={setAiText} preview={preview} loading={aiBusy} onPreview={analyze} onApply={apply}/>}
-  return <AppShell page={page} setPage={setPage} onLogout={logout}>{screens[page]}{modal?<Modal title="새 업무" onClose={()=>setModal(false)}><TaskForm onSave={saveTask} onCancel={()=>setModal(false)}/></Modal>:null}</AppShell>
+export default function App(){
+ const {preference,setPreference}=useTheme(); const [user,setUser]=useState(null),[checking,setChecking]=useState(true),[page,setPage]=useState('today'); const [tasks,setTasks]=useState([]),[events,setEvents]=useState([]),[todos,setTodos]=useState([]),[logs,setLogs]=useState([]); const [loginState,setLoginState]=useState({busy:false,error:'',google:false}),[modal,setModal]=useState(false),[toast,setToast]=useState(null); const [aiText,setAiText]=useState(''),[preview,setPreview]=useState(null),[recommendations,setRecommendations]=useState([]),[aiMode,setAiMode]=useState('parse'),[aiBusy,setAiBusy]=useState(false)
+ const notify=useCallback((message,type='success')=>{setToast({message,type});setTimeout(()=>setToast(null),4000)},[])
+ const refresh=useCallback(async()=>{try{const [t,e,today]=await Promise.all([api.tasks(),api.events(),api.today()]);setTasks(t);setEvents(e.map((x,i)=>({...x,start:x.start_at,end:x.end_at,color:['blue','purple','orange'][i%3]})));setTodos(today.todos||[]);setLogs(today.work_logs||[])}catch(e){notify(e.message,'error')}},[notify])
+ useEffect(()=>{Promise.all([api.config().catch(()=>({google_enabled:false})),api.me().catch(()=>null)]).then(([c,m])=>{setLoginState(s=>({...s,google:c.google_enabled}));setUser(m?.user||null)}).finally(()=>setChecking(false))},[])
+ useEffect(()=>{if(user)refresh()},[user,refresh])
+ const login=async(id,password)=>{setLoginState(s=>({...s,busy:true,error:''}));try{const r=await api.login(id,password);setUser(r.user)}catch(e){setLoginState(s=>({...s,error:e.message}))}finally{setLoginState(s=>({...s,busy:false}))}}
+ const mutate=async(action,success)=>{try{await action();await refresh();if(success)notify(success)}catch(e){notify(e.message,'error')}}
+ const analyze=async()=>{setAiMode('parse');setAiBusy(true);try{setPreview(await api.aiPreview(aiText))}catch(e){notify(e.message,'error')}finally{setAiBusy(false)}}
+ const recommend=async()=>{setAiMode('recommend');setPreview(null);setAiBusy(true);try{const result=await api.aiRecommendations(5);setRecommendations(result.items||[])}catch(e){notify(e.message,'error')}finally{setAiBusy(false)}}
+ const apply=()=>mutate(async()=>{await api.aiApply({action:preview.action,entity:preview.entity,id:preview.id,data:preview.data});setPreview(null);setAiText('');setPage('today')},'AI 제안을 적용했습니다.')
+ if(checking)return <div className="app-loading"><span className="brand-mark">W</span> WorkManager</div>
+ if(!user)return <Login onLogin={login} busy={loginState.busy} error={loginState.error} googleEnabled={loginState.google}/>
+ const today=new Date().toLocaleDateString('en-CA'); const screens={
+  today:<Today tasks={tasks} events={events.filter(e=>e.start?.slice(0,10)===today)} todos={todos} logs={logs} onAddTodo={title=>mutate(()=>api.createTodo({title,todo_date:today,completed:false}),'오늘 할 일을 추가했습니다.')} onToggleTodo={todo=>mutate(()=>api.updateTodo(todo.id,{completed:!todo.completed}))} onDeleteTodo={todo=>{if(confirm(`“${todo.title}” 할 일을 삭제할까요?`))mutate(()=>api.deleteTodo(todo.id),'오늘 할 일을 삭제했습니다.')}} onAddLog={content=>mutate(()=>api.createLog({content,log_date:today}),'오늘 한 일을 기록했습니다.')} onUpdateLog={(id,content)=>mutate(()=>api.updateLog(id,{content}),'기록을 수정했습니다.')} onDeleteLog={log=>{if(confirm(`“${log.content}” 기록을 삭제할까요?`))mutate(()=>api.deleteLog(log.id),'기록을 삭제했습니다.')}} onToggleTask={t=>mutate(()=>api.updateTask(t.id,{progress:t.progress===100?0:100,status:t.progress===100?'todo':'done'}))} goAI={()=>setPage('ai')}/>,
+  tasks:<Tasks tasks={tasks} onNew={()=>setModal({type:'task'})} onEdit={task=>setModal({type:'task',task})} onProgress={(t,value)=>mutate(()=>api.updateTask(t.id,{progress:value,status:value===100?'done':value>0?'in_progress':'todo'}),'진행률을 저장했습니다.')}/>,calendar:<Calendar events={events} onCreate={data=>mutate(()=>api.createEvent(data),'일정을 등록했습니다.')} onUpdate={(event,data)=>mutate(()=>api.updateEvent(event.id,data),'일정을 수정했습니다.')} onDelete={event=>mutate(()=>api.deleteEvent(event.id),'일정을 삭제했습니다.')}/>,ai:<AIAssistant text={aiText} setText={setAiText} preview={preview} recommendations={recommendations} mode={aiMode} loading={aiBusy} onPreview={analyze} onRecommend={recommend} onApply={apply}/>,settings:<Settings theme={preference} setTheme={setPreference} notify={notify} onDataChanged={refresh}/>
+ }
+ return <AppShell page={page} setPage={setPage} onLogout={async()=>{await api.logout();setUser(null)}} user={user}>{screens[page]}{modal?.type==='task'?<Modal title={modal.task?'업무 수정':'새 업무'} onClose={()=>setModal(false)}><TaskForm task={modal.task} onSave={data=>mutate(async()=>{modal.task?await api.updateTask(modal.task.id,data):await api.createTask(data);setModal(false)},modal.task?'업무를 수정했습니다.':'업무를 추가했습니다.')} onDelete={modal.task?()=>{if(confirm(`‘${modal.task.title}’ 업무를 삭제할까요?`))mutate(async()=>{await api.deleteTask(modal.task.id);setModal(false)},'업무를 삭제했습니다.')} : null} onCancel={()=>setModal(false)}/></Modal>:null}<Toast toast={toast} onClose={()=>setToast(null)}/></AppShell>
 }

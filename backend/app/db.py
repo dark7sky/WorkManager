@@ -28,7 +28,18 @@ def init_db():
         CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',start_at TEXT NOT NULL,end_at TEXT NOT NULL,location TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS todos(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT NOT NULL,todo_date TEXT NOT NULL,completed INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS work_logs(id INTEGER PRIMARY KEY AUTOINCREMENT,content TEXT NOT NULL,log_date TEXT NOT NULL,task_id INTEGER,created_at TEXT NOT NULL,FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE SET NULL);
+        CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY,value TEXT NOT NULL,updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS oauth_tokens(provider TEXT PRIMARY KEY,user_email TEXT NOT NULL,access_token TEXT,refresh_token TEXT,expires_at TEXT,scope TEXT,updated_at TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS deleted_google_events(google_event_id TEXT NOT NULL,calendar_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(google_event_id,calendar_id));
         """)
+        # Additive migrations keep existing single-user databases intact.
+        event_columns = {r["name"] for r in c.execute("PRAGMA table_info(events)")}
+        for name, definition in {
+            "google_event_id": "TEXT", "google_calendar_id": "TEXT", "updated_at": "TEXT"
+        }.items():
+            if name not in event_columns:
+                c.execute(f"ALTER TABLE events ADD COLUMN {name} {definition}")
+        c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_google ON events(google_calendar_id,google_event_id) WHERE google_event_id IS NOT NULL")
         if c.execute("SELECT COUNT(*) n FROM tasks").fetchone()["n"] == 0: seed(c)
 
 def seed(c):

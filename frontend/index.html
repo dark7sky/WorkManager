@@ -1,2 +1,22 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#0078d4"/><link rel="manifest" href="/manifest.webmanifest"/><title>WorkManager</title></head><body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#0078d4" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>WorkManager</title>
+    <script>
+      (() => {
+        const preference = localStorage.getItem('wm-theme-v1') || 'auto';
+        const dark = preference === 'dark' || (preference === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

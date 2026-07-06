@@ -6,6 +6,7 @@
 2. 기존 리버스 프록시에서 `work.ysyoo.link`를 Docker 호스트의 `APP_HTTP_PORT`로 전달합니다. 기본 포트는 `18080`입니다.
 3. 방화벽에서는 이 포트를 외부에 직접 공개하지 말고 리버스 프록시에서만 접근하게 하는 것을 권장합니다.
 4. Google 로그인을 쓸 경우 Google Cloud Console의 Authorized redirect URI에 `https://work.ysyoo.link/api/auth/google/callback`을 등록합니다.
+5. Google Cloud Console에서 Google Calendar API를 활성화하고 본인 계정을 OAuth 테스트 사용자로 추가합니다.
 
 ## Stack 생성
 
@@ -28,6 +29,7 @@
    - `AI_API_KEY` (선택)
    - `AI_BASE_URL` (선택)
    - `AI_MODEL` (선택)
+   - `AI_TIMEOUT_SECONDS` (선택, 기본 `30`)
 6. **GitOps updates**를 켜고 다음 중 하나를 선택합니다.
    - Polling: 5분 간격. 가장 단순하고 GitHub 추가 설정이 필요 없습니다.
    - Webhook: 표시된 URL을 복사해 GitHub 저장소의 Actions secret `PORTAINER_WEBHOOK_URL`로 등록합니다.

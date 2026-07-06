@@ -1,11 +1,24 @@
-import { CheckCircle2, CornerDownLeft, FilePenLine, LoaderCircle, MessageSquareText, Sparkles, WandSparkles } from 'lucide-react'
+import { AlertTriangle, CalendarDays, CheckCircle2, CornerDownLeft, LoaderCircle, Sparkles, Target } from 'lucide-react'
 import Header from '../components/Header'
 
-export default function AIAssistant({ text, setText, preview, loading, onPreview, onApply }) {
+const ACTION_LABELS = { create: '새 항목 등록', update: '기존 항목 수정', delete: '항목 삭제' }
+const ENTITY_LABELS = { task: '업무', event: '일정', work_log: '업무 기록' }
+
+export default function AIAssistant({ text, setText, preview, recommendations, mode, loading, onPreview, onRecommend, onApply }) {
   const data = preview?.data || {}
-  const confidence = preview ? Math.round((preview.confidence > 1 ? preview.confidence / 100 : preview.confidence || .92) * 100) : 0
-  return <><Header title="AI 도우미" subtitle="자연스럽게 말하면 업무와 일정으로 정리해 드립니다."/><div className="content ai-layout">
-    <section className="assistant-panel"><div className="assistant-heading"><span><Sparkles/></span><div><h2>무엇을 도와드릴까요?</h2><p>해야 할 일, 완료한 일, 일정 변경을 자유롭게 적어보세요.</p></div></div><div className="suggestions"><button onClick={()=>setText('이번 주 금요일까지 제안서 초안을 작성해야 해. 중요도는 높음으로 해줘.')}><FilePenLine/>새 업무 등록</button><button onClick={()=>setText('오늘 고객사 미팅을 완료했고, 다음 주 화요일에 후속 연락 일정 추가해줘.')}><MessageSquareText/>완료 업무 기록</button><button onClick={()=>setText('진행 중인 일을 보고 오늘 가장 먼저 할 일 3개를 추천해줘.')}><WandSparkles/>오늘 업무 추천</button></div><div className="prompt-box"><textarea value={text} onChange={e=>setText(e.target.value)} placeholder="예: 다음 주 화요일 오후 2시에 고객사 미팅을 추가하고, 하루 전에 준비 자료 검토 업무도 만들어줘."/><footer><span>AI가 적용 전 내용을 미리 보여드려요.</span><button className="primary" disabled={!text.trim()||loading} onClick={onPreview}>{loading?<LoaderCircle className="spin"/>:<CornerDownLeft/>} 분석하기</button></footer></div></section>
-    <section className={`ai-result ${preview?'visible':''}`}><div className="section-title"><div><h2>AI 분석 결과</h2><p>적용 전에 내용을 확인하세요.</p></div>{preview?<span className="confidence">{confidence}% 확신</span>:null}</div>{preview?<><div className="preview-item"><span className="preview-icon"><CheckCircle2/></span><div><small>{preview.action==='update'?'항목 수정':'새 항목'} · {preview.entity}</small><h3>{data.title||data.content||'새 항목'}</h3><dl><div><dt>시작</dt><dd>{data.start_date||data.start_at||data.todo_date||data.log_date||'-'}</dd></div><div><dt>완료</dt><dd>{data.due_date||data.end_at||'-'}</dd></div><div><dt>우선순위</dt><dd>{data.priority||'보통'}</dd></div></dl><p>{data.description||text}</p></div></div><div className="result-actions"><button className="secondary" onClick={()=>setText(text)}>내용 수정</button><button className="primary" onClick={onApply}>이대로 적용</button></div></>:<div className="ai-empty"><Sparkles/><strong>분석 결과가 여기에 표시됩니다</strong><p>왼쪽 입력창에 내용을 적고 분석하기를 눌러보세요.</p></div>}</section>
-  </div></>
+  const isRemote = preview?.source === 'remote-ai'
+  return <><Header title="AI 도우미" subtitle="자연어로 업무를 정리하고, 지금 집중할 일을 추천받으세요."/><div className="content ai-layout">
+    <section className="assistant-panel"><div className="assistant-heading"><span><Sparkles/></span><div><h2>무엇을 도와드릴까요?</h2><p>등록·수정 요청은 적용 전에 검토하며, 추천은 데이터를 변경하지 않습니다.</p></div></div>
+      <div className="suggestions"><button onClick={()=>setText('금요일까지 주간 보고서 초안을 작성하는 높은 우선순위 업무를 만들어줘.')}><Target size={16}/> 업무 만들기</button><button onClick={()=>setText('다음 주 화요일 오후 2시에 고객 미팅 일정을 추가해줘.')}><CalendarDays size={16}/> 일정 만들기</button><button onClick={onRecommend}><Sparkles size={16}/> 오늘 할 일 추천</button></div>
+      <div className="prompt-box"><textarea value={text} onChange={e=>setText(e.target.value)} placeholder="예: 기획서 작성 업무의 진행률을 60%로 수정해줘."/><footer><span>AI 결과를 검토한 뒤에만 실제 데이터에 반영됩니다.</span><button className="primary" disabled={!text.trim()||loading} onClick={onPreview}>{loading&&mode==='parse'?<LoaderCircle className="spin"/>:<CornerDownLeft/>} 분석하기</button></footer></div>
+      <div className="ai-privacy-note"><CheckCircle2/> 추천은 현재 업무의 마감일, 우선순위, 진행률과 최근 기록을 기준으로 계산합니다.</div>
+    </section>
+    <section className="ai-result"><div className="section-title"><div><h2>{mode==='recommend'?'오늘의 추천':'분석 결과'}</h2><p>{mode==='recommend'?'추천 결과는 업무를 자동으로 변경하지 않습니다.':'적용 전 해석이 정확한지 확인하세요.'}</p></div></div>
+      {loading&&mode==='recommend'?<div className="ai-empty"><LoaderCircle className="spin"/><strong>업무 우선순위를 분석하고 있습니다.</strong></div>:null}
+      {!loading&&mode==='recommend'?<RecommendationList items={recommendations}/>:null}
+      {!loading&&mode!=='recommend'&&preview?<>{preview.warning?<div className="ai-warning"><AlertTriangle/><span>{preview.warning}</span></div>:null}<div className="ai-source"><span className={isRemote?'online':''}>{isRemote?'AI API 분석':'로컬 규칙 분석'}</span></div><div className="preview-item"><span className="preview-icon"><Sparkles/></span><div><small>{ACTION_LABELS[preview.action]||preview.action} · {ENTITY_LABELS[preview.entity]||preview.entity}</small><h3>{data.title||data.content||'제목 없음'}</h3><p>{data.description||(data.content?'':text)}</p><dl><div><dt>시작</dt><dd>{data.start_date||data.start_at||data.log_date||'-'}</dd></div><div><dt>완료</dt><dd>{data.due_date||data.end_at||'-'}</dd></div><div><dt>우선순위 / 진행률</dt><dd>{data.priority||(data.progress!=null?`${data.progress}%`:'보통')}</dd></div></dl></div></div><div className="result-actions"><button className="primary" onClick={onApply}>확인하고 적용</button></div></>:null}
+      {!loading&&mode!=='recommend'&&!preview?<div className="ai-empty"><Sparkles/><strong>요청을 분석하거나 오늘의 추천을 받아보세요.</strong><p>AI가 만든 내용은 확인 없이 저장되지 않습니다.</p></div>:null}
+    </section></div></>
 }
+
+function RecommendationList({items=[]}){if(!items.length)return <div className="ai-empty"><CheckCircle2/><strong>추천할 진행 중 업무가 없습니다.</strong><p>새 업무를 등록하거나 완료된 업무의 상태를 확인해 보세요.</p></div>;return <ol className="recommendation-list">{items.map((item,index)=><li key={item.task_id}><span className="recommendation-rank">{index+1}</span><div><h3>{item.title}</h3><p>{item.reason}</p><div className="recommendation-meta"><span>권장 진행률 <b>{item.suggested_progress}%</b></span><span>권장 완료일 <b>{item.suggested_due_date||item.due_date||'미정'}</b></span></div></div></li>)}</ol>}
