@@ -12,7 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Portainer GitOps webhook
-        if: ${{ secrets.PORTAINER_WEBHOOK_URL != '' }}
         env:
           PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
-        run: curl --fail --silent --show-error --retry 3 --request POST "$PORTAINER_WEBHOOK_URL"
+        run: |
+          if [ -z "$PORTAINER_WEBHOOK_URL" ]; then
+            echo "PORTAINER_WEBHOOK_URL is not configured; Portainer polling remains active."
+            exit 0
+          fi
+          curl --fail --silent --show-error --retry 3 --request POST "$PORTAINER_WEBHOOK_URL"
