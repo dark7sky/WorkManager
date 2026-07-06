@@ -34,23 +34,9 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    restart: unless-stopped
-
-  caddy:
-    build:
-      context: ./deploy/caddy
-    depends_on:
-      - web
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
+      - "${APP_HTTP_PORT:-18080}:80"
     restart: unless-stopped
 
 volumes:
   workmanager_data:
-  caddy_data:
-  caddy_config:

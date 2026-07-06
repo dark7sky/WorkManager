@@ -156,6 +156,6 @@ docker compose start api
 
 ## Portainer 배포
 
-Portainer에서는 Git repository 방식으로 `https://github.com/dark7sky/WorkManager.git`의 `main` 브랜치와 `portainer-stack.yml`을 지정합니다. GitOps polling 또는 webhook을 켜면 Git push 후 자동으로 다시 빌드·배포됩니다. 자세한 절차는 [Portainer 배포 가이드](docs/PORTAINER.md)를 참고하세요.
+Portainer에서는 Git repository 방식으로 `https://github.com/dark7sky/WorkManager.git`의 `main` 브랜치와 `portainer-stack.yml`을 지정합니다. 웹 포트는 기본 `18080`이며 Portainer 환경변수 `APP_HTTP_PORT`로 변경할 수 있습니다. 기존 리버스 프록시에서 `work.ysyoo.link`를 이 포트로 연결하세요. GitOps polling 또는 webhook을 켜면 Git push 후 자동으로 다시 빌드·배포됩니다. 자세한 절차는 [Portainer 배포 가이드](docs/PORTAINER.md)를 참고하세요.
 
 ![모바일 콘셉트](design/mobile-concept.png)

@@ -3,8 +3,8 @@
 ## 사전 준비
 
 1. `work.ysyoo.link`의 A/AAAA 레코드를 Portainer가 관리하는 Docker 호스트로 연결합니다.
-2. 공유기와 방화벽에서 TCP 80·443을 해당 호스트로 전달합니다. HTTP/3를 사용하려면 UDP 443도 허용합니다.
-3. 다른 컨테이너가 호스트의 80/443 포트를 사용하지 않는지 확인합니다.
+2. 기존 리버스 프록시에서 `work.ysyoo.link`를 Docker 호스트의 `APP_HTTP_PORT`로 전달합니다. 기본 포트는 `18080`입니다.
+3. 방화벽에서는 이 포트를 외부에 직접 공개하지 말고 리버스 프록시에서만 접근하게 하는 것을 권장합니다.
 4. Google 로그인을 쓸 경우 Google Cloud Console의 Authorized redirect URI에 `https://work.ysyoo.link/api/auth/google/callback`을 등록합니다.
 
 ## Stack 생성
@@ -21,6 +21,7 @@
    - `APP_LOGIN_ID`
    - `APP_LOGIN_PASSWORD`
    - `APP_SECRET` (긴 무작위 문자열)
+   - `APP_HTTP_PORT` (선택, 기본값 `18080`)
    - `GOOGLE_CLIENT_ID` (선택)
    - `GOOGLE_CLIENT_SECRET` (선택)
    - `GOOGLE_ALLOWED_EMAIL` (선택, 본인 이메일 권장)
@@ -42,9 +43,10 @@
 
 ## 확인
 
-1. Stack의 `api`, `web`, `caddy` 컨테이너가 Running/Healthy인지 확인합니다.
-2. Caddy 로그에서 인증서 발급 성공을 확인합니다.
-3. `https://work.ysyoo.link`에 접속합니다.
-4. 인증서 발급이 실패하면 DNS, 포트포워딩, 방화벽, 기존 80/443 점유를 순서대로 확인합니다.
+1. Stack의 `api`, `web` 컨테이너가 Running/Healthy인지 확인합니다.
+2. 먼저 `http://Docker호스트IP:18080`으로 앱 응답을 확인합니다.
+3. 기존 리버스 프록시에서 `work.ysyoo.link`의 upstream을 `Docker호스트IP:18080`으로 설정하고 WebSocket 지원을 켭니다.
+4. `https://work.ysyoo.link`에 접속합니다.
+5. 접속이 실패하면 DNS, 리버스 프록시 upstream, 방화벽, `APP_HTTP_PORT` 점유를 순서대로 확인합니다.
 
 데이터는 `workmanager_data` named volume에 유지되므로 코드 재배포 시 삭제되지 않습니다. Stack 삭제 화면에서 volumes 삭제 옵션은 선택하지 마세요.
