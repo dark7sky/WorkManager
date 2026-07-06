@@ -54,6 +54,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(a.post("/api/tasks", json={"title": "x", "status": "invalid"}).status_code, 422)
         self.assertEqual(a.post("/api/events", json={"title": "x", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T11:00:00"}).status_code, 422)
         self.assertEqual(a.post("/api/todos", json={"title": "x", "unexpected": True}).status_code, 422)
+        self.assertEqual(a.post("/api/tasks", json={"title": "   "}).status_code, 422)
+        self.assertEqual(a.post("/api/work_logs", json={"content": "\t "}).status_code, 422)
 
     def test_logout_revokes_server_session(self):
         from app.auth import create_session
@@ -63,6 +65,26 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(client.post("/api/auth/logout").status_code, 200)
         other = self.client(token)
         self.assertEqual(other.get("/api/auth/me").status_code, 401)
+
+    def test_allowlist_removal_revokes_existing_session(self):
+        from app.auth import create_session
+        token = create_session("sub-a")
+        with patch.dict(os.environ, {"GOOGLE_ALLOWED_EMAIL": "b@example.com"}):
+            self.assertEqual(self.client(token).get("/api/auth/me").status_code, 403)
+        self.assertEqual(self.client(token).get("/api/auth/me").status_code, 401)
+
+    def test_expired_session_is_deleted_persistently(self):
+        import hashlib
+        from app.auth import create_session
+        from app.db import connection
+        token = create_session("sub-a")
+        with connection() as c:
+            c.execute("UPDATE sessions SET expires_at=0 WHERE token_hash=?",
+                      (hashlib.sha256(token.encode()).hexdigest(),))
+        self.assertEqual(self.client(token).get("/api/auth/me").status_code, 401)
+        with connection() as c:
+            self.assertIsNone(c.execute("SELECT 1 FROM sessions WHERE token_hash=?",
+                                        (hashlib.sha256(token.encode()).hexdigest(),)).fetchone())
 
     def test_readiness_checks_database(self):
         self.assertEqual(TestClient(self.app).get("/api/ready").json()["database"], "ready")
@@ -124,6 +146,15 @@ class ApiTests(unittest.TestCase):
         first = a.post("/api/tasks", json={"title": "first"}).json()
         second = a.post("/api/tasks", json={"title": "second", "dependency_ids": [first["id"]]}).json()
         self.assertEqual(a.patch(f"/api/tasks/{first['id']}", json={"dependency_ids": [second["id"]]}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_parent_hierarchy_cycle_is_rejected(self, *_):
+        a = self.client(self.token_a)
+        parent = a.post("/api/tasks", json={"title": "parent"}).json()
+        child = a.post("/api/tasks", json={"title": "child", "parent_id": parent["id"]}).json()
+        response = a.patch(f"/api/tasks/{parent['id']}", json={"parent_id": child["id"]})
+        self.assertEqual(response.status_code, 422, response.text)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

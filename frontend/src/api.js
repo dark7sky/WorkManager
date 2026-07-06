@@ -10,7 +10,8 @@ export async function request(path, options = {}) {
   let response
   try {
     response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', headers: { 'Content-Type': 'application/json', ...fetchOptions.headers } })
-  } catch {
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error
     throw new ApiError('서버에 연결할 수 없습니다. 네트워크 상태를 확인해 주세요.', 0)
   }
   if (!response.ok) {
@@ -37,7 +38,7 @@ export const api = {
   trash: () => request('/trash'),
   restoreTrash: (table,id) => request(`/${encodeURIComponent(table)}/${id}/restore`,{method:'POST'}),
   cleanupTrash: (days=30) => request(`/trash?older_than_days=${days}`,{method:'DELETE'}),
-  achievements: (start,end,tags=[]) => request(`/achievements?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
+  achievements: (start,end,tags=[],signal) => request(`/achievements?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&tags=${encodeURIComponent(tags.join(','))}`, { signal }),
   resolveEventConflict: (id,strategy) => request(`/events/${id}/resolve-conflict`,json('POST',{strategy})),
   aiTagSuggestions: data => request('/ai/tag-recommendations',json('POST',data)),
   aiPeriodSummary: (start,end,tags=[]) => request(`/ai/period-summary?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),

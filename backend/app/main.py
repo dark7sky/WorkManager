@@ -249,6 +249,13 @@ def normalize(table, data):
     except ValidationError as exc:
         raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
     result = model.model_dump(exclude_unset=True, mode="json")
+    text_fields = {
+        "tasks": ("title",), "events": ("title", "location"),
+        "todos": ("title",), "work_logs": ("content",),
+    }[table]
+    for key in text_fields:
+        if key in result and isinstance(result[key], str):
+            result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id"},
                 "events": set(), "todos": set(), "work_logs": {"task_id"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
@@ -318,6 +325,18 @@ def validate_task_links(data, user_id, current_id=None):
             return False
         if visit(current_id):
             raise HTTPException(422, "Task dependencies must not contain a cycle")
+    if current_id is not None and "parent_id" in data:
+        with connection() as c:
+            parents = {r["id"]: r["parent_id"] for r in c.execute(
+                "SELECT id,parent_id FROM tasks WHERE user_id=? AND deleted_at IS NULL", (user_id,)).fetchall()}
+        parents[current_id] = data.get("parent_id")
+        seen = set()
+        node = current_id
+        while node is not None:
+            if node in seen:
+                raise HTTPException(422, "Task parent hierarchy must not contain a cycle")
+            seen.add(node)
+            node = parents.get(node)
 
 
 def next_recurrence_date(value, rule, anchor_day=None, anchor_month_end=False):

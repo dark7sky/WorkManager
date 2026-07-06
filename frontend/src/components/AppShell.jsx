@@ -2,9 +2,28 @@ import { BarChart3, CalendarDays, CheckSquare2, LayoutDashboard, ListTodo, LogOu
 const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['settings',Settings,'설정']]
 export default function AppShell({ page, setPage, children, onLogout, user }) {
   const initials = (user?.name || user?.email || user?.user_id || '나').slice(0,2).toUpperCase()
-  return <div className="app-shell"><aside className="sidebar">
-    <div className="brand"><span className="brand-mark"><ListTodo size={20}/></span><strong>WorkManager</strong></div>
-    <nav aria-label="주 메뉴">{items.map(([id,Icon,label])=><button key={id} className={page===id?'active':''} onClick={()=>setPage(id)}><Icon size={19}/><span>{label}</span></button>)}</nav>
-    <div className="sidebar-foot"><div className="avatar">{initials}</div><div><strong>{user?.name || '나의 작업 공간'}</strong><small>{user?.email || '개인 계정'}</small></div><button className="icon-button" onClick={onLogout} title="로그아웃"><LogOut size={18}/></button></div>
-  </aside><main className="main-area">{children}</main><nav className="mobile-nav" aria-label="모바일 메뉴">{items.map(([id,Icon,label])=><button key={id} className={page===id?'active':''} onClick={()=>setPage(id)}><Icon size={20}/><small>{label}</small></button>)}</nav></div>
+  const navigate = id => {
+    setPage(id)
+    document.querySelector('.main-area')?.focus({ preventScroll: true })
+  }
+  const navigation = (mobile = false) => items.map(([id,Icon,label]) => <button
+    key={id}
+    type="button"
+    className={page === id ? 'active' : ''}
+    aria-current={page === id ? 'page' : undefined}
+    aria-label={mobile ? label : undefined}
+    title={mobile ? label : undefined}
+    onClick={() => navigate(id)}
+  ><Icon size={mobile ? 20 : 19} aria-hidden="true"/><span>{label}</span></button>)
+
+  return <div className="app-shell">
+    <a className="skip-link" href="#main-content">본문으로 바로가기</a>
+    <aside className="sidebar">
+      <div className="brand"><span className="brand-mark"><ListTodo size={20} aria-hidden="true"/></span><strong>WorkManager</strong></div>
+      <nav aria-label="주 메뉴">{navigation()}</nav>
+      <div className="sidebar-foot"><div className="avatar" aria-hidden="true">{initials}</div><div><strong>{user?.name || '나의 작업 공간'}</strong><small title={user?.email}>{user?.email || '개인 계정'}</small></div><button type="button" className="icon-button" onClick={onLogout} aria-label="로그아웃" title="로그아웃"><LogOut size={18} aria-hidden="true"/></button></div>
+    </aside>
+    <main id="main-content" className="main-area" tabIndex="-1">{children}</main>
+    <nav className="mobile-nav" aria-label="모바일 메뉴">{navigation(true)}</nav>
+  </div>
 }
