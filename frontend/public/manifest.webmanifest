@@ -1,5 +1,24 @@
 {
-  "name": "WorkManager", "short_name": "WorkManager", "start_url": "/", "display": "standalone",
-  "background_color": "#f3f4f6", "theme_color": "#0078d4", "lang": "ko",
-  "icons": [{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "id": "/",
+  "name": "WorkManager - 나의 업무 관리",
+  "short_name": "WorkManager",
+  "description": "업무, 일정, 오늘 할 일과 업무 기록을 한곳에서 관리합니다.",
+  "lang": "ko-KR",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f3f4f6",
+  "theme_color": "#0078d4",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "오늘", "short_name": "오늘", "url": "/?page=today", "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}]},
+    {"name": "새 업무", "short_name": "새 업무", "url": "/?page=tasks&action=new", "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}]},
+    {"name": "일정", "short_name": "일정", "url": "/?page=calendar", "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}]}
+  ]
 }

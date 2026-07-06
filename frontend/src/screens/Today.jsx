@@ -1,20 +1,129 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CalendarClock, Check, ChevronRight, Circle, Clock3, Pencil, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import Header from '../components/Header'
+import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
+import { api } from '../api'
 
-const dateText = new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'long'}).format(new Date())
+const now = new Date()
+const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
 
-export default function Today({tasks,events,todos,logs,onAddTodo,onToggleTodo,onDeleteTodo,onAddLog,onUpdateLog,onDeleteLog,onToggleTask,goAI}) {
-  const [editing,setEditing]=useState(null), [draft,setDraft]=useState('')
-  const active=tasks.filter(t=>t.status!=='done').slice(0,5)
-  const submitTodo=e=>{e.preventDefault();const value=e.currentTarget.elements.title.value.trim();if(value){onAddTodo(value);e.currentTarget.reset()}}
-  const submitLog=e=>{e.preventDefault();const value=e.currentTarget.elements.content.value.trim();if(value){onAddLog(value);e.currentTarget.reset()}}
-  return <><Header title="오늘" subtitle={`${dateText} · 중요한 일에 집중해 보세요.`}/><div className="content today-grid">
-    <section className="focus-panel"><div className="section-title"><div><h2>오늘 할 일</h2><p>빠른 Todo와 진행 중인 업무를 함께 확인합니다.</p></div></div>
-      <form className="quick-add" onSubmit={submitTodo}><Plus/><input name="title" aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><button>추가</button></form>
-      {todos.length?<div className="todo-list">{todos.map(todo=><div className={`todo-row ${todo.completed?'completed':''}`} key={todo.id}><button className="todo-check" aria-label={`${todo.title} ${todo.completed?'미완료':'완료'} 처리`} onClick={()=>onToggleTodo(todo)}>{todo.completed?<Check/>:<Circle/>}</button><span>{todo.title}</span><button className="danger-icon" title="삭제" onClick={()=>onDeleteTodo(todo)}><Trash2/></button></div>)}</div>:null}
-      <div className="section-divider"><span>등록된 업무</span><b>{active.length}</b></div><div className="task-list">{active.length?active.map(task=><button className="task-row" key={task.id} onClick={()=>onToggleTask(task)}><span className="check-circle"><Circle/><Check/></span><span className="task-main"><strong>{task.title}</strong><small>{task.priority==='high'?'높은 우선순위':'업무'} · {task.due_date||'기한 없음'}</small></span><span className="mini-progress"><i style={{width:`${task.progress}%`}}/></span><b>{task.progress}%</b></button>):<p className="empty-state">오늘 진행할 업무가 없습니다.</p>}</div></section>
-    <aside className="today-side"><section className="side-panel"><div className="section-title"><div><h2>오늘 일정</h2><p>{events.length}개의 일정</p></div><CalendarClock/></div>{events.length?events.slice(0,4).map(e=><div className="event-row" key={e.id}><time>{new Date(e.start).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</time><i/><div><strong>{e.title}</strong><small>{e.location||'일정'}</small></div></div>):<p className="empty-state">오늘은 등록된 일정이 없습니다.</p>}</section><button className="ai-card" onClick={goAI}><span><Sparkles/></span><div><strong>AI에게 오늘 할 일 추천받기</strong><p>진행 상황과 마감일을 분석해 우선순위를 정리합니다.</p></div><ChevronRight/></button></aside>
-    <section className="log-panel"><div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록하면 내일의 계획이 선명해집니다.</p></div><Clock3/></div><form className="quick-add" onSubmit={submitLog}><Plus/><input name="content" aria-label="오늘 한 일" placeholder="오늘 완료한 일을 기록하세요"/><button>기록</button></form>{logs.length?<div className="done-notes">{logs.map(log=><div key={log.id}>{editing===log.id?<><Check/><input className="inline-edit" value={draft} autoFocus onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&draft.trim()){onUpdateLog(log.id,draft.trim());setEditing(null)}if(e.key==='Escape')setEditing(null)}}/><span className="row-actions"><button title="취소" onClick={()=>setEditing(null)}><X/></button><button title="저장" onClick={()=>{if(draft.trim()){onUpdateLog(log.id,draft.trim());setEditing(null)}}}><Check/></button></span></>:<><Check/><span>{log.content}</span><span className="row-actions"><button title="수정" onClick={()=>{setEditing(log.id);setDraft(log.content)}}><Pencil/></button><button className="danger-icon" title="삭제" onClick={()=>onDeleteLog(log)}><Trash2/></button></span></>}</div>)}</div>:<p className="empty-state">아직 기록이 없습니다. 방금 끝낸 일부터 적어보세요.</p>}</section>
-  </div></>
+function localDate(value) {
+  if (!value) return null
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00`) : new Date(value)
+}
+
+function overlapsDay(event, day) {
+  const dayStart = new Date(day)
+  dayStart.setHours(0, 0, 0, 0)
+  const nextDay = new Date(dayStart)
+  nextDay.setDate(nextDay.getDate() + 1)
+  const start = localDate(event.start_at || event.start)
+  if (!start || Number.isNaN(start.getTime())) return false
+  const end = localDate(event.end_at || event.end) || new Date(start.getTime() + 1)
+  return start < nextDay && end > dayStart
+}
+
+export default function Today(props) {
+  const {
+    tasks = [], events = [], todos = [], logs = [], loading,
+    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo,
+    onAddLog, onUpdateLog, onDeleteLog, onToggleTask, goAI,
+  } = props
+  const [todoDraft, setTodoDraft] = useState('')
+  const [todoTags, setTodoTags] = useState([])
+  const [logDraft, setLogDraft] = useState('')
+  const [logTags, setLogTags] = useState([])
+  const [edit, setEdit] = useState(null)
+  const [editText, setEditText] = useState('')
+  const [editTags, setEditTags] = useState([])
+  const [saving, setSaving] = useState('')
+  const [selectedTags, setSelectedTags] = useState([])
+  const [tagSuggestions, setTagSuggestions] = useState({})
+
+  const allTags = useMemo(
+    () => [...new Set([...tasks, ...events, ...todos, ...logs].flatMap(item => item.tags || []))].sort(),
+    [tasks, events, todos, logs],
+  )
+  const matches = item => !selectedTags.length || selectedTags.every(tag => (item.tags || []).includes(tag))
+  const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
+  const active = tasks.filter(task => task.status !== 'done' && matches(task))
+  const shownTodos = todos.filter(matches)
+  const shownLogs = logs.filter(matches)
+
+  const submitTodo = async event => {
+    event.preventDefault()
+    if (!todoDraft.trim()) return
+    setSaving('todo')
+    if (await onAddTodo(todoDraft.trim(), todoTags)) {
+      setTodoDraft('')
+      setTodoTags([])
+    }
+    setSaving('')
+  }
+  const submitLog = async event => {
+    event.preventDefault()
+    if (!logDraft.trim()) return
+    setSaving('log')
+    if (await onAddLog(logDraft.trim(), logTags)) {
+      setLogDraft('')
+      setLogTags([])
+    }
+    setSaving('')
+  }
+  const beginEdit = (type, item) => {
+    setEdit({ type, id: item.id })
+    setEditText(item.title || item.content)
+    setEditTags(item.tags || [])
+  }
+  const saveEdit = async item => {
+    if (!editText.trim()) return
+    const key = `${edit.type}-${item.id}`
+    setSaving(key)
+    const ok = edit.type === 'todo'
+      ? await onUpdateTodo(item.id, editText.trim(), editTags)
+      : await onUpdateLog(item.id, editText.trim(), editTags)
+    if (ok) setEdit(null)
+    setSaving('')
+  }
+
+  const editable = (type, item) => edit?.type === type && edit.id === item.id
+  const recommendTags = async (key, entity, text) => {
+    if (!text.trim()) return
+    setSaving(`tags-${key}`)
+    try {
+      const result = await api.aiTagSuggestions({ entity, content: text })
+      setTagSuggestions(current => ({ ...current, [key]: result.tags || result.items || [] }))
+    } catch { setTagSuggestions(current => ({ ...current, [key]: [] })) }
+    finally { setSaving('') }
+  }
+  const recommendationButtons = (key, tags, setTags) => (tagSuggestions[key] || []).map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)
+  return <>
+    <Header title="오늘" subtitle={`${dateText} · 중요한 일에 집중해 보세요.`}/>
+    <div className="content today-grid">
+      <section className="focus-panel">
+        <div className="section-title"><div><h2>오늘 할 일</h2><p>오늘 예정 업무와 빠른 Todo를 함께 확인합니다.</p></div>{loading ? <span className="status-pill">동기화 중…</span> : null}</div>
+        <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
+        <form className="quick-entry" onSubmit={submitTodo}>
+          <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><button disabled={saving === 'todo'}>추가</button></div>
+          <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>
+        </form>
+        {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''}`} key={todo.id}>
+          <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>
+          <div>{editable('todo', todo) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`todo-${todo.id}`, 'todo', editText)}>AI 태그 추천</button>{recommendationButtons(`todo-${todo.id}`, editTags, setEditTags)}</div></> : <><span>{todo.title}</span><TagChips tags={todo.tags}/></>}</div>
+          <span className="row-actions">{editable('todo', todo) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `todo-${todo.id}`} onClick={() => saveEdit(todo)}><Check/></button></> : <button aria-label={`${todo.title} 수정`} onClick={() => beginEdit('todo', todo)}><Pencil/></button>}<button className="danger-icon" aria-label={`${todo.title} 삭제`} onClick={() => onDeleteTodo(todo)}><Trash2/></button></span>
+        </div>)}</div> : null}
+        <div className="section-divider"><span>오늘 예정 업무</span><b>{active.length}</b></div>
+        <div className="task-list">{active.map(task => <button className="task-row" key={task.id} onClick={() => onToggleTask(task)}><Circle/><span className="task-main"><strong>{task.title}</strong><small>{task.due_date || '기한 없음'}</small><TagChips tags={task.tags}/></span><span className="mini-progress"><i style={{ width: `${task.progress}%` }}/></span><b>{task.progress}%</b></button>)}</div>
+      </section>
+      <aside className="today-side">
+        <section className="side-panel"><div className="section-title"><div><h2>오늘 일정</h2><p>{todayEvents.length}개의 일정</p></div><CalendarClock/></div>{todayEvents.map(event => <div className="event-row" key={event.id}><time>{event.google_is_all_day ? '종일' : new Date(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</time><i/><div><strong>{event.title}</strong><small>{event.location || '일정'}</small><TagChips tags={event.tags}/></div></div>)}</section>
+        <button className="ai-card" onClick={goAI}><Sparkles/><div><strong>AI에게 오늘 할 일 추천받기</strong><p>진행 상황을 분석합니다.</p></div><ChevronRight/></button>
+      </aside>
+      <section className="log-panel">
+        <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
+        <form className="quick-entry" onSubmit={submitLog}><div className="quick-add"><Plus/><input value={logDraft} onChange={event => setLogDraft(event.target.value)} aria-label="오늘 한 일"/><button disabled={saving === 'log'}>기록</button></div><TagsInput label="업무 기록 태그" value={logTags} onChange={setLogTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('log-new', 'work_log', logDraft)}>AI 태그 추천</button>{recommendationButtons('log-new', logTags, setLogTags)}</div></form>
+        <div className="done-notes">{shownLogs.map(log => <div key={log.id}><Check/><div>{editable('log', log) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`log-${log.id}`, 'work_log', editText)}>AI 태그 추천</button>{recommendationButtons(`log-${log.id}`, editTags, setEditTags)}</div></> : <><span>{log.content}</span><TagChips tags={log.tags}/></>}</div><span className="row-actions">{editable('log', log) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `log-${log.id}`} onClick={() => saveEdit(log)}><Check/></button></> : <button aria-label={`${log.content} 수정`} onClick={() => beginEdit('log', log)}><Pencil/></button>}<button className="danger-icon" aria-label={`${log.content} 삭제`} onClick={() => onDeleteLog(log)}><Trash2/></button></span></div>)}</div>
+      </section>
+    </div>
+  </>
 }

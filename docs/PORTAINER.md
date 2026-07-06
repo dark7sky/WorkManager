@@ -19,17 +19,19 @@
    - Compose path: `portainer-stack.yml`
 4. 저장소가 private이면 Authentication을 켜고 GitHub 사용자명과 `Contents: Read-only` 권한의 fine-grained PAT를 입력합니다.
 5. 아래 환경변수를 Portainer UI에서 추가합니다. 비밀값은 저장소 파일에 넣지 않습니다.
-   - `APP_LOGIN_ID`
-   - `APP_LOGIN_PASSWORD`
    - `APP_SECRET` (긴 무작위 문자열)
    - `APP_HTTP_PORT` (선택, 기본값 `18080`)
-   - `GOOGLE_CLIENT_ID` (선택)
-   - `GOOGLE_CLIENT_SECRET` (선택)
-   - `GOOGLE_ALLOWED_EMAIL` (선택, 본인 이메일 권장)
+   - `GOOGLE_CLIENT_ID` (필수)
+   - `GOOGLE_CLIENT_SECRET` (필수)
+   - `GOOGLE_ALLOWED_EMAIL` (필수, 여러 계정은 쉼표 구분)
+   - `LEGACY_OWNER_EMAIL` (기존 DB 업그레이드 시 필수, 기존 데이터 소유 Google 이메일)
+   - `GOOGLE_CALENDAR_HISTORY_DAYS` (선택, 최초 동기화 이력 기본 3650일)
    - `AI_API_KEY` (선택)
    - `AI_BASE_URL` (선택)
    - `AI_MODEL` (선택)
    - `AI_TIMEOUT_SECONDS` (선택, 기본 `30`)
+   - `BACKUP_INTERVAL_SECONDS` (선택, 기본 `21600`)
+   - `BACKUP_RETENTION_DAYS` (선택, 기본 `30`)
 6. **GitOps updates**를 켜고 다음 중 하나를 선택합니다.
    - Polling: 5분 간격. 가장 단순하고 GitHub 추가 설정이 필요 없습니다.
    - Webhook: 표시된 URL을 복사해 GitHub 저장소의 Actions secret `PORTAINER_WEBHOOK_URL`로 등록합니다.
@@ -45,10 +47,18 @@
 
 ## 확인
 
-1. Stack의 `api`, `web` 컨테이너가 Running/Healthy인지 확인합니다.
+1. Stack의 `api`, `web`, `backup` 컨테이너가 Running/Healthy인지 확인합니다.
 2. 먼저 `http://Docker호스트IP:18080`으로 앱 응답을 확인합니다.
 3. 기존 리버스 프록시에서 `work.ysyoo.link`의 upstream을 `Docker호스트IP:18080`으로 설정하고 WebSocket 지원을 켭니다.
 4. `https://work.ysyoo.link`에 접속합니다.
 5. 접속이 실패하면 DNS, 리버스 프록시 upstream, 방화벽, `APP_HTTP_PORT` 점유를 순서대로 확인합니다.
 
-데이터는 `workmanager_data` named volume에 유지되므로 코드 재배포 시 삭제되지 않습니다. Stack 삭제 화면에서 volumes 삭제 옵션은 선택하지 마세요.
+데이터는 `workmanager_data`, 자동 백업은 `workmanager_backups` named volume에 유지됩니다. Stack 삭제 화면에서 volumes 삭제 옵션은 선택하지 마세요. 디스크 고장에 대비해 `workmanager_backups`를 다른 장치나 암호화된 원격 저장소에도 복제하십시오.
+
+## 업그레이드 주의사항
+
+- 기존 ID/PW 로그인은 제거되었습니다. 배포 전에 Google OAuth 환경변수가 반드시 있어야 합니다.
+- 기존 단일 사용자 데이터가 있다면 첫 재배포 전에 `LEGACY_OWNER_EMAIL`을 정확히 설정하십시오. 값이 없거나 로그인 계정과 다르면 데이터는 안전하게 legacy 상태로 남습니다.
+- `APP_SECRET`을 변경하면 기존 Google refresh token을 복호화할 수 없으므로 다시 연결해야 합니다.
+- 배포 후 `https://work.ysyoo.link/api/ready`가 `database: ready`를 반환하는지 확인합니다.
+- 삭제 항목은 즉시 제거되지 않고 휴지통으로 이동합니다. 설정에서 복원하거나 30일이 지난 항목을 영구 정리할 수 있습니다.

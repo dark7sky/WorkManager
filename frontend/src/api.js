@@ -1,43 +1,45 @@
 const API = '/api'
+export const AUTH_EXPIRED_EVENT = 'workmanager:auth-expired'
+
+export class ApiError extends Error {
+  constructor(message, status) { super(message); this.name = 'ApiError'; this.status = status }
+}
 
 export async function request(path, options = {}) {
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  })
+  const { suppressAuthEvent, ...fetchOptions } = options
+  let response
+  try {
+    response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', headers: { 'Content-Type': 'application/json', ...fetchOptions.headers } })
+  } catch {
+    throw new ApiError('서버에 연결할 수 없습니다. 네트워크 상태를 확인해 주세요.', 0)
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail || body.message || `요청을 처리하지 못했습니다 (${response.status})`)
+    if (response.status === 401 && !suppressAuthEvent) window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
+    throw new ApiError(body.detail || body.message || `요청을 처리하지 못했습니다 (${response.status})`, response.status)
   }
   return response.status === 204 ? null : response.json()
 }
 
 const json = (method, body) => ({ method, body: JSON.stringify(body) })
 export const api = {
-  config: () => request('/auth/config'), me: () => request('/auth/me'),
-  login: (user_id, password) => request('/auth/login', json('POST', { user_id, password })),
+  config: () => request('/auth/config', { suppressAuthEvent: true }),
+  me: () => request('/auth/me', { suppressAuthEvent: true }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   tasks: () => request('/tasks'), events: () => request('/events'), today: () => request('/today'),
-  createTask: data => request('/tasks', json('POST', data)),
-  updateTask: (id, data) => request(`/tasks/${id}`, json('PATCH', data)),
-  deleteTask: id => request(`/tasks/${id}`, { method: 'DELETE' }),
-  createEvent: data => request('/events', json('POST', data)),
-  updateEvent: (id, data) => request(`/events/${id}`, json('PATCH', data)),
-  deleteEvent: id => request(`/events/${id}`, { method: 'DELETE' }),
-  createLog: data => request('/work_logs', json('POST', data)),
-  updateLog: (id, data) => request(`/work_logs/${id}`, json('PATCH', data)),
-  deleteLog: id => request(`/work_logs/${id}`, { method: 'DELETE' }),
-  createTodo: data => request('/todos', json('POST', data)),
-  updateTodo: (id, data) => request(`/todos/${id}`, json('PATCH', data)),
-  deleteTodo: id => request(`/todos/${id}`, { method: 'DELETE' }),
-  aiPreview: text => request('/ai/parse', json('POST', { text })),
-  aiApply: data => request('/ai/apply', json('POST', data)),
-  aiRecommendations: (limit = 5) => request(`/ai/recommendations?limit=${limit}`),
-  aiStatus: () => request('/ai/status'),
-  integrations: () => request('/settings/integrations'),
-  googleStatus: () => request('/google/status'),
-  googleCalendars: () => request('/google/calendars'),
-  selectGoogleCalendar: calendar_id => request('/google/select', json('POST', { calendar_id })),
-  syncGoogleCalendar: () => request('/google/sync', { method: 'POST' }),
+  createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),
+  createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
+  createLog: data => request('/work_logs',json('POST',data)), updateLog: (id,data) => request(`/work_logs/${id}`,json('PATCH',data)), deleteLog: id => request(`/work_logs/${id}`,{method:'DELETE'}),
+  createTodo: data => request('/todos',json('POST',data)), updateTodo: (id,data) => request(`/todos/${id}`,json('PATCH',data)), deleteTodo: id => request(`/todos/${id}`,{method:'DELETE'}),
+  aiPreview: text => request('/ai/parse',json('POST',{text})), aiApply: data => request('/ai/apply',json('POST',data)), aiRecommendations: (limit=5) => request(`/ai/recommendations?limit=${limit}`), aiStatus: () => request('/ai/status'),
+  integrations: () => request('/settings/integrations'), googleStatus: () => request('/google/status'), googleCalendars: () => request('/google/calendars'), selectGoogleCalendar: calendar_id => request('/google/select',json('POST',{calendar_id})), syncGoogleCalendar: () => request('/google/sync',{method:'POST'}),
+  exportData: () => request('/export'),
+  trash: () => request('/trash'),
+  restoreTrash: (table,id) => request(`/${encodeURIComponent(table)}/${id}/restore`,{method:'POST'}),
+  cleanupTrash: (days=30) => request(`/trash?older_than_days=${days}`,{method:'DELETE'}),
+  achievements: (start,end,tags=[]) => request(`/achievements?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
+  resolveEventConflict: (id,strategy) => request(`/events/${id}/resolve-conflict`,json('POST',{strategy})),
+  aiTagSuggestions: data => request('/ai/tag-recommendations',json('POST',data)),
+  aiPeriodSummary: (start,end,tags=[]) => request(`/ai/period-summary?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
+  aiProgressSuggestions: (start,end,tags=[]) => request(`/ai/project-suggestions?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
 }

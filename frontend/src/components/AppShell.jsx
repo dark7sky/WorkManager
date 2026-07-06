@@ -1,5 +1,5 @@
-import { CalendarDays, CheckSquare2, LayoutDashboard, ListTodo, LogOut, Settings, Sparkles } from 'lucide-react'
-const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['ai',Sparkles,'AI'],['settings',Settings,'설정']]
+import { BarChart3, CalendarDays, CheckSquare2, LayoutDashboard, ListTodo, LogOut, Settings, Sparkles } from 'lucide-react'
+const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['settings',Settings,'설정']]
 export default function AppShell({ page, setPage, children, onLogout, user }) {
   const initials = (user?.name || user?.email || user?.user_id || '나').slice(0,2).toUpperCase()
   return <div className="app-shell"><aside className="sidebar">

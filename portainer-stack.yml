@@ -2,14 +2,15 @@ services:
   api:
     build:
       context: ./backend
+    image: workmanager-api:latest
     environment:
-      APP_LOGIN_ID: ${APP_LOGIN_ID}
-      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD}
       APP_SECRET: ${APP_SECRET}
       DATABASE_PATH: /data/workmanager.db
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_ALLOWED_EMAIL: ${GOOGLE_ALLOWED_EMAIL:-}
+      GOOGLE_CALENDAR_HISTORY_DAYS: ${GOOGLE_CALENDAR_HISTORY_DAYS:-3650}
+      LEGACY_OWNER_EMAIL: ${LEGACY_OWNER_EMAIL:-}
       GOOGLE_REDIRECT_URI: https://work.ysyoo.link/api/auth/google/callback
       FRONTEND_URL: https://work.ysyoo.link
       COOKIE_SECURE: "true"
@@ -23,11 +24,27 @@ services:
       - workmanager_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready')"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
+
+  backup:
+    image: workmanager-api:latest
+    depends_on:
+      api:
+        condition: service_healthy
+    command: ["python", "/app/scripts/backup_db.py"]
+    environment:
+      DATABASE_PATH: /data/workmanager.db
+      BACKUP_PATH: /backups
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-21600}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+    volumes:
+      - workmanager_data:/data:ro
+      - workmanager_backups:/backups
+    restart: unless-stopped
 
   web:
     build:
@@ -41,3 +58,4 @@ services:
 
 volumes:
   workmanager_data:
+  workmanager_backups:

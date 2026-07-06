@@ -56,6 +56,19 @@ class ValidationAndStatusTests(unittest.TestCase):
         self.assertEqual(result[0]["task_id"], 2)
         self.assertEqual(result[0]["reason"], "완료일이 지났습니다")
 
+    def test_period_summary_includes_real_activity(self):
+        report = {"summary": {"completed_tasks": 1, "work_logs": 1, "events": 0, "active_tasks": 0},
+                  "timeline": [{"type": "work_log", "content": "신규 결제 API 배포"}]}
+        result = ai.period_summary(report)
+        self.assertIn("신규 결제 API 배포", result["narrative"])
+
+    def test_project_suggestion_uses_shared_tags_without_task_link(self):
+        tasks = [{"id": 7, "title": "결제 개선", "status": "doing", "progress": 20, "tags": ["결제"]}]
+        logs = [{"task_id": None, "content": "PG 연동 완료", "log_date": date.today().isoformat(), "tags": ["결제"]}]
+        result = ai.project_progress_suggestions(tasks, logs, 5)
+        self.assertEqual(result[0]["id"], 7)
+        self.assertEqual(result[0]["data"]["progress"], 30)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,2 @@
+import Modal from './Modal'
+export default function ConfirmDialog({title='삭제할까요?',message,confirmLabel='삭제',busy,onConfirm,onClose}){return <Modal title={title} onClose={busy?()=>{}:onClose}><p className="confirm-message">{message}</p><div className="form-actions"><button className="secondary" disabled={busy} onClick={onClose}>취소</button><button className="danger-button" disabled={busy} onClick={onConfirm}>{busy?'처리 중…':confirmLabel}</button></div></Modal>}
