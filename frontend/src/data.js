@@ -9,3 +9,11 @@ export const seedEvents = [
   { id: 2, title: '고객사 미팅', start: '2026-07-08T14:00:00', end: '2026-07-08T15:30:00', color: 'purple' },
   { id: 3, title: '보고서 제출', start: '2026-07-10T17:00:00', end: '2026-07-10T18:00:00', color: 'orange' },
 ]
+
+export const changelogUpdates = [
+  {
+    id: '2026-07-07-changelog-screen',
+    timestamp: '2026-07-07T08:54:01+09:00',
+    description: '사용자가 앱 안에서 릴리스 변경 이력을 확인할 수 있는 변경 이력 화면과 메뉴를 추가했습니다.',
+  },
+]
