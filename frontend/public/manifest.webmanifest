@@ -1,0 +1,5 @@
+{
+  "name": "WorkManager", "short_name": "WorkManager", "start_url": "/", "display": "standalone",
+  "background_color": "#f3f4f6", "theme_color": "#0078d4", "lang": "ko",
+  "icons": [{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

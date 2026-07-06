@@ -1,0 +1,18 @@
+name: Trigger Portainer deployment
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Portainer GitOps webhook
+        if: ${{ secrets.PORTAINER_WEBHOOK_URL != '' }}
+        env:
+          PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+        run: curl --fail --silent --show-error --retry 3 --request POST "$PORTAINER_WEBHOOK_URL"

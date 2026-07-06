@@ -1,0 +1,15 @@
+@media (max-width: 680px) {
+  .page-header p {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .log-panel {
+    display: block;
+  }
+
+  .done-notes div {
+    grid-template-columns: 22px 1fr auto;
+    gap: 6px;
+  }
+}

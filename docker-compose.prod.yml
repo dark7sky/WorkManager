@@ -1,0 +1,24 @@
+services:
+  api:
+    environment:
+      GOOGLE_REDIRECT_URI: https://work.ysyoo.link/api/auth/google/callback
+      FRONTEND_URL: https://work.ysyoo.link
+      COOKIE_SECURE: "true"
+      CORS_ORIGINS: https://work.ysyoo.link
+  web:
+    ports: []
+  caddy:
+    image: caddy:2.10-alpine
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+volumes:
+  caddy_data:
+  caddy_config:

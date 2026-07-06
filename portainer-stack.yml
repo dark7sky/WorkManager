@@ -1,0 +1,56 @@
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      APP_LOGIN_ID: ${APP_LOGIN_ID}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD}
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_PATH: /data/workmanager.db
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_ALLOWED_EMAIL: ${GOOGLE_ALLOWED_EMAIL:-}
+      GOOGLE_REDIRECT_URI: https://work.ysyoo.link/api/auth/google/callback
+      FRONTEND_URL: https://work.ysyoo.link
+      COOKIE_SECURE: "true"
+      CORS_ORIGINS: https://work.ysyoo.link
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+      AI_MODEL: ${AI_MODEL:-gpt-5-mini}
+      TZ: Asia/Seoul
+    volumes:
+      - workmanager_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      context: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    build:
+      context: ./deploy/caddy
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  workmanager_data:
+  caddy_data:
+  caddy_config:
