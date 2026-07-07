@@ -102,6 +102,29 @@ class TaskUpdateValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(Exception, "approval_status requires a completed task"):
                 update_item("tasks", task["id"], {"approval_status": "approved"}, "sub-a")
 
+    def test_task_schedule_change_requires_review(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            task = create_item("tasks", {"title": "scheduled work", "start_date": "2026-07-08", "due_date": "2026-07-10"}, "sub-a")
+            self.assertEqual(task["schedule_approval_status"], "none")
+
+            changed = update_item("tasks", task["id"], {"due_date": "2026-07-11"}, "sub-a")
+            self.assertEqual(changed["due_date"], "2026-07-11")
+            self.assertEqual(changed["schedule_approval_status"], "pending")
+
+            approved = update_item("tasks", task["id"], {"schedule_approval_status": "approved"}, "sub-a")
+            self.assertEqual(approved["schedule_approval_status"], "approved")
+
+            title_only = update_item("tasks", task["id"], {"title": "scheduled work updated"}, "sub-a")
+            self.assertEqual(title_only["schedule_approval_status"], "approved")
+
 
 if __name__ == "__main__":
     unittest.main()

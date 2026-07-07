@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-08T00:00:26+09:00
+Last updated: 2026-07-08T00:09:55+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -16,7 +16,7 @@ Last updated: 2026-07-08T00:00:26+09:00
 - [x] Inline assignee load preview while creating or editing a task.
 - [ ] Role-based permissions for managers, members, and viewers.
 - [x] Basic approval workflow for completed work in the task management screen.
-- [ ] Approval workflow for schedule changes.
+- [x] Basic approval workflow for schedule changes.
 - [x] Basic capacity planning across team members and date ranges.
 - [x] Basic reminder rules for upcoming and overdue work in the task management screen.
 - [x] Basic priority filtering in the task management screen.

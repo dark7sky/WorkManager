@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-schedule-change-approval',
+    timestamp: '2026-07-08T00:09:55+09:00',
+    description: '업무 시작일이나 완료 예정일이 바뀌면 일정 승인 대기 상태로 표시하고 업무 관리 화면에서 일정 변경을 승인하거나 재검토로 표시할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-completion-approval',
     timestamp: '2026-07-08T00:00:26+09:00',
     description: '완료된 업무가 승인 대기 상태로 남고 업무 관리 화면에서 승인하거나 재작업으로 되돌릴 수 있는 기본 완료 승인 흐름을 추가했습니다.',

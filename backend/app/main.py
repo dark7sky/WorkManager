@@ -193,6 +193,7 @@ class TaskPayload(StrictPayload):
     due_date: date | None = None
     assignee_name: str | None = Field(None, max_length=120)
     approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
+    schedule_approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     parent_id: int | None = Field(None, ge=1)
@@ -264,7 +265,7 @@ class FeatureRequestStatusPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
@@ -496,6 +497,9 @@ def update_item(table, item_id, data, user_id):
             raise HTTPException(404, "Item not found")
         if table == "tasks":
             target_status = data.get("status", existing["status"])
+            schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
+            if schedule_changed and "schedule_approval_status" not in data:
+                data["schedule_approval_status"] = "pending"
             if target_status == "done" and existing["status"] != "done":
                 became_done = True
                 data["completed_at"] = now()
