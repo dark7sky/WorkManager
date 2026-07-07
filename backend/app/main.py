@@ -384,6 +384,9 @@ def merged_resource_for_validation(table, existing, data):
             merged["status"] = "doing"
         if merged.get("priority") == "medium":
             merged["priority"] = "normal"
+        for key in ("approval_status", "schedule_approval_status"):
+            if merged.get(key) == "":
+                merged[key] = "none"
     return merged
 
 
@@ -496,6 +499,9 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
+            for key in ("approval_status", "schedule_approval_status"):
+                if existing[key] == "" and key not in data:
+                    data[key] = "none"
             target_status = data.get("status", existing["status"])
             schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
             if schedule_changed and "schedule_approval_status" not in data:

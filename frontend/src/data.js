@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-blank-approval-fields',
+    timestamp: '2026-07-08T06:14:27+09:00',
+    description: '기존 업무의 완료 승인 상태나 일정 승인 상태가 비어 있는 레거시 데이터도 수정 저장 시 자동으로 none 값으로 복구해, 제목만 바꿔도 저장 오류가 나던 편집 경로를 막았습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-regression-test-entrypoint',
     timestamp: '2026-07-08T06:12:04+09:00',
     description: '업무 수정 저장 회귀 테스트가 저장소 루트에서 바로 실행되도록 백엔드 테스트 경로를 보강해, 기존 업무 편집 저장 오류가 다시 섞여 들어와도 기본 점검에서 바로 잡을 수 있게 했습니다.',

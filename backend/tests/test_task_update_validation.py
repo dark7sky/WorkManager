@@ -131,6 +131,53 @@ class TaskUpdateValidationTests(unittest.TestCase):
             title_only = update_item("tasks", task["id"], {"title": "scheduled work updated"}, "sub-a")
             self.assertEqual(title_only["schedule_approval_status"], "approved")
 
+    def test_merged_task_validation_treats_blank_approval_fields_as_none(self):
+        from app.main import MODELS, merged_resource_for_validation
+
+        existing = {
+            "title": "legacy approval state",
+            "description": "",
+            "status": "doing",
+            "priority": "normal",
+            "progress": 20,
+            "start_date": None,
+            "due_date": None,
+            "assignee_name": "담당자",
+            "approval_status": "",
+            "schedule_approval_status": "",
+            "tags": "[]",
+            "recurrence_rule": None,
+            "parent_id": None,
+            "dependency_ids": "[]",
+        }
+
+        merged = merged_resource_for_validation("tasks", existing, {"title": "legacy approval state updated"})
+
+        MODELS["tasks"].model_validate(merged)
+        self.assertEqual(merged["approval_status"], "none")
+        self.assertEqual(merged["schedule_approval_status"], "none")
+
+    def test_update_item_repairs_blank_approval_fields_on_legacy_task_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy approval edit", "", "doing", "normal", 25, None, None,
+                     "Dana", "", "", "[]", "2026-07-08T06:14:27", "2026-07-08T06:14:27"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy approval edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy approval edit saved")
+            self.assertEqual(updated["approval_status"], "none")
+            self.assertEqual(updated["schedule_approval_status"], "none")
+
 
 if __name__ == "__main__":
     unittest.main()
