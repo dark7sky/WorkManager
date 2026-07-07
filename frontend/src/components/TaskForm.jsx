@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { api } from '../api'
+import { buildTaskPayload } from '../taskFormPayload'
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
 
@@ -39,19 +40,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     }
     setSaving(true)
     setError('')
-    const ok = await onSave({
-      title: data.title.trim(),
-      description: data.description.trim(),
-      assignee_name: data.assignee_name.trim(),
-      start_date: data.start_date || null,
-      due_date: data.due_date || null,
-      status: data.status === 'in_progress' ? 'doing' : data.status,
-      priority: data.priority,
-      progress: Number(data.progress),
-      recurrence_rule: data.recurrence_rule || null,
-      parent_id: data.parent_id ? Number(data.parent_id) : null,
-      tags,
-    })
+    const ok = await onSave(buildTaskPayload(data, { tags, task }))
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 그대로 유지됩니다.')
     setSaving(false)
   }

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-parent-payload',
+    timestamp: '2026-07-07T18:50:25+09:00',
+    description: '업무 수정 저장 시 상위 업무가 바뀌지 않은 경우 계층 필드를 다시 보내지 않도록 조정해 기존 업무 저장 경로를 더 안정화했습니다.',
+  },
+  {
     id: '2026-07-07-unassigned-task-ownership-alert',
     timestamp: '2026-07-07T18:47:46+09:00',
     description: '업무 관리 화면에 담당자가 없는 진행 업무를 알려주는 소유자 미지정 알림과 빠른 필터를 추가했습니다.',
