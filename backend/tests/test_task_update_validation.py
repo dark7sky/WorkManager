@@ -37,6 +37,8 @@ class TaskUpdateValidationTests(unittest.TestCase):
         merged = merged_resource_for_validation("tasks", existing, data)
 
         MODELS["tasks"].model_validate(merged)
+        self.assertEqual(merged["status"], "doing")
+        self.assertEqual(merged["priority"], "normal")
         self.assertEqual(merged["tags"], ["운영", "보고"])
         self.assertEqual(merged["dependency_ids"], [])
 

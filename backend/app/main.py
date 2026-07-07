@@ -368,6 +368,11 @@ def merged_resource_for_validation(table, existing, data):
     for key in json_fields & merged.keys():
         if isinstance(merged[key], str):
             merged[key] = json.loads(merged[key] or "[]")
+    if table == "tasks":
+        if merged.get("status") == "in_progress":
+            merged["status"] = "doing"
+        if merged.get("priority") == "medium":
+            merged["priority"] = "normal"
     return merged
 
 
