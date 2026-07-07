@@ -271,6 +271,24 @@ CONFIG = {
     "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
 }
 
+VALID_TASK_STATUSES = {"todo", "doing", "done"}
+VALID_TASK_PRIORITIES = {"low", "normal", "high"}
+VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
+
+
+def normalize_legacy_task_field(key, value):
+    if key == "status":
+        if value == "in_progress":
+            return "doing"
+        return value if value in VALID_TASK_STATUSES else "todo"
+    if key == "priority":
+        if value == "medium":
+            return "normal"
+        return value if value in VALID_TASK_PRIORITIES else "normal"
+    if key in {"approval_status", "schedule_approval_status"}:
+        return value if value in VALID_TASK_APPROVAL_STATES else "none"
+    return value
+
 
 def normalize(table, data):
     try:
@@ -380,13 +398,8 @@ def merged_resource_for_validation(table, existing, data):
         if isinstance(merged[key], str):
             merged[key] = json.loads(merged[key] or "[]")
     if table == "tasks":
-        if merged.get("status") == "in_progress":
-            merged["status"] = "doing"
-        if merged.get("priority") == "medium":
-            merged["priority"] = "normal"
-        for key in ("approval_status", "schedule_approval_status"):
-            if merged.get(key) == "":
-                merged[key] = "none"
+        for key in ("status", "priority", "approval_status", "schedule_approval_status"):
+            merged[key] = normalize_legacy_task_field(key, merged.get(key))
     return merged
 
 
@@ -499,9 +512,10 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
-            for key in ("approval_status", "schedule_approval_status"):
-                if existing[key] == "" and key not in data:
-                    data[key] = "none"
+            for key in ("status", "priority", "approval_status", "schedule_approval_status"):
+                normalized = normalize_legacy_task_field(key, existing[key])
+                if normalized != existing[key] and key not in data:
+                    data[key] = normalized
             target_status = data.get("status", existing["status"])
             schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
             if schedule_changed and "schedule_approval_status" not in data:

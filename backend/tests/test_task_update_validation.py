@@ -178,6 +178,29 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["approval_status"], "none")
             self.assertEqual(updated["schedule_approval_status"], "none")
 
+    def test_update_item_repairs_invalid_legacy_task_enums_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy enum edit", "", "", "", 0, None, None,
+                     "", "", "", "[]", "2026-07-08T06:21:55", "2026-07-08T06:21:55"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy enum edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy enum edit saved")
+            self.assertEqual(updated["status"], "todo")
+            self.assertEqual(updated["priority"], "normal")
+            self.assertEqual(updated["approval_status"], "none")
+            self.assertEqual(updated["schedule_approval_status"], "none")
+
 
 if __name__ == "__main__":
     unittest.main()

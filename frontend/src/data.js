@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-enum-repair',
+    timestamp: '2026-07-08T06:21:55+09:00',
+    description: '기존 업무에 비표준 상태값이나 우선순위값이 남아 있어도 수정 저장 시 표준값으로 자동 복구해, 제목만 바꾸는 편집에서도 저장 오류가 다시 나지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-blank-approval-fields',
     timestamp: '2026-07-08T06:14:27+09:00',
     description: '기존 업무의 완료 승인 상태나 일정 승인 상태가 비어 있는 레거시 데이터도 수정 저장 시 자동으로 none 값으로 복구해, 제목만 바꿔도 저장 오류가 나던 편집 경로를 막았습니다.',
