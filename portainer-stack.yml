@@ -2,7 +2,6 @@ services:
   api:
     build:
       context: ./backend
-    image: workmanager-api:latest
     environment:
       APP_SECRET: ${APP_SECRET}
       DATABASE_PATH: /data/workmanager.db
@@ -31,7 +30,8 @@ services:
       start_period: 20s
 
   backup:
-    image: workmanager-api:latest
+    build:
+      context: ./backend
     depends_on:
       api:
         condition: service_healthy

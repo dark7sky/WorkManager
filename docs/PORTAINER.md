@@ -35,7 +35,7 @@
 6. **GitOps updates**를 켜고 다음 중 하나를 선택합니다.
    - Polling: 5분 간격. 가장 단순하고 GitHub 추가 설정이 필요 없습니다.
    - Webhook: 표시된 URL을 복사해 GitHub 저장소의 Actions secret `PORTAINER_WEBHOOK_URL`로 등록합니다.
-7. `Re-pull image`는 꺼도 됩니다. 이 Stack은 저장소 소스로 이미지를 직접 빌드합니다.
+7. `Re-pull image`는 꺼도 됩니다. 이 Stack은 `workmanager-api` 같은 로컬 이미지 이름을 쓰지 않고 저장소 소스로 이미지를 직접 빌드합니다.
 8. `Force redeployment`는 끕니다. 커밋이 바뀐 경우에만 재배포하도록 합니다.
 9. **Deploy the stack**을 누릅니다.
 
@@ -44,6 +44,7 @@
 - Polling을 선택하면 Portainer가 원격 `main` 커밋 해시를 주기적으로 확인해 변경 시 저장소를 다시 받고 Stack을 재배포합니다.
 - Webhook을 선택하고 GitHub secret을 등록하면 `.github/workflows/portainer-deploy.yml`이 `main` push 직후 Portainer를 호출합니다.
 - 사용 중인 Portainer 에디션에서 GitOps webhook을 제공하지 않으면 Polling만 사용하면 됩니다.
+- `portainer-stack.yml`의 `api`와 `backup` 서비스는 모두 `./backend`에서 빌드합니다. `image: workmanager-api` 같은 로컬 태그를 추가하면 Portainer의 pull 단계가 Docker Hub에서 해당 이미지를 찾으려다 실패할 수 있습니다.
 
 ## 확인
 
