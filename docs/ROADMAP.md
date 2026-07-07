@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T09:08:21+09:00
+Last updated: 2026-07-07T09:13:03+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -11,5 +11,6 @@ Last updated: 2026-07-07T09:08:21+09:00
 - [ ] Approval workflow for schedule changes and completed work.
 - [ ] Capacity planning across team members and date ranges.
 - [ ] Reminder rules for upcoming and overdue work.
-- [ ] CSV/PDF reporting exports for customer and management reporting.
+- [x] Basic CSV task export for customer and management reporting.
+- [ ] PDF reporting exports for customer and management reporting.
 - [x] Audit log browsing and filtering in the app UI.
