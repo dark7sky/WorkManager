@@ -40,7 +40,7 @@ export default function App(){
   performance:<Performance notify={notify} onDataChanged={refresh}/>,
   ai:<AIAssistant text={aiText} setText={setAiText} preview={preview} recommendations={recommendations} mode={aiMode} loading={aiBusy} onPreview={analyze} onRecommend={recommend} onApply={apply}/>,
   audit:<AuditLog/>,
-  changelog:<Changelog/>,
+  changelog:<Changelog notify={notify}/>,
   settings:<Settings theme={preference} setTheme={setPreference} notify={notify} onDataChanged={refresh} canInstall={!!installPrompt} onInstall={async()=>{if(!installPrompt)return;await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('WorkManager 앱을 설치했습니다.');setInstallPrompt(null)}} notificationPermission={notificationPermission} onEnableNotifications={async()=>{if(!('Notification' in window)){notify('이 브라우저는 알림을 지원하지 않습니다.','error');return}const result=await Notification.requestPermission();setNotificationPermission(result);notify(result==='granted'?'오늘 업무 알림을 켰습니다.':'브라우저 설정에서 알림 권한을 허용해 주세요.',result==='granted'?'success':'error')}}/>
  }
  return <AppShell page={page} setPage={setPage} onLogout={async()=>{try{await api.logout()}finally{setUser(null)}}} user={user}>{dataError?<div className="data-error" role="alert"><span>{dataError}</span><button onClick={refresh}>다시 시도</button></div>:null}{screens[page]}

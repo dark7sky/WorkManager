@@ -147,6 +147,23 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_feature_requests_are_user_scoped_and_status_managed(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        created = a.post("/api/feature-requests", json={"content": "  칸반 보드가 필요합니다.  ", "source": "customer"})
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertEqual(created.json()["content"], "칸반 보드가 필요합니다.")
+        self.assertEqual(created.json()["status"], "pending")
+        self.assertEqual(b.get("/api/feature-requests").json()["items"], [])
+        self.assertEqual(b.patch(f"/api/feature-requests/{created.json()['id']}", json={"status": "done"}).status_code, 404)
+        updated = a.patch(f"/api/feature-requests/{created.json()['id']}", json={"status": "in_progress"})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["status"], "in_progress")
+        pending = a.get("/api/feature-requests?status=pending")
+        self.assertEqual(pending.status_code, 200, pending.text)
+        self.assertEqual(pending.json()["items"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_common_tags_filter_and_achievement_report(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "tagged", "completed": True, "todo_date": "2026-07-06", "tags": [" Project-X ", "project-x"]})

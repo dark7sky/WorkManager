@@ -44,4 +44,7 @@ export const api = {
   aiTagSuggestions: data => request('/ai/tag-recommendations',json('POST',data)),
   aiPeriodSummary: (start,end,tags=[]) => request(`/ai/period-summary?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
   aiProgressSuggestions: (start,end,tags=[]) => request(`/ai/project-suggestions?start_date=${start}&end_date=${end}&tags=${encodeURIComponent(tags.join(','))}`),
+  featureRequests: (status='all') => request(`/feature-requests?status=${encodeURIComponent(status)}`),
+  createFeatureRequest: content => request('/feature-requests',json('POST',{content,source:'changelog'})),
+  updateFeatureRequest: (id,status) => request(`/feature-requests/${id}`,json('PATCH',{status})),
 }

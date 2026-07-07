@@ -100,7 +100,7 @@ def ready():
     try:
         with connection() as c:
             version = c.execute("SELECT value FROM migration_state WHERE key='schema_version'").fetchone()
-            if not version or int(version["value"]) < 4:
+            if not version or int(version["value"]) < 5:
                 raise RuntimeError("schema migration is incomplete")
             c.execute("BEGIN IMMEDIATE")
             c.execute("UPDATE migration_state SET value=value WHERE key='schema_version'")
@@ -233,6 +233,15 @@ class WorkLogPayload(StrictPayload):
     log_date: date | None = None
     task_id: int | None = Field(None, ge=1)
     tags: list[str] | None = Field(None, max_length=50)
+
+
+class FeatureRequestPayload(StrictPayload):
+    content: str | None = Field(None, min_length=1, max_length=5000)
+    source: str | None = Field("user", max_length=80)
+
+
+class FeatureRequestStatusPayload(StrictPayload):
+    status: Literal["pending", "in_progress", "done", "dismissed"]
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -618,7 +627,8 @@ def resolve_event_conflict(item_id: int, payload: dict = Body(...), user=Depends
 def export_data(user=Depends(require_user)):
     return {"version": 1, "exported_at": now(),
             "tasks": rows("tasks", user), "events": rows("events", user),
-            "todos": rows("todos", user), "work_logs": rows("work_logs", user)}
+            "todos": rows("todos", user), "work_logs": rows("work_logs", user),
+            "feature_requests": rows("feature_requests", user)}
 
 
 @app.get("/api/audit-logs")
@@ -627,6 +637,54 @@ def audit_log_list(limit: int = 100, user=Depends(require_user)):
     for item in items:
         item["metadata"] = json.loads(item.get("metadata") or "{}")
     return {"items": items}
+
+
+@app.get("/api/feature-requests")
+def feature_request_list(status: Literal["pending", "in_progress", "done", "dismissed", "all"] = "all", limit: int = 100, user=Depends(require_user)):
+    where = "ORDER BY created_at DESC LIMIT ?"
+    args = (max(1, min(limit, 500)),)
+    if status != "all":
+        where = "WHERE status=? ORDER BY created_at DESC LIMIT ?"
+        args = (status, *args)
+    return {"items": rows("feature_requests", user, where, args)}
+
+
+@app.post("/api/feature-requests")
+def feature_request_create(payload: dict = Body(...), user=Depends(require_user)):
+    try:
+        model = FeatureRequestPayload.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+    content = (model.content or "").strip()
+    source = (model.source or "user").strip() or "user"
+    if not content:
+        raise HTTPException(422, "content is required")
+    timestamp = now()
+    with connection() as c:
+        cur = c.execute("""INSERT INTO feature_requests(user_id,content,source,status,created_at,updated_at)
+          VALUES(?,?,?,?,?,?)""", (user, content, source, "pending", timestamp, timestamp))
+        item = row_dict(c.execute("SELECT * FROM feature_requests WHERE id=? AND user_id=?", (cur.lastrowid, user)).fetchone())
+    audit(user, "create", "feature_requests", item["id"], {"source": source})
+    return item
+
+
+@app.patch("/api/feature-requests/{item_id}")
+def feature_request_update(item_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    try:
+        model = FeatureRequestStatusPayload.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+    timestamp = now()
+    completed_at = timestamp if model.status == "done" else None
+    with connection() as c:
+        existing = c.execute("SELECT * FROM feature_requests WHERE id=? AND user_id=?", (item_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Feature request not found")
+        c.execute("UPDATE feature_requests SET status=?,updated_at=?,completed_at=? WHERE id=? AND user_id=?",
+                  (model.status, timestamp, completed_at, item_id, user))
+        item = row_dict(c.execute("SELECT * FROM feature_requests WHERE id=? AND user_id=?", (item_id, user)).fetchone())
+    audit(user, "update", "feature_requests", item_id, {"status": model.status})
+    return item
 
 
 @app.get("/api/today")
