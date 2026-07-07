@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-due-reminders',
+    timestamp: '2026-07-07T09:19:48+09:00',
+    description: '업무 관리 화면에 지연, 오늘 마감, 2일 내 마감 업무를 요약하는 마감 알림을 추가해 놓치기 쉬운 일정 확인을 빠르게 했습니다.',
+  },
+  {
     id: '2026-07-07-assignee-workload-filter',
     timestamp: '2026-07-07T09:15:59+09:00',
     description: '업무 관리 화면에 담당자별 필터와 업무량 요약을 추가해 팀원별 진행, 지연, 완료 업무를 빠르게 확인할 수 있게 했습니다.',

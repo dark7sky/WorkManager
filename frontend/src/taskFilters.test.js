@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeWorkload } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeWorkload, summarizeDueReminders } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -29,4 +29,20 @@ test('summarizeAssigneeWorkload counts active overdue and completed work by owne
     { assignee: '미지정', active: 1, overdue: 1, done: 0, total: 1 },
     { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1 },
   ])
+})
+
+test('summarizeDueReminders counts overdue today and upcoming unfinished tasks', () => {
+  const reminderTasks = [
+    ...tasks,
+    { id: 5, title: '오늘 마감', status: 'todo', due_date: '2026-07-07', progress: 0, tags: [] },
+  ]
+  const summary = summarizeDueReminders(reminderTasks, '2026-07-07', 2)
+
+  assert.deepEqual(summary, {
+    overdue: 1,
+    dueToday: 1,
+    dueSoon: 2,
+    total: 4,
+    nextDueDate: '2026-07-06',
+  })
 })

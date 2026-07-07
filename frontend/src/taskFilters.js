@@ -4,6 +4,12 @@ export const taskAssignee = task => task.assignee_name?.trim() || UNASSIGNED_LAB
 
 export const isTaskOverdue = (task, todayIso) => task.status !== 'done' && task.due_date && todayIso && task.due_date < todayIso
 
+const addDays = (isoDate, days) => {
+  const date = new Date(`${isoDate}T00:00:00`)
+  date.setDate(date.getDate() + days)
+  return date.toLocaleDateString('en-CA')
+}
+
 export const filterTasks = (tasks, { query = '', status = 'active', selectedTags = [], assignee = 'all', todayIso }) => {
   const q = query.trim().toLowerCase()
   return tasks.filter(task => {
@@ -28,4 +34,25 @@ export const summarizeAssigneeWorkload = (tasks, todayIso) => {
     rows.set(assignee, row)
   }
   return [...rows.values()].sort((a, b) => b.total - a.total || b.active - a.active || a.assignee.localeCompare(b.assignee, 'ko'))
+}
+
+export const summarizeDueReminders = (tasks, todayIso, upcomingDays = 2) => {
+  if (!todayIso) return { overdue: 0, dueToday: 0, dueSoon: 0, total: 0, nextDueDate: null }
+
+  const soonLimit = addDays(todayIso, upcomingDays)
+  const summary = { overdue: 0, dueToday: 0, dueSoon: 0, total: 0, nextDueDate: null }
+
+  for (const task of tasks) {
+    if (task.status === 'done' || !task.due_date) continue
+
+    if (task.due_date < todayIso) summary.overdue += 1
+    else if (task.due_date === todayIso) summary.dueToday += 1
+    else if (task.due_date <= soonLimit) summary.dueSoon += 1
+    else continue
+
+    summary.total += 1
+    if (!summary.nextDueDate || task.due_date < summary.nextDueDate) summary.nextDueDate = task.due_date
+  }
+
+  return summary
 }
