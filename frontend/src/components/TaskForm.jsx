@@ -1,14 +1,16 @@
 import { useRef, useState } from 'react'
 import { api } from '../api'
+import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
 
-export default function TaskForm({ task, onSave, onCancel, onDelete }) {
+export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
   const [suggestions, setSuggestions] = useState([])
   const formRef = useRef(null)
   const today = new Date().toLocaleDateString('en-CA')
+  const parentOptions = taskParentOptions(tasks, task?.id)
 
   const recommend = async () => {
     const data = new FormData(formRef.current)
@@ -47,6 +49,7 @@ export default function TaskForm({ task, onSave, onCancel, onDelete }) {
       priority: data.priority,
       progress: Number(data.progress),
       recurrence_rule: data.recurrence_rule || null,
+      parent_id: data.parent_id ? Number(data.parent_id) : null,
       tags,
     })
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 그대로 유지됩니다.')
@@ -62,6 +65,7 @@ export default function TaskForm({ task, onSave, onCancel, onDelete }) {
     <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label>우선순위<select name="priority" defaultValue={task?.priority || 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
     <label>반복<select name="recurrence_rule" defaultValue={task?.recurrence_rule || ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
+    <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={task?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
