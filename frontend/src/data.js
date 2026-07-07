@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-regression-test-entrypoint',
+    timestamp: '2026-07-08T06:12:04+09:00',
+    description: '업무 수정 저장 회귀 테스트가 저장소 루트에서 바로 실행되도록 백엔드 테스트 경로를 보강해, 기존 업무 편집 저장 오류가 다시 섞여 들어와도 기본 점검에서 바로 잡을 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-unassigned-save',
     timestamp: '2026-07-08T06:09:01+09:00',
     description: '기존에 담당자 없이 진행 중이던 업무도 제목이나 메모를 수정해 저장할 수 있도록 편집 검증을 보완해, 새 소유자 누락은 계속 막으면서 기존 업무 수정 차단 문제를 해소했습니다.',

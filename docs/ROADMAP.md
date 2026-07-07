@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-08T06:09:01+09:00
+Last updated: 2026-07-08T06:12:04+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -21,6 +21,7 @@ Last updated: 2026-07-08T06:09:01+09:00
 - [x] Basic approval workflow for completed work in the task management screen.
 - [x] Basic approval workflow for schedule changes.
 - [x] Approval queue filters for completed-work and schedule-change review.
+- [x] Repo-root backend regression coverage for task edit save flows.
 - [x] Basic capacity planning across team members and date ranges.
 - [x] Basic reminder rules for upcoming and overdue work in the task management screen.
 - [x] Basic priority filtering in the task management screen.
