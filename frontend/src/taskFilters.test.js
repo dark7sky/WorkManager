@@ -3,10 +3,10 @@ import test from 'node:test'
 import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeBlockedTasks, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions, taskBlockingDependencies } from './taskFilters.js'
 
 const tasks = [
-  { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
-  { id: 2, title: '요구사항 정리', status: 'in_progress', due_date: '2026-07-09', progress: 50, assignee_name: '이서연', tags: ['기획'] },
-  { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, assignee_name: '김민준', tags: ['운영'] },
-  { id: 4, title: '검토 대기', status: 'todo', due_date: '2026-07-06', progress: 10, tags: [] },
+  { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', assignee_name: '김민준', tags: ['보고'] },
+  { id: 2, title: '요구사항 정리', status: 'in_progress', due_date: '2026-07-09', progress: 50, priority: 'normal', assignee_name: '이서연', tags: ['기획'] },
+  { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, priority: 'low', assignee_name: '김민준', tags: ['운영'] },
+  { id: 4, title: '검토 대기', status: 'todo', due_date: '2026-07-06', progress: 10, priority: 'high', tags: [] },
 ]
 
 test('filterTasks narrows tasks by assignee without losing status and tag filters', () => {
@@ -19,6 +19,19 @@ test('filterTasks narrows tasks by assignee without losing status and tag filter
   })
 
   assert.deepEqual(shown.map(task => task.id), [1])
+})
+
+test('filterTasks narrows active tasks by priority without losing assignee filters', () => {
+  const shown = filterTasks(tasks, {
+    query: '',
+    status: 'active',
+    selectedTags: [],
+    assignee: 'all',
+    priority: 'high',
+    todayIso: '2026-07-07',
+  })
+
+  assert.deepEqual(shown.map(task => task.id), [1, 4])
 })
 
 test('taskAssigneeOptions returns trimmed unique owner names for form suggestions', () => {

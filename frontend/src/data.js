@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-priority-filter',
+    timestamp: '2026-07-07T23:43:44+09:00',
+    description: '업무 관리 화면에 우선순위 필터를 추가해 높은, 보통, 낮은 우선순위 업무만 빠르게 좁혀 볼 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-parent-move-promote-regression',
     timestamp: '2026-07-07T19:16:26+09:00',
     description: '업무 계층 편집에서 기존 업무를 다른 상위 업무로 이동하고 다시 최상위로 승격하는 API 경로를 회귀 테스트로 보강했습니다.',

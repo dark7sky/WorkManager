@@ -34,7 +34,7 @@ const dateRange = (startIso, endIso) => {
   return dates
 }
 
-export const filterTasks = (tasks, { query = '', status = 'active', selectedTags = [], assignee = 'all', todayIso }) => {
+export const filterTasks = (tasks, { query = '', status = 'active', selectedTags = [], assignee = 'all', priority = 'all', todayIso }) => {
   const q = query.trim().toLowerCase()
   return tasks.filter(task => {
     const matchesQuery = !q || `${task.title} ${task.description || ''} ${task.assignee_name || ''} ${(task.tags || []).join(' ')}`.toLowerCase().includes(q)
@@ -42,7 +42,8 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
       || (status === 'overdue' ? isTaskOverdue(task, todayIso) : status === 'active' ? task.status !== 'done' : status === 'in_progress' ? ['in_progress', 'doing'].includes(task.status) : task.status === status)
     const matchesTags = !selectedTags.length || selectedTags.every(tag => (task.tags || []).includes(tag))
     const matchesAssignee = assignee === 'all' || taskAssignee(task) === assignee
-    return matchesQuery && matchesStatus && matchesTags && matchesAssignee
+    const matchesPriority = priority === 'all' || task.priority === priority
+    return matchesQuery && matchesStatus && matchesTags && matchesAssignee && matchesPriority
   })
 }
 
