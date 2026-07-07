@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-hierarchy-roadmap-reconciled',
+    timestamp: '2026-07-07T17:27:11+09:00',
+    description: '업무 계층 편집 기능이 실제 화면과 API에 반영된 상태를 제품 로드맵과 변경 이력에 맞춰 정리했습니다.',
+  },
+  {
     id: '2026-07-07-task-hierarchy-editing',
     timestamp: '2026-07-07T17:20:01+09:00',
     description: '업무 수정 화면에서 상위 업무를 선택하거나 최상위로 승격할 수 있게 하고, 업무 목록을 부모-자식 순서로 표시하도록 개선했습니다.',
