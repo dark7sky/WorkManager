@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-save-optional-text-fields',
+    timestamp: '2026-07-07T19:06:33+09:00',
+    description: '업무 수정 저장 시 선택 입력값이 비어 있거나 누락되어도 저장 요청 생성이 중단되지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-07-feature-request-status-management',
     timestamp: '2026-07-07T19:03:34+09:00',
     description: '변경 이력 화면에서 제출된 기능 개선 요청의 상태를 대기, 진행 중, 완료, 보류로 바로 관리할 수 있게 했습니다.',

@@ -1,8 +1,10 @@
+const trimField = value => String(value ?? '').trim()
+
 export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const payload = {
-    title: data.title.trim(),
-    description: data.description.trim(),
-    assignee_name: data.assignee_name.trim(),
+    title: trimField(data.title),
+    description: trimField(data.description),
+    assignee_name: trimField(data.assignee_name),
     start_date: data.start_date || null,
     due_date: data.due_date || null,
     status: data.status === 'in_progress' ? 'doing' : data.status,

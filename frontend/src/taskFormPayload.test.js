@@ -29,3 +29,10 @@ test('buildTaskPayload sends parent_id when hierarchy changes', () => {
   assert.equal(buildTaskPayload({ ...baseData, parent_id: '7' }, { task: { id: 1, parent_id: null } }).parent_id, 7)
   assert.equal(buildTaskPayload(baseData, { task: { id: 1, parent_id: 7 } }).parent_id, null)
 })
+
+test('buildTaskPayload tolerates missing optional text fields during edit save', () => {
+  const payload = buildTaskPayload({ ...baseData, description: undefined, assignee_name: null }, { task: { id: 1 } })
+
+  assert.equal(payload.description, '')
+  assert.equal(payload.assignee_name, '')
+})
