@@ -43,8 +43,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     }
     setSaving(true)
     setError('')
-    const ok = await onSave(buildTaskPayload(data, { tags, task }))
-    if (!ok) setError('저장하지 못했습니다. 입력 내용은 그대로 유지됩니다.')
+    const result = await onSave(buildTaskPayload(data, { tags, task }))
+    const ok = typeof result === 'object' ? result.ok : result
+    if (!ok) setError(result?.error || '저장하지 못했습니다. 입력 내용은 그대로 유지됩니다.')
     setSaving(false)
   }
 

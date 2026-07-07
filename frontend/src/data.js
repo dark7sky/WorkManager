@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-save-error-detail',
+    timestamp: '2026-07-07T18:56:37+09:00',
+    description: '업무 수정 저장이 실패할 때 저장 창 안에서도 API 검증 오류를 그대로 보여주도록 개선해 기존 업무 수정 문제를 더 빠르게 진단할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-assignee-reuse-suggestions',
     timestamp: '2026-07-07T18:54:47+09:00',
     description: '업무 등록과 수정 화면의 담당자 입력에 기존 담당자 이름 추천을 추가해 팀원 이름 표기 흔들림을 줄였습니다.',
