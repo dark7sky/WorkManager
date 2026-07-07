@@ -5,9 +5,10 @@ import AppShell from './components/AppShell'; import Login from './components/Lo
 import Today from './screens/Today'; import Tasks from './screens/Tasks'; import Calendar from './screens/Calendar'; import AIAssistant from './screens/AIAssistant'; import Settings from './screens/Settings'
 import Changelog from './screens/Changelog'
 import Performance from './screens/Performance'
+import AuditLog from './screens/AuditLog'
 
 const eventColors=['blue','purple','orange']
-const pages = ['today','tasks','calendar','performance','ai','changelog','settings']
+const pages = ['today','tasks','calendar','performance','ai','audit','changelog','settings']
 export default function App(){
  const {preference,setPreference}=useTheme(),[user,setUser]=useState(null),[boot,setBoot]=useState({loading:true,error:'',google:true}),[page,setPage]=useState(()=>{const p=new URLSearchParams(location.search).get('page');return pages.includes(p)?p:'today'})
  const [tasks,setTasks]=useState([]),[todayTasks,setTodayTasks]=useState([]),[events,setEvents]=useState([]),[todos,setTodos]=useState([]),[logs,setLogs]=useState([]),[dataLoading,setDataLoading]=useState(false),[dataError,setDataError]=useState('')
@@ -38,6 +39,7 @@ export default function App(){
   calendar:<Calendar events={events} notify={notify} onDataChanged={refresh} onCreate={data=>mutate(()=>api.createEvent(data),'일정을 등록했습니다.')} onUpdate={(event,data)=>mutate(()=>api.updateEvent(event.id,data),'일정을 수정했습니다.')} onDelete={event=>mutate(()=>api.deleteEvent(event.id),'일정을 삭제했습니다.')}/>,
   performance:<Performance notify={notify} onDataChanged={refresh}/>,
   ai:<AIAssistant text={aiText} setText={setAiText} preview={preview} recommendations={recommendations} mode={aiMode} loading={aiBusy} onPreview={analyze} onRecommend={recommend} onApply={apply}/>,
+  audit:<AuditLog/>,
   changelog:<Changelog/>,
   settings:<Settings theme={preference} setTheme={setPreference} notify={notify} onDataChanged={refresh} canInstall={!!installPrompt} onInstall={async()=>{if(!installPrompt)return;await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('WorkManager 앱을 설치했습니다.');setInstallPrompt(null)}} notificationPermission={notificationPermission} onEnableNotifications={async()=>{if(!('Notification' in window)){notify('이 브라우저는 알림을 지원하지 않습니다.','error');return}const result=await Notification.requestPermission();setNotificationPermission(result);notify(result==='granted'?'오늘 업무 알림을 켰습니다.':'브라우저 설정에서 알림 권한을 허용해 주세요.',result==='granted'?'success':'error')}}/>
  }

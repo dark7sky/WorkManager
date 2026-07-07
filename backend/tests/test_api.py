@@ -136,6 +136,17 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_audit_logs_are_user_scoped_and_include_metadata(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        task = a.post("/api/tasks", json={"title": "audited task"}).json()
+        a.patch(f"/api/tasks/{task['id']}", json={"progress": 40})
+        logs = a.get("/api/audit-logs?limit=10")
+        self.assertEqual(logs.status_code, 200, logs.text)
+        self.assertTrue(any(x["action"] == "update" and x["entity_type"] == "tasks" and "progress" in x["metadata"].get("fields", []) for x in logs.json()["items"]))
+        self.assertEqual(b.get("/api/audit-logs?limit=10").json()["items"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_common_tags_filter_and_achievement_report(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "tagged", "completed": True, "todo_date": "2026-07-06", "tags": [" Project-X ", "project-x"]})
