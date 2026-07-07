@@ -6,6 +6,10 @@ const normalizedProgress = value => {
   if (!Number.isFinite(number)) return 0
   return Math.max(0, Math.min(100, number))
 }
+const normalizedOptionalId = value => {
+  const number = Number(value)
+  return Number.isInteger(number) && number > 0 ? number : null
+}
 
 export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const payload = {
@@ -21,9 +25,10 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     tags,
   }
 
-  const parentId = data.parent_id ? Number(data.parent_id) : null
-  const previousParentId = task?.parent_id || null
-  if (!task || parentId !== previousParentId) payload.parent_id = parentId
+  const taskId = normalizedOptionalId(task?.id)
+  const parentId = normalizedOptionalId(data.parent_id)
+  const previousParentId = normalizedOptionalId(task?.parent_id)
+  if (parentId !== taskId && (!task || parentId !== previousParentId)) payload.parent_id = parentId
 
   return payload
 }

@@ -30,6 +30,18 @@ test('buildTaskPayload sends parent_id when hierarchy changes', () => {
   assert.equal(buildTaskPayload(baseData, { task: { id: 1, parent_id: 7 } }).parent_id, null)
 })
 
+test('buildTaskPayload treats numeric and string parent IDs as unchanged on edit', () => {
+  const payload = buildTaskPayload({ ...baseData, parent_id: '7' }, { task: { id: 1, parent_id: '7' } })
+
+  assert.equal(Object.hasOwn(payload, 'parent_id'), false)
+})
+
+test('buildTaskPayload never sends the edited task as its own parent', () => {
+  const payload = buildTaskPayload({ ...baseData, parent_id: '1' }, { task: { id: 1, parent_id: null } })
+
+  assert.equal(Object.hasOwn(payload, 'parent_id'), false)
+})
+
 test('buildTaskPayload tolerates missing optional text fields during edit save', () => {
   const payload = buildTaskPayload({ ...baseData, description: undefined, assignee_name: null }, { task: { id: 1 } })
 
