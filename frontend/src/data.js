@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-assignee-workload-filter',
+    timestamp: '2026-07-07T09:15:59+09:00',
+    description: '업무 관리 화면에 담당자별 필터와 업무량 요약을 추가해 팀원별 진행, 지연, 완료 업무를 빠르게 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-csv-export',
     timestamp: '2026-07-07T09:13:03+09:00',
     description: '업무 관리 화면의 현재 검색, 상태, 태그 필터 결과를 고객 보고용 CSV 파일로 내려받을 수 있는 내보내기 버튼을 추가했습니다.',
