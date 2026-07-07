@@ -12,7 +12,7 @@ import httpx
 from fastapi import Body, Cookie, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import ai, google_calendar
 from .auth import create_session, require_user, revoke_session
@@ -196,6 +196,16 @@ class TaskPayload(StrictPayload):
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     parent_id: int | None = Field(None, ge=1)
     dependency_ids: list[int] | None = Field(None, max_length=100)
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def normalize_status_alias(cls, value):
+        return "doing" if value == "in_progress" else value
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def normalize_priority_alias(cls, value):
+        return "normal" if value == "medium" else value
 
     @model_validator(mode="after")
     def dates_in_order(self):

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-save-legacy-values',
+    timestamp: '2026-07-07T17:15:59+09:00',
+    description: '기존 업무를 수정해 저장할 때 이전 데이터의 진행 상태와 우선순위 값이 엄격한 API 검증에서 오류를 내던 문제를 수정했습니다.',
+  },
+  {
     id: '2026-07-07-feature-request-queue',
     timestamp: '2026-07-07T13:43:14+09:00',
     description: '변경 이력 화면에 사용자 개선 요청 입력 칸과 요청 목록을 추가하고, Codex 자동 개선 루프가 pending 요청을 우선 제안으로 반영할 수 있게 했습니다.',
