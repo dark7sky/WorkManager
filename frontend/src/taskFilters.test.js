@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -39,6 +39,21 @@ test('summarizeAssigneeWorkload counts active overdue and completed work by owne
     { assignee: '미지정', active: 1, overdue: 1, done: 0, total: 1 },
     { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1 },
   ])
+})
+
+test('summarizeAssigneeAssignmentLoad excludes the edited task and highlights due risk', () => {
+  const summary = summarizeAssigneeAssignmentLoad([
+    ...tasks,
+    { id: 5, title: '긴급 검토', status: 'doing', due_date: '2026-07-10', priority: 'high', assignee_name: '김민준' },
+  ], ' 김민준 ', '2026-07-07', 1)
+
+  assert.deepEqual(summary, {
+    assignee: '김민준',
+    active: 1,
+    overdue: 0,
+    dueSoon: 1,
+    highPriority: 1,
+  })
 })
 
 test('summarizeDueReminders counts overdue today and upcoming unfinished tasks', () => {

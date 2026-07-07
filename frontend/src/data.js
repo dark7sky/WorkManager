@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-form-assignee-load-preview',
+    timestamp: '2026-07-07T19:00:59+09:00',
+    description: '업무 등록과 수정 화면에서 선택한 담당자의 진행 업무, 임박 마감, 지연, 높은 우선순위 업무 수를 저장 전에 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-save-error-detail',
     timestamp: '2026-07-07T18:56:37+09:00',
     description: '업무 수정 저장이 실패할 때 저장 창 안에서도 API 검증 오류를 그대로 보여주도록 개선해 기존 업무 수정 문제를 더 빠르게 진단할 수 있게 했습니다.',

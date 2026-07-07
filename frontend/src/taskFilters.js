@@ -54,6 +54,25 @@ export const summarizeAssigneeWorkload = (tasks, todayIso) => {
   return [...rows.values()].sort((a, b) => b.total - a.total || b.active - a.active || a.assignee.localeCompare(b.assignee, 'ko'))
 }
 
+export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, excludeTaskId = null, upcomingDays = 7) => {
+  const assignee = assigneeName?.trim()
+  if (!assignee || !todayIso) return null
+
+  const soonLimit = addDays(todayIso, upcomingDays)
+  const summary = { assignee, active: 0, overdue: 0, dueSoon: 0, highPriority: 0 }
+
+  for (const task of tasks) {
+    if (task.id === excludeTaskId || taskAssignee(task) !== assignee || task.status === 'done') continue
+
+    summary.active += 1
+    if (isTaskOverdue(task, todayIso)) summary.overdue += 1
+    else if (task.due_date && task.due_date <= soonLimit) summary.dueSoon += 1
+    if (task.priority === 'high') summary.highPriority += 1
+  }
+
+  return summary
+}
+
 export const summarizeOwnershipGaps = (tasks, todayIso) => {
   const activeUnassigned = tasks.filter(task => task.status !== 'done' && taskAssignee(task) === UNASSIGNED_LABEL)
   return {

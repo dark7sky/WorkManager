@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T18:54:47+09:00
+Last updated: 2026-07-07T19:00:59+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -12,6 +12,7 @@ Last updated: 2026-07-07T18:54:47+09:00
 - [x] Basic task assignee name persisted and visible in task management.
 - [x] Basic assignee workload filtering and summary in task management.
 - [x] Basic unassigned-task ownership gap alert and quick filter.
+- [x] Inline assignee load preview while creating or editing a task.
 - [ ] Role-based permissions for managers, members, and viewers.
 - [ ] Approval workflow for schedule changes and completed work.
 - [x] Basic capacity planning across team members and date ranges.

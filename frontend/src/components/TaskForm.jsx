@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { api } from '../api'
 import { buildTaskPayload } from '../taskFormPayload'
-import { taskAssigneeOptions } from '../taskFilters'
+import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFilters'
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
 
@@ -10,11 +10,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
   const [suggestions, setSuggestions] = useState([])
+  const [assigneeName, setAssigneeName] = useState(() => task?.assignee_name || '')
   const formRef = useRef(null)
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
   const assigneeOptions = taskAssigneeOptions(tasks)
   const assigneeListId = task?.id ? `task-assignee-options-${task.id}` : 'task-assignee-options-new'
+  const assigneeLoad = useMemo(() => summarizeAssigneeAssignmentLoad(tasks, assigneeName, today, task?.id), [tasks, assigneeName, today, task?.id])
 
   const recommend = async () => {
     const data = new FormData(formRef.current)
@@ -51,8 +53,15 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
 
   return <form ref={formRef} className="form-grid" onSubmit={submit}>
     <label className="span-2">업무 제목<input name="title" required autoFocus defaultValue={task?.title || ''}/></label>
-    <label>담당자<input name="assignee_name" list={assigneeListId} maxLength="120" defaultValue={task?.assignee_name || ''} placeholder="담당자 이름"/><datalist id={assigneeListId}>{assigneeOptions.map(name => <option key={name} value={name}/>)}</datalist></label>
+    <label>담당자<input name="assignee_name" list={assigneeListId} maxLength="120" value={assigneeName} onChange={e=>setAssigneeName(e.target.value)} placeholder="담당자 이름"/><datalist id={assigneeListId}>{assigneeOptions.map(name => <option key={name} value={name}/>)}</datalist></label>
     <label>시작일<input name="start_date" type="date" defaultValue={task?.start_date || today}/></label>
+    {assigneeLoad ? <div className={`assignee-load span-2 ${assigneeLoad.overdue ? 'has-risk' : ''}`} aria-live="polite">
+      <strong>{assigneeLoad.assignee} 배정 현황</strong>
+      <span>진행 {assigneeLoad.active}건</span>
+      <span>7일 내 마감 {assigneeLoad.dueSoon}건</span>
+      {assigneeLoad.overdue ? <em>지연 {assigneeLoad.overdue}건</em> : null}
+      {assigneeLoad.highPriority ? <em>높은 우선순위 {assigneeLoad.highPriority}건</em> : null}
+    </div> : null}
     <label>완료 예정일<input name="due_date" type="date" defaultValue={task?.due_date || today}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
