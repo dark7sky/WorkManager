@@ -191,6 +191,7 @@ class TaskPayload(StrictPayload):
     progress: int | None = Field(None, ge=0, le=100)
     start_date: date | None = None
     due_date: date | None = None
+    assignee_name: str | None = Field(None, max_length=120)
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     parent_id: int | None = Field(None, ge=1)
@@ -236,7 +237,7 @@ class WorkLogPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
@@ -250,7 +251,7 @@ def normalize(table, data):
         raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
     result = model.model_dump(exclude_unset=True, mode="json")
     text_fields = {
-        "tasks": ("title",), "events": ("title", "location"),
+        "tasks": ("title", "assignee_name"), "events": ("title", "location"),
         "todos": ("title",), "work_logs": ("content",),
     }[table]
     for key in text_fields:
@@ -367,10 +368,10 @@ def spawn_recurring_task(task, user_id):
         if not c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, task["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,tags,
-          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,assignee_name,tags,
+          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
-           start_date, due_date, json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), task["id"],
+           start_date, due_date, task.get("assignee_name", ""), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), task["id"],
            json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})

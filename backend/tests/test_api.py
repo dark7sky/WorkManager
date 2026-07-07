@@ -125,6 +125,17 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_assignee_is_persisted_and_trimmed(self, *_):
+        a = self.client(self.token_a)
+        created = a.post("/api/tasks", json={"title": "handoff", "assignee_name": "  Dana  "})
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertEqual(created.json()["assignee_name"], "Dana")
+        updated = a.patch(f"/api/tasks/{created.json()['id']}", json={"assignee_name": " Lee "})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(a.get(f"/api/tasks/{created.json()['id']}").json()["assignee_name"], "Lee")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_common_tags_filter_and_achievement_report(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "tagged", "completed": True, "todo_date": "2026-07-06", "tags": [" Project-X ", "project-x"]})
