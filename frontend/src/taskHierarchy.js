@@ -23,10 +23,9 @@ export const childTaskIds = (tasks, taskId) => {
 export const taskParentOptions = (tasks, currentTaskId) => {
   const blocked = childTaskIds(tasks, currentTaskId)
   if (currentTaskId) blocked.add(currentTaskId)
-  return tasks
-    .filter(task => !blocked.has(task.id))
-    .sort(byTitle)
-    .map(task => ({ id: task.id, label: task.title || `#${task.id}` }))
+  return orderTasksHierarchically(tasks, tasks)
+    .filter(({ task }) => !blocked.has(task.id))
+    .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
 }
 
 export const taskHierarchyDepths = tasks => {

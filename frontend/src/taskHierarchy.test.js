@@ -19,6 +19,10 @@ test('taskParentOptions includes all tasks when creating a new child task', () =
   assert.deepEqual(taskParentOptions(tasks).map(option => option.id), [1, 2, 3, 4])
 })
 
+test('taskParentOptions labels nested parent choices with hierarchy depth', () => {
+  assert.deepEqual(taskParentOptions(tasks).map(option => option.label), ['Alpha', '-- Bravo', '-- -- Charlie', 'Delta'])
+})
+
 test('orderTasksHierarchically places children directly below visible parents', () => {
   const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks)
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[1, 0], [2, 1], [3, 2], [4, 0]])

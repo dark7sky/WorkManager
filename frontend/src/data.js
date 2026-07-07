@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-parent-selector-hierarchy-labels',
+    timestamp: '2026-07-07T23:50:51+09:00',
+    description: '업무 수정 화면의 상위 업무 선택 목록을 실제 부모-자식 순서와 깊이 표시로 정리해 계층 이동 대상을 더 명확히 고를 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-save-payload-defaults',
     timestamp: '2026-07-07T23:49:11+09:00',
     description: '업무 수정 저장 요청에서 상태, 우선순위, 진행률 입력값이 비어 있거나 손상되어도 안전한 기본값으로 정규화해 저장 오류 가능성을 줄였습니다.',
