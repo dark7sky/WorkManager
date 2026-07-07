@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-ownership-save-guard',
+    timestamp: '2026-07-08T05:59:04+09:00',
+    description: '업무 등록과 수정 화면에서 진행 중이거나 완료된 업무를 저장할 때 담당자가 비어 있으면 바로 안내해 소유자 없는 활성 업무가 쌓이지 않도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-approval-queue-filters',
     timestamp: '2026-07-08T00:18:03+09:00',
     description: '업무 관리 화면의 상태 필터에 완료 승인 대기와 일정 승인 대기를 추가하고 알림에서 해당 검토 대기 업무만 바로 좁혀 볼 수 있게 했습니다.',

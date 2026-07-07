@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskPayload } from './taskFormPayload.js'
+import { buildTaskPayload, validateTaskOwnership } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -55,4 +55,15 @@ test('buildTaskPayload defaults missing select and invalid progress values durin
   assert.equal(payload.status, 'todo')
   assert.equal(payload.priority, 'normal')
   assert.equal(payload.progress, 0)
+})
+
+test('validateTaskOwnership requires an assignee for active owned work', () => {
+  assert.equal(validateTaskOwnership({ ...baseData, status: 'in_progress', assignee_name: '   ' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
+  assert.equal(validateTaskOwnership({ ...baseData, status: 'done', assignee_name: '' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
+  assert.equal(validateTaskOwnership({ ...baseData, status: 'todo', progress: '25', assignee_name: '' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
+})
+
+test('validateTaskOwnership allows unassigned backlog work', () => {
+  assert.equal(validateTaskOwnership({ ...baseData, status: 'todo', progress: '0', assignee_name: ' ' }), '')
+  assert.equal(validateTaskOwnership({ ...baseData, status: 'in_progress', progress: '40', assignee_name: '담당자' }), '')
 })

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { api } from '../api'
-import { buildTaskPayload } from '../taskFormPayload'
+import { buildTaskPayload, validateTaskOwnership } from '../taskFormPayload'
 import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFilters'
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
@@ -41,6 +41,11 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
     const data = Object.fromEntries(new FormData(e.currentTarget))
     if (data.start_date && data.due_date && data.due_date < data.start_date) {
       setError('완료 예정일은 시작일보다 빠를 수 없습니다.')
+      return
+    }
+    const ownershipError = validateTaskOwnership(data)
+    if (ownershipError) {
+      setError(ownershipError)
       return
     }
     setSaving(true)
