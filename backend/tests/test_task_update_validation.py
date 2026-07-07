@@ -1,4 +1,7 @@
+import os
+import tempfile
 import unittest
+from unittest.mock import patch
 
 
 class TaskUpdateValidationTests(unittest.TestCase):
@@ -41,6 +44,26 @@ class TaskUpdateValidationTests(unittest.TestCase):
         self.assertEqual(merged["priority"], "normal")
         self.assertEqual(merged["tags"], ["운영", "보고"])
         self.assertEqual(merged["dependency_ids"], [])
+
+    def test_task_parent_can_move_and_promote_to_top_level(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-07", "2026-07-07"))
+
+            first_parent = create_item("tasks", {"title": "first parent"}, "sub-a")
+            second_parent = create_item("tasks", {"title": "second parent"}, "sub-a")
+            child = create_item("tasks", {"title": "child", "parent_id": first_parent["id"]}, "sub-a")
+
+            moved = update_item("tasks", child["id"], {"parent_id": second_parent["id"]}, "sub-a")
+            self.assertEqual(moved["parent_id"], second_parent["id"])
+
+            promoted = update_item("tasks", child["id"], {"parent_id": None}, "sub-a")
+            self.assertIsNone(promoted["parent_id"])
 
 
 if __name__ == "__main__":

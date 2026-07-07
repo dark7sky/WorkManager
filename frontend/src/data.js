@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-parent-move-promote-regression',
+    timestamp: '2026-07-07T19:16:26+09:00',
+    description: '업무 계층 편집에서 기존 업무를 다른 상위 업무로 이동하고 다시 최상위로 승격하는 API 경로를 회귀 테스트로 보강했습니다.',
+  },
+  {
     id: '2026-07-07-task-dependency-blocker-visibility',
     timestamp: '2026-07-07T19:13:14+09:00',
     description: '업무 관리 화면에서 완료되지 않은 선행 업무 때문에 대기 중인 업무를 알림과 행별 표시로 확인할 수 있게 했습니다.',
