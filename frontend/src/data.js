@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-save-payload-defaults',
+    timestamp: '2026-07-07T23:49:11+09:00',
+    description: '업무 수정 저장 요청에서 상태, 우선순위, 진행률 입력값이 비어 있거나 손상되어도 안전한 기본값으로 정규화해 저장 오류 가능성을 줄였습니다.',
+  },
+  {
     id: '2026-07-07-task-priority-filter',
     timestamp: '2026-07-07T23:43:44+09:00',
     description: '업무 관리 화면에 우선순위 필터를 추가해 높은, 보통, 낮은 우선순위 업무만 빠르게 좁혀 볼 수 있게 했습니다.',

@@ -36,3 +36,11 @@ test('buildTaskPayload tolerates missing optional text fields during edit save',
   assert.equal(payload.description, '')
   assert.equal(payload.assignee_name, '')
 })
+
+test('buildTaskPayload defaults missing select and invalid progress values during edit save', () => {
+  const payload = buildTaskPayload({ ...baseData, status: '', priority: '', progress: 'not-a-number' }, { task: { id: 1 } })
+
+  assert.equal(payload.status, 'todo')
+  assert.equal(payload.priority, 'normal')
+  assert.equal(payload.progress, 0)
+})

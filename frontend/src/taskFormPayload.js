@@ -1,4 +1,11 @@
 const trimField = value => String(value ?? '').trim()
+const normalizedStatus = value => (value === 'in_progress' ? 'doing' : value) || 'todo'
+const normalizedPriority = value => (value === 'medium' ? 'normal' : value) || 'normal'
+const normalizedProgress = value => {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return 0
+  return Math.max(0, Math.min(100, number))
+}
 
 export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const payload = {
@@ -7,9 +14,9 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     assignee_name: trimField(data.assignee_name),
     start_date: data.start_date || null,
     due_date: data.due_date || null,
-    status: data.status === 'in_progress' ? 'doing' : data.status,
-    priority: data.priority,
-    progress: Number(data.progress),
+    status: normalizedStatus(data.status),
+    priority: normalizedPriority(data.priority),
+    progress: normalizedProgress(data.progress),
     recurrence_rule: data.recurrence_rule || null,
     tags,
   }
