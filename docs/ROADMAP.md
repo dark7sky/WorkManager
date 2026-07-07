@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T18:47:46+09:00
+Last updated: 2026-07-07T18:54:47+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -8,6 +8,7 @@ Last updated: 2026-07-07T18:47:46+09:00
 - [x] Add Gantt-style task hierarchy editing: tasks must support parent/child placement, moving existing tasks under another task, promoting a child back to top level, and safely preventing invalid cycles.
 - [x] Overdue task visibility in the task management screen.
 - [ ] Team/member assignment and workload ownership.
+- [x] Basic assignee reuse suggestions in the task create/edit form to reduce owner name drift.
 - [x] Basic task assignee name persisted and visible in task management.
 - [x] Basic assignee workload filtering and summary in task management.
 - [x] Basic unassigned-task ownership gap alert and quick filter.

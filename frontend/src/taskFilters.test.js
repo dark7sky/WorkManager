@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -19,6 +19,16 @@ test('filterTasks narrows tasks by assignee without losing status and tag filter
   })
 
   assert.deepEqual(shown.map(task => task.id), [1])
+})
+
+test('taskAssigneeOptions returns trimmed unique owner names for form suggestions', () => {
+  assert.deepEqual(taskAssigneeOptions([
+    { assignee_name: ' 이서연 ' },
+    { assignee_name: '김민준' },
+    { assignee_name: '이서연' },
+    { assignee_name: '' },
+    {},
+  ]), ['김민준', '이서연'])
 })
 
 test('summarizeAssigneeWorkload counts active overdue and completed work by owner', () => {

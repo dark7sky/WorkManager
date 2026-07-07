@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-assignee-reuse-suggestions',
+    timestamp: '2026-07-07T18:54:47+09:00',
+    description: '업무 등록과 수정 화면의 담당자 입력에 기존 담당자 이름 추천을 추가해 팀원 이름 표기 흔들림을 줄였습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-parent-payload',
     timestamp: '2026-07-07T18:50:25+09:00',
     description: '업무 수정 저장 시 상위 업무가 바뀌지 않은 경우 계층 필드를 다시 보내지 않도록 조정해 기존 업무 저장 경로를 더 안정화했습니다.',
