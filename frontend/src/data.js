@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-overdue-task-filter',
+    timestamp: '2026-07-07T08:58:35+09:00',
+    description: '업무 관리 화면에서 기한이 지난 미완료 업무만 빠르게 확인할 수 있는 지연 업무 필터를 추가했습니다.',
+  },
+  {
     id: '2026-07-07-changelog-screen',
     timestamp: '2026-07-07T08:54:01+09:00',
     description: '사용자가 앱 안에서 릴리스 변경 이력을 확인할 수 있는 변경 이력 화면과 메뉴를 추가했습니다.',
