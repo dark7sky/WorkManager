@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-stale-approval-repair',
+    timestamp: '2026-07-08T06:27:31+09:00',
+    description: '완료 상태에서 되돌아온 기존 업무에 승인 완료 값이 남아 있어 수정 저장이 막히던 문제를 보완해, 일반 편집 저장 시 승인 상태를 안전하게 초기화하도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-json-array-repair',
     timestamp: '2026-07-08T06:24:33+09:00',
     description: '기존 업무의 태그나 의존 업무 값이 깨진 JSON 문자열로 남아 있어도 수정 저장 시 빈 목록으로 안전하게 복구해, 제목만 바꾸는 편집에서도 서버 오류가 나지 않도록 보강했습니다.',

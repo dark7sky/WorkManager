@@ -222,6 +222,26 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["tags"], [])
             self.assertEqual(updated["dependency_ids"], [])
 
+    def test_update_item_repairs_stale_approval_state_on_active_task_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy approval mismatch", "", "doing", "normal", 35, None, None,
+                     "Dana", "approved", "none", "[]", "2026-07-08T06:27:31", "2026-07-08T06:27:31"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy approval mismatch saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy approval mismatch saved")
+            self.assertEqual(updated["approval_status"], "none")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -542,6 +542,8 @@ def update_item(table, item_id, data, user_id):
             schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
             if schedule_changed and "schedule_approval_status" not in data:
                 data["schedule_approval_status"] = "pending"
+            if target_status != "done" and "approval_status" not in data and existing["approval_status"] not in (None, "none"):
+                data["approval_status"] = "none"
             if target_status == "done" and existing["status"] != "done":
                 became_done = True
                 data["completed_at"] = now()
