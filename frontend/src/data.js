@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-pdf-report-export',
+    timestamp: '2026-07-07T18:41:12+09:00',
+    description: '업무 관리 화면의 현재 검색, 상태, 담당자, 태그 필터 결과를 인쇄 또는 PDF 저장용 업무 보고서로 출력할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-assignee-capacity-strip',
     timestamp: '2026-07-07T17:29:51+09:00',
     description: '업무 관리 화면에 14일 기준 담당자별 일정 부하 요약을 추가해 특정 담당자에게 업무가 몰리는 날짜를 빠르게 확인할 수 있게 했습니다.',
