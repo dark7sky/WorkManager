@@ -201,6 +201,27 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["approval_status"], "none")
             self.assertEqual(updated["schedule_approval_status"], "none")
 
+    def test_update_item_repairs_invalid_legacy_task_json_arrays_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy json edit", "", "doing", "normal", 15, None, None,
+                     "Dana", "none", "none", "not-json", "1,2,3", "2026-07-08T06:24:33", "2026-07-08T06:24:33"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy json edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy json edit saved")
+            self.assertEqual(updated["tags"], [])
+            self.assertEqual(updated["dependency_ids"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

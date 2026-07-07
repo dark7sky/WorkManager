@@ -7,6 +7,18 @@ from datetime import datetime, timezone
 LEGACY_USER_ID = "__legacy__"
 
 
+def decode_json_array(value):
+    if isinstance(value, list):
+        return value
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
 @contextmanager
 def connection():
     db_path = os.getenv("DATABASE_PATH", "./data/workmanager.db")
@@ -28,11 +40,11 @@ def connection():
 def row_dict(row):
     item = dict(row)
     if "tags" in item:
-        item["tags"] = json.loads(item["tags"] or "[]")
+        item["tags"] = decode_json_array(item["tags"])
     if "dependency_ids" in item:
-        item["dependency_ids"] = json.loads(item["dependency_ids"] or "[]")
+        item["dependency_ids"] = decode_json_array(item["dependency_ids"])
     if "recurrence" in item:
-        item["recurrence"] = json.loads(item["recurrence"] or "[]")
+        item["recurrence"] = decode_json_array(item["recurrence"])
     if "completed" in item:
         item["completed"] = bool(item["completed"])
     return item

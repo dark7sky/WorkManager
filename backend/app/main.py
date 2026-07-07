@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from . import ai, google_calendar
 from .auth import create_session, require_user, revoke_session
-from .db import connection, init_db, row_dict, upsert_google_user
+from .db import connection, decode_json_array, init_db, row_dict, upsert_google_user
 
 app = FastAPI(title="WorkManager API", version="2.0.0")
 origins = [x.rstrip("/") for x in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if x]
@@ -290,6 +290,23 @@ def normalize_legacy_task_field(key, value):
     return value
 
 
+def normalize_legacy_json_array_field(key, value):
+    items = decode_json_array(value)
+    if key == "dependency_ids":
+        normalized = []
+        seen = set()
+        for raw in items:
+            try:
+                number = int(raw)
+            except (TypeError, ValueError):
+                continue
+            if number > 0 and number not in seen:
+                seen.add(number)
+                normalized.append(number)
+        return sorted(normalized)
+    return items
+
+
 def normalize(table, data):
     try:
         model = MODELS[table].model_validate(data)
@@ -358,7 +375,7 @@ def validate_task_links(data, user_id, current_id=None):
     if current_id is not None and "dependency_ids" in data:
         proposed = set(json.loads(data["dependency_ids"]))
         with connection() as c:
-            graph = {r["id"]: set(json.loads(r["dependency_ids"] or "[]")) for r in c.execute(
+            graph = {r["id"]: set(normalize_legacy_json_array_field("dependency_ids", r["dependency_ids"])) for r in c.execute(
                 "SELECT id,dependency_ids FROM tasks WHERE user_id=? AND deleted_at IS NULL", (user_id,)).fetchall()}
         graph[current_id] = proposed
         visiting, visited = set(), set()
@@ -392,11 +409,11 @@ def merged_resource_for_validation(table, existing, data):
     merged = {k: existing[k] for k in CONFIG[table][0] if k in existing.keys()}
     json_fields = {"tags", "dependency_ids", "recurrence"}
     for key in json_fields & merged.keys():
-        merged[key] = json.loads(merged[key] or "[]")
+        merged[key] = normalize_legacy_json_array_field(key, merged[key])
     merged.update({k: v for k, v in data.items() if k in CONFIG[table][0]})
     for key in json_fields & merged.keys():
         if isinstance(merged[key], str):
-            merged[key] = json.loads(merged[key] or "[]")
+            merged[key] = normalize_legacy_json_array_field(key, merged[key])
     if table == "tasks":
         for key in ("status", "priority", "approval_status", "schedule_approval_status"):
             merged[key] = normalize_legacy_task_field(key, merged.get(key))
@@ -516,6 +533,11 @@ def update_item(table, item_id, data, user_id):
                 normalized = normalize_legacy_task_field(key, existing[key])
                 if normalized != existing[key] and key not in data:
                     data[key] = normalized
+            for key in ("tags", "dependency_ids"):
+                normalized = normalize_legacy_json_array_field(key, existing[key])
+                normalized_json = json.dumps(normalized, ensure_ascii=False)
+                if normalized_json != (existing[key] or "[]") and key not in data:
+                    data[key] = normalized_json
             target_status = data.get("status", existing["status"])
             schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
             if schedule_changed and "schedule_approval_status" not in data:
