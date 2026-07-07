@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-completion-approval',
+    timestamp: '2026-07-08T00:00:26+09:00',
+    description: '완료된 업무가 승인 대기 상태로 남고 업무 관리 화면에서 승인하거나 재작업으로 되돌릴 수 있는 기본 완료 승인 흐름을 추가했습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-parent-id-normalization',
     timestamp: '2026-07-07T23:58:33+09:00',
     description: '업무 수정 저장 시 상위 업무 ID의 문자열/숫자 차이와 자기 자신을 상위 업무로 보내는 잘못된 값 때문에 저장 오류가 나지 않도록 요청 생성을 보강했습니다.',

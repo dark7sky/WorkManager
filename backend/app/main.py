@@ -192,6 +192,7 @@ class TaskPayload(StrictPayload):
     start_date: date | None = None
     due_date: date | None = None
     assignee_name: str | None = Field(None, max_length=120)
+    approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     parent_id: int | None = Field(None, ge=1)
@@ -216,6 +217,8 @@ class TaskPayload(StrictPayload):
     def dates_in_order(self):
         if self.start_date and self.due_date and self.due_date < self.start_date:
             raise ValueError("due_date must not be before start_date")
+        if self.approval_status not in (None, "none") and self.status not in (None, "done"):
+            raise ValueError("approval_status requires a completed task")
         return self
 
 
@@ -261,7 +264,7 @@ class FeatureRequestStatusPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
@@ -293,6 +296,8 @@ def normalize(table, data):
             result["progress"] = 0
         elif "progress" in result:
             result["status"] = "doing" if result["progress"] > 0 else "todo"
+        if result.get("status") and result["status"] != "done":
+            result["approval_status"] = "none"
     if "tags" in result:
         cleaned, seen = [], set()
         for raw in result["tags"]:
@@ -445,6 +450,9 @@ def create_item(table, data, user_id):
             data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
     if table == "tasks" and data.get("status") == "done":
         data["completed_at"] = timestamp
+        data.setdefault("approval_status", "pending")
+    if table == "tasks" and data.get("approval_status") not in (None, "none") and data.get("status") != "done":
+        raise HTTPException(422, "approval_status requires a completed task")
     if table == "work_logs" and data.get("task_id"):
         with connection() as c:
             if not c.execute("SELECT 1 FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (data["task_id"], user_id)).fetchone():
@@ -491,8 +499,10 @@ def update_item(table, item_id, data, user_id):
             if target_status == "done" and existing["status"] != "done":
                 became_done = True
                 data["completed_at"] = now()
+                data.setdefault("approval_status", "pending")
             elif target_status != "done" and existing["status"] == "done":
                 data["completed_at"] = None
+                data["approval_status"] = "none"
             if data.get("recurrence_rule") == "monthly" or (data.get("recurrence_rule", existing["recurrence_rule"]) == "monthly" and ("due_date" in data or "start_date" in data)):
                 anchor_value = data.get("due_date", existing["due_date"]) or data.get("start_date", existing["start_date"])
                 if anchor_value:

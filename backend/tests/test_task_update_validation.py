@@ -79,6 +79,29 @@ class TaskUpdateValidationTests(unittest.TestCase):
             promoted = update_item("tasks", child["id"], {"parent_id": None}, "sub-a")
             self.assertIsNone(promoted["parent_id"])
 
+    def test_completed_task_approval_flow_is_persisted(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-07", "2026-07-07"))
+
+            task = create_item("tasks", {"title": "reviewable work"}, "sub-a")
+            completed = update_item("tasks", task["id"], {"status": "done"}, "sub-a")
+            self.assertEqual(completed["approval_status"], "pending")
+
+            approved = update_item("tasks", task["id"], {"approval_status": "approved"}, "sub-a")
+            self.assertEqual(approved["approval_status"], "approved")
+
+            reopened = update_item("tasks", task["id"], {"status": "doing", "progress": 90}, "sub-a")
+            self.assertEqual(reopened["approval_status"], "none")
+
+            with self.assertRaisesRegex(Exception, "approval_status requires a completed task"):
+                update_item("tasks", task["id"], {"approval_status": "approved"}, "sub-a")
+
 
 if __name__ == "__main__":
     unittest.main()
