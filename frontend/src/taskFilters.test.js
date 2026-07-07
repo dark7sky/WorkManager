@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeBlockedTasks, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions, taskBlockingDependencies } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeBlockedTasks, summarizeDueReminders, summarizeOwnershipGaps, summarizeTeamMemberRoster, taskAssigneeOptions, taskBlockingDependencies } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', assignee_name: '김민준', tags: ['보고'] },
@@ -150,4 +150,17 @@ test('summarizeAssigneeCapacity counts scheduled load inside the planning window
     overloadDays: 1,
   })
   assert.equal(capacity.some(row => row.assignee === '이서연' && row.scheduledTasks === 1), true)
+})
+
+test('summarizeTeamMemberRoster keeps saved members visible with workload context', () => {
+  const roster = summarizeTeamMemberRoster([
+    ...tasks,
+    { id: 5, title: '동시 작업', status: 'doing', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
+  ], ['박지훈', '김민준'], '2026-07-07', 14, 1)
+
+  assert.deepEqual(roster, [
+    { assignee: '김민준', active: 2, overdue: 0, done: 1, total: 3, scheduledTasks: 2, overloadDays: 1, peakDailyLoad: 2 },
+    { assignee: '박지훈', active: 0, overdue: 0, done: 0, total: 0, scheduledTasks: 0, overloadDays: 0, peakDailyLoad: 0 },
+    { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1, scheduledTasks: 1, overloadDays: 0, peakDailyLoad: 1 },
+  ])
 })

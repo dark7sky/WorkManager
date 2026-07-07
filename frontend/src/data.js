@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-team-roster-workload-summary',
+    timestamp: '2026-07-08T06:02:00+09:00',
+    description: '설정 화면의 팀원 명단에 진행, 완료, 지연, 14일 부하 요약을 추가해 저장된 담당자별 업무 분산 상태를 배정 전에 바로 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-ownership-save-guard',
     timestamp: '2026-07-08T05:59:04+09:00',
     description: '업무 등록과 수정 화면에서 진행 중이거나 완료된 업무를 저장할 때 담당자가 비어 있으면 바로 안내해 소유자 없는 활성 업무가 쌓이지 않도록 했습니다.',

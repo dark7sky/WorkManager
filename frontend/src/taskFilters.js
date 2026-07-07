@@ -167,3 +167,27 @@ export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit
     return row
   }).sort((a, b) => b.overloadDays - a.overloadDays || b.peakDailyLoad - a.peakDailyLoad || b.scheduledTasks - a.scheduledTasks || a.assignee.localeCompare(b.assignee, 'ko'))
 }
+
+export const summarizeTeamMemberRoster = (tasks, teamMembers = [], todayIso, days = 14, dailyLimit = 3) => {
+  const workload = new Map(summarizeAssigneeWorkload(tasks, todayIso).map(row => [row.assignee, row]))
+  const capacity = new Map(summarizeAssigneeCapacity(tasks, todayIso, days, dailyLimit).map(row => [row.assignee, row]))
+  const names = [...new Set([
+    ...teamMembers.map(name => String(name ?? '').trim()),
+    ...tasks.map(task => task.assignee_name?.trim()),
+  ].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'))
+
+  return names.map(name => {
+    const workloadRow = workload.get(name)
+    const capacityRow = capacity.get(name)
+    return {
+      assignee: name,
+      active: workloadRow?.active || 0,
+      overdue: workloadRow?.overdue || 0,
+      done: workloadRow?.done || 0,
+      total: workloadRow?.total || 0,
+      scheduledTasks: capacityRow?.scheduledTasks || 0,
+      overloadDays: capacityRow?.overloadDays || 0,
+      peakDailyLoad: capacityRow?.peakDailyLoad || 0,
+    }
+  })
+}
