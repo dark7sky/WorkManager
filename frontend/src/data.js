@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-unassigned-task-ownership-alert',
+    timestamp: '2026-07-07T18:47:46+09:00',
+    description: '업무 관리 화면에 담당자가 없는 진행 업무를 알려주는 소유자 미지정 알림과 빠른 필터를 추가했습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-save-json-fields',
     timestamp: '2026-07-07T18:43:38+09:00',
     description: '업무 수정 저장 시 태그와 의존 업무 같은 JSON 필드가 API 재검증에서 문자열로 처리되어 저장이 실패하던 문제를 수정했습니다.',

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { BellRing, CalendarRange, Download, FileText, Search, SlidersHorizontal, UserRound, UsersRound } from 'lucide-react'
+import { BellRing, CalendarRange, Download, FileText, Search, SlidersHorizontal, UserRound, UsersRound, UserX } from 'lucide-react'
 import Header from '../components/Header'
 import { TagChips,TagFilter } from '../components/TagsInput'
 import { taskCsvFilename, tasksToCsv } from '../csv'
 import { taskReportFilename, tasksToPrintableReport } from '../taskReport'
-import { filterTasks, isTaskOverdue, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, taskAssignee } from '../taskFilters'
+import { UNASSIGNED_LABEL, filterTasks, isTaskOverdue, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps, taskAssignee } from '../taskFilters'
 import { orderTasksHierarchically } from '../taskHierarchy'
 
 const labels={todo:'할 일',doing:'진행 중',in_progress:'진행 중',done:'완료',overdue:'지연'}
@@ -23,6 +23,7 @@ export default function Tasks({tasks,onNew,onEdit,onProgress}){
   const workload=useMemo(()=>summarizeAssigneeWorkload(tasks,todayIso),[tasks,todayIso])
   const capacity=useMemo(()=>summarizeAssigneeCapacity(tasks,todayIso,14,3),[tasks,todayIso])
   const reminders=useMemo(()=>summarizeDueReminders(tasks,todayIso,2),[tasks,todayIso])
+  const ownership=useMemo(()=>summarizeOwnershipGaps(tasks,todayIso),[tasks,todayIso])
   const reminderParts=[reminders.overdue?`지연 ${reminders.overdue}개`:null,reminders.dueToday?`오늘 마감 ${reminders.dueToday}개`:null,reminders.dueSoon?`2일 내 마감 ${reminders.dueSoon}개`:null].filter(Boolean)
   const exportShown=()=>{
     const csv=`\ufeff${tasksToCsv(shown,todayIso)}`,blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a')
@@ -36,6 +37,7 @@ export default function Tasks({tasks,onNew,onEdit,onProgress}){
   const saveProgress=async t=>{const value=Number(draft[t.id]??t.progress);if(value===t.progress)return;const ok=await onProgress(t,value);if(ok)setDraft(x=>{const n={...x};delete n[t.id];return n})}
   return <><Header title="업무 관리" subtitle="업무 일정과 진행률을 한눈에 관리하세요." action="새 업무" onAction={onNew}/><div className="content">
     {reminders.total?<section className="due-reminder" aria-label="업무 마감 알림"><BellRing aria-hidden="true"/><div><strong>마감 알림</strong><p>{reminderParts.join(' · ')} 업무가 확인이 필요합니다.</p></div>{reminders.overdue?<button type="button" className="secondary" onClick={()=>setStatus('overdue')}>지연 보기</button>:null}</section>:null}
+    {ownership.activeUnassigned?<section className="ownership-gap" aria-label="담당자 미지정 업무"><UserX aria-hidden="true"/><div><strong>담당자 미지정</strong><p>진행 중인 업무 {ownership.activeUnassigned}개에 담당자가 없습니다{ownership.overdueUnassigned ? ` · 지연 ${ownership.overdueUnassigned}개` : ''}.</p></div><button type="button" className="secondary" onClick={()=>setAssignee(UNASSIGNED_LABEL)}>미지정 보기</button></section>:null}
     <div className="toolbar task-toolbar"><div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="제목, 메모, 태그 검색" /></div><div className="task-toolbar-actions"><label className="filter-select"><SlidersHorizontal/><span>상태</span><select value={status} onChange={e=>setStatus(e.target.value)}><option value="active">진행 업무</option><option value="overdue">지연 업무</option><option value="all">전체</option><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label><label className="filter-select"><UsersRound/><span>담당</span><select value={assignee} onChange={e=>setAssignee(e.target.value)}><option value="all">전체</option>{assignees.map(name=><option key={name} value={name}>{name}</option>)}</select></label><button className="secondary" onClick={printReport} disabled={!shown.length}><FileText size={17}/>PDF</button><button className="secondary" onClick={exportShown} disabled={!shown.length}><Download size={17}/>CSV</button></div></div><TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
     {workload.length?<section className="workload-strip" aria-label="담당자별 업무 현황">{workload.map(row=><button key={row.assignee} type="button" className={assignee===row.assignee?'selected':''} onClick={()=>setAssignee(row.assignee)}><strong>{row.assignee}</strong><span>진행 {row.active}</span>{row.overdue?<em>지연 {row.overdue}</em>:null}<small>완료 {row.done}</small></button>)}</section>:null}
     {capacity.length?<section className="capacity-strip" aria-label="14일 담당자별 일정 부하"><div><CalendarRange aria-hidden="true"/><strong>14일 부하</strong></div>{capacity.slice(0,4).map(row=><button key={row.assignee} type="button" className={row.overloadDays?'overloaded':''} onClick={()=>setAssignee(row.assignee)}><strong>{row.assignee}</strong><span>최대 {row.peakDailyLoad}건/일</span><small>{row.scheduledDays}일 배정</small>{row.overloadDays?<em>초과 {row.overloadDays}일</em>:null}</button>)}</section>:null}

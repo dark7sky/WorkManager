@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -44,6 +44,13 @@ test('summarizeDueReminders counts overdue today and upcoming unfinished tasks',
     dueSoon: 2,
     total: 4,
     nextDueDate: '2026-07-06',
+  })
+})
+
+test('summarizeOwnershipGaps counts active unassigned and overdue ownership gaps', () => {
+  assert.deepEqual(summarizeOwnershipGaps(tasks, '2026-07-07'), {
+    activeUnassigned: 1,
+    overdueUnassigned: 1,
   })
 })
 
