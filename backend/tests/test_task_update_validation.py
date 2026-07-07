@@ -45,6 +45,20 @@ class TaskUpdateValidationTests(unittest.TestCase):
         self.assertEqual(merged["tags"], ["운영", "보고"])
         self.assertEqual(merged["dependency_ids"], [])
 
+    def test_task_edit_empty_clearable_fields_normalize_to_null(self):
+        from app.main import normalize
+
+        data = normalize("tasks", {
+            "title": "clear schedule",
+            "start_date": "",
+            "due_date": "",
+            "recurrence_rule": "",
+        })
+
+        self.assertIsNone(data["start_date"])
+        self.assertIsNone(data["due_date"])
+        self.assertIsNone(data["recurrence_rule"])
+
     def test_task_parent_can_move_and_promote_to_top_level(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

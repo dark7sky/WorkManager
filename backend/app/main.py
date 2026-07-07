@@ -197,6 +197,11 @@ class TaskPayload(StrictPayload):
     parent_id: int | None = Field(None, ge=1)
     dependency_ids: list[int] | None = Field(None, max_length=100)
 
+    @field_validator("start_date", "due_date", "recurrence_rule", "parent_id", mode="before")
+    @classmethod
+    def empty_clearable_fields_to_null(cls, value):
+        return None if value == "" else value
+
     @field_validator("status", mode="before")
     @classmethod
     def normalize_status_alias(cls, value):

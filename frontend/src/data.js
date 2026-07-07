@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-clear-empty-fields',
+    timestamp: '2026-07-07T23:53:13+09:00',
+    description: '업무 수정 저장 시 비워 둔 시작일, 완료 예정일, 반복, 상위 업무 값이 빈 문자열로 전달되어도 서버에서 해제 값으로 처리해 저장 오류를 막았습니다.',
+  },
+  {
     id: '2026-07-07-task-parent-selector-hierarchy-labels',
     timestamp: '2026-07-07T23:50:51+09:00',
     description: '업무 수정 화면의 상위 업무 선택 목록을 실제 부모-자식 순서와 깊이 표시로 정리해 계층 이동 대상을 더 명확히 고를 수 있게 했습니다.',
