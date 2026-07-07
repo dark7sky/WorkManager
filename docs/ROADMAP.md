@@ -1,11 +1,12 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T19:03:34+09:00
+Last updated: 2026-07-07T19:13:14+09:00
 
 ## Commercial Schedule Management Gaps
 
 - [x] Fix user-reported task edit save failure: saving changes from the 업무/Tasks screen currently shows an error and must be diagnosed, covered by a regression test, and fixed before adding more task-editing features.
 - [x] Add Gantt-style task hierarchy editing: tasks must support parent/child placement, moving existing tasks under another task, promoting a child back to top level, and safely preventing invalid cycles.
+- [x] Basic dependency blocker visibility in the task management screen.
 - [x] Overdue task visibility in the task management screen.
 - [ ] Team/member assignment and workload ownership.
 - [x] Basic assignee reuse suggestions in the task create/edit form to reduce owner name drift.

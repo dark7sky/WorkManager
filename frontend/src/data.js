@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-dependency-blocker-visibility',
+    timestamp: '2026-07-07T19:13:14+09:00',
+    description: '업무 관리 화면에서 완료되지 않은 선행 업무 때문에 대기 중인 업무를 알림과 행별 표시로 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-edit-save-merged-aliases',
     timestamp: '2026-07-07T19:08:34+09:00',
     description: '기존 업무 수정 저장 시 이전 데이터의 상태와 우선순위 별칭을 병합 검증 전에 표준값으로 맞춰 저장 경로를 더 견고하게 했습니다.',

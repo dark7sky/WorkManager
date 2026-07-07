@@ -9,6 +9,12 @@ export const taskAssigneeOptions = tasks => [...new Set(tasks
 
 export const isTaskOverdue = (task, todayIso) => task.status !== 'done' && task.due_date && todayIso && task.due_date < todayIso
 
+export const taskBlockingDependencies = (task, tasks) => {
+  const ids = new Set((task.dependency_ids || []).map(Number))
+  if (!ids.size || task.status === 'done') return []
+  return tasks.filter(item => ids.has(Number(item.id)) && item.status !== 'done')
+}
+
 const addDays = (isoDate, days) => {
   const date = new Date(`${isoDate}T00:00:00`)
   date.setDate(date.getDate() + days)
@@ -100,6 +106,22 @@ export const summarizeDueReminders = (tasks, todayIso, upcomingDays = 2) => {
   }
 
   return summary
+}
+
+export const summarizeBlockedTasks = tasks => {
+  const blocked = tasks
+    .filter(task => taskBlockingDependencies(task, tasks).length)
+    .map(task => ({ task, blockers: taskBlockingDependencies(task, tasks) }))
+
+  return {
+    total: blocked.length,
+    blockerTotal: blocked.reduce((sum, item) => sum + item.blockers.length, 0),
+    nextDueDate: blocked
+      .map(item => item.task.due_date)
+      .filter(Boolean)
+      .sort()[0] || null,
+    items: blocked,
+  }
 }
 
 export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit = 3) => {

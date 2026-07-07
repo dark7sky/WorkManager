@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeBlockedTasks, summarizeDueReminders, summarizeOwnershipGaps, taskAssigneeOptions, taskBlockingDependencies } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -70,6 +70,28 @@ test('summarizeDueReminders counts overdue today and upcoming unfinished tasks',
     total: 4,
     nextDueDate: '2026-07-06',
   })
+})
+
+test('taskBlockingDependencies returns unfinished dependency blockers only', () => {
+  const blockers = taskBlockingDependencies(
+    { id: 5, title: '출시', status: 'todo', dependency_ids: [1, 3, 999] },
+    tasks,
+  )
+
+  assert.deepEqual(blockers.map(task => task.id), [1])
+})
+
+test('summarizeBlockedTasks counts unfinished tasks blocked by incomplete dependencies', () => {
+  const summary = summarizeBlockedTasks([
+    ...tasks,
+    { id: 5, title: '출시', status: 'todo', due_date: '2026-07-10', dependency_ids: [1, 3] },
+    { id: 6, title: '완료된 후속', status: 'done', due_date: '2026-07-09', dependency_ids: [1] },
+  ])
+
+  assert.equal(summary.total, 1)
+  assert.equal(summary.blockerTotal, 1)
+  assert.equal(summary.nextDueDate, '2026-07-10')
+  assert.deepEqual(summary.items[0].blockers.map(task => task.id), [1])
 })
 
 test('summarizeOwnershipGaps counts active unassigned and overdue ownership gaps', () => {
