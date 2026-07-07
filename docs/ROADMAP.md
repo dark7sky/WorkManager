@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T17:27:11+09:00
+Last updated: 2026-07-07T17:29:51+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -12,7 +12,7 @@ Last updated: 2026-07-07T17:27:11+09:00
 - [x] Basic assignee workload filtering and summary in task management.
 - [ ] Role-based permissions for managers, members, and viewers.
 - [ ] Approval workflow for schedule changes and completed work.
-- [ ] Capacity planning across team members and date ranges.
+- [x] Basic capacity planning across team members and date ranges.
 - [x] Basic reminder rules for upcoming and overdue work in the task management screen.
 - [x] Basic CSV task export for customer and management reporting.
 - [ ] PDF reporting exports for customer and management reporting.

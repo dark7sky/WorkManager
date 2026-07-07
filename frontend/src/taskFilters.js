@@ -10,6 +10,19 @@ const addDays = (isoDate, days) => {
   return date.toLocaleDateString('en-CA')
 }
 
+const dateRange = (startIso, endIso) => {
+  const dates = []
+  if (!startIso || !endIso) return dates
+  const current = new Date(`${startIso}T00:00:00`)
+  const end = new Date(`${endIso}T00:00:00`)
+  if (Number.isNaN(current.getTime()) || Number.isNaN(end.getTime()) || end < current) return dates
+  while (current <= end) {
+    dates.push(current.toLocaleDateString('en-CA'))
+    current.setDate(current.getDate() + 1)
+  }
+  return dates
+}
+
 export const filterTasks = (tasks, { query = '', status = 'active', selectedTags = [], assignee = 'all', todayIso }) => {
   const q = query.trim().toLowerCase()
   return tasks.filter(task => {
@@ -55,4 +68,36 @@ export const summarizeDueReminders = (tasks, todayIso, upcomingDays = 2) => {
   }
 
   return summary
+}
+
+export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit = 3) => {
+  if (!todayIso || days <= 0) return []
+
+  const windowEnd = addDays(todayIso, days - 1)
+  const rows = new Map()
+
+  for (const task of tasks) {
+    if (task.status === 'done') continue
+    const start = task.start_date || task.due_date
+    const end = task.due_date || task.start_date
+    if (!start || !end || end < todayIso || start > windowEnd) continue
+
+    const assignee = taskAssignee(task)
+    const row = rows.get(assignee) || { assignee, scheduledTasks: 0, scheduledDays: 0, peakDailyLoad: 0, overloadDays: 0, daily: new Map() }
+    row.scheduledTasks += 1
+
+    for (const day of dateRange(start < todayIso ? todayIso : start, end > windowEnd ? windowEnd : end)) {
+      row.daily.set(day, (row.daily.get(day) || 0) + 1)
+    }
+    rows.set(assignee, row)
+  }
+
+  return [...rows.values()].map(row => {
+    const loads = [...row.daily.values()]
+    row.scheduledDays = loads.length
+    row.peakDailyLoad = loads.length ? Math.max(...loads) : 0
+    row.overloadDays = loads.filter(load => load > dailyLimit).length
+    delete row.daily
+    return row
+  }).sort((a, b) => b.overloadDays - a.overloadDays || b.peakDailyLoad - a.peakDailyLoad || b.scheduledTasks - a.scheduledTasks || a.assignee.localeCompare(b.assignee, 'ko'))
 }

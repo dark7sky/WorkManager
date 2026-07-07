@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeWorkload, summarizeDueReminders } from './taskFilters.js'
+import { filterTasks, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeDueReminders } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, assignee_name: '김민준', tags: ['보고'] },
@@ -45,4 +45,23 @@ test('summarizeDueReminders counts overdue today and upcoming unfinished tasks',
     total: 4,
     nextDueDate: '2026-07-06',
   })
+})
+
+test('summarizeAssigneeCapacity counts scheduled load inside the planning window', () => {
+  const capacity = summarizeAssigneeCapacity([
+    ...tasks,
+    { id: 5, title: '동시 작업 A', status: 'todo', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
+    { id: 6, title: '동시 작업 B', status: 'doing', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
+    { id: 7, title: '완료 작업', status: 'done', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
+    { id: 8, title: '기간 밖 작업', status: 'todo', start_date: '2026-08-01', due_date: '2026-08-02', assignee_name: '이서연' },
+  ], '2026-07-07', 14, 2)
+
+  assert.deepEqual(capacity[0], {
+    assignee: '김민준',
+    scheduledTasks: 3,
+    scheduledDays: 2,
+    peakDailyLoad: 3,
+    overloadDays: 1,
+  })
+  assert.equal(capacity.some(row => row.assignee === '이서연' && row.scheduledTasks === 1), true)
 })

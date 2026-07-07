@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-assignee-capacity-strip',
+    timestamp: '2026-07-07T17:29:51+09:00',
+    description: '업무 관리 화면에 14일 기준 담당자별 일정 부하 요약을 추가해 특정 담당자에게 업무가 몰리는 날짜를 빠르게 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-hierarchy-roadmap-reconciled',
     timestamp: '2026-07-07T17:27:11+09:00',
     description: '업무 계층 편집 기능이 실제 화면과 API에 반영된 상태를 제품 로드맵과 변경 이력에 맞춰 정리했습니다.',
