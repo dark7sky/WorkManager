@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-preserve-blank-dates',
+    timestamp: '2026-07-08T06:06:39+09:00',
+    description: '기존 업무에 시작일이나 완료 예정일이 비어 있을 때 수정 창이 오늘 날짜를 임의로 채우지 않도록 바꿔 저장만 눌러도 일정이 바뀌거나 날짜 검증 오류가 나던 문제를 막았습니다.',
+  },
+  {
     id: '2026-07-08-team-roster-workload-summary',
     timestamp: '2026-07-08T06:02:00+09:00',
     description: '설정 화면의 팀원 명단에 진행, 완료, 지연, 14일 부하 요약을 추가해 저장된 담당자별 업무 분산 상태를 배정 전에 바로 확인할 수 있게 했습니다.',

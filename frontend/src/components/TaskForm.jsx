@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { api } from '../api'
-import { buildTaskPayload, validateTaskOwnership } from '../taskFormPayload'
+import { buildTaskPayload, initialTaskDateValue, validateTaskOwnership } from '../taskFormPayload'
 import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFilters'
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
@@ -59,7 +59,7 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
   return <form ref={formRef} className="form-grid" onSubmit={submit}>
     <label className="span-2">업무 제목<input name="title" required autoFocus defaultValue={task?.title || ''}/></label>
     <label>담당자<input name="assignee_name" list={assigneeListId} maxLength="120" value={assigneeName} onChange={e=>setAssigneeName(e.target.value)} placeholder="담당자 이름"/><datalist id={assigneeListId}>{assigneeOptions.map(name => <option key={name} value={name}/>)}</datalist></label>
-    <label>시작일<input name="start_date" type="date" defaultValue={task?.start_date || today}/></label>
+    <label>시작일<input name="start_date" type="date" defaultValue={initialTaskDateValue(task, 'start_date', today)}/></label>
     {assigneeLoad ? <div className={`assignee-load span-2 ${assigneeLoad.overdue ? 'has-risk' : ''}`} aria-live="polite">
       <strong>{assigneeLoad.assignee} 배정 현황</strong>
       <span>진행 {assigneeLoad.active}건</span>
@@ -67,7 +67,7 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
       {assigneeLoad.overdue ? <em>지연 {assigneeLoad.overdue}건</em> : null}
       {assigneeLoad.highPriority ? <em>높은 우선순위 {assigneeLoad.highPriority}건</em> : null}
     </div> : null}
-    <label>완료 예정일<input name="due_date" type="date" defaultValue={task?.due_date || today}/></label>
+    <label>완료 예정일<input name="due_date" type="date" defaultValue={initialTaskDateValue(task, 'due_date', today)}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label>우선순위<select name="priority" defaultValue={task?.priority || 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>

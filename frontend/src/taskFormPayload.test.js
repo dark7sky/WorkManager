@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskPayload, validateTaskOwnership } from './taskFormPayload.js'
+import { buildTaskPayload, initialTaskDateValue, validateTaskOwnership } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -55,6 +55,16 @@ test('buildTaskPayload defaults missing select and invalid progress values durin
   assert.equal(payload.status, 'todo')
   assert.equal(payload.priority, 'normal')
   assert.equal(payload.progress, 0)
+})
+
+test('initialTaskDateValue keeps blank dates blank when editing an existing task', () => {
+  assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'start_date', '2026-07-08'), '')
+  assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'due_date', '2026-07-08'), '')
+})
+
+test('initialTaskDateValue still defaults new task dates to today', () => {
+  assert.equal(initialTaskDateValue(null, 'start_date', '2026-07-08'), '2026-07-08')
+  assert.equal(initialTaskDateValue(undefined, 'due_date', '2026-07-08'), '2026-07-08')
 })
 
 test('validateTaskOwnership requires an assignee for active owned work', () => {

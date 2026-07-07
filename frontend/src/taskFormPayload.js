@@ -12,6 +12,11 @@ const normalizedOptionalId = value => {
   return Number.isInteger(number) && number > 0 ? number : null
 }
 
+export const initialTaskDateValue = (task, field, today) => {
+  if (task) return task?.[field] || ''
+  return today
+}
+
 export const validateTaskOwnership = data => {
   const status = normalizedStatus(data.status)
   const progress = normalizedProgress(data.progress)
