@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-approval-queue-filters',
+    timestamp: '2026-07-08T00:18:03+09:00',
+    description: '업무 관리 화면의 상태 필터에 완료 승인 대기와 일정 승인 대기를 추가하고 알림에서 해당 검토 대기 업무만 바로 좁혀 볼 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-local-team-roster',
     timestamp: '2026-07-08T00:14:49+09:00',
     description: '설정 화면에 기기별 팀원 명단을 추가하고 업무 등록과 수정 화면의 담당자 추천에 저장된 팀원을 함께 표시하도록 했습니다.',

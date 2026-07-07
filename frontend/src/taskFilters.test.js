@@ -41,6 +41,18 @@ test('filterTasks narrows active tasks by priority without losing assignee filte
   assert.deepEqual(shown.map(task => task.id), [1, 4])
 })
 
+test('filterTasks can isolate completion and schedule approval queues', () => {
+  const approvalTasks = [
+    ...tasks,
+    { id: 5, title: '완료 승인', status: 'done', approval_status: 'pending', due_date: '2026-07-07', priority: 'normal' },
+    { id: 6, title: '일정 승인', status: 'doing', schedule_approval_status: 'pending', due_date: '2026-07-08', priority: 'normal' },
+    { id: 7, title: '승인 완료', status: 'done', approval_status: 'approved', schedule_approval_status: 'approved', due_date: '2026-07-08', priority: 'normal' },
+  ]
+
+  assert.deepEqual(filterTasks(approvalTasks, { status: 'approval_pending' }).map(task => task.id), [5])
+  assert.deepEqual(filterTasks(approvalTasks, { status: 'schedule_pending' }).map(task => task.id), [6])
+})
+
 test('taskAssigneeOptions returns trimmed unique owner names for form suggestions', () => {
   assert.deepEqual(taskAssigneeOptions([
     { assignee_name: ' 이서연 ' },

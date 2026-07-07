@@ -40,7 +40,17 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
   return tasks.filter(task => {
     const matchesQuery = !q || `${task.title} ${task.description || ''} ${task.assignee_name || ''} ${(task.tags || []).join(' ')}`.toLowerCase().includes(q)
     const matchesStatus = status === 'all'
-      || (status === 'overdue' ? isTaskOverdue(task, todayIso) : status === 'active' ? task.status !== 'done' : status === 'in_progress' ? ['in_progress', 'doing'].includes(task.status) : task.status === status)
+      || (status === 'overdue'
+        ? isTaskOverdue(task, todayIso)
+        : status === 'active'
+          ? task.status !== 'done'
+          : status === 'in_progress'
+            ? ['in_progress', 'doing'].includes(task.status)
+            : status === 'approval_pending'
+              ? task.status === 'done' && task.approval_status === 'pending'
+              : status === 'schedule_pending'
+                ? task.schedule_approval_status === 'pending'
+                : task.status === status)
     const matchesTags = !selectedTags.length || selectedTags.every(tag => (task.tags || []).includes(tag))
     const matchesAssignee = assignee === 'all' || taskAssignee(task) === assignee
     const matchesPriority = priority === 'all' || task.priority === priority
