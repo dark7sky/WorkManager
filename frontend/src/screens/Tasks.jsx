@@ -13,10 +13,10 @@ const scheduleApprovalLabels={none:'일정 검토 없음',pending:'일정 승인
 const iso=d=>d.toLocaleDateString('en-CA')
 const dayMs=86400000
 
-export default function Tasks({tasks,onNew,onEdit,onProgress,onApprove}){
+export default function Tasks({tasks,teamMembers=[],onNew,onEdit,onProgress,onApprove}){
   const [query,setQuery]=useState(''),[status,setStatus]=useState('active'),[selectedTags,setSelectedTags]=useState([]),[assignee,setAssignee]=useState('all'),[priority,setPriority]=useState('all'),[draft,setDraft]=useState({})
   const allTags=useMemo(()=>[...new Set(tasks.flatMap(t=>t.tags||[]))].sort(),[tasks])
-  const assignees=useMemo(()=>[...new Set(tasks.map(taskAssignee))].sort((a,b)=>a.localeCompare(b,'ko')),[tasks])
+  const assignees=useMemo(()=>[...new Set([...teamMembers,tasks.map(taskAssignee)].flat())].sort((a,b)=>a.localeCompare(b,'ko')),[tasks,teamMembers])
   const start=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return d},[])
   const todayIso=iso(start)
   const days=useMemo(()=>Array.from({length:14},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d}),[start])

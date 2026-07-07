@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-08T00:09:55+09:00
+Last updated: 2026-07-08T00:14:49+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -9,6 +9,7 @@ Last updated: 2026-07-08T00:09:55+09:00
 - [x] Basic dependency blocker visibility in the task management screen.
 - [x] Overdue task visibility in the task management screen.
 - [ ] Team/member assignment and workload ownership.
+- [x] Local team member roster for reusable task assignee suggestions.
 - [x] Basic assignee reuse suggestions in the task create/edit form to reduce owner name drift.
 - [x] Basic task assignee name persisted and visible in task management.
 - [x] Basic assignee workload filtering and summary in task management.

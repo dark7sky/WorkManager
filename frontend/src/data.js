@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-local-team-roster',
+    timestamp: '2026-07-08T00:14:49+09:00',
+    description: '설정 화면에 기기별 팀원 명단을 추가하고 업무 등록과 수정 화면의 담당자 추천에 저장된 팀원을 함께 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-schedule-change-approval',
     timestamp: '2026-07-08T00:09:55+09:00',
     description: '업무 시작일이나 완료 예정일이 바뀌면 일정 승인 대기 상태로 표시하고 업무 관리 화면에서 일정 변경을 승인하거나 재검토로 표시할 수 있게 했습니다.',

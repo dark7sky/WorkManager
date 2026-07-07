@@ -2,9 +2,10 @@ export const UNASSIGNED_LABEL = '미지정'
 
 export const taskAssignee = task => task.assignee_name?.trim() || UNASSIGNED_LABEL
 
-export const taskAssigneeOptions = tasks => [...new Set(tasks
-  .map(task => task.assignee_name?.trim())
-  .filter(Boolean))]
+export const taskAssigneeOptions = (tasks, teamMembers = []) => [...new Set([
+  ...teamMembers.map(name => String(name ?? '').trim()),
+  ...tasks.map(task => task.assignee_name?.trim()),
+].filter(Boolean))]
   .sort((a, b) => a.localeCompare(b, 'ko'))
 
 export const isTaskOverdue = (task, todayIso) => task.status !== 'done' && task.due_date && todayIso && task.due_date < todayIso

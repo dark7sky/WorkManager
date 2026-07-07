@@ -5,7 +5,7 @@ import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFil
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
 
-export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
+export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, onCancel, onDelete }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
@@ -14,7 +14,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const formRef = useRef(null)
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
-  const assigneeOptions = taskAssigneeOptions(tasks)
+  const assigneeOptions = taskAssigneeOptions(tasks, teamMembers)
   const assigneeListId = task?.id ? `task-assignee-options-${task.id}` : 'task-assignee-options-new'
   const assigneeLoad = useMemo(() => summarizeAssigneeAssignmentLoad(tasks, assigneeName, today, task?.id), [tasks, assigneeName, today, task?.id])
 

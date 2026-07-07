@@ -21,6 +21,13 @@ test('filterTasks narrows tasks by assignee without losing status and tag filter
   assert.deepEqual(shown.map(task => task.id), [1])
 })
 
+test('taskAssigneeOptions includes saved team members and task assignees', () => {
+  assert.deepEqual(taskAssigneeOptions([
+    { assignee_name: '이서연' },
+    { assignee_name: ' 김민준 ' },
+  ], ['박지훈', '이서연']), ['김민준', '박지훈', '이서연'])
+})
+
 test('filterTasks narrows active tasks by priority without losing assignee filters', () => {
   const shown = filterTasks(tasks, {
     query: '',
