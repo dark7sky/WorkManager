@@ -77,3 +77,23 @@ test('validateTaskOwnership allows unassigned backlog work', () => {
   assert.equal(validateTaskOwnership({ ...baseData, status: 'todo', progress: '0', assignee_name: ' ' }), '')
   assert.equal(validateTaskOwnership({ ...baseData, status: 'in_progress', progress: '40', assignee_name: '담당자' }), '')
 })
+
+test('validateTaskOwnership allows editing a legacy active task that is already unassigned', () => {
+  assert.equal(
+    validateTaskOwnership(
+      { ...baseData, title: '제목만 수정', status: 'in_progress', progress: '40', assignee_name: '' },
+      { id: 1, status: 'in_progress', progress: 40, assignee_name: '' },
+    ),
+    '',
+  )
+})
+
+test('validateTaskOwnership still blocks creating a new active unassigned state during edit', () => {
+  assert.equal(
+    validateTaskOwnership(
+      { ...baseData, status: 'in_progress', progress: '40', assignee_name: '' },
+      { id: 1, status: 'todo', progress: 0, assignee_name: '' },
+    ),
+    '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.',
+  )
+})

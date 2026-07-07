@@ -43,7 +43,7 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
       setError('완료 예정일은 시작일보다 빠를 수 없습니다.')
       return
     }
-    const ownershipError = validateTaskOwnership(data)
+    const ownershipError = validateTaskOwnership(data, task)
     if (ownershipError) {
       setError(ownershipError)
       return

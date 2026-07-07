@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-unassigned-save',
+    timestamp: '2026-07-08T06:09:01+09:00',
+    description: '기존에 담당자 없이 진행 중이던 업무도 제목이나 메모를 수정해 저장할 수 있도록 편집 검증을 보완해, 새 소유자 누락은 계속 막으면서 기존 업무 수정 차단 문제를 해소했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-preserve-blank-dates',
     timestamp: '2026-07-08T06:06:39+09:00',
     description: '기존 업무에 시작일이나 완료 예정일이 비어 있을 때 수정 창이 오늘 날짜를 임의로 채우지 않도록 바꿔 저장만 눌러도 일정이 바뀌거나 날짜 검증 오류가 나던 문제를 막았습니다.',

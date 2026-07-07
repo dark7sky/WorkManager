@@ -11,19 +11,22 @@ const normalizedOptionalId = value => {
   const number = Number(value)
   return Number.isInteger(number) && number > 0 ? number : null
 }
+const requiresTaskOwner = data => {
+  const status = normalizedStatus(data?.status)
+  const progress = normalizedProgress(data?.progress)
+  return status === 'doing' || status === 'done' || progress > 0
+}
 
 export const initialTaskDateValue = (task, field, today) => {
   if (task) return task?.[field] || ''
   return today
 }
 
-export const validateTaskOwnership = data => {
-  const status = normalizedStatus(data.status)
-  const progress = normalizedProgress(data.progress)
-  if ((status === 'doing' || status === 'done' || progress > 0) && !normalizedAssigneeName(data.assignee_name)) {
+export const validateTaskOwnership = (data, task = null) => {
+  const nextAssignee = normalizedAssigneeName(data.assignee_name)
+  if (!requiresTaskOwner(data) || nextAssignee) return ''
+  if (task && requiresTaskOwner(task) && !normalizedAssigneeName(task.assignee_name)) return ''
     return '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.'
-  }
-  return ''
 }
 
 export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
