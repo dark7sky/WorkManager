@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-task-edit-save-json-fields',
+    timestamp: '2026-07-07T18:43:38+09:00',
+    description: '업무 수정 저장 시 태그와 의존 업무 같은 JSON 필드가 API 재검증에서 문자열로 처리되어 저장이 실패하던 문제를 수정했습니다.',
+  },
+  {
     id: '2026-07-07-task-pdf-report-export',
     timestamp: '2026-07-07T18:41:12+09:00',
     description: '업무 관리 화면의 현재 검색, 상태, 담당자, 태그 필터 결과를 인쇄 또는 PDF 저장용 업무 보고서로 출력할 수 있게 했습니다.',

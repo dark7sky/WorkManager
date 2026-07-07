@@ -359,6 +359,18 @@ def validate_task_links(data, user_id, current_id=None):
             node = parents.get(node)
 
 
+def merged_resource_for_validation(table, existing, data):
+    merged = {k: existing[k] for k in CONFIG[table][0] if k in existing.keys()}
+    json_fields = {"tags", "dependency_ids", "recurrence"}
+    for key in json_fields & merged.keys():
+        merged[key] = json.loads(merged[key] or "[]")
+    merged.update({k: v for k, v in data.items() if k in CONFIG[table][0]})
+    for key in json_fields & merged.keys():
+        if isinstance(merged[key], str):
+            merged[key] = json.loads(merged[key] or "[]")
+    return merged
+
+
 def next_recurrence_date(value, rule, anchor_day=None, anchor_month_end=False):
     if not value:
         return None
@@ -478,14 +490,7 @@ def update_item(table, item_id, data, user_id):
                     data["recurrence_anchor_day"] = anchor.day
                     data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
         # Validate cross-field date ordering using the merged resource.
-        merged = {k: existing[k] for k in CONFIG[table][0] if k in existing.keys()}
-        if "tags" in merged:
-            merged["tags"] = json.loads(merged["tags"] or "[]")
-        if "dependency_ids" in merged:
-            merged["dependency_ids"] = json.loads(merged["dependency_ids"] or "[]")
-        if "recurrence" in merged:
-            merged["recurrence"] = json.loads(merged["recurrence"] or "[]")
-        merged.update({k: v for k, v in data.items() if k in CONFIG[table][0]})
+        merged = merged_resource_for_validation(table, existing, data)
         try:
             MODELS[table].model_validate(merged)
         except ValidationError as exc:

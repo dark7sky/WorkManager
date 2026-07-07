@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T18:41:12+09:00
+Last updated: 2026-07-07T18:43:38+09:00
 
 ## Commercial Schedule Management Gaps
 
