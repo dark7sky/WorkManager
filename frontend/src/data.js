@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-07-feature-request-status-management',
+    timestamp: '2026-07-07T19:03:34+09:00',
+    description: '변경 이력 화면에서 제출된 기능 개선 요청의 상태를 대기, 진행 중, 완료, 보류로 바로 관리할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-07-task-form-assignee-load-preview',
     timestamp: '2026-07-07T19:00:59+09:00',
     description: '업무 등록과 수정 화면에서 선택한 담당자의 진행 업무, 임박 마감, 지연, 높은 우선순위 업무 수를 저장 전에 확인할 수 있게 했습니다.',

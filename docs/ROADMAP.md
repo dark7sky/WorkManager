@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-07T19:00:59+09:00
+Last updated: 2026-07-07T19:03:34+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -20,3 +20,4 @@ Last updated: 2026-07-07T19:00:59+09:00
 - [x] Basic CSV task export for customer and management reporting.
 - [x] PDF reporting exports for customer and management reporting.
 - [x] Audit log browsing and filtering in the app UI.
+- [x] Feature request status management in the Changelog screen for the Codex improvement loop.

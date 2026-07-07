@@ -3,6 +3,7 @@ import { Clock3, History, LoaderCircle, Send, Lightbulb } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import { changelogUpdates } from '../data'
+import { countPendingFeatureRequests, featureRequestStatuses, featureRequestStatusLabel, replaceFeatureRequestStatus } from '../featureRequests'
 
 const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
   dateStyle: 'medium',
@@ -10,14 +11,13 @@ const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
 }).format(new Date(value))
 
-const statusLabel = { pending: '대기', in_progress: '진행 중', done: '완료', dismissed: '보류' }
-
 export default function Changelog({ notify }) {
   const updates = [...changelogUpdates].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
   const [text, setText] = useState('')
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [updatingId, setUpdatingId] = useState(null)
   const loadRequests = async () => {
     setLoading(true)
     try { setRequests((await api.featureRequests('all')).items || []) }
@@ -41,7 +41,20 @@ export default function Changelog({ notify }) {
       setSaving(false)
     }
   }
-  const pendingCount = requests.filter(item => item.status === 'pending').length
+  const updateStatus = async (item, status) => {
+    if (item.status === status) return
+    setUpdatingId(item.id)
+    try {
+      const updated = await api.updateFeatureRequest(item.id, status)
+      setRequests(items => replaceFeatureRequestStatus(items, updated))
+      notify?.('요청 상태를 업데이트했습니다.')
+    } catch (error) {
+      notify?.(error.message, 'error')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+  const pendingCount = countPendingFeatureRequests(requests)
   return <><Header title="변경 이력" subtitle="WorkManager 업데이트 내역과 Codex 개선 요청을 관리하세요."/><div className="content changelog-page">
     <section className="changelog-panel feature-request-panel" aria-labelledby="feature-request-title">
       <div className="section-title"><div><h2 id="feature-request-title">기능 개선 요청</h2><p>여러 사용자의 요청을 모아 Codex 자동 개선 루프가 하나씩 참고합니다. 현재 대기 {pendingCount}건</p></div><Lightbulb aria-hidden="true"/></div>
@@ -52,7 +65,7 @@ export default function Changelog({ notify }) {
       </form>
       <div className="feature-request-list" aria-live="polite">
         {loading ? <p className="empty-state">요청사항을 불러오는 중입니다…</p> : requests.length ? requests.slice(0, 8).map(item => <article key={item.id} className={`feature-request ${item.status}`}>
-          <div><strong>{item.content}</strong><time dateTime={item.created_at}>{formatTimestamp(item.created_at)}</time></div><span>{statusLabel[item.status] || item.status}</span>
+          <div><strong>{item.content}</strong><time dateTime={item.created_at}>{formatTimestamp(item.created_at)}</time></div><label><span>{featureRequestStatusLabel[item.status] || item.status}</span><select aria-label={`${item.content} 상태`} value={item.status} disabled={updatingId === item.id} onChange={event => updateStatus(item, event.target.value)}>{featureRequestStatuses.map(status => <option key={status.value} value={status.value}>{status.label}</option>)}</select></label>
         </article>) : <p className="empty-state">아직 등록된 개선 요청이 없습니다.</p>}
       </div>
     </section>
