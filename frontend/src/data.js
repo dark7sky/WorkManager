@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-tag-member-repair',
+    timestamp: '2026-07-08T10:26:59+09:00',
+    description: '기존 업무의 태그 값이 JSON 배열 형태라도 문자열이 아닌 항목이나 중복 공백 태그가 섞여 있으면 수정 저장이 실패하던 문제를 보완해, 업무 화면에서 제목만 바꾸는 편집도 저장하면서 태그를 안전하게 정리하도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-blank-legacy-date-repair',
     timestamp: '2026-07-08T10:22:56+09:00',
     description: '기존 업무의 시작일이나 완료 예정일이 빈 문자열 레거시 값으로 남아 있어도 수정 저장 시 빈 일정으로 안전하게 정리해, 업무 화면에서 제목만 바꾸는 편집이 날짜 검증 오류에 다시 막히지 않도록 보강했습니다.',

@@ -344,6 +344,18 @@ def normalize_legacy_json_array_field(key, value):
                 seen.add(number)
                 normalized.append(number)
         return sorted(normalized)
+    if key == "tags":
+        normalized = []
+        seen = set()
+        for raw in items:
+            if not isinstance(raw, str):
+                continue
+            value = raw.strip()
+            tag_key = value.casefold()
+            if value and tag_key not in seen:
+                seen.add(tag_key)
+                normalized.append(value[:50])
+        return normalized
     return items
 
 

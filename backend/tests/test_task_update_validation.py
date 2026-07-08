@@ -312,6 +312,26 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["tags"], [])
             self.assertEqual(updated["dependency_ids"], [])
 
+    def test_update_item_repairs_invalid_legacy_tag_members_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy typed tags", "", "doing", "normal", 15, None, None,
+                     "Dana", "none", "none", '["  운영  ", {"bad": true}, "운영", 5]', "2026-07-08T10:26:59", "2026-07-08T10:26:59"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy typed tags saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy typed tags saved")
+            self.assertEqual(updated["tags"], ["운영"])
+
     def test_update_item_repairs_invalid_legacy_parent_id_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import init_db
