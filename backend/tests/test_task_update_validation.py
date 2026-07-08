@@ -395,6 +395,28 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["title"], "legacy typed tags saved")
             self.assertEqual(updated["tags"], ["운영"])
 
+    def test_update_item_repairs_oversized_legacy_tags_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                oversized_tags = json.dumps([f"태그-{index}" for index in range(60)], ensure_ascii=False)
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy oversized tags", "", "doing", "normal", 10, None, None,
+                     "Dana", "none", "none", oversized_tags, "2026-07-08T15:07:21", "2026-07-08T15:07:21"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy oversized tags saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy oversized tags saved")
+            self.assertEqual(len(updated["tags"]), 50)
+            self.assertEqual(updated["tags"], [f"태그-{index}" for index in range(50)])
+
     def test_update_item_repairs_invalid_legacy_parent_id_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import init_db

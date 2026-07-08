@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-tag-backend-clamp',
+    timestamp: '2026-07-08T15:07:21+09:00',
+    description: '기존 업무에 50개를 넘는 레거시 태그가 남아 있어도 서버가 수정 저장 시 허용 개수까지만 정리해 반영하도록 보강해, 업무 화면의 변경사항 저장이 다른 저장 경로나 후속 클라이언트에서도 같은 태그 검증 오류에 다시 막히지 않도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-dependency-count-clamp',
     timestamp: '2026-07-08T14:59:15+09:00',
     description: '기존 업무에 허용 개수보다 많은 의존 업무가 남아 있어도 수정 저장 시 상위 100개만 안전하게 유지하도록 정리해, 업무 화면에서 기존 항목의 변경사항 저장 버튼이 숨은 의존 관계 검증 오류에 다시 막히지 않도록 보강했습니다.',

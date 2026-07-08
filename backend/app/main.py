@@ -358,6 +358,8 @@ def normalize_legacy_json_array_field(key, value):
             if value and tag_key not in seen:
                 seen.add(tag_key)
                 normalized.append(value[:50])
+                if len(normalized) >= 50:
+                    break
         return normalized
     return items
 
