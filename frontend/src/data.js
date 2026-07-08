@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-progress-repair',
+    timestamp: '2026-07-08T10:01:03+09:00',
+    description: '기존 업무의 진행률 값이 0~100 범위를 벗어난 레거시 데이터여도 수정 저장 시 정상 범위와 상태로 자동 복구해, 제목만 바꾸는 편집에서도 저장 오류가 다시 나지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-form-state-reset',
     timestamp: '2026-07-08T09:57:34+09:00',
     description: '업무 수정 창이 다른 업무나 새 업무 작성으로 전환될 때 이전 항목의 담당자, 태그, 오류 상태가 남아 저장을 방해하지 않도록 폼 상태를 항상 새로 초기화했습니다.',
