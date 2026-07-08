@@ -71,6 +71,17 @@ test('buildTaskPayload normalizes legacy task tags during edit save', () => {
   assert.deepEqual(payload.tags, ['운영', '태'.repeat(50)])
 })
 
+test('buildTaskPayload caps legacy tag count during edit save', () => {
+  const payload = buildTaskPayload(baseData, {
+    tags: Array.from({ length: 60 }, (_, index) => `태그-${index + 1}`),
+    task: { id: 1 },
+  })
+
+  assert.equal(payload.tags.length, 50)
+  assert.deepEqual(payload.tags.slice(0, 3), ['태그-1', '태그-2', '태그-3'])
+  assert.equal(payload.tags.at(-1), '태그-50')
+})
+
 test('buildTaskPayload defaults missing select and invalid progress values during edit save', () => {
   const payload = buildTaskPayload({ ...baseData, status: '', priority: '', progress: 'not-a-number' }, { task: { id: 1 } })
 

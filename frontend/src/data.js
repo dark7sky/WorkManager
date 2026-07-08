@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-tag-count-clamp',
+    timestamp: '2026-07-08T14:56:11+09:00',
+    description: '기존 업무에 50개를 넘는 레거시 태그가 남아 있어도 수정 저장 요청에서 허용 개수까지만 정리해 보내, 업무 화면에서 변경사항 저장 버튼이 태그 개수 검증 오류에 다시 막히지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-team-roster-removal-guard',
     timestamp: '2026-07-08T14:53:38+09:00',
     description: '설정 화면에서 아직 업무가 배정된 팀원은 배정 건수를 함께 보여주고 명단 제거를 막아, 담당자 재배정 전에 팀원 이름이 실수로 사라져 업무 소유권 관리가 흐려지지 않도록 했습니다.',

@@ -4,6 +4,7 @@ const TASK_TEXT_LIMITS = {
   assignee_name: 120,
 }
 const TASK_TAG_LIMIT = 50
+const TASK_TAG_COUNT_LIMIT = 50
 
 const trimField = value => String(value ?? '').trim()
 const normalizedTaskText = (field, value) => trimField(value).slice(0, TASK_TEXT_LIMITS[field] ?? undefined)
@@ -16,6 +17,7 @@ const normalizedTaskTags = tags => {
     if (!value || seen.has(key)) continue
     seen.add(key)
     cleaned.push(value)
+    if (cleaned.length >= TASK_TAG_COUNT_LIMIT) break
   }
   return cleaned
 }
