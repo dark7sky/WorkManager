@@ -9,6 +9,31 @@ const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
   dateStyle: 'medium', timeStyle: 'short', hour12: false,
 }).format(new Date(value))
 
+const ultraTone = value => {
+  if (!value) return value
+  return value
+    .replace(/합니다\./g, '')
+    .replace(/했습니다\./g, '')
+    .replace(/되었습니다\./g, '')
+    .replace(/할 수 있게 했습니다/g, '가능')
+    .replace(/할 수 있게 해줬습니다/g, '가능')
+    .replace(/할 수 있도록/g, '가능')
+    .replace(/바로 확인할 수 있게 했습니다/g, '즉시 확인 가능')
+    .replace(/문제를 수정해/g, '수정')
+    .replace(/문제를 수정하고/g, '수정')
+    .replace(/추가했습니다/g, '추가')
+    .replace(/보강했습니다/g, '보강')
+    .replace(/정리했습니다/g, '정리')
+    .replace(/구현했습니다/g, '구현')
+    .replace(/반영했습니다/g, '반영')
+    .replace(/보존해 기록합니다/g, '보존 기록')
+    .replace(/보존하면서/g, '보존')
+    .replace(/다시 불러오도록/g, '재불러오기')
+    .replace(/, /g, ' · ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export default function Changelog({ notify, publicMode = false }) {
   const [text, setText] = useState('')
   const [requests, setRequests] = useState([])
@@ -51,28 +76,28 @@ export default function Changelog({ notify, publicMode = false }) {
   const pendingCount = countPendingFeatureRequests(requests)
   const content = <div className={`content changelog-page ${publicMode ? 'public-changelog-content' : ''}`}>
     <section className="changelog-panel feature-request-panel" aria-labelledby="feature-request-title">
-      <div className="section-title"><div><h2 id="feature-request-title">기능 개선 요청</h2><p>모든 사용자의 공개 개선 큐입니다. 대기 {pendingCount}건 · 진행 중 {requests.filter(item => item.status === 'in_progress').length}건</p></div><Lightbulb aria-hidden="true"/></div>
+      <div className="section-title"><div><h2 id="feature-request-title">개선 요청</h2><p>공개 큐. 대기 {pendingCount}건 · 진행 중 {requests.filter(item => item.status === 'in_progress').length}건</p></div><Lightbulb aria-hidden="true"/></div>
       {!publicMode ? <form className="feature-request-form" onSubmit={submit}>
-        <label htmlFor="feature-request-input">요청사항 입력</label>
-        <textarea id="feature-request-input" value={text} maxLength={5000} onChange={event => setText(event.target.value)} placeholder="예: 프로젝트별 칸반 보드를 추가하고 담당자별 업무량을 같이 보여주세요."/>
-        <footer><small>{text.trim().length}/5000자 · 등록 후 공개 개선 큐에서 함께 확인할 수 있습니다.</small><button className="primary" disabled={!text.trim() || saving}>{saving ? <LoaderCircle className="spin"/> : <Send/>} 요청 추가</button></footer>
+        <label htmlFor="feature-request-input">요청 입력</label>
+        <textarea id="feature-request-input" value={text} maxLength={5000} onChange={event => setText(event.target.value)} placeholder="예: 칸반 추가. 담당자별 부하도."/>
+        <footer><small>{text.trim().length}/5000자 · 등록 후 공개 큐에서 확인 가능.</small><button className="primary" disabled={!text.trim() || saving}>{saving ? <LoaderCircle className="spin"/> : <Send/>} 추가</button></footer>
       </form> : null}
       <div className="feature-request-list" aria-live="polite">
-        {loading ? <p className="empty-state">요청사항을 불러오는 중입니다…</p> : requests.length ? requests.map(item => <article key={item.id} className={`feature-request ${item.status}`}>
-          <div><strong>{item.content}</strong><time dateTime={item.created_at}>요청일 {formatTimestamp(item.created_at)}</time></div><span className="request-status">{featureRequestStatusLabel[item.status] || item.status}</span>
-        </article>) : <p className="empty-state">현재 대기 중인 개선 요청이 없습니다.</p>}
+        {loading ? <p className="empty-state">요청 불러오는 중.</p> : requests.length ? requests.map(item => <article key={item.id} className={`feature-request ${item.status}`}>
+          <div><strong>{ultraTone(item.content)}</strong><time dateTime={item.created_at}>요청일 {formatTimestamp(item.created_at)}</time></div><span className="request-status">{featureRequestStatusLabel[item.status] || item.status}</span>
+        </article>) : <p className="empty-state">대기 요청 없음.</p>}
       </div>
     </section>
     <section className="changelog-panel" aria-labelledby="changelog-title">
-      <div className="section-title"><div><h2 id="changelog-title">업데이트 기록</h2><p>완료된 개선 요청은 요청 내용과 요청일을 보존해 기록합니다.</p></div><History aria-hidden="true"/></div>
+      <div className="section-title"><div><h2 id="changelog-title">변경 이력</h2><p>완료 요청만 기록. 요청일, 원문 보존.</p></div><History aria-hidden="true"/></div>
       <ol className="changelog-list">
         {updates.map(update => <li key={update.id}>
           <time dateTime={update.timestamp}><Clock3 aria-hidden="true"/>{formatTimestamp(update.timestamp)}</time>
-          <div>{update.requestContent ? <p className="changelog-request"><b>요청</b> {update.requestContent}<small>요청일 {formatTimestamp(update.requestedAt)}</small></p> : null}<p>{update.description}</p></div>
+          <div>{update.requestContent ? <p className="changelog-request"><b>요청</b> {ultraTone(update.requestContent)}<small>요청일 {formatTimestamp(update.requestedAt)}</small></p> : null}<p>{ultraTone(update.description)}</p></div>
         </li>)}
       </ol>
     </section>
   </div>
-  if (!publicMode) return <><Header title="변경 이력" subtitle="WorkManager 업데이트 내역과 Codex 개선 요청을 확인하세요."/>{content}</>
-  return <main className="public-changelog"><header><span><ListTodo aria-hidden="true"/> WorkManager</span><div><h1>변경 이력과 개선 요청</h1><p>로그인 없이 확인할 수 있는 공개 제품 업데이트 페이지입니다.</p></div></header>{content}</main>
+  if (!publicMode) return <><Header title="변경 이력" subtitle="업데이트, 요청, 끝난 것만 본다."/>{content}</>
+  return <main className="public-changelog"><header><span><ListTodo aria-hidden="true"/> WorkManager</span><div><h1>변경 이력 · 요청</h1><p>로그인 없이 본다.</p></div></header>{content}</main>
 }
