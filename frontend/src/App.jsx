@@ -27,7 +27,7 @@ export default function App(){
  const bootstrap=useCallback(async()=>{setBoot(b=>({...b,loading:true,error:''}));const [configResult,userResult]=await Promise.allSettled([api.config(),api.me()]);const config=configResult.status==='fulfilled'?configResult.value:null,current=userResult.status==='fulfilled'?userResult.value:null,meUnavailable=userResult.status==='rejected'&&userResult.reason?.status!==401;setUser(current?.user||null);setBoot({loading:false,google:config?.google_enabled!==false,error:configResult.status==='rejected'||meUnavailable?'서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.':''})},[])
  useEffect(()=>{bootstrap()},[bootstrap])
  useEffect(()=>{const install=e=>{e.preventDefault();setInstallPrompt(e)},updated=()=>notify('새 버전이 준비되었습니다. 앱을 다시 열면 자동으로 적용됩니다.');addEventListener('beforeinstallprompt',install);addEventListener('workmanager:update-ready',updated);return()=>{removeEventListener('beforeinstallprompt',install);removeEventListener('workmanager:update-ready',updated);clearTimeout(toastTimer.current)}},[notify])
- useEffect(()=>{const url=new URL(location.href);url.searchParams.set('page',page);history.replaceState(null,'',url);const pop=()=>{const p=new URLSearchParams(location.search).get('page');if(pages.includes(p))setPage(p)};addEventListener('popstate',pop);return()=>removeEventListener('popstate',pop)},[page])
+ useEffect(()=>{if(location.pathname.replace(/\/+$/,'')==='/changelog')return;const url=new URL(location.href);url.searchParams.set('page',page);history.replaceState(null,'',url);const pop=()=>{const p=new URLSearchParams(location.search).get('page');if(pages.includes(p))setPage(p)};addEventListener('popstate',pop);return()=>removeEventListener('popstate',pop)},[page])
  useEffect(()=>{const expired=()=>{setUser(null);setBoot(b=>({...b,error:'로그인 세션이 만료되었습니다. 다시 로그인해 주세요.'}))};window.addEventListener(AUTH_EXPIRED_EVENT,expired);return()=>window.removeEventListener(AUTH_EXPIRED_EVENT,expired)},[])
  useEffect(()=>{if(user)refresh()},[user,refresh])
  useEffect(()=>{const params=new URLSearchParams(location.search);if(user&&page==='tasks'&&params.get('action')==='new'){setModal({type:'task'});params.delete('action');history.replaceState(null,'',`${location.pathname}?${params}`)}},[user,page])
@@ -40,6 +40,7 @@ export default function App(){
  const apply=()=>mutate(async()=>{await api.aiApply({action:preview.action,entity:preview.entity,id:preview.id,data:preview.data});setPreview(null);setAiText('');setPage('today')},'AI 제안을 적용했습니다.')
  const updateTeamMembers=members=>setTeamMembers(saveTeamMembers(localStorage,members))
  const updateTeamMemberCapacity=(name,limit)=>setTeamMemberCapacities(current=>saveTeamMemberCapacity(localStorage,current,name,limit))
+ if(location.pathname.replace(/\/+$/,'')==='/changelog')return <Changelog publicMode/>
  if(boot.loading)return <div className="app-loading" role="status"><span className="brand-mark">W</span><span>WorkManager를 준비하고 있습니다…</span></div>
  if(!user)return <Login error={boot.error} googleEnabled={boot.google} onRetry={bootstrap}/>
  const screens={

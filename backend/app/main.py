@@ -27,6 +27,8 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 @app.middleware("http")
 async def verify_request_origin(request: Request, call_next):
     if request.method in {"POST", "PUT", "PATCH", "DELETE"} and os.getenv("COOKIE_SECURE", "false").lower() == "true":
+        if request.url.path.startswith("/api/admin/") and request.headers.get("authorization", "").startswith("Bearer "):
+            return await call_next(request)
         allowed = set(origins) | {os.getenv("FRONTEND_URL", "").rstrip("/")}
         if request.headers.get("origin", "").rstrip("/") not in allowed:
             return Response(status_code=403, content="Invalid request origin")
@@ -261,6 +263,11 @@ class FeatureRequestPayload(StrictPayload):
 
 class FeatureRequestStatusPayload(StrictPayload):
     status: Literal["pending", "in_progress", "done", "dismissed"]
+
+
+class FeatureRequestAdminPayload(StrictPayload):
+    status: Literal["pending", "in_progress", "done", "dismissed"]
+    description: str | None = Field(None, max_length=10000)
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -853,6 +860,54 @@ def feature_request_list(status: Literal["pending", "in_progress", "done", "dism
         where = "WHERE status=? ORDER BY created_at DESC LIMIT ?"
         args = (status, *args)
     return {"items": rows("feature_requests", user, where, args)}
+
+
+@app.get("/api/public/changelog")
+def public_changelog():
+    """Public, read-only product history and the shared open improvement queue."""
+    with connection() as c:
+        requests = [row_dict(row) for row in c.execute("""SELECT id,content,status,created_at,updated_at
+          FROM feature_requests WHERE status IN ('pending','in_progress')
+          ORDER BY CASE status WHEN 'in_progress' THEN 0 ELSE 1 END,created_at DESC LIMIT 500""").fetchall()]
+        entries = [row_dict(row) for row in c.execute("""SELECT id,feature_request_id,request_content,requested_at,description,released_at
+          FROM changelog_entries ORDER BY released_at DESC,id DESC LIMIT 500""").fetchall()]
+    return {"requests": requests, "entries": entries}
+
+
+def require_codex_admin(request: Request):
+    enforce_rate(request.client.host if request.client else "unknown", "codex-admin", 30, 60)
+    configured = os.getenv("CODEX_ADMIN_TOKEN", "").strip()
+    supplied = request.headers.get("authorization", "")
+    if not configured or not supplied.startswith("Bearer ") or not secrets.compare_digest(supplied[7:], configured):
+        raise HTTPException(403, "Codex admin token is required")
+
+
+@app.patch("/api/admin/feature-requests/{item_id}")
+def feature_request_admin_update(item_id: int, request: Request, payload: dict = Body(...)):
+    require_codex_admin(request)
+    try:
+        model = FeatureRequestAdminPayload.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+    description = (model.description or "").strip()
+    if model.status == "done" and not description:
+        raise HTTPException(422, "description is required when completing a request")
+    timestamp = now()
+    with connection() as c:
+        existing = c.execute("SELECT * FROM feature_requests WHERE id=?", (item_id,)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Feature request not found")
+        completed_at = timestamp if model.status == "done" else None
+        c.execute("UPDATE feature_requests SET status=?,updated_at=?,completed_at=? WHERE id=?",
+                  (model.status, timestamp, completed_at, item_id))
+        if model.status == "done":
+            c.execute("""INSERT INTO changelog_entries(feature_request_id,request_content,requested_at,description,released_at)
+              VALUES(?,?,?,?,?) ON CONFLICT(feature_request_id) DO UPDATE SET
+              request_content=excluded.request_content,requested_at=excluded.requested_at,
+              description=excluded.description,released_at=excluded.released_at""",
+                      (item_id, existing["content"], existing["created_at"], description, timestamp))
+        item = row_dict(c.execute("SELECT * FROM feature_requests WHERE id=?", (item_id,)).fetchone())
+    return item
 
 
 @app.post("/api/feature-requests")

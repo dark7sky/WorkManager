@@ -4,6 +4,7 @@ services:
       context: ./backend
     environment:
       APP_SECRET: ${APP_SECRET}
+      CODEX_ADMIN_TOKEN: ${CODEX_ADMIN_TOKEN:-}
       DATABASE_PATH: /data/workmanager.db
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}

@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-public-changelog-improvement-queue',
+    timestamp: '2026-07-08T21:52:37+09:00',
+    requestedAt: '2026-07-08T21:52:37+09:00',
+    requestContent: '로그인하지 않아도 changelog와 모든 사용자의 개선 요청 사항을 URL로 확인하고, Codex 작업 중에는 진행 중으로 표시하며 완료 후 요청 원문과 요청일을 changelog에 기록한 뒤 개선 요청 목록에서 제거되게 해주세요.',
+    description: '로그인 없는 /changelog 공개 페이지와 전체 사용자 공개 개선 큐를 추가하고, Codex 관리 토큰으로 진행 중 상태를 표시하거나 완료 설명을 남기면 요청 원문·요청일을 변경 이력에 보존하면서 공개 큐에서 자동 제거하는 처리 흐름을 구현했습니다.',
+  },
+  {
     id: '2026-07-08-team-member-capacity-limits',
     timestamp: '2026-07-08T15:33:02+09:00',
     description: '설정 화면에서 팀원별 일일 업무 한도를 저장하고 업무 배정 현황과 등록·수정 폼의 14일 과부하 경고에 바로 반영해, 사람마다 다른 처리 가능량을 기준으로 업무 소유권과 일정 압박을 더 현실적으로 판단할 수 있게 했습니다.',

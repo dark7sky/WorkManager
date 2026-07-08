@@ -20,6 +20,7 @@
 4. 저장소가 private이면 Authentication을 켜고 GitHub 사용자명과 `Contents: Read-only` 권한의 fine-grained PAT를 입력합니다.
 5. 아래 환경변수를 Portainer UI에서 추가합니다. 비밀값은 저장소 파일에 넣지 않습니다.
    - `APP_SECRET` (긴 무작위 문자열)
+   - `CODEX_ADMIN_TOKEN` (Codex 개선 요청 상태 변경용 별도의 긴 무작위 문자열)
    - `APP_HTTP_PORT` (선택, 기본값 `18080`)
    - `GOOGLE_CLIENT_ID` (필수)
    - `GOOGLE_CLIENT_SECRET` (필수)
@@ -55,6 +56,20 @@
 5. 접속이 실패하면 DNS, 리버스 프록시 upstream, 방화벽, `APP_HTTP_PORT` 점유를 순서대로 확인합니다.
 
 데이터는 `workmanager_data`, 자동 백업은 `workmanager_backups` named volume에 유지됩니다. Stack 삭제 화면에서 volumes 삭제 옵션은 선택하지 마세요. 디스크 고장에 대비해 `workmanager_backups`를 다른 장치나 암호화된 원격 저장소에도 복제하십시오.
+
+## 공개 변경 이력과 Codex 개선 큐
+
+- `https://work.ysyoo.link/changelog`는 로그인 없이 읽을 수 있습니다.
+- 공개 페이지에는 모든 사용자의 `pending`, `in_progress` 요청이 표시되며 사용자 계정 정보는 노출하지 않습니다.
+- Codex가 작업을 시작할 때 아래 관리 API로 `in_progress` 상태를 지정합니다.
+- 완료할 때 `done`과 변경 설명을 함께 보내면 서버가 요청 원문과 요청일을 변경 이력에 보존하고 공개 개선 큐에서는 제거합니다.
+- 토큰을 명령문에 직접 쓰지 말고 Codex 실행 환경의 `CODEX_ADMIN_TOKEN`으로 전달합니다.
+
+```powershell
+$headers = @{ Authorization = "Bearer $env:CODEX_ADMIN_TOKEN" }
+Invoke-RestMethod -Method Patch -Uri "https://work.ysyoo.link/api/admin/feature-requests/요청ID" -Headers $headers -ContentType "application/json" -Body '{"status":"in_progress"}'
+Invoke-RestMethod -Method Patch -Uri "https://work.ysyoo.link/api/admin/feature-requests/요청ID" -Headers $headers -ContentType "application/json" -Body '{"status":"done","description":"구현하고 배포한 내용을 기록합니다."}'
+```
 
 ## 업그레이드 주의사항
 

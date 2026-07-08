@@ -11,7 +11,8 @@ class ApiTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
         os.environ.update({"DATABASE_PATH": os.path.join(cls.temp.name, "test.db"),
-                           "APP_SECRET": "test-secret-that-is-long-and-stable", "COOKIE_SECURE": "false"})
+                           "APP_SECRET": "test-secret-that-is-long-and-stable", "COOKIE_SECURE": "false",
+                           "CODEX_ADMIN_TOKEN": "test-codex-admin-token"})
         from app.main import app
         from app.auth import create_session
         from app.db import connection, init_db
@@ -224,6 +225,41 @@ class ApiTests(unittest.TestCase):
         pending = a.get("/api/feature-requests?status=pending")
         self.assertEqual(pending.status_code, 200, pending.text)
         self.assertEqual(pending.json()["items"], [])
+
+    def test_public_improvement_queue_and_codex_completion_changelog(self):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        first = a.post("/api/feature-requests", json={"content": "계층형 보드를 개선해 주세요"}).json()
+        second = b.post("/api/feature-requests", json={"content": "모바일 보기를 개선해 주세요"}).json()
+        anonymous = TestClient(self.app)
+
+        public = anonymous.get("/api/public/changelog")
+        self.assertEqual(public.status_code, 200, public.text)
+        visible_ids = {item["id"] for item in public.json()["requests"]}
+        self.assertTrue({first["id"], second["id"]}.issubset(visible_ids))
+        self.assertNotIn("user_id", next(item for item in public.json()["requests"] if item["id"] == first["id"]))
+
+        denied = anonymous.patch(f"/api/admin/feature-requests/{first['id']}", json={"status": "in_progress"})
+        self.assertEqual(denied.status_code, 403)
+        headers = {"Authorization": "Bearer test-codex-admin-token"}
+        started = anonymous.patch(f"/api/admin/feature-requests/{first['id']}", headers=headers,
+                                  json={"status": "in_progress"})
+        self.assertEqual(started.status_code, 200, started.text)
+        self.assertEqual(started.json()["status"], "in_progress")
+
+        missing_note = anonymous.patch(f"/api/admin/feature-requests/{first['id']}", headers=headers,
+                                       json={"status": "done"})
+        self.assertEqual(missing_note.status_code, 422)
+        completed = anonymous.patch(f"/api/admin/feature-requests/{first['id']}", headers=headers,
+                                    json={"status": "done", "description": "계층 이동과 표시를 개선했습니다."})
+        self.assertEqual(completed.status_code, 200, completed.text)
+
+        after = anonymous.get("/api/public/changelog").json()
+        self.assertNotIn(first["id"], {item["id"] for item in after["requests"]})
+        self.assertIn(second["id"], {item["id"] for item in after["requests"]})
+        entry = next(item for item in after["entries"] if item["feature_request_id"] == first["id"])
+        self.assertEqual(entry["request_content"], "계층형 보드를 개선해 주세요")
+        self.assertEqual(entry["requested_at"], first["created_at"])
+        self.assertEqual(entry["description"], "계층 이동과 표시를 개선했습니다.")
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

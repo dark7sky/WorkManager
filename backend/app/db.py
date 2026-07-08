@@ -106,6 +106,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS migration_state(key TEXT PRIMARY KEY,value TEXT NOT NULL,updated_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS audit_logs(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,action TEXT NOT NULL,entity_type TEXT NOT NULL,entity_id TEXT,metadata TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS feature_requests(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,content TEXT NOT NULL,source TEXT NOT NULL DEFAULT 'user',status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS changelog_entries(id INTEGER PRIMARY KEY AUTOINCREMENT,feature_request_id INTEGER UNIQUE,request_content TEXT NOT NULL,requested_at TEXT NOT NULL,description TEXT NOT NULL,released_at TEXT NOT NULL,FOREIGN KEY(feature_request_id) REFERENCES feature_requests(id) ON DELETE SET NULL);
         """)
         for table in ("tasks", "events", "todos", "work_logs"):
             _add_column(c, table, "user_id", "TEXT")
@@ -141,6 +142,8 @@ def init_db():
         c.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_date ON work_logs(user_id,log_date)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_audit_user_created ON audit_logs(user_id,created_at DESC)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_feature_requests_user_status ON feature_requests(user_id,status,created_at DESC)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_feature_requests_public_status ON feature_requests(status,created_at DESC)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_changelog_released ON changelog_entries(released_at DESC)")
         c.execute("DROP INDEX IF EXISTS idx_events_google")
         duplicate_google = c.execute("""SELECT user_id,google_calendar_id,google_event_id,COUNT(*) n FROM events
           WHERE google_event_id IS NOT NULL GROUP BY user_id,google_calendar_id,google_event_id HAVING COUNT(*)>1 LIMIT 1""").fetchone()
@@ -150,7 +153,7 @@ def init_db():
             raise RuntimeError("Duplicate event identities detected; back up the database and resolve duplicates before migration")
         c.execute("CREATE UNIQUE INDEX idx_events_google ON events(user_id,google_calendar_id,google_event_id) WHERE google_event_id IS NOT NULL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_local_uid ON events(user_id,local_uid) WHERE local_uid IS NOT NULL")
-        c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('schema_version','5',?) ON CONFLICT(key) DO UPDATE SET value='5',updated_at=excluded.updated_at", (datetime.now(timezone.utc).isoformat(),))
+        c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('schema_version','6',?) ON CONFLICT(key) DO UPDATE SET value='6',updated_at=excluded.updated_at", (datetime.now(timezone.utc).isoformat(),))
 
 
 def upsert_google_user(google_sub, email, display_name="", picture_url=None):
