@@ -276,6 +276,16 @@ VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
 
 
+def normalize_legacy_optional_task_id(value):
+    if value in (None, ""):
+        return None
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
+
+
 def normalize_legacy_task_field(key, value):
     if key == "status":
         if value == "in_progress":
@@ -417,6 +427,7 @@ def merged_resource_for_validation(table, existing, data):
     if table == "tasks":
         for key in ("status", "priority", "approval_status", "schedule_approval_status"):
             merged[key] = normalize_legacy_task_field(key, merged.get(key))
+        merged["parent_id"] = normalize_legacy_optional_task_id(merged.get("parent_id"))
     return merged
 
 
@@ -533,6 +544,9 @@ def update_item(table, item_id, data, user_id):
                 normalized = normalize_legacy_task_field(key, existing[key])
                 if normalized != existing[key] and key not in data:
                     data[key] = normalized
+            normalized_parent_id = normalize_legacy_optional_task_id(existing["parent_id"])
+            if normalized_parent_id != existing["parent_id"] and "parent_id" not in data:
+                data["parent_id"] = normalized_parent_id
             for key in ("tags", "dependency_ids"):
                 normalized = normalize_legacy_json_array_field(key, existing[key])
                 normalized_json = json.dumps(normalized, ensure_ascii=False)

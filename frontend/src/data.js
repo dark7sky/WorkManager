@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-parent-id-repair',
+    timestamp: '2026-07-08T09:48:41+09:00',
+    description: '기존 최상위 업무의 상위 업무 값이 0 같은 잘못된 레거시 값으로 남아 있어 수정 저장이 막히던 문제를 보완해, 편집 저장 시 상위 업무 값을 안전하게 최상위 상태로 복구하도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-stale-approval-repair',
     timestamp: '2026-07-08T06:27:31+09:00',
     description: '완료 상태에서 되돌아온 기존 업무에 승인 완료 값이 남아 있어 수정 저장이 막히던 문제를 보완해, 일반 편집 저장 시 승인 상태를 안전하게 초기화하도록 했습니다.',

@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import sys
 import tempfile
 import unittest
@@ -221,6 +222,28 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["title"], "legacy json edit saved")
             self.assertEqual(updated["tags"], [])
             self.assertEqual(updated["dependency_ids"], [])
+
+    def test_update_item_repairs_invalid_legacy_parent_id_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import init_db
+            from app.main import update_item
+
+            init_db()
+            db_path = os.environ["DATABASE_PATH"]
+            with sqlite3.connect(db_path) as c:
+                c.execute("PRAGMA foreign_keys=OFF")
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy parent edit", "", "doing", "normal", 35, None, None,
+                     "Dana", "none", "none", "[]", 0, "2026-07-08T09:48:41", "2026-07-08T09:48:41"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy parent edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy parent edit saved")
+            self.assertIsNone(updated["parent_id"])
 
     def test_update_item_repairs_stale_approval_state_on_active_task_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
