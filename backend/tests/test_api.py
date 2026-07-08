@@ -106,7 +106,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_completion_spawns_once(self, *_):
         a = self.client(self.token_a)
-        task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-06",
+        task = a.post("/api/tasks", json={"title": "weekly review", "assignee_name": "Dana", "start_date": "2026-07-06",
                                            "due_date": "2026-07-06", "recurrence_rule": "weekly"}).json()
         first = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
         self.assertIn("next_recurrence_id", first)
@@ -133,6 +133,22 @@ class ApiTests(unittest.TestCase):
         updated = a.patch(f"/api/tasks/{created.json()['id']}", json={"assignee_name": " Lee "})
         self.assertEqual(updated.status_code, 200, updated.text)
         self.assertEqual(a.get(f"/api/tasks/{created.json()['id']}").json()["assignee_name"], "Lee")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_unassigned_task_cannot_become_active_via_patch_without_owner(self, *_):
+        a = self.client(self.token_a)
+        created = a.post("/api/tasks", json={"title": "owner needed"})
+        self.assertEqual(created.status_code, 200, created.text)
+
+        updated = a.patch(f"/api/tasks/{created.json()['id']}", json={"progress": 40})
+
+        self.assertEqual(updated.status_code, 422, updated.text)
+        self.assertIn("require an assignee", updated.text)
+
+        fresh = a.get(f"/api/tasks/{created.json()['id']}").json()
+        self.assertEqual(fresh["status"], "todo")
+        self.assertEqual(fresh["progress"], 0)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
@@ -245,7 +261,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_month_end_recurrence_returns_to_month_end(self, *_):
         a = self.client(self.token_a)
-        task = a.post("/api/tasks", json={"title": "month end", "start_date": "2027-01-31", "due_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
+        task = a.post("/api/tasks", json={"title": "month end", "assignee_name": "Dana", "start_date": "2027-01-31", "due_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
         feb = a.patch(f"/api/tasks/{task['id']}", json={"status": "done"}).json()
         feb_task = a.get(f"/api/tasks/{feb['next_recurrence_id']}").json()
         self.assertEqual(feb_task["due_date"], "2027-02-28")

@@ -122,7 +122,7 @@ class TaskUpdateValidationTests(unittest.TestCase):
                 c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
                           ("sub-a", "a@example.com", "A", "2026-07-07", "2026-07-07"))
 
-            task = create_item("tasks", {"title": "reviewable work"}, "sub-a")
+            task = create_item("tasks", {"title": "reviewable work", "assignee_name": "Dana"}, "sub-a")
             completed = update_item("tasks", task["id"], {"status": "done"}, "sub-a")
             self.assertEqual(completed["approval_status"], "pending")
 
@@ -157,6 +157,25 @@ class TaskUpdateValidationTests(unittest.TestCase):
 
             title_only = update_item("tasks", task["id"], {"title": "scheduled work updated"}, "sub-a")
             self.assertEqual(title_only["schedule_approval_status"], "approved")
+
+    def test_task_cannot_become_active_without_owner(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            task = create_item("tasks", {"title": "owner needed"}, "sub-a")
+
+            with self.assertRaisesRegex(Exception, "require an assignee"):
+                update_item("tasks", task["id"], {"progress": 40}, "sub-a")
+
+            unchanged = update_item("tasks", task["id"], {"title": "owner still needed"}, "sub-a")
+            self.assertEqual(unchanged["status"], "todo")
+            self.assertEqual(unchanged["progress"], 0)
 
     def test_merged_task_validation_treats_blank_approval_fields_as_none(self):
         from app.main import MODELS, merged_resource_for_validation

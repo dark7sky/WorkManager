@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-inline-owner-requirement',
+    timestamp: '2026-07-08T10:30:33+09:00',
+    description: '업무 관리 화면의 진행률 슬라이더나 빠른 상태 변경으로 담당자 없는 업무가 새로 진행 중 또는 완료 상태가 되지 않도록 서버 검증을 보강해, 소유자 없는 활성 업무가 다시 생기지 않게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-tag-member-repair',
     timestamp: '2026-07-08T10:26:59+09:00',
     description: '기존 업무의 태그 값이 JSON 배열 형태라도 문자열이 아닌 항목이나 중복 공백 태그가 섞여 있으면 수정 저장이 실패하던 문제를 보완해, 업무 화면에서 제목만 바꾸는 편집도 저장하면서 태그를 안전하게 정리하도록 했습니다.',

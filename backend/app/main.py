@@ -359,6 +359,24 @@ def normalize_legacy_json_array_field(key, value):
     return items
 
 
+def task_requires_owner(data):
+    status = normalize_legacy_task_field("status", data["status"] if "status" in data.keys() else None)
+    progress = normalize_legacy_task_progress(data["progress"] if "progress" in data.keys() else None)
+    return status in {"doing", "done"} or progress > 0
+
+
+def task_has_owner(data):
+    return bool(normalize_legacy_task_text("assignee_name", data["assignee_name"] if "assignee_name" in data.keys() else None))
+
+
+def validate_task_ownership(data, existing=None):
+    if not task_requires_owner(data) or task_has_owner(data):
+        return
+    if existing is not None and task_requires_owner(existing) and not task_has_owner(existing):
+        return
+    raise HTTPException(422, "Active or completed tasks require an assignee")
+
+
 def normalize(table, data):
     try:
         model = MODELS[table].model_validate(data)
@@ -520,6 +538,7 @@ def create_item(table, data, user_id):
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id)
+        validate_task_ownership(data)
     timestamp = now()
     if table in ("tasks", "events"):
         data.update(created_at=timestamp, updated_at=timestamp)
@@ -644,6 +663,8 @@ def update_item(table, item_id, data, user_id):
             MODELS[table].model_validate(merged)
         except ValidationError as exc:
             raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+        if table == "tasks":
+            validate_task_ownership(merged, existing)
         c.execute(f"UPDATE {table} SET {','.join(f'{x}=?' for x in data)} WHERE id=? AND user_id=? AND deleted_at IS NULL", [*data.values(), item_id, user_id])
         item = row_dict(c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=?", (item_id, user_id)).fetchone())
     if table == "events" and google_calendar.token_status(user_id)["connected"] and google_calendar.selected_calendar(user_id):
