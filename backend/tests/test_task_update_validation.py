@@ -1,3 +1,4 @@
+import json
 import os
 import sqlite3
 import sys
@@ -330,6 +331,27 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["title"], "legacy json edit saved")
             self.assertEqual(updated["tags"], [])
             self.assertEqual(updated["dependency_ids"], [])
+
+    def test_update_item_repairs_stale_legacy_dependency_ids_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            dependency = create_item("tasks", {"title": "valid dependency"}, "sub-a")
+            task = create_item("tasks", {"title": "legacy dependency edit"}, "sub-a")
+            with connection() as c:
+                c.execute("UPDATE tasks SET dependency_ids=? WHERE id=? AND user_id=?",
+                          (json.dumps([dependency["id"], 999, task["id"]]), task["id"], "sub-a"))
+
+            updated = update_item("tasks", task["id"], {"title": "legacy dependency edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy dependency edit saved")
+            self.assertEqual(updated["dependency_ids"], [dependency["id"]])
 
     def test_update_item_repairs_invalid_legacy_tag_members_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):

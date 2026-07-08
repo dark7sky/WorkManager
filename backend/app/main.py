@@ -359,6 +359,15 @@ def normalize_legacy_json_array_field(key, value):
     return items
 
 
+def sanitize_legacy_dependency_ids(value, visible_task_ids, current_id=None):
+    sanitized = []
+    for dependency_id in normalize_legacy_json_array_field("dependency_ids", value):
+        if dependency_id == current_id or dependency_id not in visible_task_ids:
+            continue
+        sanitized.append(dependency_id)
+    return sanitized
+
+
 def task_requires_owner(data):
     status = normalize_legacy_task_field("status", data["status"] if "status" in data.keys() else None)
     progress = normalize_legacy_task_progress(data["progress"] if "progress" in data.keys() else None)
@@ -606,6 +615,7 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
+            visible_task_ids = None
             for key in TASK_TEXT_LIMITS:
                 normalized = normalize_legacy_task_text(key, existing[key])
                 if normalized != existing[key] and key not in data:
@@ -633,8 +643,14 @@ def update_item(table, item_id, data, user_id):
                 ).fetchone()
                 if not visible_parent:
                     data["parent_id"] = None
+            visible_task_ids = {
+                row["id"] for row in c.execute(
+                    "SELECT id FROM tasks WHERE user_id=? AND deleted_at IS NULL",
+                    (user_id,),
+                ).fetchall()
+            }
             for key in ("tags", "dependency_ids"):
-                normalized = normalize_legacy_json_array_field(key, existing[key])
+                normalized = sanitize_legacy_dependency_ids(existing[key], visible_task_ids, item_id) if key == "dependency_ids" else normalize_legacy_json_array_field(key, existing[key])
                 normalized_json = json.dumps(normalized, ensure_ascii=False)
                 if normalized_json != (existing[key] or "[]") and key not in data:
                     data[key] = normalized_json

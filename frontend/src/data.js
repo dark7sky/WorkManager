@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-stale-dependency-repair',
+    timestamp: '2026-07-08T10:36:01+09:00',
+    description: '기존 업무의 의존 업무 목록에 삭제됐거나 자기 자신을 가리키는 레거시 참조가 남아 있어도 수정 저장 시 유효한 의존 업무만 남기도록 정리해, 업무 화면에서 기존 항목을 저장한 뒤에도 깨진 선행 업무 연결이 남지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-inline-owner-requirement',
     timestamp: '2026-07-08T10:30:33+09:00',
     description: '업무 관리 화면의 진행률 슬라이더나 빠른 상태 변경으로 담당자 없는 업무가 새로 진행 중 또는 완료 상태가 되지 않도록 서버 검증을 보강해, 소유자 없는 활성 업무가 다시 생기지 않게 했습니다.',
