@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-09-ai-provider-key-preservation-and-model-listbox',
+    timestamp: '2026-07-09T00:00:00+09:00',
+    requestedAt: '2026-07-09T00:00:00+09:00',
+    requestContent: '각 AI 서비스의 API 키를 벤더별로 저장해두고, 모델만 바꿔도 키가 유지되게 해주세요. 모델 선택은 listbox로 고를 수 있으면 좋겠습니다.',
+    description: 'OpenAI와 Gemini 설정을 벤더별로 분리 저장하고, 모델 변경 시 기존 키를 유지하도록 수정했습니다. 모델 선택은 드롭다운으로 바꿔서 더 빠르게 고를 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-public-changelog-improvement-queue',
     timestamp: '2026-07-08T21:52:37+09:00',
     requestedAt: '2026-07-08T21:52:37+09:00',
