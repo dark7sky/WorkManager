@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-team-member-task-reassignment',
+    timestamp: '2026-07-08T15:11:04+09:00',
+    description: '설정 화면에서 저장된 팀원의 담당 업무를 다른 팀원에게 한 번에 재배정할 수 있게 해, 업무가 남아 있어 명단 정리가 막히던 팀 운영 흐름을 직접 처리할 수 있도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-tag-backend-clamp',
     timestamp: '2026-07-08T15:07:21+09:00',
     description: '기존 업무에 50개를 넘는 레거시 태그가 남아 있어도 서버가 수정 저장 시 허용 개수까지만 정리해 반영하도록 보강해, 업무 화면의 변경사항 저장이 다른 저장 경로나 후속 클라이언트에서도 같은 태그 검증 오류에 다시 막히지 않도록 했습니다.',

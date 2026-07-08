@@ -22,3 +22,11 @@ export const saveTeamMembers = (storage, members) => {
 export const addTeamMember = (members, name) => normalizeTeamMembers([...members, name])
 
 export const removeTeamMember = (members, name) => normalizeTeamMembers(members.filter(member => member !== name))
+
+export const teamMemberReassignmentOptions = (members, tasks, currentName) => {
+  const current = String(currentName ?? '').trim()
+  return normalizeTeamMembers([
+    ...(members || []),
+    ...((tasks || []).map(task => task?.assignee_name)),
+  ]).filter(name => name !== current)
+}
