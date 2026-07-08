@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api'
 import { buildTaskPayload, initialTaskDateValue, validateTaskOwnership } from '../taskFormPayload'
 import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFilters'
@@ -17,6 +17,14 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
   const assigneeOptions = taskAssigneeOptions(tasks, teamMembers)
   const assigneeListId = task?.id ? `task-assignee-options-${task.id}` : 'task-assignee-options-new'
   const assigneeLoad = useMemo(() => summarizeAssigneeAssignmentLoad(tasks, assigneeName, today, task?.id), [tasks, assigneeName, today, task?.id])
+
+  useEffect(() => {
+    setSaving(false)
+    setError('')
+    setSuggestions([])
+    setTags(task?.tags || [])
+    setAssigneeName(task?.assignee_name || '')
+  }, [task?.id, task?.assignee_name, task?.tags])
 
   const recommend = async () => {
     const data = new FormData(formRef.current)

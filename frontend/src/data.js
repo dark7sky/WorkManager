@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-form-state-reset',
+    timestamp: '2026-07-08T09:57:34+09:00',
+    description: '업무 수정 창이 다른 업무나 새 업무 작성으로 전환될 때 이전 항목의 담당자, 태그, 오류 상태가 남아 저장을 방해하지 않도록 폼 상태를 항상 새로 초기화했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-stale-parent-reference-repair',
     timestamp: '2026-07-08T09:52:32+09:00',
     description: '기존 업무의 상위 업무가 이미 삭제됐거나 더 이상 같은 사용자에게 보이지 않는 레거시 참조로 남아 있어도 수정 저장 시 해당 부모 연결을 자동으로 해제해, 저장 후에도 깨진 업무 계층이 남지 않도록 보완했습니다.',
