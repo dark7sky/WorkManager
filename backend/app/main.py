@@ -547,6 +547,13 @@ def update_item(table, item_id, data, user_id):
             normalized_parent_id = normalize_legacy_optional_task_id(existing["parent_id"])
             if normalized_parent_id != existing["parent_id"] and "parent_id" not in data:
                 data["parent_id"] = normalized_parent_id
+            if "parent_id" not in data and normalized_parent_id is not None:
+                visible_parent = c.execute(
+                    "SELECT 1 FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL",
+                    (normalized_parent_id, user_id),
+                ).fetchone()
+                if not visible_parent:
+                    data["parent_id"] = None
             for key in ("tags", "dependency_ids"):
                 normalized = normalize_legacy_json_array_field(key, existing[key])
                 normalized_json = json.dumps(normalized, ensure_ascii=False)

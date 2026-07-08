@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-stale-parent-reference-repair',
+    timestamp: '2026-07-08T09:52:32+09:00',
+    description: '기존 업무의 상위 업무가 이미 삭제됐거나 더 이상 같은 사용자에게 보이지 않는 레거시 참조로 남아 있어도 수정 저장 시 해당 부모 연결을 자동으로 해제해, 저장 후에도 깨진 업무 계층이 남지 않도록 보완했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-parent-id-repair',
     timestamp: '2026-07-08T09:48:41+09:00',
     description: '기존 최상위 업무의 상위 업무 값이 0 같은 잘못된 레거시 값으로 남아 있어 수정 저장이 막히던 문제를 보완해, 편집 저장 시 상위 업무 값을 안전하게 최상위 상태로 복구하도록 했습니다.',
