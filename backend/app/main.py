@@ -275,6 +275,7 @@ VALID_TASK_STATUSES = {"todo", "doing", "done"}
 VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
 VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "monthly"}
+TASK_TEXT_LIMITS = {"title": 300, "description": 20000, "assignee_name": 120}
 
 
 def normalize_legacy_optional_task_id(value):
@@ -318,6 +319,15 @@ def normalize_legacy_task_date(value):
         return date.fromisoformat(str(value)).isoformat()
     except (TypeError, ValueError):
         return None
+
+
+def normalize_legacy_task_text(key, value):
+    if key not in TASK_TEXT_LIMITS:
+        return value
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text[:TASK_TEXT_LIMITS[key]]
 
 
 def normalize_legacy_json_array_field(key, value):
@@ -445,6 +455,8 @@ def merged_resource_for_validation(table, existing, data):
         if isinstance(merged[key], str):
             merged[key] = normalize_legacy_json_array_field(key, merged[key])
     if table == "tasks":
+        for key in TASK_TEXT_LIMITS:
+            merged[key] = normalize_legacy_task_text(key, merged.get(key))
         for key in ("status", "priority", "approval_status", "schedule_approval_status", "recurrence_rule"):
             merged[key] = normalize_legacy_task_field(key, merged.get(key))
         merged["progress"] = normalize_legacy_task_progress(merged.get("progress"))
@@ -563,6 +575,10 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
+            for key in TASK_TEXT_LIMITS:
+                normalized = normalize_legacy_task_text(key, existing[key])
+                if normalized != existing[key] and key not in data:
+                    data[key] = normalized
             for key in ("status", "priority", "approval_status", "schedule_approval_status", "recurrence_rule"):
                 normalized = normalize_legacy_task_field(key, existing[key])
                 if normalized != existing[key] and key not in data:

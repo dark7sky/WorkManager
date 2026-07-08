@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-text-repair',
+    timestamp: '2026-07-08T10:11:46+09:00',
+    description: '기존 업무의 제목, 메모, 담당자 값이 허용 길이를 넘는 레거시 데이터여도 수정 저장 시 안전한 길이로 자동 복구해, 업무 화면에서 변경사항 저장 버튼을 눌렀을 때 다시 오류가 나지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-date-repair',
     timestamp: '2026-07-08T10:11:08+09:00',
     description: '기존 업무의 시작일이나 완료 예정일이 잘못된 날짜 문자열로 남아 있어도 수정 저장 시 빈 일정으로 안전하게 복구해, 업무 화면에서 제목만 바꿔도 저장 오류가 나던 편집 경로를 막았습니다.',

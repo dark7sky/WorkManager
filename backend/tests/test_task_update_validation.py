@@ -350,6 +350,28 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["title"], "legacy approval mismatch saved")
             self.assertEqual(updated["approval_status"], "none")
 
+    def test_update_item_repairs_oversized_legacy_task_text_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy text edit", "x" * 20050, "doing", "normal", 35, None, None,
+                     "Dana" * 40, "none", "none", "[]", "2026-07-08T10:11:46", "2026-07-08T10:11:46"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy text edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy text edit saved")
+            self.assertEqual(len(updated["description"]), 20000)
+            self.assertEqual(len(updated["assignee_name"]), 120)
+            self.assertTrue(updated["assignee_name"].startswith("Dana"))
+
 
 if __name__ == "__main__":
     unittest.main()
