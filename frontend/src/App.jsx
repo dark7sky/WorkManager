@@ -7,6 +7,7 @@ import Changelog from './screens/Changelog'
 import Performance from './screens/Performance'
 import AuditLog from './screens/AuditLog'
 import { loadTeamMembers, saveTeamMembers } from './teamMembers'
+import { loadTeamMemberCapacities, saveTeamMemberCapacity } from './teamMemberCapacity'
 import { upsertTask } from './taskState'
 
 const eventColors=['blue','purple','orange']
@@ -17,6 +18,7 @@ export default function App(){
  const [modal,setModal]=useState(null),[confirm,setConfirm]=useState(null),[toast,setToast]=useState(null),[aiText,setAiText]=useState(''),[preview,setPreview]=useState(null),[recommendations,setRecommendations]=useState([]),[aiMode,setAiMode]=useState('parse'),[aiBusy,setAiBusy]=useState(false)
  const [installPrompt,setInstallPrompt]=useState(null),toastTimer=useRef(null)
  const [teamMembers,setTeamMembers]=useState(()=>loadTeamMembers(localStorage))
+ const [teamMemberCapacities,setTeamMemberCapacities]=useState(()=>loadTeamMemberCapacities(localStorage))
  const [notificationPermission,setNotificationPermission]=useState(()=>('Notification' in window?Notification.permission:'unsupported'))
  const notify=useCallback((message,type='success')=>{setToast({message,type});clearTimeout(toastTimer.current);toastTimer.current=window.setTimeout(()=>setToast(null),4000)},[])
  const refresh=useCallback(async()=>{setDataLoading(true);setDataError('');try{const [allTasks,allEvents,today]=await Promise.all([api.tasks(),api.events(),api.today()]);setTasks(allTasks);setTodayTasks(today.tasks||[]);setEvents(allEvents.map((x,i)=>({...x,start:x.start_at,end:x.end_at,color:eventColors[i%eventColors.length]})));setTodos(today.todos||[]);setLogs(today.work_logs||[]);return true}catch(e){setDataError(e.message);notify(e.message,'error');return false}finally{setDataLoading(false)}},[notify])
@@ -37,6 +39,7 @@ export default function App(){
  const recommend=async()=>{setAiMode('recommend');setPreview(null);setAiBusy(true);try{const result=await api.aiRecommendations(5);setRecommendations(result.items||[])}catch(e){notify(e.message,'error')}finally{setAiBusy(false)}}
  const apply=()=>mutate(async()=>{await api.aiApply({action:preview.action,entity:preview.entity,id:preview.id,data:preview.data});setPreview(null);setAiText('');setPage('today')},'AI 제안을 적용했습니다.')
  const updateTeamMembers=members=>setTeamMembers(saveTeamMembers(localStorage,members))
+ const updateTeamMemberCapacity=(name,limit)=>setTeamMemberCapacities(current=>saveTeamMemberCapacity(localStorage,current,name,limit))
  if(boot.loading)return <div className="app-loading" role="status"><span className="brand-mark">W</span><span>WorkManager를 준비하고 있습니다…</span></div>
  if(!user)return <Login error={boot.error} googleEnabled={boot.google} onRetry={bootstrap}/>
  const screens={
@@ -47,9 +50,9 @@ export default function App(){
   ai:<AIAssistant text={aiText} setText={setAiText} preview={preview} recommendations={recommendations} mode={aiMode} loading={aiBusy} onPreview={analyze} onRecommend={recommend} onApply={apply}/>,
   audit:<AuditLog/>,
   changelog:<Changelog notify={notify}/>,
-  settings:<Settings theme={preference} setTheme={setPreference} tasks={tasks} teamMembers={teamMembers} setTeamMembers={updateTeamMembers} notify={notify} onDataChanged={refresh} canInstall={!!installPrompt} onInstall={async()=>{if(!installPrompt)return;await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('WorkManager 앱을 설치했습니다.');setInstallPrompt(null)}} notificationPermission={notificationPermission} onEnableNotifications={async()=>{if(!('Notification' in window)){notify('이 브라우저는 알림을 지원하지 않습니다.','error');return}const result=await Notification.requestPermission();setNotificationPermission(result);notify(result==='granted'?'오늘 업무 알림을 켰습니다.':'브라우저 설정에서 알림 권한을 허용해 주세요.',result==='granted'?'success':'error')}}/>
+  settings:<Settings theme={preference} setTheme={setPreference} tasks={tasks} teamMembers={teamMembers} teamMemberCapacities={teamMemberCapacities} setTeamMemberCapacity={updateTeamMemberCapacity} setTeamMembers={updateTeamMembers} notify={notify} onDataChanged={refresh} canInstall={!!installPrompt} onInstall={async()=>{if(!installPrompt)return;await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('WorkManager 앱을 설치했습니다.');setInstallPrompt(null)}} notificationPermission={notificationPermission} onEnableNotifications={async()=>{if(!('Notification' in window)){notify('이 브라우저는 알림을 지원하지 않습니다.','error');return}const result=await Notification.requestPermission();setNotificationPermission(result);notify(result==='granted'?'오늘 업무 알림을 켰습니다.':'브라우저 설정에서 알림 권한을 허용해 주세요.',result==='granted'?'success':'error')}}/>
  }
  return <AppShell page={page} setPage={setPage} onLogout={async()=>{try{await api.logout()}finally{setUser(null)}}} user={user}>{dataError?<div className="data-error" role="alert"><span>{dataError}</span><button onClick={refresh}>다시 시도</button></div>:null}{screens[page]}
-  {modal?.type==='task'?<Modal title={modal.task?'업무 수정':'새 업무'} onClose={()=>setModal(null)}><TaskForm key={modal.task?.id ?? 'new-task'} task={modal.task} tasks={tasks} teamMembers={teamMembers} onSave={async data=>{try{const savedTask=await (modal.task?api.updateTask(modal.task.id,data):api.createTask(data));try{await refreshTasksOnly();notify(modal.task?'업무를 수정했습니다.':'업무를 추가했습니다.')}catch(e){mergeSavedTask(savedTask);notify('업무는 저장했지만 목록을 다시 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.','error')}setModal(null);return {ok:true,error:''}}catch(e){notify(e.message,'error');return {ok:false,error:e.message}}}} onDelete={modal.task?()=>askDelete(`‘${modal.task.title}’ 업무를 삭제합니다.`,async()=>{await api.deleteTask(modal.task.id);setModal(null)},'업무를 삭제했습니다.'):null} onCancel={()=>setModal(null)}/></Modal>:null}
+  {modal?.type==='task'?<Modal title={modal.task?'업무 수정':'새 업무'} onClose={()=>setModal(null)}><TaskForm key={modal.task?.id ?? 'new-task'} task={modal.task} tasks={tasks} teamMembers={teamMembers} teamMemberCapacities={teamMemberCapacities} onSave={async data=>{try{const savedTask=await (modal.task?api.updateTask(modal.task.id,data):api.createTask(data));try{await refreshTasksOnly();notify(modal.task?'업무를 수정했습니다.':'업무를 추가했습니다.')}catch(e){mergeSavedTask(savedTask);notify('업무는 저장했지만 목록을 다시 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.','error')}setModal(null);return {ok:true,error:''}}catch(e){notify(e.message,'error');return {ok:false,error:e.message}}}} onDelete={modal.task?()=>askDelete(`‘${modal.task.title}’ 업무를 삭제합니다.`,async()=>{await api.deleteTask(modal.task.id);setModal(null)},'업무를 삭제했습니다.'):null} onCancel={()=>setModal(null)}/></Modal>:null}
   {confirm?<ConfirmDialog message={confirm.message} busy={confirm.busy} onClose={()=>setConfirm(null)} onConfirm={runDelete}/>:null}<Toast toast={toast} onClose={()=>setToast(null)}/></AppShell>
 }

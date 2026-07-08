@@ -92,7 +92,18 @@ test('summarizeAssigneeAssignmentLoad excludes the edited task and highlights du
     scheduledTasks: 2,
     peakDailyLoad: 2,
     overloadDays: 1,
+    dailyLimit: 1,
   })
+})
+
+test('summarizeAssigneeAssignmentLoad respects saved per-member daily capacity', () => {
+  const summary = summarizeAssigneeAssignmentLoad([
+    { id: 1, title: 'A', status: 'doing', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
+    { id: 2, title: 'B', status: 'todo', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
+  ], '김민준', '2026-07-07', null, 7, 3, 14, { 김민준: 2 })
+
+  assert.equal(summary.dailyLimit, 2)
+  assert.equal(summary.overloadDays, 0)
 })
 
 test('summarizeDueReminders counts overdue today and upcoming unfinished tasks', () => {
@@ -155,20 +166,22 @@ test('summarizeAssigneeCapacity counts scheduled load inside the planning window
     scheduledDays: 2,
     peakDailyLoad: 3,
     overloadDays: 1,
+    dailyLimit: 2,
   })
   assert.equal(capacity.some(row => row.assignee === '이서연' && row.scheduledTasks === 1), true)
+  assert.equal(capacity[0].dailyLimit, 2)
 })
 
 test('summarizeTeamMemberRoster keeps saved members visible with workload context', () => {
   const roster = summarizeTeamMemberRoster([
     ...tasks,
     { id: 5, title: '동시 작업', status: 'doing', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
-  ], ['박지훈', '김민준'], '2026-07-07', 14, 1)
+  ], ['박지훈', '김민준'], '2026-07-07', 14, 1, { 김민준: 2, 박지훈: 4 })
 
   assert.deepEqual(roster, [
-    { assignee: '김민준', active: 2, overdue: 0, done: 1, total: 3, scheduledTasks: 2, overloadDays: 1, peakDailyLoad: 2 },
-    { assignee: '박지훈', active: 0, overdue: 0, done: 0, total: 0, scheduledTasks: 0, overloadDays: 0, peakDailyLoad: 0 },
-    { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1, scheduledTasks: 1, overloadDays: 0, peakDailyLoad: 1 },
+    { assignee: '김민준', active: 2, overdue: 0, done: 1, total: 3, scheduledTasks: 2, overloadDays: 0, peakDailyLoad: 2, dailyLimit: 2 },
+    { assignee: '박지훈', active: 0, overdue: 0, done: 0, total: 0, scheduledTasks: 0, overloadDays: 0, peakDailyLoad: 0, dailyLimit: 4 },
+    { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1, scheduledTasks: 1, overloadDays: 0, peakDailyLoad: 1, dailyLimit: 1 },
   ])
 })
 

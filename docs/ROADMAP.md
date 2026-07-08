@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-08T15:25:21+09:00
+Last updated: 2026-07-08T15:33:02+09:00
 
 ## Commercial Schedule Management Gaps
 
@@ -9,6 +9,7 @@ Last updated: 2026-07-08T15:25:21+09:00
 - [x] Basic dependency blocker visibility in the task management screen.
 - [x] Overdue task visibility in the task management screen.
 - [ ] Team/member assignment and workload ownership.
+- [x] Saved per-member daily capacity limits for overload detection and assignment planning.
 - [x] Quick task reassignment between saved team members from Settings.
 - [x] Prevent removing a saved team member while tasks are still assigned to that name.
 - [x] Prevent inline task status/progress updates from creating new unassigned active work.

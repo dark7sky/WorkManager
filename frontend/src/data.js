@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-team-member-capacity-limits',
+    timestamp: '2026-07-08T15:33:02+09:00',
+    description: '설정 화면에서 팀원별 일일 업무 한도를 저장하고 업무 배정 현황과 등록·수정 폼의 14일 과부하 경고에 바로 반영해, 사람마다 다른 처리 가능량을 기준으로 업무 소유권과 일정 압박을 더 현실적으로 판단할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-null-legacy-text-repair',
     timestamp: '2026-07-08T15:28:57+09:00',
     description: '기존 업무의 메모나 담당자 값이 NULL 레거시 데이터로 남아 있어 변경사항 저장 시 데이터베이스 오류가 나던 문제를 수정해, 업무 화면에서 제목만 바꾸는 편집도 빈 문자열로 안전하게 복구하며 저장되도록 했습니다.',

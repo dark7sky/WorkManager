@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api'
 import { buildTaskPayload, initialTaskDateValue, validateTaskOwnership } from '../taskFormPayload'
+import { DEFAULT_TEAM_MEMBER_DAILY_CAPACITY } from '../teamMemberCapacity'
 import { summarizeAssigneeAssignmentLoad, taskAssigneeOptions } from '../taskFilters'
 import { taskParentOptions } from '../taskHierarchy'
 import TagsInput from './TagsInput'
 
-export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, onCancel, onDelete }) {
+export default function TaskForm({ task, tasks = [], teamMembers = [], teamMemberCapacities = {}, onSave, onCancel, onDelete }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
@@ -16,7 +17,7 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
   const parentOptions = taskParentOptions(tasks, task?.id)
   const assigneeOptions = taskAssigneeOptions(tasks, teamMembers)
   const assigneeListId = task?.id ? `task-assignee-options-${task.id}` : 'task-assignee-options-new'
-  const assigneeLoad = useMemo(() => summarizeAssigneeAssignmentLoad(tasks, assigneeName, today, task?.id), [tasks, assigneeName, today, task?.id])
+  const assigneeLoad = useMemo(() => summarizeAssigneeAssignmentLoad(tasks, assigneeName, today, task?.id, 7, DEFAULT_TEAM_MEMBER_DAILY_CAPACITY, 14, teamMemberCapacities), [tasks, assigneeName, today, task?.id, teamMemberCapacities])
 
   useEffect(() => {
     setSaving(false)
@@ -73,6 +74,7 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
       <span>진행 {assigneeLoad.active}건</span>
       <span>7일 내 마감 {assigneeLoad.dueSoon}건</span>
       {assigneeLoad.scheduledTasks ? <span>14일 일정 최대 {assigneeLoad.peakDailyLoad}건/일</span> : <span>14일 예정 업무 없음</span>}
+      <span>일일 한도 {assigneeLoad.dailyLimit}건</span>
       {assigneeLoad.overdue ? <em>지연 {assigneeLoad.overdue}건</em> : null}
       {assigneeLoad.overloadDays ? <em>14일 초과 {assigneeLoad.overloadDays}일</em> : null}
       {assigneeLoad.highPriority ? <em>높은 우선순위 {assigneeLoad.highPriority}건</em> : null}

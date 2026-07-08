@@ -1,6 +1,11 @@
 export const UNASSIGNED_LABEL = '미지정'
 
 export const taskAssignee = task => task.assignee_name?.trim() || UNASSIGNED_LABEL
+const assigneeDailyLimit = (capacityByAssignee, assignee, fallback) => {
+  const value = capacityByAssignee?.[assignee]
+  const number = Number(value)
+  return Number.isFinite(number) && number > 0 ? Math.round(number) : fallback
+}
 
 export const taskAssigneeOptions = (tasks, teamMembers = []) => [...new Set([
   ...teamMembers.map(name => String(name ?? '').trim()),
@@ -72,14 +77,14 @@ export const summarizeAssigneeWorkload = (tasks, todayIso) => {
   return [...rows.values()].sort((a, b) => b.total - a.total || b.active - a.active || a.assignee.localeCompare(b.assignee, 'ko'))
 }
 
-export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, excludeTaskId = null, upcomingDays = 7, dailyLimit = 3, capacityDays = 14) => {
+export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, excludeTaskId = null, upcomingDays = 7, dailyLimit = 3, capacityDays = 14, capacityByAssignee = {}) => {
   const assignee = assigneeName?.trim()
   if (!assignee || !todayIso) return null
 
   const soonLimit = addDays(todayIso, upcomingDays)
   const capacityWindowEnd = addDays(todayIso, Math.max(capacityDays, 1) - 1)
   const daily = new Map()
-  const summary = { assignee, active: 0, overdue: 0, dueSoon: 0, highPriority: 0, scheduledTasks: 0, peakDailyLoad: 0, overloadDays: 0 }
+  const summary = { assignee, active: 0, overdue: 0, dueSoon: 0, highPriority: 0, scheduledTasks: 0, peakDailyLoad: 0, overloadDays: 0, dailyLimit: assigneeDailyLimit(capacityByAssignee, assignee, dailyLimit) }
 
   for (const task of tasks) {
     if (task.id === excludeTaskId || taskAssignee(task) !== assignee || task.status === 'done') continue
@@ -101,7 +106,7 @@ export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, e
 
   const dailyLoads = [...daily.values()]
   summary.peakDailyLoad = dailyLoads.length ? Math.max(...dailyLoads) : 0
-  summary.overloadDays = dailyLoads.filter(load => load > dailyLimit).length
+  summary.overloadDays = dailyLoads.filter(load => load > summary.dailyLimit).length
 
   return summary
 }
@@ -151,7 +156,7 @@ export const summarizeBlockedTasks = tasks => {
   }
 }
 
-export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit = 3) => {
+export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit = 3, capacityByAssignee = {}) => {
   if (!todayIso || days <= 0) return []
 
   const windowEnd = addDays(todayIso, days - 1)
@@ -177,15 +182,16 @@ export const summarizeAssigneeCapacity = (tasks, todayIso, days = 14, dailyLimit
     const loads = [...row.daily.values()]
     row.scheduledDays = loads.length
     row.peakDailyLoad = loads.length ? Math.max(...loads) : 0
-    row.overloadDays = loads.filter(load => load > dailyLimit).length
+    row.dailyLimit = assigneeDailyLimit(capacityByAssignee, row.assignee, dailyLimit)
+    row.overloadDays = loads.filter(load => load > row.dailyLimit).length
     delete row.daily
     return row
   }).sort((a, b) => b.overloadDays - a.overloadDays || b.peakDailyLoad - a.peakDailyLoad || b.scheduledTasks - a.scheduledTasks || a.assignee.localeCompare(b.assignee, 'ko'))
 }
 
-export const summarizeTeamMemberRoster = (tasks, teamMembers = [], todayIso, days = 14, dailyLimit = 3) => {
+export const summarizeTeamMemberRoster = (tasks, teamMembers = [], todayIso, days = 14, dailyLimit = 3, capacityByAssignee = {}) => {
   const workload = new Map(summarizeAssigneeWorkload(tasks, todayIso).map(row => [row.assignee, row]))
-  const capacity = new Map(summarizeAssigneeCapacity(tasks, todayIso, days, dailyLimit).map(row => [row.assignee, row]))
+  const capacity = new Map(summarizeAssigneeCapacity(tasks, todayIso, days, dailyLimit, capacityByAssignee).map(row => [row.assignee, row]))
   const names = [...new Set([
     ...teamMembers.map(name => String(name ?? '').trim()),
     ...tasks.map(task => task.assignee_name?.trim()),
@@ -203,6 +209,7 @@ export const summarizeTeamMemberRoster = (tasks, teamMembers = [], todayIso, day
       scheduledTasks: capacityRow?.scheduledTasks || 0,
       overloadDays: capacityRow?.overloadDays || 0,
       peakDailyLoad: capacityRow?.peakDailyLoad || 0,
+      dailyLimit: capacityRow?.dailyLimit || assigneeDailyLimit(capacityByAssignee, name, dailyLimit),
     }
   })
 }
