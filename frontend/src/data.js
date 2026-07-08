@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-text-payload-clamp',
+    timestamp: '2026-07-08T10:17:12+09:00',
+    description: '기존 업무의 제목, 메모, 담당자 값이 화면에 남아 있는 레거시 초과 길이 텍스트여도 수정 저장 요청을 보낼 때 허용 길이로 잘라 보내, 업무 화면의 변경사항 저장 버튼이 다시 검증 오류에 막히지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-text-repair',
     timestamp: '2026-07-08T10:11:46+09:00',
     description: '기존 업무의 제목, 메모, 담당자 값이 허용 길이를 넘는 레거시 데이터여도 수정 저장 시 안전한 길이로 자동 복구해, 업무 화면에서 변경사항 저장 버튼을 눌렀을 때 다시 오류가 나지 않도록 보강했습니다.',

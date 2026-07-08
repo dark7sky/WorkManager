@@ -1,4 +1,11 @@
+const TASK_TEXT_LIMITS = {
+  title: 300,
+  description: 20000,
+  assignee_name: 120,
+}
+
 const trimField = value => String(value ?? '').trim()
+const normalizedTaskText = (field, value) => trimField(value).slice(0, TASK_TEXT_LIMITS[field] ?? undefined)
 const normalizedStatus = value => (value === 'in_progress' ? 'doing' : value) || 'todo'
 const normalizedPriority = value => (value === 'medium' ? 'normal' : value) || 'normal'
 const normalizedProgress = value => {
@@ -31,9 +38,9 @@ export const validateTaskOwnership = (data, task = null) => {
 
 export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const payload = {
-    title: trimField(data.title),
-    description: trimField(data.description),
-    assignee_name: normalizedAssigneeName(data.assignee_name),
+    title: normalizedTaskText('title', data.title),
+    description: normalizedTaskText('description', data.description),
+    assignee_name: normalizedTaskText('assignee_name', data.assignee_name),
     start_date: data.start_date || null,
     due_date: data.due_date || null,
     status: normalizedStatus(data.status),

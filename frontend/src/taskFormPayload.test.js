@@ -49,6 +49,19 @@ test('buildTaskPayload tolerates missing optional text fields during edit save',
   assert.equal(payload.assignee_name, '')
 })
 
+test('buildTaskPayload caps legacy task text fields to backend limits during edit save', () => {
+  const payload = buildTaskPayload({
+    ...baseData,
+    title: `  ${'제'.repeat(305)}  `,
+    description: ` ${'메'.repeat(20005)} `,
+    assignee_name: ` ${'김'.repeat(125)} `,
+  }, { task: { id: 1 } })
+
+  assert.equal(payload.title.length, 300)
+  assert.equal(payload.description.length, 20000)
+  assert.equal(payload.assignee_name.length, 120)
+})
+
 test('buildTaskPayload defaults missing select and invalid progress values during edit save', () => {
   const payload = buildTaskPayload({ ...baseData, status: '', priority: '', progress: 'not-a-number' }, { task: { id: 1 } })
 
