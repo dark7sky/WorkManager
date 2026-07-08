@@ -72,12 +72,14 @@ export const summarizeAssigneeWorkload = (tasks, todayIso) => {
   return [...rows.values()].sort((a, b) => b.total - a.total || b.active - a.active || a.assignee.localeCompare(b.assignee, 'ko'))
 }
 
-export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, excludeTaskId = null, upcomingDays = 7) => {
+export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, excludeTaskId = null, upcomingDays = 7, dailyLimit = 3, capacityDays = 14) => {
   const assignee = assigneeName?.trim()
   if (!assignee || !todayIso) return null
 
   const soonLimit = addDays(todayIso, upcomingDays)
-  const summary = { assignee, active: 0, overdue: 0, dueSoon: 0, highPriority: 0 }
+  const capacityWindowEnd = addDays(todayIso, Math.max(capacityDays, 1) - 1)
+  const daily = new Map()
+  const summary = { assignee, active: 0, overdue: 0, dueSoon: 0, highPriority: 0, scheduledTasks: 0, peakDailyLoad: 0, overloadDays: 0 }
 
   for (const task of tasks) {
     if (task.id === excludeTaskId || taskAssignee(task) !== assignee || task.status === 'done') continue
@@ -86,7 +88,20 @@ export const summarizeAssigneeAssignmentLoad = (tasks, assigneeName, todayIso, e
     if (isTaskOverdue(task, todayIso)) summary.overdue += 1
     else if (task.due_date && task.due_date <= soonLimit) summary.dueSoon += 1
     if (task.priority === 'high') summary.highPriority += 1
+
+    const start = task.start_date || task.due_date
+    const end = task.due_date || task.start_date
+    if (!start || !end || end < todayIso || start > capacityWindowEnd) continue
+
+    summary.scheduledTasks += 1
+    for (const day of dateRange(start < todayIso ? todayIso : start, end > capacityWindowEnd ? capacityWindowEnd : end)) {
+      daily.set(day, (daily.get(day) || 0) + 1)
+    }
   }
+
+  const dailyLoads = [...daily.values()]
+  summary.peakDailyLoad = dailyLoads.length ? Math.max(...dailyLoads) : 0
+  summary.overloadDays = dailyLoads.filter(load => load > dailyLimit).length
 
   return summary
 }

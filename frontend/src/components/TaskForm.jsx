@@ -68,11 +68,13 @@ export default function TaskForm({ task, tasks = [], teamMembers = [], onSave, o
     <label className="span-2">업무 제목<input name="title" required autoFocus defaultValue={task?.title || ''}/></label>
     <label>담당자<input name="assignee_name" list={assigneeListId} maxLength="120" value={assigneeName} onChange={e=>setAssigneeName(e.target.value)} placeholder="담당자 이름"/><datalist id={assigneeListId}>{assigneeOptions.map(name => <option key={name} value={name}/>)}</datalist></label>
     <label>시작일<input name="start_date" type="date" defaultValue={initialTaskDateValue(task, 'start_date', today)}/></label>
-    {assigneeLoad ? <div className={`assignee-load span-2 ${assigneeLoad.overdue ? 'has-risk' : ''}`} aria-live="polite">
+    {assigneeLoad ? <div className={`assignee-load span-2 ${assigneeLoad.overdue || assigneeLoad.overloadDays ? 'has-risk' : ''}`} aria-live="polite">
       <strong>{assigneeLoad.assignee} 배정 현황</strong>
       <span>진행 {assigneeLoad.active}건</span>
       <span>7일 내 마감 {assigneeLoad.dueSoon}건</span>
+      {assigneeLoad.scheduledTasks ? <span>14일 일정 최대 {assigneeLoad.peakDailyLoad}건/일</span> : <span>14일 예정 업무 없음</span>}
       {assigneeLoad.overdue ? <em>지연 {assigneeLoad.overdue}건</em> : null}
+      {assigneeLoad.overloadDays ? <em>14일 초과 {assigneeLoad.overloadDays}일</em> : null}
       {assigneeLoad.highPriority ? <em>높은 우선순위 {assigneeLoad.highPriority}건</em> : null}
     </div> : null}
     <label>완료 예정일<input name="due_date" type="date" defaultValue={initialTaskDateValue(task, 'due_date', today)}/></label>

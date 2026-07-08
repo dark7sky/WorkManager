@@ -73,18 +73,25 @@ test('summarizeAssigneeWorkload counts active overdue and completed work by owne
   ])
 })
 
-test('summarizeAssigneeAssignmentLoad excludes the edited task and highlights due risk', () => {
+test('summarizeAssigneeAssignmentLoad excludes the edited task and highlights due and schedule risk', () => {
   const summary = summarizeAssigneeAssignmentLoad([
-    ...tasks,
-    { id: 5, title: '긴급 검토', status: 'doing', due_date: '2026-07-10', priority: 'high', assignee_name: '김민준' },
-  ], ' 김민준 ', '2026-07-07', 1)
+    { ...tasks[0], start_date: '2026-07-07', due_date: '2026-07-08' },
+    tasks[1],
+    tasks[2],
+    tasks[3],
+    { id: 5, title: '긴급 검토', status: 'doing', start_date: '2026-07-08', due_date: '2026-07-10', priority: 'high', assignee_name: '김민준' },
+    { id: 6, title: '후속 준비', status: 'todo', start_date: '2026-07-08', due_date: '2026-07-08', priority: 'normal', assignee_name: '김민준' },
+  ], ' 김민준 ', '2026-07-07', 1, 7, 1)
 
   assert.deepEqual(summary, {
     assignee: '김민준',
-    active: 1,
+    active: 2,
     overdue: 0,
-    dueSoon: 1,
+    dueSoon: 2,
     highPriority: 1,
+    scheduledTasks: 2,
+    peakDailyLoad: 2,
+    overloadDays: 1,
   })
 })
 

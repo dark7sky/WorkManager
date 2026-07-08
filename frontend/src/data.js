@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-form-assignee-capacity-preview',
+    timestamp: '2026-07-08T15:25:21+09:00',
+    description: '업무 등록·수정 화면의 담당자 배정 현황에 14일 일정 최대 부하와 초과 일수를 함께 보여줘, 저장 전에 특정 팀원에게 일이 과하게 몰리는지 바로 판단할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-task-save-refresh-decoupling',
     timestamp: '2026-07-08T15:20:31+09:00',
     description: '업무 화면에서 기존 업무를 저장한 뒤 전체 오늘/일정 데이터를 함께 다시 불러오다가 다른 섹션 요청이 실패하면 저장 자체가 실패한 것처럼 보이던 문제를 줄이기 위해, 저장 후에는 업무 목록만 다시 불러오고 그마저 실패하면 방금 저장한 업무를 목록에 바로 반영하도록 보강했습니다.',
