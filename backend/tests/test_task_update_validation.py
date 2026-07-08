@@ -66,6 +66,32 @@ class TaskUpdateValidationTests(unittest.TestCase):
         self.assertIsNone(data["due_date"])
         self.assertIsNone(data["recurrence_rule"])
 
+    def test_merged_task_validation_treats_blank_legacy_dates_as_none(self):
+        from app.main import MODELS, merged_resource_for_validation
+
+        existing = {
+            "title": "legacy blank dates",
+            "description": "",
+            "status": "doing",
+            "priority": "normal",
+            "progress": 20,
+            "start_date": "",
+            "due_date": "",
+            "assignee_name": "담당자",
+            "approval_status": "none",
+            "schedule_approval_status": "none",
+            "tags": "[]",
+            "recurrence_rule": None,
+            "parent_id": None,
+            "dependency_ids": "[]",
+        }
+
+        merged = merged_resource_for_validation("tasks", existing, {"title": "legacy blank dates saved"})
+
+        MODELS["tasks"].model_validate(merged)
+        self.assertIsNone(merged["start_date"])
+        self.assertIsNone(merged["due_date"])
+
     def test_task_parent_can_move_and_promote_to_top_level(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

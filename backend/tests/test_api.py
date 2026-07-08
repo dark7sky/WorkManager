@@ -164,6 +164,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_blank_legacy_task_dates_do_not_break_edit_save(self, *_):
+        from app.db import connection
+        with connection() as c:
+            cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                assignee_name,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                ("sub-a", "legacy blank dates", "", "doing", "normal", 25, "", "",
+                 "Dana", "[]", "2026-07-08T10:22:56", "2026-07-08T10:22:56"))
+            task_id = cur.lastrowid
+
+        updated = self.client(self.token_a).patch(f"/api/tasks/{task_id}", json={"title": "legacy blank dates saved"})
+
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["title"], "legacy blank dates saved")
+        self.assertIsNone(updated.json()["start_date"])
+        self.assertIsNone(updated.json()["due_date"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_audit_logs_are_user_scoped_and_include_metadata(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "audited task"}).json()

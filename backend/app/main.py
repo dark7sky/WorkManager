@@ -314,7 +314,7 @@ def normalize_legacy_task_progress(value):
 
 def normalize_legacy_task_date(value):
     if value in (None, ""):
-        return value
+        return None
     try:
         return date.fromisoformat(str(value)).isoformat()
     except (TypeError, ValueError):
