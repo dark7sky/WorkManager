@@ -270,6 +270,13 @@ class FeatureRequestAdminPayload(StrictPayload):
     description: str | None = Field(None, max_length=10000)
 
 
+class AISettingsPayload(StrictPayload):
+    provider: Literal["openai", "gemini"] | None = None
+    api_key: str | None = Field(None, max_length=5000)
+    base_url: str | None = Field(None, max_length=2000)
+    model: str | None = Field(None, max_length=120)
+
+
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
@@ -1006,12 +1013,31 @@ async def ai_parse(payload: dict = Body(...), user=Depends(require_user)):
     if not text or len(text) > 10000:
         raise HTTPException(422, "text is required and must be at most 10000 characters")
     context = rows("tasks", user, "WHERE status!='done' ORDER BY updated_at DESC LIMIT 20")
-    return await ai.parse_text(text, context)
+    return await ai.parse_text(text, context, user)
 
 
 @app.get("/api/ai/status")
 def ai_status(user=Depends(require_user)):
-    return ai.status()
+    return ai.status(user)
+
+
+@app.get("/api/settings/ai")
+def ai_settings(user=Depends(require_user)):
+    return ai.status(user)
+
+
+@app.put("/api/settings/ai")
+def ai_settings_update(payload: dict = Body(...), user=Depends(require_user)):
+    try:
+        model = AISettingsPayload.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+    try:
+        return ai.save_user_config(user, model.model_dump(exclude_unset=True))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(500, str(exc))
 
 
 @app.post("/api/ai/tag-recommendations")
@@ -1024,7 +1050,7 @@ async def ai_tag_recommendations(payload: dict = Body(...), user=Depends(require
     for table in CONFIG:
         for item in rows(table, user):
             existing.extend(item.get("tags") or [])
-    tags, source = await ai.smart_tag_recommendations(text, list(dict.fromkeys(existing)))
+    tags, source = await ai.smart_tag_recommendations(text, list(dict.fromkeys(existing)), user_id=user)
     return {"tags": tags, "preview_only": True, "source": source}
 
 
@@ -1033,7 +1059,7 @@ async def ai_period_summary(start_date: str | None = None, end_date: str | None 
                       tags: str | None = None, user=Depends(require_user)):
     enforce_rate(user, "ai", 20, 60)
     report = achievements(start_date, end_date, tags, user)
-    return await ai.smart_period_summary(report)
+    return await ai.smart_period_summary(report, user)
 
 
 @app.get("/api/ai/project-suggestions")
@@ -1047,7 +1073,7 @@ async def ai_project_suggestions(start_date: str | None = None, end_date: str | 
     wanted = (tags or "").split(",")
     tasks = rows("tasks", user, tags=wanted)
     logs = rows("work_logs", user, "WHERE log_date BETWEEN ? AND ? ORDER BY created_at DESC LIMIT 200", (start, end), tags=wanted)
-    items, source = await ai.smart_project_suggestions(tasks, logs, max(1, min(limit, 20)))
+    items, source = await ai.smart_project_suggestions(tasks, logs, max(1, min(limit, 20)), user)
     return {"items": items, "preview_only": True, "source": source}
 
 

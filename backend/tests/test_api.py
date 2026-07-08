@@ -258,6 +258,29 @@ class ApiTests(unittest.TestCase):
         self.assertIn(second["id"], {item["id"] for item in after["requests"]})
         entry = next(item for item in after["entries"] if item["feature_request_id"] == first["id"])
         self.assertEqual(entry["request_content"], "계층형 보드를 개선해 주세요")
+
+    def test_ai_settings_are_user_specific_and_support_gemini(self):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        saved = a.put("/api/settings/ai", json={
+            "provider": "gemini",
+            "api_key": "gemini-secret",
+            "model": "gemini-3.5-flash",
+        })
+        self.assertEqual(saved.status_code, 200, saved.text)
+        body = saved.json()
+        self.assertEqual(body["provider"], "gemini")
+        self.assertEqual(body["provider_name"], "Gemini")
+        self.assertTrue(body["api_key_set"])
+        self.assertNotIn("gemini-secret", saved.text)
+
+        status = a.get("/api/settings/ai")
+        self.assertEqual(status.status_code, 200, status.text)
+        self.assertEqual(status.json()["provider"], "gemini")
+        self.assertTrue(status.json()["configured"])
+
+        other = b.get("/api/settings/ai")
+        self.assertEqual(other.status_code, 200, other.text)
+        self.assertNotEqual(other.json()["provider"], "gemini")
         self.assertEqual(entry["requested_at"], first["created_at"])
         self.assertEqual(entry["description"], "계층 이동과 표시를 개선했습니다.")
 

@@ -1,5 +1,7 @@
 """AI adapter with validated output and a deterministic private fallback."""
 
+import base64
+import hashlib
 import json
 import os
 import re
@@ -7,9 +9,161 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 import httpx
+from cryptography.fernet import Fernet, InvalidToken
 
 ENTITIES = {"task", "event", "todo", "work_log"}
 ACTIONS = {"create", "update"}
+SUPPORTED_PROVIDERS = {"openai", "gemini"}
+DEFAULT_PROVIDER = "openai"
+DEFAULT_BASE_URLS = {
+    "openai": "https://api.openai.com/v1",
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/",
+}
+DEFAULT_MODELS = {
+    "openai": "gpt-5-mini",
+    "gemini": "gemini-3.5-flash",
+}
+AI_SETTING_KEYS = {
+    "provider": "ai_provider",
+    "api_key": "ai_api_key",
+    "base_url": "ai_base_url",
+    "model": "ai_model",
+}
+
+
+def _fernet():
+    secret = os.getenv("APP_SECRET", "")
+    if not secret:
+        raise RuntimeError("APP_SECRET is required for AI settings storage")
+    return Fernet(base64.urlsafe_b64encode(hashlib.sha256(secret.encode()).digest()))
+
+
+def _enc(value: str | None):
+    return _fernet().encrypt(value.encode()).decode() if value else None
+
+
+def _dec(value: str | None):
+    if not value:
+        return None
+    try:
+        return _fernet().decrypt(value.encode()).decode()
+    except InvalidToken as exc:
+        raise RuntimeError("Stored AI settings cannot be decrypted. Check APP_SECRET.") from exc
+
+
+def _normalize_provider(value: str | None):
+    provider = (value or DEFAULT_PROVIDER).strip().lower()
+    return provider if provider in SUPPORTED_PROVIDERS else DEFAULT_PROVIDER
+
+
+def _default_base_url(provider: str):
+    return DEFAULT_BASE_URLS.get(provider, DEFAULT_BASE_URLS[DEFAULT_PROVIDER])
+
+
+def _default_model(provider: str):
+    return DEFAULT_MODELS.get(provider, DEFAULT_MODELS[DEFAULT_PROVIDER])
+
+
+def _load_setting(user_id: str, key: str):
+    from .db import connection
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, key)).fetchone()
+    return row["value"] if row else None
+
+
+def _store_settings(user_id: str, values: dict[str, str | None]):
+    from .db import connection
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    with connection() as c:
+        for key, value in values.items():
+            if value is None:
+                c.execute("DELETE FROM app_settings WHERE user_id=? AND key=?", (user_id, key))
+            else:
+                c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+                  ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                          (user_id, key, value, timestamp))
+
+
+def get_user_config(user_id: str):
+    stored_provider = _load_setting(user_id, AI_SETTING_KEYS["provider"])
+    if stored_provider:
+        provider = _normalize_provider(stored_provider)
+        api_key = _dec(_load_setting(user_id, AI_SETTING_KEYS["api_key"]))
+        base_url = (_load_setting(user_id, AI_SETTING_KEYS["base_url"]) or "").strip() or _default_base_url(provider)
+        model = (_load_setting(user_id, AI_SETTING_KEYS["model"]) or "").strip() or _default_model(provider)
+        return {
+            "provider": provider,
+            "api_key": api_key,
+            "base_url": base_url,
+            "model": model,
+            "source": "user",
+            "configured": bool(api_key),
+            "api_key_set": bool(api_key),
+        }
+    provider = _normalize_provider(os.getenv("AI_PROVIDER") or DEFAULT_PROVIDER)
+    api_key = os.getenv("AI_API_KEY", "").strip()
+    base_url = os.getenv("AI_BASE_URL", "").strip() or _default_base_url(provider)
+    model = os.getenv("AI_MODEL", "").strip() or _default_model(provider)
+    return {
+        "provider": provider,
+        "api_key": api_key,
+        "base_url": base_url,
+        "model": model,
+        "source": "environment",
+        "configured": bool(api_key),
+        "api_key_set": bool(api_key),
+    }
+
+
+def save_user_config(user_id: str, payload: dict[str, Any]):
+    current = get_user_config(user_id)
+    provider = _normalize_provider(payload.get("provider") or current["provider"])
+    provider_changed = provider != current["provider"]
+    updates: dict[str, str | None] = {AI_SETTING_KEYS["provider"]: provider}
+
+    if "api_key" in payload:
+        api_key = str(payload.get("api_key") or "").strip()
+        if api_key:
+            updates[AI_SETTING_KEYS["api_key"]] = _enc(api_key)
+        elif current["source"] == "user" and current.get("api_key_set"):
+            updates[AI_SETTING_KEYS["api_key"]] = _load_setting(user_id, AI_SETTING_KEYS["api_key"])
+        else:
+            raise ValueError("API key is required")
+    elif current["source"] != "user" or not current.get("api_key_set"):
+        raise ValueError("API key is required")
+
+    if "base_url" in payload:
+        base_url = str(payload.get("base_url") or "").strip() or _default_base_url(provider)
+        updates[AI_SETTING_KEYS["base_url"]] = base_url
+    elif current["source"] != "user" or provider_changed:
+        updates[AI_SETTING_KEYS["base_url"]] = _default_base_url(provider)
+
+    if "model" in payload:
+        model = str(payload.get("model") or "").strip() or _default_model(provider)
+        updates[AI_SETTING_KEYS["model"]] = model
+    elif current["source"] != "user" or provider_changed:
+        updates[AI_SETTING_KEYS["model"]] = _default_model(provider)
+
+    _store_settings(user_id, updates)
+    return get_user_config(user_id)
+
+
+def status(user_id: str):
+    config = get_user_config(user_id)
+    provider_name = "OpenAI" if config["provider"] == "openai" else "Gemini"
+    return {
+        "configured": config["configured"],
+        "enabled": config["configured"],
+        "mode": "remote-ai" if config["configured"] else "local-rules",
+        "provider": config["provider"],
+        "provider_name": provider_name,
+        "model": config["model"],
+        "base_url": config["base_url"],
+        "source": config["source"],
+        "source_label": "계정 설정" if config["source"] == "user" else "서버 기본값",
+        "api_key_set": config["api_key_set"],
+        "message": f"{provider_name} 연결됨" if config["configured"] else f"{provider_name} 키 필요",
+    }
 
 
 def _day(text: str, today: date | None = None) -> str:
@@ -99,15 +253,9 @@ def _normalize(result: Any) -> dict[str, Any]:
     return result
 
 
-def status() -> dict[str, Any]:
-    enabled = bool(os.getenv("AI_API_KEY", "").strip())
-    return {"configured": enabled, "mode": "remote-ai" if enabled else "local-rules",
-            "model": os.getenv("AI_MODEL", "gpt-5-mini") if enabled else None,
-            "base_url": os.getenv("AI_BASE_URL", "https://api.openai.com/v1") if enabled else None}
-
-
-async def parse_text(text: str, context: list[dict] | None = None) -> dict[str, Any]:
-    key = os.getenv("AI_API_KEY", "").strip()
+async def parse_text(text: str, context: list[dict] | None = None, user_id: str | None = None) -> dict[str, Any]:
+    config = get_user_config(user_id) if user_id else get_user_config("__legacy__")
+    key = config["api_key"]
     if not key:
         return rule_parse(text)
     system = (
@@ -120,8 +268,8 @@ async def parse_text(text: str, context: list[dict] | None = None) -> dict[str, 
     )
     prompt = {"today": date.today().isoformat(), "timezone": os.getenv("TZ", "Asia/Seoul"),
               "input": text, "recent_tasks": (context or [])[:20]}
-    base = os.getenv("AI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-    body = {"model": os.getenv("AI_MODEL", "gpt-5-mini"),
+    base = config["base_url"].rstrip("/")
+    body = {"model": config["model"],
             "response_format": {"type": "json_object"},
             "messages": [{"role": "system", "content": system},
                          {"role": "user", "content": json.dumps(prompt, ensure_ascii=False, default=str)}]}
@@ -225,25 +373,27 @@ def project_progress_suggestions(tasks: list[dict], logs: list[dict], limit: int
     return suggestions
 
 
-async def _remote_json(system: str, payload: dict) -> dict:
-    key = os.getenv("AI_API_KEY", "").strip()
+async def _remote_json(system: str, payload: dict, user_id: str | None = None) -> dict:
+    config = get_user_config(user_id) if user_id else get_user_config("__legacy__")
+    key = config["api_key"]
     if not key:
         raise RuntimeError("AI is not configured")
-    body = {"model": os.getenv("AI_MODEL", "gpt-5-mini"), "response_format": {"type": "json_object"},
+    body = {"model": config["model"], "response_format": {"type": "json_object"},
             "messages": [{"role": "system", "content": system},
                          {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]}
     async with httpx.AsyncClient(timeout=float(os.getenv("AI_TIMEOUT_SECONDS", "30"))) as client:
-        response = await client.post(os.getenv("AI_BASE_URL", "https://api.openai.com/v1").rstrip("/") + "/chat/completions",
+        response = await client.post(config["base_url"].rstrip("/") + "/chat/completions",
                                      json=body, headers={"Authorization": f"Bearer {key}"})
         response.raise_for_status()
     return json.loads(response.json()["choices"][0]["message"]["content"])
 
 
-async def smart_tag_recommendations(text, existing_tags=None, limit=5):
+async def smart_tag_recommendations(text, existing_tags=None, limit=5, user_id: str | None = None):
     fallback = tag_recommendations(text, existing_tags, limit)
     try:
         result = await _remote_json("Suggest concise Korean work tags. Return JSON {tags:[string]}. No other keys.",
-                                    {"text": text[:3000], "allowed_existing_tags": list(existing_tags or [])[:100], "limit": limit})
+                                    {"text": text[:3000], "allowed_existing_tags": list(existing_tags or [])[:100], "limit": limit},
+                                    user_id)
         tags = result.get("tags")
         if not isinstance(tags, list):
             raise ValueError
@@ -255,7 +405,7 @@ async def smart_tag_recommendations(text, existing_tags=None, limit=5):
         return fallback, "private-rules"
 
 
-async def smart_period_summary(report):
+async def smart_period_summary(report, user_id: str | None = None):
     fallback = period_summary(report)
     try:
         result = await _remote_json(
@@ -264,7 +414,8 @@ async def smart_period_summary(report):
              "activities": [{"date": item.get("date"), "type": item.get("type"),
                               "text": str(item.get("title") or item.get("content") or "")[:500],
                               "tags": (item.get("tags") or [])[:10]}
-                             for item in report.get("timeline", [])[:100]]})
+                             for item in report.get("timeline", [])[:100]]},
+            user_id)
         headline, narrative = result.get("headline"), result.get("narrative")
         if not isinstance(headline, str) or not isinstance(narrative, str) or len(headline) > 200 or len(narrative) > 2000:
             raise ValueError
@@ -273,7 +424,7 @@ async def smart_period_summary(report):
         return fallback
 
 
-async def smart_project_suggestions(tasks, logs, limit=5):
+async def smart_project_suggestions(tasks, logs, limit=5, user_id: str | None = None):
     fallback = project_progress_suggestions(tasks, logs, limit)
     allowed = {int(x["id"]) for x in tasks}
     minimal_tasks = [{k: x.get(k) for k in ("id", "title", "status", "progress", "due_date", "priority", "tags")} for x in tasks[:50]]
@@ -283,7 +434,8 @@ async def smart_project_suggestions(tasks, logs, limit=5):
             {"today": date.today().isoformat(), "tasks": minimal_tasks,
              "recent_activity": [{"task_id": x.get("task_id"), "log_date": x.get("log_date"),
                                   "content": str(x.get("content") or "")[:500], "tags": (x.get("tags") or [])[:10]}
-                                 for x in logs[:100]], "limit": limit})
+                                 for x in logs[:100]], "limit": limit},
+            user_id)
         if not isinstance(result.get("items"), list):
             raise ValueError
         output = []
