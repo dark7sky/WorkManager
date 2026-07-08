@@ -200,8 +200,9 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_audit_logs_are_user_scoped_and_include_metadata(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        task = a.post("/api/tasks", json={"title": "audited task"}).json()
-        a.patch(f"/api/tasks/{task['id']}", json={"progress": 40})
+        task = a.post("/api/tasks", json={"title": "audited task", "assignee_name": "Ava"}).json()
+        updated = a.patch(f"/api/tasks/{task['id']}", json={"progress": 40})
+        self.assertEqual(updated.status_code, 200, updated.text)
         logs = a.get("/api/audit-logs?limit=10")
         self.assertEqual(logs.status_code, 200, logs.text)
         self.assertTrue(any(x["action"] == "update" and x["entity_type"] == "tasks" and "progress" in x["metadata"].get("fields", []) for x in logs.json()["items"]))
