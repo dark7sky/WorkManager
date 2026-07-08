@@ -276,6 +276,7 @@ VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
 VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "monthly"}
 TASK_TEXT_LIMITS = {"title": 300, "description": 20000, "assignee_name": 120}
+TASK_DEPENDENCY_LIMIT = 100
 
 
 def normalize_legacy_optional_task_id(value):
@@ -343,6 +344,8 @@ def normalize_legacy_json_array_field(key, value):
             if number > 0 and number not in seen:
                 seen.add(number)
                 normalized.append(number)
+                if len(normalized) >= TASK_DEPENDENCY_LIMIT:
+                    break
         return sorted(normalized)
     if key == "tags":
         normalized = []
