@@ -62,6 +62,15 @@ test('buildTaskPayload caps legacy task text fields to backend limits during edi
   assert.equal(payload.assignee_name.length, 120)
 })
 
+test('buildTaskPayload normalizes legacy task tags during edit save', () => {
+  const payload = buildTaskPayload(baseData, {
+    tags: ['  운영  ', '#운영', ` ${'태'.repeat(60)} `, '', '  '],
+    task: { id: 1 },
+  })
+
+  assert.deepEqual(payload.tags, ['운영', '태'.repeat(50)])
+})
+
 test('buildTaskPayload defaults missing select and invalid progress values during edit save', () => {
   const payload = buildTaskPayload({ ...baseData, status: '', priority: '', progress: 'not-a-number' }, { task: { id: 1 } })
 

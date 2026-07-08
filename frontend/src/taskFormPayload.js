@@ -3,9 +3,22 @@ const TASK_TEXT_LIMITS = {
   description: 20000,
   assignee_name: 120,
 }
+const TASK_TAG_LIMIT = 50
 
 const trimField = value => String(value ?? '').trim()
 const normalizedTaskText = (field, value) => trimField(value).slice(0, TASK_TEXT_LIMITS[field] ?? undefined)
+const normalizedTaskTags = tags => {
+  const cleaned = []
+  const seen = new Set()
+  for (const raw of Array.isArray(tags) ? tags : []) {
+    const value = trimField(raw).replace(/^#/, '').slice(0, TASK_TAG_LIMIT)
+    const key = value.toLocaleLowerCase('ko-KR')
+    if (!value || seen.has(key)) continue
+    seen.add(key)
+    cleaned.push(value)
+  }
+  return cleaned
+}
 const normalizedStatus = value => (value === 'in_progress' ? 'doing' : value) || 'todo'
 const normalizedPriority = value => (value === 'medium' ? 'normal' : value) || 'normal'
 const normalizedProgress = value => {
@@ -47,7 +60,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     priority: normalizedPriority(data.priority),
     progress: normalizedProgress(data.progress),
     recurrence_rule: data.recurrence_rule || null,
-    tags,
+    tags: normalizedTaskTags(tags),
   }
 
   const taskId = normalizedOptionalId(task?.id)
