@@ -264,7 +264,7 @@ class ApiTests(unittest.TestCase):
         saved = a.put("/api/settings/ai", json={
             "provider": "gemini",
             "api_key": "gemini-secret",
-            "model": "gemini-3.5-flash",
+            "model": "gemini-2.5-flash",
         })
         self.assertEqual(saved.status_code, 200, saved.text)
         body = saved.json()
@@ -273,16 +273,37 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(body["api_key_set"])
         self.assertNotIn("gemini-secret", saved.text)
 
-        status = a.get("/api/settings/ai")
+        status = a.get("/api/settings/ai?provider=gemini")
         self.assertEqual(status.status_code, 200, status.text)
         self.assertEqual(status.json()["provider"], "gemini")
         self.assertTrue(status.json()["configured"])
+        self.assertTrue(status.json()["saved_api_key"])
+
+        updated = a.put("/api/settings/ai", json={
+            "provider": "gemini",
+            "model": "gemini-3.5-flash",
+            "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        })
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertTrue(updated.json()["api_key_set"])
+        self.assertEqual(updated.json()["model"], "gemini-3.5-flash")
+
+        switched = a.put("/api/settings/ai", json={
+            "provider": "openai",
+            "api_key": "openai-secret",
+            "model": "gpt-5-mini",
+        })
+        self.assertEqual(switched.status_code, 200, switched.text)
+        self.assertEqual(switched.json()["provider"], "openai")
+
+        gemini = a.get("/api/settings/ai?provider=gemini")
+        self.assertEqual(gemini.status_code, 200, gemini.text)
+        self.assertEqual(gemini.json()["provider"], "gemini")
+        self.assertTrue(gemini.json()["api_key_set"])
 
         other = b.get("/api/settings/ai")
         self.assertEqual(other.status_code, 200, other.text)
         self.assertNotEqual(other.json()["provider"], "gemini")
-        self.assertEqual(entry["requested_at"], first["created_at"])
-        self.assertEqual(entry["description"], "계층 이동과 표시를 개선했습니다.")
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

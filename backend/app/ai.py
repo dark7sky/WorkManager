@@ -24,7 +24,7 @@ DEFAULT_MODELS = {
     "gemini": "gemini-3.5-flash",
 }
 AI_SETTING_KEYS = {
-    "provider": "ai_provider",
+    "selected_provider": "ai_provider",
     "api_key": "ai_api_key",
     "base_url": "ai_base_url",
     "model": "ai_model",
@@ -64,6 +64,51 @@ def _default_model(provider: str):
     return DEFAULT_MODELS.get(provider, DEFAULT_MODELS[DEFAULT_PROVIDER])
 
 
+def _provider_setting_key(provider: str, field: str):
+    return f"ai_{provider}_{field}"
+
+
+def _load_provider_settings(user_id: str, provider: str):
+    provider = _normalize_provider(provider)
+    selected_provider = _normalize_provider(_load_setting(user_id, AI_SETTING_KEYS["selected_provider"]) or os.getenv("AI_PROVIDER") or DEFAULT_PROVIDER)
+    legacy_provider = selected_provider
+    stored_api_key = _dec(_load_setting(user_id, _provider_setting_key(provider, "api_key")))
+    stored_base_url = (_load_setting(user_id, _provider_setting_key(provider, "base_url")) or "").strip()
+    stored_model = (_load_setting(user_id, _provider_setting_key(provider, "model")) or "").strip()
+    legacy_api_key = _dec(_load_setting(user_id, AI_SETTING_KEYS["api_key"])) if provider == legacy_provider else None
+    legacy_base_url = (_load_setting(user_id, AI_SETTING_KEYS["base_url"]) or "").strip() if provider == legacy_provider else ""
+    legacy_model = (_load_setting(user_id, AI_SETTING_KEYS["model"]) or "").strip() if provider == legacy_provider else ""
+    env_provider = _normalize_provider(os.getenv("AI_PROVIDER") or DEFAULT_PROVIDER)
+    env_api_key = os.getenv("AI_API_KEY", "").strip() if provider == env_provider else ""
+    env_base_url = os.getenv("AI_BASE_URL", "").strip() if provider == env_provider else ""
+    env_model = os.getenv("AI_MODEL", "").strip() if provider == env_provider else ""
+    effective_api_key = stored_api_key or legacy_api_key or env_api_key
+    effective_base_url = stored_base_url or legacy_base_url or env_base_url or _default_base_url(provider)
+    effective_model = stored_model or legacy_model or env_model or _default_model(provider)
+    has_user_settings = bool(stored_api_key or stored_base_url or stored_model or legacy_api_key or legacy_base_url or legacy_model)
+    api_key_source = "user" if stored_api_key or legacy_api_key else "environment" if env_api_key else None
+    return {
+        "provider": provider,
+        "api_key": effective_api_key,
+        "base_url": effective_base_url,
+        "model": effective_model,
+        "has_user_settings": has_user_settings,
+        "stored_api_key": stored_api_key,
+        "stored_base_url": stored_base_url,
+        "stored_model": stored_model,
+        "legacy_api_key": legacy_api_key,
+        "legacy_base_url": legacy_base_url,
+        "legacy_model": legacy_model,
+        "api_key_set": bool(effective_api_key),
+        "api_key_source": api_key_source,
+    }
+def _selected_provider(user_id: str):
+    stored = _load_setting(user_id, AI_SETTING_KEYS["selected_provider"])
+    if stored:
+        return _normalize_provider(stored)
+    return _normalize_provider(os.getenv("AI_PROVIDER") or DEFAULT_PROVIDER)
+
+
 def _load_setting(user_id: str, key: str):
     from .db import connection
     with connection() as c:
@@ -84,72 +129,72 @@ def _store_settings(user_id: str, values: dict[str, str | None]):
                           (user_id, key, value, timestamp))
 
 
-def get_user_config(user_id: str):
-    stored_provider = _load_setting(user_id, AI_SETTING_KEYS["provider"])
-    if stored_provider:
-        provider = _normalize_provider(stored_provider)
-        api_key = _dec(_load_setting(user_id, AI_SETTING_KEYS["api_key"]))
-        base_url = (_load_setting(user_id, AI_SETTING_KEYS["base_url"]) or "").strip() or _default_base_url(provider)
-        model = (_load_setting(user_id, AI_SETTING_KEYS["model"]) or "").strip() or _default_model(provider)
-        return {
-            "provider": provider,
-            "api_key": api_key,
-            "base_url": base_url,
-            "model": model,
-            "source": "user",
-            "configured": bool(api_key),
-            "api_key_set": bool(api_key),
-        }
-    provider = _normalize_provider(os.getenv("AI_PROVIDER") or DEFAULT_PROVIDER)
-    api_key = os.getenv("AI_API_KEY", "").strip()
-    base_url = os.getenv("AI_BASE_URL", "").strip() or _default_base_url(provider)
-    model = os.getenv("AI_MODEL", "").strip() or _default_model(provider)
+def get_user_config(user_id: str, provider: str | None = None):
+    provider = _normalize_provider(provider or _selected_provider(user_id))
+    user_settings = _load_provider_settings(user_id, provider)
+    api_key = user_settings["api_key"]
+    base_url = user_settings["base_url"]
+    model = user_settings["model"]
+    source = "user" if user_settings["has_user_settings"] else "environment"
     return {
         "provider": provider,
         "api_key": api_key,
         "base_url": base_url,
         "model": model,
-        "source": "environment",
+        "source": source,
         "configured": bool(api_key),
         "api_key_set": bool(api_key),
+        "saved_api_key": bool(user_settings["stored_api_key"] or user_settings["legacy_api_key"]),
+        "has_user_settings": user_settings["has_user_settings"],
+        "selected_provider": _selected_provider(user_id),
     }
 
 
 def save_user_config(user_id: str, payload: dict[str, Any]):
-    current = get_user_config(user_id)
-    provider = _normalize_provider(payload.get("provider") or current["provider"])
-    provider_changed = provider != current["provider"]
-    updates: dict[str, str | None] = {AI_SETTING_KEYS["provider"]: provider}
+    current = get_user_config(user_id, payload.get("provider"))
+    provider = current["provider"]
+    provider_settings = _load_provider_settings(user_id, provider)
+    selected_provider = _normalize_provider(payload.get("provider") or provider)
+    updates: dict[str, str | None] = {AI_SETTING_KEYS["selected_provider"]: selected_provider}
 
-    if "api_key" in payload:
-        api_key = str(payload.get("api_key") or "").strip()
-        if api_key:
-            updates[AI_SETTING_KEYS["api_key"]] = _enc(api_key)
-        elif current["source"] == "user" and current.get("api_key_set"):
-            updates[AI_SETTING_KEYS["api_key"]] = _load_setting(user_id, AI_SETTING_KEYS["api_key"])
-        else:
-            raise ValueError("API key is required")
-    elif current["source"] != "user" or not current.get("api_key_set"):
+    api_key = str(payload.get("api_key") or "").strip() if "api_key" in payload else ""
+    if api_key:
+        updates[_provider_setting_key(provider, "api_key")] = _enc(api_key)
+    elif provider_settings["stored_api_key"]:
+        updates[_provider_setting_key(provider, "api_key")] = _enc(provider_settings["stored_api_key"])
+    elif provider_settings["legacy_api_key"]:
+        updates[_provider_setting_key(provider, "api_key")] = _enc(provider_settings["legacy_api_key"])
+    elif current["configured"]:
+        updates[_provider_setting_key(provider, "api_key")] = None
+    else:
         raise ValueError("API key is required")
 
     if "base_url" in payload:
         base_url = str(payload.get("base_url") or "").strip() or _default_base_url(provider)
-        updates[AI_SETTING_KEYS["base_url"]] = base_url
-    elif current["source"] != "user" or provider_changed:
-        updates[AI_SETTING_KEYS["base_url"]] = _default_base_url(provider)
+        updates[_provider_setting_key(provider, "base_url")] = base_url
+    elif provider_settings["stored_base_url"]:
+        updates[_provider_setting_key(provider, "base_url")] = provider_settings["stored_base_url"]
+    elif provider_settings["legacy_base_url"]:
+        updates[_provider_setting_key(provider, "base_url")] = provider_settings["legacy_base_url"]
+    else:
+        updates[_provider_setting_key(provider, "base_url")] = _default_base_url(provider)
 
     if "model" in payload:
         model = str(payload.get("model") or "").strip() or _default_model(provider)
-        updates[AI_SETTING_KEYS["model"]] = model
-    elif current["source"] != "user" or provider_changed:
-        updates[AI_SETTING_KEYS["model"]] = _default_model(provider)
+        updates[_provider_setting_key(provider, "model")] = model
+    elif provider_settings["stored_model"]:
+        updates[_provider_setting_key(provider, "model")] = provider_settings["stored_model"]
+    elif provider_settings["legacy_model"]:
+        updates[_provider_setting_key(provider, "model")] = provider_settings["legacy_model"]
+    else:
+        updates[_provider_setting_key(provider, "model")] = _default_model(provider)
 
     _store_settings(user_id, updates)
-    return get_user_config(user_id)
+    return get_user_config(user_id, provider)
 
 
-def status(user_id: str):
-    config = get_user_config(user_id)
+def status(user_id: str, provider: str | None = None):
+    config = get_user_config(user_id, provider)
     provider_name = "OpenAI" if config["provider"] == "openai" else "Gemini"
     return {
         "configured": config["configured"],
@@ -160,9 +205,12 @@ def status(user_id: str):
         "model": config["model"],
         "base_url": config["base_url"],
         "source": config["source"],
-        "source_label": "계정 설정" if config["source"] == "user" else "서버 기본값",
+        "source_label": "?? ??" if config["source"] == "user" else "?? ???",
         "api_key_set": config["api_key_set"],
-        "message": f"{provider_name} 연결됨" if config["configured"] else f"{provider_name} 키 필요",
+        "message": f"{provider_name} ???" if config["configured"] else f"{provider_name} ? ??",
+        "selected_provider": config["selected_provider"],
+        "saved_api_key": config["saved_api_key"],
+        "has_user_settings": config["has_user_settings"],
     }
 
 

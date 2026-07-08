@@ -1022,8 +1022,8 @@ def ai_status(user=Depends(require_user)):
 
 
 @app.get("/api/settings/ai")
-def ai_settings(user=Depends(require_user)):
-    return ai.status(user)
+def ai_settings(provider: Literal["openai", "gemini"] | None = None, user=Depends(require_user)):
+    return ai.status(user, provider)
 
 
 @app.put("/api/settings/ai")
