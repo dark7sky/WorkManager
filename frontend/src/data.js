@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-validation-error-formatting',
+    timestamp: '2026-07-08T15:16:44+09:00',
+    description: '업무 수정 저장이 서버 검증에 막힐 때 [object Object] 같은 불명확한 오류 대신 실제 입력 필드와 검증 메시지를 그대로 보여주도록 정리해, 기존 업무 편집 저장 문제를 화면에서 바로 진단할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-08-team-member-task-reassignment',
     timestamp: '2026-07-08T15:11:04+09:00',
     description: '설정 화면에서 저장된 팀원의 담당 업무를 다른 팀원에게 한 번에 재배정할 수 있게 해, 업무가 남아 있어 명단 정리가 막히던 팀 운영 흐름을 직접 처리할 수 있도록 했습니다.',

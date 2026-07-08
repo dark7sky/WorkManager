@@ -5,6 +5,26 @@ export class ApiError extends Error {
   constructor(message, status) { super(message); this.name = 'ApiError'; this.status = status }
 }
 
+const validationDetailMessage = detail => {
+  if (!Array.isArray(detail)) return ''
+  const parts = detail.map(item => {
+    if (!item || typeof item !== 'object') return ''
+    const loc = Array.isArray(item.loc) ? item.loc.filter(part => part !== 'body').join('.') : ''
+    const msg = typeof item.msg === 'string' ? item.msg.trim() : ''
+    if (!loc && !msg) return ''
+    return loc ? `${loc}: ${msg}` : msg
+  }).filter(Boolean)
+  return parts.join(' / ')
+}
+
+export const apiErrorMessage = (body, status) => {
+  if (typeof body?.detail === 'string' && body.detail.trim()) return body.detail
+  const validationMessage = validationDetailMessage(body?.detail)
+  if (validationMessage) return validationMessage
+  if (typeof body?.message === 'string' && body.message.trim()) return body.message
+  return `요청을 처리하지 못했습니다 (${status})`
+}
+
 export async function request(path, options = {}) {
   const { suppressAuthEvent, ...fetchOptions } = options
   let response
@@ -17,7 +37,7 @@ export async function request(path, options = {}) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
     if (response.status === 401 && !suppressAuthEvent) window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
-    throw new ApiError(body.detail || body.message || `요청을 처리하지 못했습니다 (${response.status})`, response.status)
+    throw new ApiError(apiErrorMessage(body, response.status), response.status)
   }
   return response.status === 204 ? null : response.json()
 }
