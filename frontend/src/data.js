@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-save-refresh-decoupling',
+    timestamp: '2026-07-08T15:20:31+09:00',
+    description: '업무 화면에서 기존 업무를 저장한 뒤 전체 오늘/일정 데이터를 함께 다시 불러오다가 다른 섹션 요청이 실패하면 저장 자체가 실패한 것처럼 보이던 문제를 줄이기 위해, 저장 후에는 업무 목록만 다시 불러오고 그마저 실패하면 방금 저장한 업무를 목록에 바로 반영하도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-validation-error-formatting',
     timestamp: '2026-07-08T15:16:44+09:00',
     description: '업무 수정 저장이 서버 검증에 막힐 때 [object Object] 같은 불명확한 오류 대신 실제 입력 필드와 검증 메시지를 그대로 보여주도록 정리해, 기존 업무 편집 저장 문제를 화면에서 바로 진단할 수 있게 했습니다.',
