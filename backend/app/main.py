@@ -326,7 +326,7 @@ def normalize_legacy_task_text(key, value):
     if key not in TASK_TEXT_LIMITS:
         return value
     if value is None:
-        return None
+        return "" if key in {"description", "assignee_name"} else None
     text = str(value).strip()
     return text[:TASK_TEXT_LIMITS[key]]
 

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-null-legacy-text-repair',
+    timestamp: '2026-07-08T15:28:57+09:00',
+    description: '기존 업무의 메모나 담당자 값이 NULL 레거시 데이터로 남아 있어 변경사항 저장 시 데이터베이스 오류가 나던 문제를 수정해, 업무 화면에서 제목만 바꾸는 편집도 빈 문자열로 안전하게 복구하며 저장되도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-form-assignee-capacity-preview',
     timestamp: '2026-07-08T15:25:21+09:00',
     description: '업무 등록·수정 화면의 담당자 배정 현황에 14일 일정 최대 부하와 초과 일수를 함께 보여줘, 저장 전에 특정 팀원에게 일이 과하게 몰리는지 바로 판단할 수 있게 했습니다.',

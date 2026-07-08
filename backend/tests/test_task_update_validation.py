@@ -503,6 +503,54 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(len(updated["assignee_name"]), 120)
             self.assertTrue(updated["assignee_name"].startswith("Dana"))
 
+    def test_update_item_repairs_null_legacy_text_fields_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import init_db
+            from app.main import update_item
+
+            db_path = os.environ["DATABASE_PATH"]
+            with sqlite3.connect(db_path) as c:
+                c.execute("""CREATE TABLE users(
+                    id TEXT PRIMARY KEY,
+                    google_sub TEXT UNIQUE,
+                    email TEXT NOT NULL,
+                    display_name TEXT NOT NULL DEFAULT '',
+                    picture_url TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )""")
+                c.execute("""CREATE TABLE tasks(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id TEXT,
+                    title TEXT NOT NULL,
+                    description TEXT,
+                    status TEXT NOT NULL DEFAULT 'todo',
+                    priority TEXT NOT NULL DEFAULT 'normal',
+                    progress INTEGER NOT NULL DEFAULT 0,
+                    start_date TEXT,
+                    due_date TEXT,
+                    assignee_name TEXT,
+                    approval_status TEXT NOT NULL DEFAULT 'none',
+                    schedule_approval_status TEXT NOT NULL DEFAULT 'none',
+                    tags TEXT NOT NULL DEFAULT '[]',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )""")
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy null text edit", None, "doing", "normal", 20, None, None,
+                     None, "none", "none", "[]", "2026-07-08T15:28:57", "2026-07-08T15:28:57"))
+                task_id = cur.lastrowid
+
+            init_db()
+            updated = update_item("tasks", task_id, {"title": "legacy null text edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy null text edit saved")
+            self.assertEqual(updated["description"], "")
+            self.assertEqual(updated["assignee_name"], "")
+
 
 if __name__ == "__main__":
     unittest.main()
