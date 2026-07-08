@@ -11,27 +11,12 @@ const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
 
 const ultraTone = value => {
   if (!value) return value
-  return value
-    .replace(/합니다\./g, '')
-    .replace(/했습니다\./g, '')
-    .replace(/되었습니다\./g, '')
-    .replace(/할 수 있게 했습니다/g, '가능')
-    .replace(/할 수 있게 해줬습니다/g, '가능')
-    .replace(/할 수 있도록/g, '가능')
-    .replace(/바로 확인할 수 있게 했습니다/g, '즉시 확인 가능')
-    .replace(/문제를 수정해/g, '수정')
-    .replace(/문제를 수정하고/g, '수정')
-    .replace(/추가했습니다/g, '추가')
-    .replace(/보강했습니다/g, '보강')
-    .replace(/정리했습니다/g, '정리')
-    .replace(/구현했습니다/g, '구현')
-    .replace(/반영했습니다/g, '반영')
-    .replace(/보존해 기록합니다/g, '보존 기록')
-    .replace(/보존하면서/g, '보존')
-    .replace(/다시 불러오도록/g, '재불러오기')
-    .replace(/, /g, ' · ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  const cleaned = String(value).replace(/\s+/g, ' ').replace(/, /g, ' | ').trim()
+  const firstSentence = cleaned.split(/[.!?]/)[0].trim()
+  const firstClause = firstSentence.includes(' | ')
+    ? firstSentence.split(' | ').slice(0, 2).join(' | ')
+    : firstSentence
+  return firstClause.length > 75 ? `${firstClause.slice(0, 72).trim()}...` : firstClause
 }
 
 export default function Changelog({ notify, publicMode = false }) {
