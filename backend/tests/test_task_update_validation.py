@@ -224,6 +224,26 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["progress"], 100)
             self.assertEqual(updated["approval_status"], "pending")
 
+    def test_update_item_repairs_invalid_legacy_recurrence_rule_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,recurrence_rule,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy recurrence edit", "", "todo", "normal", 0, None, None,
+                     "", "none", "none", "[]", "yearly", "2026-07-08T10:05:27", "2026-07-08T10:05:27"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "legacy recurrence edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "legacy recurrence edit saved")
+            self.assertIsNone(updated["recurrence_rule"])
+
     def test_update_item_repairs_invalid_legacy_task_json_arrays_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

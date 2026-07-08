@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-task-edit-legacy-recurrence-repair',
+    timestamp: '2026-07-08T10:05:27+09:00',
+    description: '기존 업무에 지원되지 않는 반복 규칙 값이 남아 있어도 수정 저장 시 반복 없음으로 안전하게 복구해, 일반 편집에서 저장 오류가 다시 나지 않도록 보강했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-legacy-progress-repair',
     timestamp: '2026-07-08T10:01:03+09:00',
     description: '기존 업무의 진행률 값이 0~100 범위를 벗어난 레거시 데이터여도 수정 저장 시 정상 범위와 상태로 자동 복구해, 제목만 바꾸는 편집에서도 저장 오류가 다시 나지 않도록 보강했습니다.',

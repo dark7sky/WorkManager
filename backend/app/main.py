@@ -274,6 +274,7 @@ CONFIG = {
 VALID_TASK_STATUSES = {"todo", "doing", "done"}
 VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
+VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "monthly"}
 
 
 def normalize_legacy_optional_task_id(value):
@@ -297,6 +298,8 @@ def normalize_legacy_task_field(key, value):
         return value if value in VALID_TASK_PRIORITIES else "normal"
     if key in {"approval_status", "schedule_approval_status"}:
         return value if value in VALID_TASK_APPROVAL_STATES else "none"
+    if key == "recurrence_rule":
+        return value if value in VALID_TASK_RECURRENCE_RULES else None
     return value
 
 
@@ -433,7 +436,7 @@ def merged_resource_for_validation(table, existing, data):
         if isinstance(merged[key], str):
             merged[key] = normalize_legacy_json_array_field(key, merged[key])
     if table == "tasks":
-        for key in ("status", "priority", "approval_status", "schedule_approval_status"):
+        for key in ("status", "priority", "approval_status", "schedule_approval_status", "recurrence_rule"):
             merged[key] = normalize_legacy_task_field(key, merged.get(key))
         merged["progress"] = normalize_legacy_task_progress(merged.get("progress"))
         merged["parent_id"] = normalize_legacy_optional_task_id(merged.get("parent_id"))
@@ -549,7 +552,7 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
-            for key in ("status", "priority", "approval_status", "schedule_approval_status"):
+            for key in ("status", "priority", "approval_status", "schedule_approval_status", "recurrence_rule"):
                 normalized = normalize_legacy_task_field(key, existing[key])
                 if normalized != existing[key] and key not in data:
                     data[key] = normalized
