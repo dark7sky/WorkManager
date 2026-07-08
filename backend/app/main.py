@@ -311,6 +311,15 @@ def normalize_legacy_task_progress(value):
     return max(0, min(100, number))
 
 
+def normalize_legacy_task_date(value):
+    if value in (None, ""):
+        return value
+    try:
+        return date.fromisoformat(str(value)).isoformat()
+    except (TypeError, ValueError):
+        return None
+
+
 def normalize_legacy_json_array_field(key, value):
     items = decode_json_array(value)
     if key == "dependency_ids":
@@ -439,6 +448,8 @@ def merged_resource_for_validation(table, existing, data):
         for key in ("status", "priority", "approval_status", "schedule_approval_status", "recurrence_rule"):
             merged[key] = normalize_legacy_task_field(key, merged.get(key))
         merged["progress"] = normalize_legacy_task_progress(merged.get("progress"))
+        for key in ("start_date", "due_date"):
+            merged[key] = normalize_legacy_task_date(merged.get(key))
         merged["parent_id"] = normalize_legacy_optional_task_id(merged.get("parent_id"))
     return merged
 
@@ -561,6 +572,10 @@ def update_item(table, item_id, data, user_id):
                 data["progress"] = normalized_progress
                 if "status" not in data:
                     data["status"] = "done" if normalized_progress == 100 else ("doing" if normalized_progress > 0 else "todo")
+            for key in ("start_date", "due_date"):
+                normalized = normalize_legacy_task_date(existing[key])
+                if normalized != existing[key] and key not in data:
+                    data[key] = normalized
             normalized_parent_id = normalize_legacy_optional_task_id(existing["parent_id"])
             if normalized_parent_id != existing["parent_id"] and "parent_id" not in data:
                 data["parent_id"] = normalized_parent_id
