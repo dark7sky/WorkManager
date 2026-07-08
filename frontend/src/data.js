@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-08-team-roster-removal-guard',
+    timestamp: '2026-07-08T14:53:38+09:00',
+    description: '설정 화면에서 아직 업무가 배정된 팀원은 배정 건수를 함께 보여주고 명단 제거를 막아, 담당자 재배정 전에 팀원 이름이 실수로 사라져 업무 소유권 관리가 흐려지지 않도록 했습니다.',
+  },
+  {
     id: '2026-07-08-task-edit-stale-dependency-repair',
     timestamp: '2026-07-08T10:36:01+09:00',
     description: '기존 업무의 의존 업무 목록에 삭제됐거나 자기 자신을 가리키는 레거시 참조가 남아 있어도 수정 저장 시 유효한 의존 업무만 남기도록 정리해, 업무 화면에서 기존 항목을 저장한 뒤에도 깨진 선행 업무 연결이 남지 않도록 보강했습니다.',

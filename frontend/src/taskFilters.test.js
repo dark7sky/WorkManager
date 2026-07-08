@@ -164,3 +164,10 @@ test('summarizeTeamMemberRoster keeps saved members visible with workload contex
     { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1, scheduledTasks: 1, overloadDays: 0, peakDailyLoad: 1 },
   ])
 })
+
+test('summarizeTeamMemberRoster exposes assigned-task totals for removal guards', () => {
+  const roster = summarizeTeamMemberRoster(tasks, ['김민준', '박지훈'], '2026-07-07')
+
+  assert.equal(roster.find(member => member.assignee === '김민준')?.total, 2)
+  assert.equal(roster.find(member => member.assignee === '박지훈')?.total, 0)
+})
