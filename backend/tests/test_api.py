@@ -58,6 +58,19 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(a.post("/api/tasks", json={"title": "   "}).status_code, 422)
         self.assertEqual(a.post("/api/work_logs", json={"content": "\t "}).status_code, 422)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_empty_patch_body_is_rejected_for_every_table(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "empty patch task"}).json()
+        event = a.post("/api/events", json={"title": "empty patch event", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00"}).json()
+        todo = a.post("/api/todos", json={"title": "empty patch todo"}).json()
+        log = a.post("/api/work_logs", json={"content": "empty patch log"}).json()
+        self.assertEqual(a.patch(f"/api/tasks/{task['id']}", json={}).status_code, 422)
+        self.assertEqual(a.patch(f"/api/events/{event['id']}", json={}).status_code, 422)
+        self.assertEqual(a.patch(f"/api/todos/{todo['id']}", json={}).status_code, 422)
+        self.assertEqual(a.patch(f"/api/work_logs/{log['id']}", json={}).status_code, 422)
+
     def test_logout_revokes_server_session(self):
         from app.auth import create_session
         token = create_session("sub-a")

@@ -610,12 +610,12 @@ def update_item(table, item_id, data, user_id):
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id, item_id)
+    if not data:
+        raise HTTPException(422, "No changes provided")
     if CONFIG[table][1]:
         data[CONFIG[table][1]] = now()
     if table == "events":
         data["sync_state"] = "dirty"
-    if not data:
-        raise HTTPException(422, "No changes provided")
     if table == "work_logs" and data.get("task_id"):
         with connection() as c:
             if not c.execute("SELECT 1 FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (data["task_id"], user_id)).fetchone():
