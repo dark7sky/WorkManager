@@ -42,7 +42,8 @@ class ValidationAndStatusTests(unittest.TestCase):
 
     def test_status_does_not_expose_api_key(self):
         with patch.dict(os.environ, {"AI_API_KEY": "super-secret", "AI_MODEL": "test-model"}):
-            result = ai.status()
+            with patch('app.ai._load_setting', return_value=None):
+                result = ai.status("test_user")
         self.assertTrue(result["configured"])
         self.assertEqual(result["model"], "test-model")
         self.assertNotIn("super-secret", repr(result))

@@ -190,7 +190,7 @@ def save_user_config(user_id: str, payload: dict[str, Any]):
         updates[_provider_setting_key(provider, "model")] = _default_model(provider)
 
     _store_settings(user_id, updates)
-    return get_user_config(user_id, provider)
+    return status(user_id, provider)
 
 
 def status(user_id: str, provider: str | None = None):
@@ -205,9 +205,9 @@ def status(user_id: str, provider: str | None = None):
         "model": config["model"],
         "base_url": config["base_url"],
         "source": config["source"],
-        "source_label": "?? ??" if config["source"] == "user" else "?? ???",
+        "source_label": "계정 설정" if config["source"] == "user" else "서버 기본값",
         "api_key_set": config["api_key_set"],
-        "message": f"{provider_name} ???" if config["configured"] else f"{provider_name} ? ??",
+        "message": f"{provider_name} 연결됨" if config["configured"] else f"{provider_name} 키 필요",
         "selected_provider": config["selected_provider"],
         "saved_api_key": config["saved_api_key"],
         "has_user_settings": config["has_user_settings"],
