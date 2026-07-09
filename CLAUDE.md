@@ -32,7 +32,7 @@ npm run build
 ```bash
 docker compose up -d --build    # web on :8080, api behind nginx /api/ proxy
 ```
-CI (`.github/workflows/ci.yml`) runs frontend build, backend unittest + compileall, then `docker compose build`.
+CI (`.github/workflows/ci.yml`) runs frontend test + build, backend unittest + compileall, then `docker compose build`.
 
 ## Architecture
 
