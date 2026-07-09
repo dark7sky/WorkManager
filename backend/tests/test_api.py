@@ -107,7 +107,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_completion_spawns_once(self, *_):
         a = self.client(self.token_a)
-        task = a.post("/api/tasks", json={"title": "weekly review", "assignee_name": "Dana", "start_date": "2026-07-06",
+        task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-06",
                                            "due_date": "2026-07-06", "recurrence_rule": "weekly"}).json()
         first = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
         self.assertIn("next_recurrence_id", first)
@@ -126,30 +126,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
-    def test_task_assignee_is_persisted_and_trimmed(self, *_):
+    def test_task_rejects_unknown_assignee_field(self, *_):
         a = self.client(self.token_a)
-        created = a.post("/api/tasks", json={"title": "handoff", "assignee_name": "  Dana  "})
-        self.assertEqual(created.status_code, 200, created.text)
-        self.assertEqual(created.json()["assignee_name"], "Dana")
-        updated = a.patch(f"/api/tasks/{created.json()['id']}", json={"assignee_name": " Lee "})
-        self.assertEqual(updated.status_code, 200, updated.text)
-        self.assertEqual(a.get(f"/api/tasks/{created.json()['id']}").json()["assignee_name"], "Lee")
+        created = a.post("/api/tasks", json={"title": "handoff", "assignee_name": "Dana"})
+        self.assertEqual(created.status_code, 422, created.text)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
-    def test_unassigned_task_cannot_become_active_via_patch_without_owner(self, *_):
+    def test_task_can_become_active_without_an_owner_field(self, *_):
         a = self.client(self.token_a)
-        created = a.post("/api/tasks", json={"title": "owner needed"})
+        created = a.post("/api/tasks", json={"title": "no owner needed"})
         self.assertEqual(created.status_code, 200, created.text)
 
         updated = a.patch(f"/api/tasks/{created.json()['id']}", json={"progress": 40})
-
-        self.assertEqual(updated.status_code, 422, updated.text)
-        self.assertIn("require an assignee", updated.text)
-
-        fresh = a.get(f"/api/tasks/{created.json()['id']}").json()
-        self.assertEqual(fresh["status"], "todo")
-        self.assertEqual(fresh["progress"], 0)
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["progress"], 40)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
@@ -164,7 +155,6 @@ class ApiTests(unittest.TestCase):
         payload = {
             "title": "legacy edit saved",
             "description": "",
-            "assignee_name": "",
             "start_date": "2026-07-07",
             "due_date": "2026-07-09",
             "status": "in_progress",
@@ -201,7 +191,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_audit_logs_are_user_scoped_and_include_metadata(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        task = a.post("/api/tasks", json={"title": "audited task", "assignee_name": "Ava"}).json()
+        task = a.post("/api/tasks", json={"title": "audited task"}).json()
         updated = a.patch(f"/api/tasks/{task['id']}", json={"progress": 40})
         self.assertEqual(updated.status_code, 200, updated.text)
         logs = a.get("/api/audit-logs?limit=10")
@@ -342,7 +332,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_month_end_recurrence_returns_to_month_end(self, *_):
         a = self.client(self.token_a)
-        task = a.post("/api/tasks", json={"title": "month end", "assignee_name": "Dana", "start_date": "2027-01-31", "due_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
+        task = a.post("/api/tasks", json={"title": "month end", "start_date": "2027-01-31", "due_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
         feb = a.patch(f"/api/tasks/{task['id']}", json={"status": "done"}).json()
         feb_task = a.get(f"/api/tasks/{feb['next_recurrence_id']}").json()
         self.assertEqual(feb_task["due_date"], "2027-02-28")
@@ -353,16 +343,16 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_can_be_disabled_per_user(self, *_):
         a = self.client(self.token_a)
-        default_task = a.post("/api/tasks", json={"title": "default workflow", "status": "done", "assignee_name": "Dana"}).json()
+        default_task = a.post("/api/tasks", json={"title": "default workflow", "status": "done"}).json()
         self.assertEqual(default_task["approval_status"], "pending")
         self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], True)
         disabled = a.put("/api/settings/workflow", json={"approval_workflow": False})
         self.assertEqual(disabled.status_code, 200, disabled.text)
         self.assertEqual(disabled.json()["approval_workflow"], False)
         self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], False)
-        personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done", "assignee_name": "Dana"}).json()
+        personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()
         self.assertEqual(personal_task["approval_status"], "none")
-        task_for_schedule_test = a.post("/api/tasks", json={"title": "schedule test", "due_date": "2026-07-10", "assignee_name": "Dana"}).json()
+        task_for_schedule_test = a.post("/api/tasks", json={"title": "schedule test", "due_date": "2026-07-10"}).json()
         self.assertEqual(task_for_schedule_test["schedule_approval_status"], "none")
         updated = a.patch(f"/api/tasks/{task_for_schedule_test['id']}", json={"due_date": "2026-07-15"}).json()
         self.assertEqual(updated["schedule_approval_status"], "none")

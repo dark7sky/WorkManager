@@ -199,7 +199,6 @@ class TaskPayload(StrictPayload):
     progress: int | None = Field(None, ge=0, le=100)
     start_date: date | None = None
     due_date: date | None = None
-    assignee_name: str | None = Field(None, max_length=120)
     approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     schedule_approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
@@ -289,7 +288,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "assignee_name", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
@@ -299,7 +298,7 @@ VALID_TASK_STATUSES = {"todo", "doing", "done"}
 VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
 VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "monthly"}
-TASK_TEXT_LIMITS = {"title": 300, "description": 20000, "assignee_name": 120}
+TASK_TEXT_LIMITS = {"title": 300, "description": 20000}
 TASK_DEPENDENCY_LIMIT = 100
 
 
@@ -350,7 +349,7 @@ def normalize_legacy_task_text(key, value):
     if key not in TASK_TEXT_LIMITS:
         return value
     if value is None:
-        return "" if key in {"description", "assignee_name"} else None
+        return "" if key == "description" else None
     text = str(value).strip()
     return text[:TASK_TEXT_LIMITS[key]]
 
@@ -397,24 +396,6 @@ def sanitize_legacy_dependency_ids(value, visible_task_ids, current_id=None):
     return sanitized
 
 
-def task_requires_owner(data):
-    status = normalize_legacy_task_field("status", data["status"] if "status" in data.keys() else None)
-    progress = normalize_legacy_task_progress(data["progress"] if "progress" in data.keys() else None)
-    return status in {"doing", "done"} or progress > 0
-
-
-def task_has_owner(data):
-    return bool(normalize_legacy_task_text("assignee_name", data["assignee_name"] if "assignee_name" in data.keys() else None))
-
-
-def validate_task_ownership(data, existing=None):
-    if not task_requires_owner(data) or task_has_owner(data):
-        return
-    if existing is not None and task_requires_owner(existing) and not task_has_owner(existing):
-        return
-    raise HTTPException(422, "Active or completed tasks require an assignee")
-
-
 def normalize(table, data):
     try:
         model = MODELS[table].model_validate(data)
@@ -422,7 +403,7 @@ def normalize(table, data):
         raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
     result = model.model_dump(exclude_unset=True, mode="json")
     text_fields = {
-        "tasks": ("title", "assignee_name"), "events": ("title", "location"),
+        "tasks": ("title",), "events": ("title", "location"),
         "todos": ("title",), "work_logs": ("content",),
     }[table]
     for key in text_fields:
@@ -562,10 +543,10 @@ def spawn_recurring_task(task, user_id):
         if not c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, task["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,assignee_name,tags,
-          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,tags,
+          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
-           start_date, due_date, task.get("assignee_name", ""), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), task["id"],
+           start_date, due_date, json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), task["id"],
            json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
@@ -576,7 +557,6 @@ def create_item(table, data, user_id):
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id)
-        validate_task_ownership(data)
     timestamp = now()
     if table in ("tasks", "events"):
         data.update(created_at=timestamp, updated_at=timestamp)
@@ -710,8 +690,6 @@ def update_item(table, item_id, data, user_id):
             MODELS[table].model_validate(merged)
         except ValidationError as exc:
             raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
-        if table == "tasks":
-            validate_task_ownership(merged, existing)
         c.execute(f"UPDATE {table} SET {','.join(f'{x}=?' for x in data)} WHERE id=? AND user_id=? AND deleted_at IS NULL", [*data.values(), item_id, user_id])
         item = row_dict(c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=?", (item_id, user_id)).fetchone())
     if table == "events" and google_calendar.token_status(user_id)["connected"] and google_calendar.selected_calendar(user_id):

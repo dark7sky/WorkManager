@@ -1,39 +1,30 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeAssigneeAssignmentLoad, summarizeAssigneeCapacity, summarizeAssigneeWorkload, summarizeBlockedTasks, summarizeDueReminders, summarizeOwnershipGaps, summarizeTeamMemberRoster, taskAssigneeOptions, taskBlockingDependencies } from './taskFilters.js'
+import { filterTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies } from './taskFilters.js'
 
 const tasks = [
-  { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', assignee_name: '김민준', tags: ['보고'] },
-  { id: 2, title: '요구사항 정리', status: 'in_progress', due_date: '2026-07-09', progress: 50, priority: 'normal', assignee_name: '이서연', tags: ['기획'] },
-  { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, priority: 'low', assignee_name: '김민준', tags: ['운영'] },
+  { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
+  { id: 2, title: '요구사항 정리', status: 'in_progress', due_date: '2026-07-09', progress: 50, priority: 'normal', tags: ['기획'] },
+  { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, priority: 'low', tags: ['운영'] },
   { id: 4, title: '검토 대기', status: 'todo', due_date: '2026-07-06', progress: 10, priority: 'high', tags: [] },
 ]
 
-test('filterTasks narrows tasks by assignee without losing status and tag filters', () => {
+test('filterTasks narrows active tasks by tag without losing status filters', () => {
   const shown = filterTasks(tasks, {
     query: '',
     status: 'active',
     selectedTags: ['보고'],
-    assignee: '김민준',
     todayIso: '2026-07-07',
   })
 
   assert.deepEqual(shown.map(task => task.id), [1])
 })
 
-test('taskAssigneeOptions includes saved team members and task assignees', () => {
-  assert.deepEqual(taskAssigneeOptions([
-    { assignee_name: '이서연' },
-    { assignee_name: ' 김민준 ' },
-  ], ['박지훈', '이서연']), ['김민준', '박지훈', '이서연'])
-})
-
-test('filterTasks narrows active tasks by priority without losing assignee filters', () => {
+test('filterTasks narrows active tasks by priority', () => {
   const shown = filterTasks(tasks, {
     query: '',
     status: 'active',
     selectedTags: [],
-    assignee: 'all',
     priority: 'high',
     todayIso: '2026-07-07',
   })
@@ -51,59 +42,6 @@ test('filterTasks can isolate completion and schedule approval queues', () => {
 
   assert.deepEqual(filterTasks(approvalTasks, { status: 'approval_pending' }).map(task => task.id), [5])
   assert.deepEqual(filterTasks(approvalTasks, { status: 'schedule_pending' }).map(task => task.id), [6])
-})
-
-test('taskAssigneeOptions returns trimmed unique owner names for form suggestions', () => {
-  assert.deepEqual(taskAssigneeOptions([
-    { assignee_name: ' 이서연 ' },
-    { assignee_name: '김민준' },
-    { assignee_name: '이서연' },
-    { assignee_name: '' },
-    {},
-  ]), ['김민준', '이서연'])
-})
-
-test('summarizeAssigneeWorkload counts active overdue and completed work by owner', () => {
-  const workload = summarizeAssigneeWorkload(tasks, '2026-07-07')
-
-  assert.deepEqual(workload, [
-    { assignee: '김민준', active: 1, overdue: 0, done: 1, total: 2 },
-    { assignee: '미지정', active: 1, overdue: 1, done: 0, total: 1 },
-    { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1 },
-  ])
-})
-
-test('summarizeAssigneeAssignmentLoad excludes the edited task and highlights due and schedule risk', () => {
-  const summary = summarizeAssigneeAssignmentLoad([
-    { ...tasks[0], start_date: '2026-07-07', due_date: '2026-07-08' },
-    tasks[1],
-    tasks[2],
-    tasks[3],
-    { id: 5, title: '긴급 검토', status: 'doing', start_date: '2026-07-08', due_date: '2026-07-10', priority: 'high', assignee_name: '김민준' },
-    { id: 6, title: '후속 준비', status: 'todo', start_date: '2026-07-08', due_date: '2026-07-08', priority: 'normal', assignee_name: '김민준' },
-  ], ' 김민준 ', '2026-07-07', 1, 7, 1)
-
-  assert.deepEqual(summary, {
-    assignee: '김민준',
-    active: 2,
-    overdue: 0,
-    dueSoon: 2,
-    highPriority: 1,
-    scheduledTasks: 2,
-    peakDailyLoad: 2,
-    overloadDays: 1,
-    dailyLimit: 1,
-  })
-})
-
-test('summarizeAssigneeAssignmentLoad respects saved per-member daily capacity', () => {
-  const summary = summarizeAssigneeAssignmentLoad([
-    { id: 1, title: 'A', status: 'doing', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
-    { id: 2, title: 'B', status: 'todo', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
-  ], '김민준', '2026-07-07', null, 7, 3, 14, { 김민준: 2 })
-
-  assert.equal(summary.dailyLimit, 2)
-  assert.equal(summary.overloadDays, 0)
 })
 
 test('summarizeDueReminders counts overdue today and upcoming unfinished tasks', () => {
@@ -142,52 +80,4 @@ test('summarizeBlockedTasks counts unfinished tasks blocked by incomplete depend
   assert.equal(summary.blockerTotal, 1)
   assert.equal(summary.nextDueDate, '2026-07-10')
   assert.deepEqual(summary.items[0].blockers.map(task => task.id), [1])
-})
-
-test('summarizeOwnershipGaps counts active unassigned and overdue ownership gaps', () => {
-  assert.deepEqual(summarizeOwnershipGaps(tasks, '2026-07-07'), {
-    activeUnassigned: 1,
-    overdueUnassigned: 1,
-  })
-})
-
-test('summarizeAssigneeCapacity counts scheduled load inside the planning window', () => {
-  const capacity = summarizeAssigneeCapacity([
-    ...tasks,
-    { id: 5, title: '동시 작업 A', status: 'todo', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
-    { id: 6, title: '동시 작업 B', status: 'doing', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
-    { id: 7, title: '완료 작업', status: 'done', start_date: '2026-07-08', due_date: '2026-07-08', assignee_name: '김민준' },
-    { id: 8, title: '기간 밖 작업', status: 'todo', start_date: '2026-08-01', due_date: '2026-08-02', assignee_name: '이서연' },
-  ], '2026-07-07', 14, 2)
-
-  assert.deepEqual(capacity[0], {
-    assignee: '김민준',
-    scheduledTasks: 3,
-    scheduledDays: 2,
-    peakDailyLoad: 3,
-    overloadDays: 1,
-    dailyLimit: 2,
-  })
-  assert.equal(capacity.some(row => row.assignee === '이서연' && row.scheduledTasks === 1), true)
-  assert.equal(capacity[0].dailyLimit, 2)
-})
-
-test('summarizeTeamMemberRoster keeps saved members visible with workload context', () => {
-  const roster = summarizeTeamMemberRoster([
-    ...tasks,
-    { id: 5, title: '동시 작업', status: 'doing', start_date: '2026-07-07', due_date: '2026-07-08', assignee_name: '김민준' },
-  ], ['박지훈', '김민준'], '2026-07-07', 14, 1, { 김민준: 2, 박지훈: 4 })
-
-  assert.deepEqual(roster, [
-    { assignee: '김민준', active: 2, overdue: 0, done: 1, total: 3, scheduledTasks: 2, overloadDays: 0, peakDailyLoad: 2, dailyLimit: 2 },
-    { assignee: '박지훈', active: 0, overdue: 0, done: 0, total: 0, scheduledTasks: 0, overloadDays: 0, peakDailyLoad: 0, dailyLimit: 4 },
-    { assignee: '이서연', active: 1, overdue: 0, done: 0, total: 1, scheduledTasks: 1, overloadDays: 0, peakDailyLoad: 1, dailyLimit: 1 },
-  ])
-})
-
-test('summarizeTeamMemberRoster exposes assigned-task totals for removal guards', () => {
-  const roster = summarizeTeamMemberRoster(tasks, ['김민준', '박지훈'], '2026-07-07')
-
-  assert.equal(roster.find(member => member.assignee === '김민준')?.total, 2)
-  assert.equal(roster.find(member => member.assignee === '박지훈')?.total, 0)
 })

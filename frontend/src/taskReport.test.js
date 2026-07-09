@@ -6,7 +6,6 @@ test('tasksToPrintableReport renders escaped printable task rows and summary', (
   const html = tasksToPrintableReport([
     {
       title: '<고객 보고>',
-      assignee_name: '김민준',
       status: 'todo',
       priority: 'high',
       start_date: '2026-07-06',
@@ -17,7 +16,6 @@ test('tasksToPrintableReport renders escaped printable task rows and summary', (
     },
     {
       title: '완료 업무',
-      assignee_name: '이서연',
       status: 'done',
       priority: 'low',
       due_date: '2026-07-08',

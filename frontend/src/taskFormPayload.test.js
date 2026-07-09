@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskPayload, initialTaskDateValue, validateTaskOwnership } from './taskFormPayload.js'
+import { buildTaskPayload, initialTaskDateValue } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
   description: ' 메모 ',
-  assignee_name: ' 담당자 ',
   start_date: '2026-07-07',
   due_date: '2026-07-09',
   status: 'in_progress',
@@ -43,10 +42,9 @@ test('buildTaskPayload never sends the edited task as its own parent', () => {
 })
 
 test('buildTaskPayload tolerates missing optional text fields during edit save', () => {
-  const payload = buildTaskPayload({ ...baseData, description: undefined, assignee_name: null }, { task: { id: 1 } })
+  const payload = buildTaskPayload({ ...baseData, description: undefined }, { task: { id: 1 } })
 
   assert.equal(payload.description, '')
-  assert.equal(payload.assignee_name, '')
 })
 
 test('buildTaskPayload caps legacy task text fields to backend limits during edit save', () => {
@@ -54,12 +52,10 @@ test('buildTaskPayload caps legacy task text fields to backend limits during edi
     ...baseData,
     title: `  ${'제'.repeat(305)}  `,
     description: ` ${'메'.repeat(20005)} `,
-    assignee_name: ` ${'김'.repeat(125)} `,
   }, { task: { id: 1 } })
 
   assert.equal(payload.title.length, 300)
   assert.equal(payload.description.length, 20000)
-  assert.equal(payload.assignee_name.length, 120)
 })
 
 test('buildTaskPayload normalizes legacy task tags during edit save', () => {
@@ -98,35 +94,4 @@ test('initialTaskDateValue keeps blank dates blank when editing an existing task
 test('initialTaskDateValue still defaults new task dates to today', () => {
   assert.equal(initialTaskDateValue(null, 'start_date', '2026-07-08'), '2026-07-08')
   assert.equal(initialTaskDateValue(undefined, 'due_date', '2026-07-08'), '2026-07-08')
-})
-
-test('validateTaskOwnership requires an assignee for active owned work', () => {
-  assert.equal(validateTaskOwnership({ ...baseData, status: 'in_progress', assignee_name: '   ' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
-  assert.equal(validateTaskOwnership({ ...baseData, status: 'done', assignee_name: '' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
-  assert.equal(validateTaskOwnership({ ...baseData, status: 'todo', progress: '25', assignee_name: '' }), '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.')
-})
-
-test('validateTaskOwnership allows unassigned backlog work', () => {
-  assert.equal(validateTaskOwnership({ ...baseData, status: 'todo', progress: '0', assignee_name: ' ' }), '')
-  assert.equal(validateTaskOwnership({ ...baseData, status: 'in_progress', progress: '40', assignee_name: '담당자' }), '')
-})
-
-test('validateTaskOwnership allows editing a legacy active task that is already unassigned', () => {
-  assert.equal(
-    validateTaskOwnership(
-      { ...baseData, title: '제목만 수정', status: 'in_progress', progress: '40', assignee_name: '' },
-      { id: 1, status: 'in_progress', progress: 40, assignee_name: '' },
-    ),
-    '',
-  )
-})
-
-test('validateTaskOwnership still blocks creating a new active unassigned state during edit', () => {
-  assert.equal(
-    validateTaskOwnership(
-      { ...baseData, status: 'in_progress', progress: '40', assignee_name: '' },
-      { id: 1, status: 'todo', progress: 0, assignee_name: '' },
-    ),
-    '진행 중이거나 완료된 업무에는 담당자를 지정해 주세요.',
-  )
 })

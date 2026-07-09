@@ -4,7 +4,7 @@ import { test } from 'node:test'
 import { apiErrorMessage } from './api.js'
 
 test('apiErrorMessage keeps plain backend messages intact', () => {
-  assert.equal(apiErrorMessage({ detail: 'Active or completed tasks require an assignee' }, 422), 'Active or completed tasks require an assignee')
+  assert.equal(apiErrorMessage({ detail: 'due_date must not be before start_date' }, 422), 'due_date must not be before start_date')
 })
 
 test('apiErrorMessage flattens FastAPI validation arrays into readable field messages', () => {

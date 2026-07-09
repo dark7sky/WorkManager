@@ -33,7 +33,6 @@ export const tasksToPrintableReport = (tasks, { todayIso, generatedAt = new Date
     const status = reportStatus(task, todayIso)
     return `<tr>
       <td><strong>${escapeHtml(task.title)}</strong>${task.description ? `<small>${escapeHtml(task.description)}</small>` : ''}</td>
-      <td>${escapeHtml(task.assignee_name || '미지정')}</td>
       <td>${escapeHtml(statusLabels[status] || status || '')}</td>
       <td>${escapeHtml(priorityLabels[task.priority] || task.priority || '')}</td>
       <td>${escapeHtml(task.start_date || '-')}</td>
@@ -68,8 +67,8 @@ export const tasksToPrintableReport = (tasks, { todayIso, generatedAt = new Date
   </header>
   <p class="summary">총 ${tasks.length}개 · 진행 ${active}개 · 완료 ${done}개 · 지연 ${overdue}개</p>
   <table>
-    <thead><tr><th>업무</th><th>담당자</th><th>상태</th><th>우선순위</th><th>시작일</th><th>기한</th><th>진행률</th><th>태그</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="8">표시할 업무가 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>업무</th><th>상태</th><th>우선순위</th><th>시작일</th><th>기한</th><th>진행률</th><th>태그</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="7">표시할 업무가 없습니다.</td></tr>'}</tbody>
   </table>
 </body>
 </html>`

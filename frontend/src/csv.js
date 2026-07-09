@@ -6,7 +6,7 @@ const taskStatusLabels = {
   overdue: '지연',
 }
 
-const headers = ['제목', '담당자', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모']
+const headers = ['제목', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -22,7 +22,6 @@ export const taskExportStatus = (task, todayIso) => {
 export const tasksToCsv = (tasks, todayIso) => {
   const rows = tasks.map(task => [
     task.title,
-    task.assignee_name,
     taskStatusLabels[taskExportStatus(task, todayIso)] || task.status,
     task.priority,
     task.start_date,

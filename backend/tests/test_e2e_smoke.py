@@ -16,7 +16,7 @@ PAYLOADS = {
 }
 
 PATCHES = {
-    "tasks": {"title": "Smoke task (updated)", "progress": 50, "assignee_name": "Smoke Owner"},
+    "tasks": {"title": "Smoke task (updated)", "progress": 50},
     "events": {"title": "Smoke event (updated)"},
     "todos": {"completed": True},
     "work_logs": {"content": "Smoke log entry (updated)"},
