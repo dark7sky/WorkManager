@@ -12,6 +12,21 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-optional-approval-workflow',
+    timestamp: '2026-07-10T00:00:00+09:00',
+    description: '설정에 승인 워크플로 토글을 추가했습니다. 끄면 업무 완료와 일정 변경 시 승인 대기가 생기지 않아 혼자 사용할 때 불필요한 승인 단계 없이 바로 완료 처리됩니다.',
+  },
+  {
+    id: '2026-07-10-today-task-tap-guard',
+    timestamp: '2026-07-10T00:00:00+09:00',
+    description: '오늘 화면의 예정 업무가 행 전체 탭으로 완료 처리되던 것을 체크 아이콘을 눌렀을 때만 완료되도록 바꿔, 모바일에서 실수로 업무가 완료되는 문제를 방지했습니다.',
+  },
+  {
+    id: '2026-07-10-ai-settings-encoding-repair',
+    timestamp: '2026-07-10T00:00:00+09:00',
+    description: '설정 화면 AI 서비스 섹션과 AI 상태 메시지의 깨진 한글 표기를 복구하고, AI 설정 저장 응답이 조회 응답과 같은 정보를 담도록 수정했습니다.',
+  },
+  {
     id: '2026-07-09-ai-provider-key-preservation-and-model-listbox',
     timestamp: '2026-07-09T00:00:00+09:00',
     requestedAt: '2026-07-09T00:00:00+09:00',

@@ -1,6 +1,14 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-08T15:33:02+09:00
+Last updated: 2026-07-10
+
+See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (P0-P4).
+
+## Real-Use Readiness (2026-07-10)
+
+- [x] Repair mojibake in AI settings UI and backend AI status strings; align PUT /api/settings/ai response with GET.
+- [x] Optional per-user approval workflow toggle so personal use skips self-approval of completed work and schedule changes.
+- [x] Today screen: completion toggle limited to the check icon to prevent accidental taps marking tasks done.
 
 ## Commercial Schedule Management Gaps
 
