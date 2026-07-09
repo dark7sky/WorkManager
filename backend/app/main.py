@@ -72,6 +72,12 @@ def audit(user_id, action, entity_type, entity_id=None, metadata=None):
                    json.dumps(metadata or {}, ensure_ascii=False), now()))
 
 
+def load_approval_workflow_setting(user_id):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, "approval_workflow")).fetchone()
+    return row["value"] != "off" if row else True
+
+
 _rate_buckets = {}
 _rate_last_cleanup = 0.0
 def enforce_rate(user_id, bucket, limit, window_seconds):
@@ -275,6 +281,10 @@ class AISettingsPayload(StrictPayload):
     api_key: str | None = Field(None, max_length=5000)
     base_url: str | None = Field(None, max_length=2000)
     model: str | None = Field(None, max_length=120)
+
+
+class WorkflowSettingsPayload(StrictPayload):
+    approval_workflow: bool | None = None
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -589,7 +599,8 @@ def create_item(table, data, user_id):
             data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
     if table == "tasks" and data.get("status") == "done":
         data["completed_at"] = timestamp
-        data.setdefault("approval_status", "pending")
+        approval_workflow_on = load_approval_workflow_setting(user_id)
+        data.setdefault("approval_status", "pending" if approval_workflow_on else "none")
     if table == "tasks" and data.get("approval_status") not in (None, "none") and data.get("status") != "done":
         raise HTTPException(422, "approval_status requires a completed task")
     if table == "work_logs" and data.get("task_id"):
@@ -634,6 +645,7 @@ def update_item(table, item_id, data, user_id):
         if not existing:
             raise HTTPException(404, "Item not found")
         if table == "tasks":
+            approval_workflow_on = load_approval_workflow_setting(user_id)
             visible_task_ids = None
             for key in TASK_TEXT_LIMITS:
                 normalized = normalize_legacy_task_text(key, existing[key])
@@ -675,14 +687,14 @@ def update_item(table, item_id, data, user_id):
                     data[key] = normalized_json
             target_status = data.get("status", existing["status"])
             schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
-            if schedule_changed and "schedule_approval_status" not in data:
+            if schedule_changed and approval_workflow_on and "schedule_approval_status" not in data:
                 data["schedule_approval_status"] = "pending"
             if target_status != "done" and "approval_status" not in data and existing["approval_status"] not in (None, "none"):
                 data["approval_status"] = "none"
             if target_status == "done" and existing["status"] != "done":
                 became_done = True
                 data["completed_at"] = now()
-                data.setdefault("approval_status", "pending")
+                data.setdefault("approval_status", "pending" if approval_workflow_on else "none")
             elif target_status != "done" and existing["status"] == "done":
                 data["completed_at"] = None
                 data["approval_status"] = "none"
@@ -1038,6 +1050,30 @@ def ai_settings_update(payload: dict = Body(...), user=Depends(require_user)):
         raise HTTPException(422, str(exc))
     except RuntimeError as exc:
         raise HTTPException(500, str(exc))
+
+
+@app.get("/api/settings/workflow")
+def workflow_settings(user=Depends(require_user)):
+    approval_workflow_on = load_approval_workflow_setting(user)
+    return {"approval_workflow": approval_workflow_on}
+
+
+@app.put("/api/settings/workflow")
+def workflow_settings_update(payload: dict = Body(...), user=Depends(require_user)):
+    try:
+        model = WorkflowSettingsPayload.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(422, detail=json.loads(exc.json(include_url=False)))
+    value = model.model_dump(exclude_unset=True)
+    if "approval_workflow" in value:
+        approval_workflow_on = value["approval_workflow"]
+        stored_value = "on" if approval_workflow_on else "off"
+        with connection() as c:
+            c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+              ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                      (user, "approval_workflow", stored_value, now()))
+        audit(user, "update", "settings", "approval_workflow", {"approval_workflow": approval_workflow_on})
+    return {"approval_workflow": load_approval_workflow_setting(user)}
 
 
 @app.post("/api/ai/tag-recommendations")

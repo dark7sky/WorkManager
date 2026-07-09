@@ -34,6 +34,7 @@ export default function Settings({ theme, setTheme, teamMembers = [], tasks = []
   const [calendars, setCalendars] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  const [workflowSettings, setWorkflowSettings] = useState(null)
   const [aiConfig, setAiConfig] = useState(null)
   const [aiDraft, setAiDraft] = useState({ provider: 'openai', api_key: '', base_url: '', model: '' })
   const [memberName, setMemberName] = useState('')
@@ -58,12 +59,14 @@ export default function Settings({ theme, setTheme, teamMembers = [], tasks = []
   const load = async () => {
     setError('')
     try {
-      const [integrations, ai] = await Promise.all([
+      const [integrations, ai, workflow] = await Promise.all([
         api.googleStatus(),
         api.aiSettings().catch(() => api.aiStatus()),
+        api.workflowSettings().catch(() => ({ approval_workflow: true })),
       ])
       setData(integrations)
       applyAiConfig(ai)
+      setWorkflowSettings(workflow)
       if (integrations.connected || integrations.google_connected || integrations.google?.connected) {
         const response = await api.googleCalendars()
         setCalendars(response.items || response.calendars || [])
@@ -196,6 +199,24 @@ export default function Settings({ theme, setTheme, teamMembers = [], tasks = []
     }
   }
 
+
+  const toggleWorkflowSettings = async e => {
+    const newValue = e.target.checked
+    setBusy("workflow-save")
+    const previousValue = workflowSettings?.approval_workflow ?? true
+    setWorkflowSettings(w => ({ ...w, approval_workflow: newValue }))
+    try {
+      const result = await api.saveWorkflowSettings({ approval_workflow: newValue })
+      setWorkflowSettings(result)
+      notify("승인 워크플로 설정을 저장했습니다.")
+    } catch (e) {
+      notify(e.message, "error")
+      setWorkflowSettings(w => ({ ...w, approval_workflow: previousValue }))
+    } finally {
+      setBusy("")
+    }
+  }
+
   const connected = data?.connected ?? data?.google_connected ?? data?.google?.connected
   const selected = data?.selected_calendar_id ?? data?.google?.selected_calendar_id
   const aiProvider = aiConfig?.provider || aiDraft.provider
@@ -236,6 +257,10 @@ export default function Settings({ theme, setTheme, teamMembers = [], tasks = []
       <section className="settings-card">
         <div className="settings-heading"><span><CalendarSync /></span><div><h2>Google 캘린더</h2><p>업무용 캘린더의 일정을 WorkManager와 동기화합니다.</p></div><em className={`status-pill ${connected ? 'online' : ''}`}>{connected ? '연결됨' : '연결 안 됨'}</em></div>
         {!data ? <div className="skeleton lines" /> : connected ? <div className="integration-body"><label>연동할 캘린더<select value={selected || ''} onChange={e => select(e.target.value)} disabled={busy === 'select'}><option value="">캘린더 선택</option>{calendars.map(c => <option key={c.id} value={c.id}>{c.summary || c.name}{c.primary ? ' (기본)' : ''}</option>)}</select></label><button className="primary" disabled={!selected || !!busy} onClick={sync}>{busy === 'sync' ? <LoaderCircle className="spin" /> : <RefreshCw />} 지금 동기화</button><small>선택한 캘린더와 양방향으로 변경 사항을 맞춥니다. 중복 일정은 만들지 않습니다.</small></div> : <div className="integration-empty"><Cloud /><div><strong>Google 계정 연결이 필요합니다</strong><p>로그아웃 후 Google로 로그인하면 캘린더를 선택할 수 있습니다.</p></div><a className="secondary" href="/api/auth/google/start">Google 연결</a></div>}
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><Bot /></span><div><h2>승인 워크플로</h2><p>완료 업무와 일정 변경에 승인 단계를 요구합니다. 혼자 사용할 때는 꺼 두세요.</p></div></div>
+        {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? true} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>AI ???</h2><p>? ??? ? AI ???? ?? ?? ?????.</p></div><em className={`status-pill ${aiConfig?.configured ? 'online' : ''}`}>{aiConfig?.configured ? '???' : '???'}</em></div>

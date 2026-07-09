@@ -349,6 +349,27 @@ class ApiTests(unittest.TestCase):
         mar = a.patch(f"/api/tasks/{feb_task['id']}", json={"status": "done"}).json()
         self.assertEqual(a.get(f"/api/tasks/{mar['next_recurrence_id']}").json()["due_date"], "2027-03-31")
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_approval_workflow_can_be_disabled_per_user(self, *_):
+        a = self.client(self.token_a)
+        default_task = a.post("/api/tasks", json={"title": "default workflow", "status": "done", "assignee_name": "Dana"}).json()
+        self.assertEqual(default_task["approval_status"], "pending")
+        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], True)
+        disabled = a.put("/api/settings/workflow", json={"approval_workflow": False})
+        self.assertEqual(disabled.status_code, 200, disabled.text)
+        self.assertEqual(disabled.json()["approval_workflow"], False)
+        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], False)
+        personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done", "assignee_name": "Dana"}).json()
+        self.assertEqual(personal_task["approval_status"], "none")
+        task_for_schedule_test = a.post("/api/tasks", json={"title": "schedule test", "due_date": "2026-07-10", "assignee_name": "Dana"}).json()
+        self.assertEqual(task_for_schedule_test["schedule_approval_status"], "none")
+        updated = a.patch(f"/api/tasks/{task_for_schedule_test['id']}", json={"due_date": "2026-07-15"}).json()
+        self.assertEqual(updated["schedule_approval_status"], "none")
+        updated_status = a.patch(f"/api/tasks/{personal_task['id']}", json={"status": "doing", "progress": 50}).json()
+        self.assertEqual(updated_status["approval_status"], "none")
+        self.assertEqual(updated_status["status"], "doing")
+
 
 if __name__ == "__main__":
     unittest.main()
