@@ -4,9 +4,6 @@ import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
 
-const now = new Date()
-const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
-
 function localDate(value) {
   if (!value) return null
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00`) : new Date(value)
@@ -29,6 +26,8 @@ export default function Today(props) {
     onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo,
     onAddLog, onUpdateLog, onDeleteLog, onToggleTask, goAI,
   } = props
+  const now = new Date()
+  const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
   const [todoDraft, setTodoDraft] = useState('')
   const [todoTags, setTodoTags] = useState([])
   const [logDraft, setLogDraft] = useState('')
