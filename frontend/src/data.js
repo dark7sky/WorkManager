@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-settings-ai-mojibake-fix',
+    timestamp: '2026-07-10T17:00:00+09:00',
+    description: '설정 화면의 AI 섹션에 남아 있던 인코딩 깨짐(물음표로 표시되던 라벨·안내 문구)을 수정했습니다.',
+  },
+  {
     id: '2026-07-10-ai-summary-evidence',
     timestamp: '2026-07-10T16:00:00+09:00',
     description: 'AI 성과 요약에 근거 목록을 추가했습니다. 요약 아래에 어떤 업무 기록·업무·일정을 근거로 사용했는지 날짜와 함께 보여줍니다.',

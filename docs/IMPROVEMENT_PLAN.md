@@ -14,7 +14,7 @@
 
 ## P0 — 안정성 회복 (즉시)
 
-1. 인코딩 깨짐 복구: `frontend/src/screens/Settings.jsx` AI 섹션, `backend/app/ai.py` `status()` 문자열. 원문은 커밋 `9d92919`에서 복구.
+1. 인코딩 깨짐 복구: `frontend/src/screens/Settings.jsx` AI 섹션, `backend/app/ai.py` `status()` 문자열. 원문은 커밋 `9d92919`에서 복구. — **정정(2026-07-10 재점검)**: 백엔드 `ai.py`는 실제로 정상이었으나 프런트 `Settings.jsx` AI 섹션은 이 항목이 "완료"로 표시된 뒤에도 실제로는 고쳐지지 않은 채 남아 있었음(라벨·상태 배지·플레이스홀더·에러 메시지·진단 목록 전부 `?`). 커밋 `adb3e02`에서 실제로 복구.
 2. `PUT /api/settings/ai` 응답을 `GET /api/settings/ai`(=`ai.status()`)와 같은 형태로 통일 → 실패 테스트 1 해결.
 3. `test_ai.py`의 낡은 `status()` 호출 테스트를 사용자 단위 시그니처에 맞게 수정 → 실패 테스트 2 해결.
 4. 완료 기준: 백엔드 67개·프런트 53개 테스트 전부 통과 + `npm run build` 성공.
