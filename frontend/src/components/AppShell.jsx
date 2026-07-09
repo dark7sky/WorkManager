@@ -1,7 +1,7 @@
 import { BarChart3, CalendarDays, CheckSquare2, ClipboardList, History, LayoutDashboard, ListTodo, LogOut, Settings, Sparkles } from 'lucide-react'
 const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['audit',ClipboardList,'감사'],['changelog',History,'변경'],['settings',Settings,'설정']]
 export default function AppShell({ page, setPage, children, onLogout, user }) {
-  const initials = (user?.name || user?.email || user?.user_id || '나').slice(0,2).toUpperCase()
+  const initials = (user?.display_name || user?.email || user?.id || '나').slice(0,2).toUpperCase()
   const navigate = id => {
     setPage(id)
     document.querySelector('.main-area')?.focus({ preventScroll: true })
@@ -21,7 +21,7 @@ export default function AppShell({ page, setPage, children, onLogout, user }) {
     <aside className="sidebar">
       <div className="brand"><span className="brand-mark"><ListTodo size={20} aria-hidden="true"/></span><strong>WorkManager</strong></div>
       <nav aria-label="주 메뉴">{navigation()}</nav>
-      <div className="sidebar-foot"><div className="avatar" aria-hidden="true">{initials}</div><div><strong>{user?.name || '나의 작업 공간'}</strong><small title={user?.email}>{user?.email || '개인 계정'}</small></div><button type="button" className="icon-button" onClick={onLogout} aria-label="로그아웃" title="로그아웃"><LogOut size={18} aria-hidden="true"/></button></div>
+      <div className="sidebar-foot"><div className="avatar" aria-hidden="true">{initials}</div><div><strong>{user?.display_name || '나의 작업 공간'}</strong><small title={user?.email}>{user?.email || '개인 계정'}</small></div><button type="button" className="icon-button" onClick={onLogout} aria-label="로그아웃" title="로그아웃"><LogOut size={18} aria-hidden="true"/></button></div>
     </aside>
     <main id="main-content" className="main-area" tabIndex="-1">{children}</main>
     <nav className="mobile-nav" aria-label="모바일 메뉴">{navigation(true)}</nav>
