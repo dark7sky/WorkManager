@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-real-use-bug-fixes',
+    timestamp: '2026-07-10T18:00:00+09:00',
+    description: '코드 감사로 찾은 실사용 버그를 고쳤습니다: 앱을 자정 너머로 켜 두면 "오늘" 화면 날짜가 어제로 멈춰 있던 문제, 사이드바에 로그인 계정 이름이 표시되지 않던 문제, 아무 동작도 하지 않던 헤더의 종 아이콘, AI 로컬 분석이 "1월 5일"처럼 연도 없는 날짜를 연말에 이미 지난 날짜로 잘못 해석하던 문제.',
+  },
+  {
     id: '2026-07-10-settings-ai-mojibake-fix',
     timestamp: '2026-07-10T17:00:00+09:00',
     description: '설정 화면의 AI 섹션에 남아 있던 인코딩 깨짐(물음표로 표시되던 라벨·안내 문구)을 수정했습니다.',
