@@ -12,6 +12,31 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-performance-presets-and-markdown-export',
+    timestamp: '2026-07-10T12:00:00+09:00',
+    description: '성과 화면에 기간·태그 조합을 프리셋으로 저장하는 기능과 통계·AI 요약·활동 타임라인을 담은 Markdown 보고서 내보내기를 추가해, 평가 자료 준비를 반복 없이 할 수 있게 했습니다.',
+  },
+  {
+    id: '2026-07-10-work-log-task-link',
+    timestamp: '2026-07-10T12:00:00+09:00',
+    description: '오늘 한 일 기록을 업무에 연결할 수 있게 했습니다. 기록 등록·수정 시 업무를 선택하면 목록에 연결된 업무가 표시되어 성과 추적이 쉬워집니다.',
+  },
+  {
+    id: '2026-07-10-calendar-week-view',
+    timestamp: '2026-07-10T12:00:00+09:00',
+    description: '일정 화면에 주간 보기를 추가했습니다. 월/주 전환과 주 단위 이동을 지원하며 요일별로 일정을 시간순으로 보여줍니다.',
+  },
+  {
+    id: '2026-07-10-faster-todo-log-updates',
+    timestamp: '2026-07-10T12:00:00+09:00',
+    description: '오늘 할 일과 업무 기록의 추가·수정·완료 토글이 전체 데이터를 다시 불러오지 않고 즉시 반영되도록 개선해 모바일에서 훨씬 빠르게 동작합니다.',
+  },
+  {
+    id: '2026-07-10-backup-verify-and-version',
+    timestamp: '2026-07-10T12:00:00+09:00',
+    description: '백업 파일의 복원 가능 여부를 확인하는 검증 스크립트를 추가하고, 설정 화면 하단에 앱 버전을 표시합니다.',
+  },
+  {
     id: '2026-07-10-optional-approval-workflow',
     timestamp: '2026-07-10T00:00:00+09:00',
     description: '설정에 승인 워크플로 토글을 추가했습니다. 끄면 업무 완료와 일정 변경 시 승인 대기가 생기지 않아 혼자 사용할 때 불필요한 승인 단계 없이 바로 완료 처리됩니다.',

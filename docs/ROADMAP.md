@@ -9,6 +9,11 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (P0-P4).
 - [x] Repair mojibake in AI settings UI and backend AI status strings; align PUT /api/settings/ai response with GET.
 - [x] Optional per-user approval workflow toggle so personal use skips self-approval of completed work and schedule changes.
 - [x] Today screen: completion toggle limited to the check icon to prevent accidental taps marking tasks done.
+- [x] Local state updates for todo/work-log mutations instead of full refetch (P2).
+- [x] Calendar week view with month/week switcher (P2).
+- [x] Performance report presets and Markdown export (P3).
+- [x] Work log to task linking UI on the Today screen (P3).
+- [x] Backup verification script (scripts/verify_backup.py) and app version display in Settings (P4).
 
 ## Commercial Schedule Management Gaps
 
