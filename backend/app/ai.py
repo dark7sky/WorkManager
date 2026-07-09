@@ -384,12 +384,15 @@ def period_summary(report: dict) -> dict:
     logs = int(summary.get("work_logs", 0))
     events = int(summary.get("events", 0))
     active = int(summary.get("active_tasks", 0))
-    highlights = [str(item.get("title") or item.get("content") or "").strip() for item in report.get("timeline", [])[:8]]
-    highlights = [value for value in highlights if value]
-    detail = f" 주요 활동은 {', '.join(highlights)}입니다." if highlights else ""
+    highlight_items = report.get("timeline", [])[:8]
+    highlights = [{"type": item.get("type"), "type_label": item.get("type_label"), "id": item.get("id"),
+                   "date": item.get("date"), "title": str(item.get("title") or item.get("content") or "").strip()}
+                  for item in highlight_items]
+    highlights = [item for item in highlights if item["title"]]
+    detail = f" 주요 활동은 {', '.join(item['title'] for item in highlights)}입니다." if highlights else ""
     return {"headline": f"완료 업무 {completed}건 · 업무 기록 {logs}건",
             "narrative": f"선택 기간에 업무 {completed}건을 완료하고 일정 {events}건을 진행했습니다. 현재 진행 중인 업무는 {active}건입니다.{detail}",
-            "metrics": summary, "source": "private-rules", "preview_only": True}
+            "metrics": summary, "highlights": highlights, "source": "private-rules", "preview_only": True}
 
 
 def project_progress_suggestions(tasks: list[dict], logs: list[dict], limit: int = 5) -> list[dict]:

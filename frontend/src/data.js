@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-summary-evidence',
+    timestamp: '2026-07-10T16:00:00+09:00',
+    description: 'AI 성과 요약에 근거 목록을 추가했습니다. 요약 아래에 어떤 업무 기록·업무·일정을 근거로 사용했는지 날짜와 함께 보여줍니다.',
+  },
+  {
     id: '2026-07-10-remove-team-assignee-feature',
     timestamp: '2026-07-10T15:00:00+09:00',
     description: '1인 사용에 맞춰 담당자 지정, 팀원 명단, 담당자별 업무량·부하 현황 기능을 제거했습니다. 업무 담당자나 협업자 정보가 필요하면 메모나 태그에 남겨 주세요.',

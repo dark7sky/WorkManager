@@ -15,6 +15,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Work log to task linking UI on the Today screen (P3).
 - [x] Backup verification script (scripts/verify_backup.py) and app version display in Settings (P4).
 - [x] E2e smoke test: login-bypass session token exercising full create/read/update/delete/restore round trip for every core entity (P4).
+- [x] AI performance summary shows a structured evidence list (which logs/tasks/events it used), not just prose (Wave 2).
 
 ## Task Management & Reporting
 

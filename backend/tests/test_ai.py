@@ -59,9 +59,10 @@ class ValidationAndStatusTests(unittest.TestCase):
 
     def test_period_summary_includes_real_activity(self):
         report = {"summary": {"completed_tasks": 1, "work_logs": 1, "events": 0, "active_tasks": 0},
-                  "timeline": [{"type": "work_log", "content": "신규 결제 API 배포"}]}
+                  "timeline": [{"type": "work_log", "type_label": "업무 기록", "id": 5, "date": "2026-07-08", "content": "신규 결제 API 배포"}]}
         result = ai.period_summary(report)
         self.assertIn("신규 결제 API 배포", result["narrative"])
+        self.assertEqual(result["highlights"], [{"type": "work_log", "type_label": "업무 기록", "id": 5, "date": "2026-07-08", "title": "신규 결제 API 배포"}])
 
     def test_project_suggestion_uses_shared_tags_without_task_link(self):
         tasks = [{"id": 7, "title": "결제 개선", "status": "doing", "progress": 20, "tags": ["결제"]}]
