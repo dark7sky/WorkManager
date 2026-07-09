@@ -159,6 +159,12 @@ docker compose exec -T -e BACKUP_INTERVAL_SECONDS=0 backup python /app/scripts/b
 docker compose exec -T backup ls -lh /backups
 ```
 
+복원 가능 여부는 검증 스크립트로 확인할 수 있습니다.
+
+```powershell
+docker compose exec -T backup python /app/scripts/verify_backup.py
+```
+
 볼륨 백업을 다른 디스크나 암호화된 원격 저장소에도 복제하십시오. 같은 Docker 호스트의 백업만으로는 디스크 고장을 막을 수 없습니다. 복원할 때는 서비스를 멈추고 검증된 백업을 `workmanager_data`의 `workmanager.db`로 복사한 다음 시작합니다.
 
 ```powershell

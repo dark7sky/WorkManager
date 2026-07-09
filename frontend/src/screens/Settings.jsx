@@ -277,6 +277,7 @@ export default function Settings({ theme, setTheme, teamMembers = [], tasks = []
       </section>
       <TrashSection notify={notify} onDataChanged={onDataChanged} />
       {error ? <p className="inline-error">{error} <button onClick={load}>다시 시도</button></p> : null}
+      <p className="muted app-version">WorkManager v{__APP_VERSION__}</p>
     </div>
   </>
 }
