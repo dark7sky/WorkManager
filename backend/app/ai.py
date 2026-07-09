@@ -230,11 +230,14 @@ def _day(text: str, today: date | None = None) -> str:
             return today.isoformat()
     match = re.search(r"(\d{1,2})\s*월\s*(\d{1,2})\s*일", text)
     if match:
-        try:
-            candidate = date(today.year, int(match.group(1)), int(match.group(2)))
-            return candidate.isoformat()
-        except ValueError:
-            pass
+        month, day = int(match.group(1)), int(match.group(2))
+        for year in (today.year, today.year + 1):
+            try:
+                candidate = date(year, month, day)
+            except ValueError:
+                continue
+            if candidate >= today:
+                return candidate.isoformat()
     return today.isoformat()
 
 

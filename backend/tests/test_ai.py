@@ -30,6 +30,13 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["entity"], "work_log")
         self.assertTrue(result["data"]["content"])
 
+    def test_explicit_month_day_before_today_rolls_to_next_year(self):
+        result = ai.rule_parse("1월 5일 신년 계획 보고서 제출")
+        self.assertEqual(result["entity"], "task")
+        due = date.fromisoformat(result["data"]["due_date"])
+        self.assertGreaterEqual(due, date.today())
+        self.assertEqual((due.month, due.day), (1, 5))
+
 
 class ValidationAndStatusTests(unittest.TestCase):
     def test_rejects_unknown_entity(self):
