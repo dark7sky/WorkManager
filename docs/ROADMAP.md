@@ -14,6 +14,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (P0-P4).
 - [x] Performance report presets and Markdown export (P3).
 - [x] Work log to task linking UI on the Today screen (P3).
 - [x] Backup verification script (scripts/verify_backup.py) and app version display in Settings (P4).
+- [x] E2e smoke test: login-bypass session token exercising full create/read/update/delete/restore round trip for every core entity (P4).
 
 ## Commercial Schedule Management Gaps
 
