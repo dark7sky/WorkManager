@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-10
 
-See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence, polish, in progress; team/assignee feature removal, done).
+See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done).
 
 ## Real-Use Readiness (2026-07-10)
 
