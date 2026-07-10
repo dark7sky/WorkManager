@@ -1,5 +1,5 @@
-import { BarChart3, CalendarDays, CheckSquare2, History, LayoutDashboard, ListTodo, LogOut, Search, Settings, Sparkles } from 'lucide-react'
-const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['changelog',History,'변경'],['settings',Settings,'설정']]
+import { ListTodo, LogOut, Search } from 'lucide-react'
+import { navItems } from '../navigation.js'
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
 export default function AppShell({ page, setPage, children, onLogout, user, onQuickCapture }) {
   const initials = (user?.display_name || user?.email || user?.id || '나').slice(0,2).toUpperCase()
@@ -7,7 +7,7 @@ export default function AppShell({ page, setPage, children, onLogout, user, onQu
     setPage(id)
     document.querySelector('.main-area')?.focus({ preventScroll: true })
   }
-  const navigation = (mobile = false) => items.map(([id,Icon,label]) => <button
+  const navigation = (mobile = false) => navItems.map(([id,Icon,label]) => <button
     key={id}
     type="button"
     className={page === id ? 'active' : ''}

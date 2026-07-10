@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-mobile-audit-nav-audit-tab',
+    timestamp: '2026-07-10T18:26:17+09:00',
+    description: '모바일 하단 메뉴에 감사 탭을 추가해 감사 화면으로 이동해도 메뉴 구성이 한 줄로 유지되도록 정리했습니다.',
+  },
+  {
     id: '2026-07-10-mobile-audit-nav-fix',
     timestamp: '2026-07-10T18:18:41+09:00',
     description: '감사 로그 화면을 연 뒤 모바일 하단 메뉴가 다음 줄로 밀리던 문제를 고쳤습니다. 하단 메뉴를 8열로 유지해 감사 메뉴를 포함한 모든 탭이 한 줄에 보이도록 정리했습니다.',
