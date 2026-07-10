@@ -42,6 +42,14 @@ export const getAiDraft = (provider, drafts = {}, config = null) => {
 }
 
 export const upsertAiConfig = (configs = {}, ai = null) => {
-  const provider = normalizeAiProvider(ai?.provider || ai?.selected_provider || 'openai')
-  return { ...configs, [provider]: ai }
+  if (!ai) return configs
+  const provider = normalizeAiProvider(ai.provider || ai.selected_provider || 'openai')
+  return {
+    ...configs,
+    [provider]: {
+      ...ai,
+      provider,
+      selected_provider: provider,
+    },
+  }
 }

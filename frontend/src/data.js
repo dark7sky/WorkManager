@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-provider-config-label-normalization',
+    timestamp: '2026-07-10T20:14:55+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정에서 provider별 저장 레코드가 자기 provider 라벨과 항상 일치하도록 정리해, OpenAI와 Gemini의 모델·API 키·선택 정보가 서로 섞여 남는 혼선을 줄였습니다.',
+  },
+  {
     id: '2026-07-10-ai-provider-draft-label-guard',
     timestamp: '2026-07-10T20:01:46+09:00',
     requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',

@@ -45,5 +45,5 @@ test('upsertAiConfig prefers the explicit provider over selected_provider', () =
 
   assert.deepEqual(Object.keys(configs), ['gemini'])
   assert.equal(configs.gemini.provider, 'gemini')
-  assert.equal(configs.gemini.selected_provider, 'openai')
+  assert.equal(configs.gemini.selected_provider, 'gemini')
 })
