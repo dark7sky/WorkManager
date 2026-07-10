@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-compose-healthcheck',
+    timestamp: '2026-07-10T23:57:50+09:00',
+    description: '로컬/자체 배포용 docker-compose.yml의 api 컨테이너에 헬스체크(/api/ready)를 추가하고, backup·web 컨테이너가 api가 정상 응답할 때까지 기다리도록 했습니다. 운영 배포(portainer-stack.yml)와 동일한 방식이라 api가 죽은 채로 살아있는 척해도 감지할 수 있습니다.',
+  },
+  {
     id: '2026-07-10-audit-log-retention',
     timestamp: '2026-07-10T23:46:52+09:00',
     description: '감사 로그(audit_logs)가 무한히 쌓이지 않도록 보존 기한(기본 180일)을 넘긴 기록을 서버 시작 시 자동 정리합니다. AUDIT_LOG_RETENTION_DAYS 환경변수로 기간을 조정할 수 있습니다.',

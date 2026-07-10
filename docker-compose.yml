@@ -23,9 +23,17 @@ services:
     volumes:
       - workmanager_data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
   backup:
     image: workmanager-api:local
-    depends_on: [api]
+    depends_on:
+      api:
+        condition: service_healthy
     command: ["python", "/app/scripts/backup_db.py"]
     environment:
       DATABASE_PATH: /data/workmanager.db
@@ -38,7 +46,9 @@ services:
     restart: unless-stopped
   web:
     build: ./frontend
-    depends_on: [api]
+    depends_on:
+      api:
+        condition: service_healthy
     ports: ["8080:80"]
     restart: unless-stopped
 volumes:
