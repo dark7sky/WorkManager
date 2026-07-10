@@ -301,6 +301,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(body["provider"], "gemini")
         self.assertEqual(body["provider_name"], "Gemini")
         self.assertTrue(body["api_key_set"])
+        self.assertIn("Gemini · gemini-2.5-flash", body["binding_label"])
         self.assertNotIn("gemini-secret", saved.text)
 
         status = a.get("/api/settings/ai?provider=gemini")
@@ -317,6 +318,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(updated.status_code, 200, updated.text)
         self.assertTrue(updated.json()["api_key_set"])
         self.assertEqual(updated.json()["model"], "gemini-3.5-flash")
+        self.assertIn("Gemini · gemini-3.5-flash", updated.json()["binding_label"])
 
         switched = a.put("/api/settings/ai", json={
             "provider": "openai",
@@ -325,11 +327,13 @@ class ApiTests(unittest.TestCase):
         })
         self.assertEqual(switched.status_code, 200, switched.text)
         self.assertEqual(switched.json()["provider"], "openai")
+        self.assertIn("OpenAI · gpt-5-mini", switched.json()["binding_label"])
 
         gemini = a.get("/api/settings/ai?provider=gemini")
         self.assertEqual(gemini.status_code, 200, gemini.text)
         self.assertEqual(gemini.json()["provider"], "gemini")
         self.assertTrue(gemini.json()["api_key_set"])
+        self.assertIn("Gemini · gemini-3.5-flash", gemini.json()["binding_label"])
 
         other = b.get("/api/settings/ai")
         self.assertEqual(other.status_code, 200, other.text)

@@ -193,7 +193,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
           </div>
           <div className="integration-body ai-settings-footer"><div><strong>{aiConfig?.provider_name || (aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI')}</strong><small>제공자별로 모델과 API 키를 따로 저장합니다. 선택한 제공자에 맞는 설정만 불러옵니다.</small></div><button className="primary" disabled={busy === 'ai-save'}>{busy === 'ai-save' ? <LoaderCircle className="spin" /> : <Bot />} 저장</button></div>
         </form>}
-        {aiConfig ? <dl className="diagnostics"><div><dt>제공자</dt><dd>{aiConfig.provider_name || aiConfig.provider}</dd></div><div><dt>모델</dt><dd>{aiConfig.model || 'API 키 필요'}</dd></div><div><dt>상태</dt><dd>{aiConfig.message || '정보 없음'}</dd></div><div><dt>설정 출처</dt><dd>{aiConfig.source_label || aiConfig.source || '알 수 없음'}</dd></div><div><dt>저장된 키</dt><dd>{aiConfig.saved_api_key ? '있음' : '없음'}</dd></div></dl> : null}
+        {aiConfig ? <dl className="diagnostics"><div><dt>제공자</dt><dd>{aiConfig.provider_name || aiConfig.provider}</dd></div><div><dt>모델</dt><dd>{aiConfig.model || 'API 키 필요'}</dd></div><div><dt>매칭</dt><dd>{aiConfig.binding_label || aiConfig.message || '정보 없음'}</dd></div><div><dt>상태</dt><dd>{aiConfig.message || '정보 없음'}</dd></div><div><dt>설정 출처</dt><dd>{aiConfig.source_label || aiConfig.source || '알 수 없음'}</dd></div><div><dt>저장된 키</dt><dd>{aiConfig.saved_api_key ? '있음' : '없음'}</dd></div></dl> : null}
       </section>
       <TrashSection notify={notify} onDataChanged={onDataChanged} />
       {error ? <p className="inline-error">{error} <button onClick={load}>다시 시도</button></p> : null}

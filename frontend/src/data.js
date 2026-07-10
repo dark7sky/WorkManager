@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-binding-summary',
+    timestamp: '2026-07-10T20:22:52+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 화면에 제공자, 모델, API 키 상태를 한 줄로 묶은 매칭 요약을 추가해, 현재 조합이 서로 어긋나지 않았는지 바로 확인할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-10-ai-provider-config-label-normalization',
     timestamp: '2026-07-10T20:14:55+09:00',
     requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',

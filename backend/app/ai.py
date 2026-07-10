@@ -196,6 +196,7 @@ def save_user_config(user_id: str, payload: dict[str, Any]):
 def status(user_id: str, provider: str | None = None):
     config = get_user_config(user_id, provider)
     provider_name = "OpenAI" if config["provider"] == "openai" else "Gemini"
+    binding_label = f"{provider_name} · {config['model']} · {'키 저장됨' if config['api_key_set'] else '키 필요'}"
     return {
         "configured": config["configured"],
         "enabled": config["configured"],
@@ -208,6 +209,7 @@ def status(user_id: str, provider: str | None = None):
         "source_label": "계정 설정" if config["source"] == "user" else "서버 기본값",
         "api_key_set": config["api_key_set"],
         "message": f"{provider_name} 연결됨" if config["configured"] else f"{provider_name} 키 필요",
+        "binding_label": binding_label,
         "selected_provider": config["selected_provider"],
         "saved_api_key": config["saved_api_key"],
         "has_user_settings": config["has_user_settings"],
