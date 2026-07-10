@@ -1,4 +1,6 @@
+import asyncio
 import os
+import tempfile
 import unittest
 from datetime import date, timedelta
 from unittest.mock import patch
@@ -12,6 +14,31 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["entity"], "event")
         self.assertEqual(result["data"]["start_at"][:10], (date.today() + timedelta(days=1)).isoformat())
         self.assertIn("15:00", result["data"]["start_at"])
+
+    def test_rule_parse_multi_splits_multiline_input_into_one_item_per_line(self):
+        result = ai.rule_parse_multi("내일 오후 3시 고객 회의\n오늘 한 일: 배포 완료")
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["entity"], "event")
+        self.assertEqual(result[1]["entity"], "work_log")
+
+    def test_rule_parse_multi_single_line_returns_one_item(self):
+        result = ai.rule_parse_multi("업무 #7 진행률 50%")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["action"], "update")
+
+    def test_rule_parse_multi_caps_at_max_batch_items(self):
+        text = "\n".join(f"할 일 {i} 처리" for i in range(15))
+        result = ai.rule_parse_multi(text)
+        self.assertEqual(len(result), ai.MAX_BATCH_ITEMS)
+
+    def test_parse_text_without_api_key_returns_items_list(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import init_db
+            init_db()
+            result = asyncio.run(ai.parse_text("내일 오후 3시 고객 회의\n오늘 한 일: 배포 완료", user_id="__legacy__"))
+        self.assertEqual(len(result["items"]), 2)
+        self.assertEqual(result["items"][0]["entity"], "event")
+        self.assertEqual(result["items"][1]["entity"], "work_log")
 
     def test_progress_update_is_clamped(self):
         result = ai.rule_parse("업무 #42 진행률 130%")

@@ -289,6 +289,17 @@ def rule_parse(text: str) -> dict[str, Any]:
             "confidence": 0.58, "source": "local-rules"}
 
 
+MAX_BATCH_ITEMS = 10
+
+
+def rule_parse_multi(text: str) -> list[dict[str, Any]]:
+    """Split multi-line input into one action per non-empty line."""
+    segments = [line.strip() for line in text.split("\n") if line.strip()]
+    if not segments:
+        segments = [text.strip()]
+    return [rule_parse(segment) for segment in segments[:MAX_BATCH_ITEMS]]
+
+
 def _normalize(result: Any) -> dict[str, Any]:
     if not isinstance(result, dict):
         raise ValueError("AI response is not an object")
@@ -305,17 +316,18 @@ def _normalize(result: Any) -> dict[str, Any]:
 
 
 async def parse_text(text: str, context: list[dict] | None = None, user_id: str | None = None) -> dict[str, Any]:
+    """Returns {"items": [...]}: one action per detected request, up to MAX_BATCH_ITEMS."""
     config = get_user_config(user_id) if user_id else get_user_config("__legacy__")
     key = config["api_key"]
     if not key:
-        return rule_parse(text)
+        return {"items": rule_parse_multi(text)}
     system = (
-        "You convert Korean work-management commands into exactly one JSON action. "
+        "You convert Korean work-management commands into JSON actions. "
         "Allowed actions: create, update. Allowed entities: task, event, todo, work_log. "
-        "Return keys action, entity, optional integer id, data, confidence. Never invent an id. "
-        "Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
-        "If the input contains several requests, select the first concrete action and include "
-        "a short warning field saying that only one action can be previewed. JSON only."
+        'Return {"items": [...]} where each item has keys action, entity, optional integer id, data, confidence. '
+        "Never invent an id. Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
+        "If the input contains several separate requests (for example one per line), return one item per "
+        f"request, up to {MAX_BATCH_ITEMS} items. JSON only."
     )
     prompt = {"today": date.today().isoformat(), "timezone": os.getenv("TZ", "Asia/Seoul"),
               "input": text, "recent_tasks": (context or [])[:20]}
@@ -331,13 +343,17 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
                                          headers={"Authorization": f"Bearer {key}"})
             response.raise_for_status()
         result = json.loads(response.json()["choices"][0]["message"]["content"])
-        normalized = _normalize(result)
-        normalized["source"] = "remote-ai"
-        return normalized
+        raw_items = result.get("items")
+        if not isinstance(raw_items, list) or not raw_items:
+            raise ValueError("AI response is missing a non-empty items list")
+        items = [_normalize(item) for item in raw_items[:MAX_BATCH_ITEMS]]
+        for item in items:
+            item["source"] = "remote-ai"
+        return {"items": items}
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        fallback = rule_parse(text)
-        fallback["warning"] = f"AI 서비스 응답을 사용할 수 없어 로컬 규칙으로 분석했습니다 ({type(exc).__name__})."
-        return fallback
+        items = rule_parse_multi(text)
+        items[0]["warning"] = f"AI 서비스 응답을 사용할 수 없어 로컬 규칙으로 분석했습니다 ({type(exc).__name__})."
+        return {"items": items}
 
 
 def recommendations(tasks: list[dict], logs: list[dict], limit: int = 5) -> list[dict]:
