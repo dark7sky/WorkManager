@@ -23,6 +23,18 @@ DEFAULT_MODELS = {
     "openai": "gpt-5-mini",
     "gemini": "gemini-3.5-flash",
 }
+KNOWN_MODELS = {
+    "openai": {"gpt-5-mini", "gpt-5", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"},
+    "gemini": {"gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"},
+}
+
+
+def _model_matches_provider(provider: str, model: str) -> bool:
+    """Reject a model only when it is known to belong to a *different* provider."""
+    other_providers = [p for p in KNOWN_MODELS if p != provider]
+    return not any(model in KNOWN_MODELS[p] for p in other_providers)
+
+
 AI_SETTING_KEYS = {
     "selected_provider": "ai_provider",
     "api_key": "ai_api_key",
@@ -181,6 +193,8 @@ def save_user_config(user_id: str, payload: dict[str, Any]):
 
     if "model" in payload:
         model = str(payload.get("model") or "").strip() or _default_model(provider)
+        if not _model_matches_provider(provider, model):
+            raise ValueError(f"'{model}' model does not belong to provider '{provider}'")
         updates[_provider_setting_key(provider, "model")] = model
     elif provider_settings["stored_model"]:
         updates[_provider_setting_key(provider, "model")] = provider_settings["stored_model"]

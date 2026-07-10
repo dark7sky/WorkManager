@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-model-provider-server-validation',
+    timestamp: '2026-07-10T21:31:13+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 저장 시 서버에서도 모델이 선택한 프로바이더 소속인지 검증하도록 하여, UI를 거치지 않고 API를 직접 호출해도 프로바이더-모델 조합이 어긋나지 않게 막았습니다.',
+  },
+  {
     id: '2026-07-10-ai-binding-structured-summary',
     timestamp: '2026-07-10T20:44:59+09:00',
     requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',

@@ -337,6 +337,22 @@ class ApiTests(unittest.TestCase):
         other = ai.status("sub-b")
         self.assertNotEqual(other["provider"], "gemini")
 
+    def test_ai_settings_reject_model_provider_mismatch(self):
+        from app import ai
+
+        with self.assertRaises(ValueError):
+            ai.save_user_config("sub-mismatch", {
+                "provider": "openai",
+                "api_key": "openai-secret",
+                "model": "gemini-2.5-pro",
+            })
+        with self.assertRaises(ValueError):
+            ai.save_user_config("sub-mismatch", {
+                "provider": "gemini",
+                "api_key": "gemini-secret",
+                "model": "gpt-4.1-mini",
+            })
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_common_tags_filter_and_achievement_report(self, *_):
