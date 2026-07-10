@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-10
 
-See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done).
+See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done).
 
 ## Real-Use Readiness (2026-07-10)
 
@@ -16,6 +16,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Backup verification script (scripts/verify_backup.py) and app version display in Settings (P4).
 - [x] E2e smoke test: login-bypass session token exercising full create/read/update/delete/restore round trip for every core entity (P4).
 - [x] AI performance summary shows a structured evidence list (which logs/tasks/events it used), not just prose (Wave 2).
+- [x] Undo action on delete toasts for tasks, events, todos, and work logs (Wave 4).
 
 ## Task Management & Reporting
 
