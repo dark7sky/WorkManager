@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-mobile-audit-nav-seven-column-fix',
+    timestamp: '2026-07-10T19:22:34+09:00',
+    requestedAt: '2026-07-07T18:50:06+09:00',
+    requestContent: '감사 들어가면 모바일에서 하단 메뉴 ui가 깨짐',
+    description: '모바일 하단 메뉴에서 감사 탭을 빼고 7칸 그리드로 고정해, 감사 화면으로 들어가도 버튼이 밀리거나 잘리지 않게 했습니다. 감사 로그는 설정 화면에서 계속 열 수 있습니다.',
+  },
+  {
     id: '2026-07-10-mobile-audit-nav-eight-column-fix',
     timestamp: '2026-07-10T19:15:22+09:00',
     requestedAt: '2026-07-07T18:50:06+09:00',

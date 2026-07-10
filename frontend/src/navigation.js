@@ -10,3 +10,5 @@ export const navItems = [
   ['changelog', History, '변경'],
   ['settings', Settings, '설정'],
 ]
+
+export const mobileNavItems = navItems.filter(([id]) => id !== 'audit')

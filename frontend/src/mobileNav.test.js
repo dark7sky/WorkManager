@@ -4,9 +4,9 @@ import { test } from 'node:test'
 
 const styles = fs.readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
 
-test('mobile navigation keeps eight columns on small screens', () => {
+test('mobile navigation keeps seven columns on small screens', () => {
   assert.match(
     styles,
-    /\.mobile-nav\{height:calc\(64px \+ env\(safe-area-inset-bottom\)\);padding-bottom:env\(safe-area-inset-bottom\);grid-template-columns:repeat\(8,minmax\(0,1fr\)\);box-shadow:0 -8px 24px rgba\(22,34,52,\.08\)\}/
+    /\.mobile-nav\{height:calc\(64px \+ env\(safe-area-inset-bottom\)\);padding-bottom:env\(safe-area-inset-bottom\);grid-template-columns:repeat\(7,minmax\(0,1fr\)\);box-shadow:0 -8px 24px rgba\(22,34,52,\.08\)\}/
   )
 })

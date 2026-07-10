@@ -1,5 +1,5 @@
 import { ListTodo, LogOut, Search } from 'lucide-react'
-import { navItems } from '../navigation.js'
+import { mobileNavItems, navItems } from '../navigation.js'
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
 export default function AppShell({ page, setPage, children, onLogout, user, onQuickCapture }) {
   const initials = (user?.display_name || user?.email || user?.id || '나').slice(0,2).toUpperCase()
@@ -7,7 +7,7 @@ export default function AppShell({ page, setPage, children, onLogout, user, onQu
     setPage(id)
     document.querySelector('.main-area')?.focus({ preventScroll: true })
   }
-  const navigation = (mobile = false) => navItems.map(([id,Icon,label]) => <button
+  const navigation = (items = navItems, mobile = false) => items.map(([id,Icon,label]) => <button
     key={id}
     type="button"
     className={page === id ? 'active' : ''}
@@ -26,6 +26,6 @@ export default function AppShell({ page, setPage, children, onLogout, user, onQu
       <div className="sidebar-foot"><div className="avatar" aria-hidden="true">{initials}</div><div><strong>{user?.display_name || '나의 작업 공간'}</strong><small title={user?.email}>{user?.email || '개인 계정'}</small></div><button type="button" className="icon-button" onClick={onLogout} aria-label="로그아웃" title="로그아웃"><LogOut size={18} aria-hidden="true"/></button></div>
     </aside>
     <main id="main-content" className="main-area" tabIndex="-1">{children}</main>
-    <nav className="mobile-nav" aria-label="모바일 메뉴">{navigation(true)}</nav>
+    <nav className="mobile-nav" aria-label="모바일 메뉴">{navigation(mobileNavItems, true)}</nav>
   </div>
 }
