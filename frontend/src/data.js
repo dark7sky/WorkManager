@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-changelog-screen-crash-fix',
+    timestamp: '2026-07-10T23:15:41+09:00',
+    description: '변경 화면이 요청일 정보가 없는 항목을 만나면 통째로 열리지 않던 문제를 고쳤습니다. 날짜가 없거나 잘못된 항목이 있어도 화면이 정상 표시됩니다.',
+  },
+  {
     id: '2026-07-10-ai-base-url-provider-validation',
     timestamp: '2026-07-10T21:35:35+09:00',
     requestedAt: '2026-07-10T18:31:54+09:00',
