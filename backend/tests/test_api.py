@@ -353,6 +353,22 @@ class ApiTests(unittest.TestCase):
                 "model": "gpt-4.1-mini",
             })
 
+    def test_ai_settings_reject_base_url_provider_mismatch(self):
+        from app import ai
+
+        with self.assertRaises(ValueError):
+            ai.save_user_config("sub-mismatch-url", {
+                "provider": "openai",
+                "api_key": "openai-secret",
+                "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+            })
+        with self.assertRaises(ValueError):
+            ai.save_user_config("sub-mismatch-url", {
+                "provider": "gemini",
+                "api_key": "gemini-secret",
+                "base_url": "https://api.openai.com/v1",
+            })
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_common_tags_filter_and_achievement_report(self, *_):

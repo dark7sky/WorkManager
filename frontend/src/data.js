@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-base-url-provider-validation',
+    timestamp: '2026-07-10T21:35:35+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 저장 시 base_url도 검증하여, 다른 프로바이더의 API 엔드포인트를 선택한 프로바이더에 잘못 연결해 키가 엉뚱한 곳으로 전송되는 것을 막았습니다.',
+  },
+  {
     id: '2026-07-10-ai-model-provider-server-validation',
     timestamp: '2026-07-10T21:31:13+09:00',
     requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',

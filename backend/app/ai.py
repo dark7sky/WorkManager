@@ -35,6 +35,17 @@ def _model_matches_provider(provider: str, model: str) -> bool:
     return not any(model in KNOWN_MODELS[p] for p in other_providers)
 
 
+def _host(url: str) -> str:
+    return re.sub(r"^https?://", "", url).split("/")[0].lower()
+
+
+def _base_url_matches_provider(provider: str, base_url: str) -> bool:
+    """Reject a base_url only when its host is known to belong to a *different* provider."""
+    host = _host(base_url)
+    other_providers = [p for p in DEFAULT_BASE_URLS if p != provider]
+    return not any(host == _host(DEFAULT_BASE_URLS[p]) for p in other_providers)
+
+
 AI_SETTING_KEYS = {
     "selected_provider": "ai_provider",
     "api_key": "ai_api_key",
@@ -183,6 +194,8 @@ def save_user_config(user_id: str, payload: dict[str, Any]):
 
     if "base_url" in payload:
         base_url = str(payload.get("base_url") or "").strip() or _default_base_url(provider)
+        if not _base_url_matches_provider(provider, base_url):
+            raise ValueError(f"'{base_url}' base_url does not belong to provider '{provider}'")
         updates[_provider_setting_key(provider, "base_url")] = base_url
     elif provider_settings["stored_base_url"]:
         updates[_provider_setting_key(provider, "base_url")] = provider_settings["stored_base_url"]
