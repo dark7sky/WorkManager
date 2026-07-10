@@ -28,6 +28,12 @@ export const taskParentOptions = (tasks, currentTaskId) => {
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
 }
 
+export const subtaskCompletionSummary = (tasks, taskId) => {
+  const children = tasks.filter(task => task.parent_id === taskId)
+  if (!children.length) return null
+  return { total: children.length, done: children.filter(task => task.status === 'done').length }
+}
+
 export const taskHierarchyDepths = tasks => {
   const parents = new Map(tasks.map(task => [task.id, task.parent_id || null]))
   const depths = new Map()

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { orderTasksHierarchically, taskParentOptions } from './taskHierarchy.js'
+import { orderTasksHierarchically, subtaskCompletionSummary, taskParentOptions } from './taskHierarchy.js'
 
 const tasks = [
   { id: 1, title: 'Alpha' },
-  { id: 2, title: 'Bravo', parent_id: 1 },
+  { id: 2, title: 'Bravo', parent_id: 1, status: 'done' },
   { id: 3, title: 'Charlie', parent_id: 2 },
   { id: 4, title: 'Delta' },
 ]
@@ -31,4 +31,14 @@ test('orderTasksHierarchically places children directly below visible parents', 
 test('orderTasksHierarchically keeps matching children visible when parent is filtered out', () => {
   const ordered = orderTasksHierarchically([tasks[2], tasks[3]], tasks)
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[3, 2], [4, 0]])
+})
+
+test('subtaskCompletionSummary counts direct children only and reports done vs total', () => {
+  assert.deepEqual(subtaskCompletionSummary(tasks, 1), { total: 1, done: 1 })
+  assert.deepEqual(subtaskCompletionSummary(tasks, 2), { total: 1, done: 0 })
+})
+
+test('subtaskCompletionSummary returns null for tasks without children', () => {
+  assert.equal(subtaskCompletionSummary(tasks, 3), null)
+  assert.equal(subtaskCompletionSummary(tasks, 4), null)
 })

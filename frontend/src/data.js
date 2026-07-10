@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-subtask-completion-summary',
+    timestamp: '2026-07-11T07:27:23+09:00',
+    description: '업무 목록에서 하위 업무가 있는 업무에 "하위 업무 n/m 완료" 요약을 표시합니다.',
+  },
+  {
     id: '2026-07-11-n-a-no-change-made-request-already-shipped-in-f75e3d5',
     timestamp: '2026-07-11T05:54:02+09:00',
     description: '자동 개선 루프가 N/A (no change made; request already shipped in f75e3d5) 변경을 반영했습니다.',
