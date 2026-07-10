@@ -94,6 +94,7 @@ def _prune_audit_logs(c):
     # the cutoff must match that format for the string comparison to sort correctly.
     cutoff = (datetime.now() - timedelta(days=AUDIT_LOG_RETENTION_DAYS)).isoformat(timespec="seconds")
     c.execute("DELETE FROM audit_logs WHERE created_at<?", (cutoff,))
+    c.execute("DELETE FROM error_logs WHERE created_at<?", (cutoff,))
 
 
 def init_db():
@@ -117,6 +118,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS audit_logs(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,action TEXT NOT NULL,entity_type TEXT NOT NULL,entity_id TEXT,metadata TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS feature_requests(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,content TEXT NOT NULL,source TEXT NOT NULL DEFAULT 'user',status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS changelog_entries(id INTEGER PRIMARY KEY AUTOINCREMENT,feature_request_id INTEGER UNIQUE,request_content TEXT NOT NULL,requested_at TEXT NOT NULL,description TEXT NOT NULL,released_at TEXT NOT NULL,FOREIGN KEY(feature_request_id) REFERENCES feature_requests(id) ON DELETE SET NULL);
+        CREATE TABLE IF NOT EXISTS error_logs(id INTEGER PRIMARY KEY AUTOINCREMENT,method TEXT NOT NULL,path TEXT NOT NULL,summary TEXT NOT NULL,created_at TEXT NOT NULL);
         """)
         for table in ("tasks", "events", "todos", "work_logs"):
             _add_column(c, table, "user_id", "TEXT")
@@ -154,6 +156,7 @@ def init_db():
         c.execute("CREATE INDEX IF NOT EXISTS idx_feature_requests_user_status ON feature_requests(user_id,status,created_at DESC)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_feature_requests_public_status ON feature_requests(status,created_at DESC)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_changelog_released ON changelog_entries(released_at DESC)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_error_logs_created ON error_logs(created_at DESC)")
         c.execute("DROP INDEX IF EXISTS idx_events_google")
         duplicate_google = c.execute("""SELECT user_id,google_calendar_id,google_event_id,COUNT(*) n FROM events
           WHERE google_event_id IS NOT NULL GROUP BY user_id,google_calendar_id,google_event_id HAVING COUNT(*)>1 LIMIT 1""").fetchone()

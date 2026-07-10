@@ -13,6 +13,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [workflowSettings, setWorkflowSettings] = useState(null)
+  const [serverErrors, setServerErrors] = useState(null)
   const [aiConfigs, setAiConfigs] = useState({})
   const [aiDrafts, setAiDrafts] = useState({})
   const [aiProvider, setAiProvider] = useState('openai')
@@ -28,14 +29,16 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const load = async () => {
     setError('')
     try {
-      const [integrations, ai, workflow] = await Promise.all([
+      const [integrations, ai, workflow, errors] = await Promise.all([
         api.googleStatus(),
         api.aiSettings().catch(() => api.aiStatus()),
         api.workflowSettings().catch(() => ({ approval_workflow: true })),
+        api.diagnosticsErrors(5).catch(() => ({ items: [] })),
       ])
       setData(integrations)
       applyAiConfig(ai)
       setWorkflowSettings(workflow)
+      setServerErrors(errors.items || [])
       if (integrations.connected || integrations.google_connected || integrations.google?.connected) {
         const response = await api.googleCalendars()
         setCalendars(response.items || response.calendars || [])
@@ -182,6 +185,10 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><ClipboardList /></span><div><h2>감사 로그</h2><p>업무 공간에서 발생한 변경 이력을 확인합니다.</p></div></div>
         <button className="secondary" onClick={onOpenAudit}>감사 로그 보기</button>
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><ClipboardList /></span><div><h2>서버 오류 진단</h2><p>처리되지 않은 서버 오류 중 최근 5건을 보여줍니다.</p></div></div>
+        {!serverErrors ? <div className="skeleton lines" /> : serverErrors.length ? <ul className="error-log-list">{serverErrors.map(item => <li key={item.id}><time dateTime={item.created_at}>{new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(item.created_at))}</time><div><strong>{item.method} {item.path}</strong><p>{item.summary}</p></div></li>)}</ul> : <p className="empty-state">최근 서버 오류가 없습니다.</p>}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>AI 설정</h2><p>OpenAI 또는 Gemini API 키를 등록하면 이 계정에서 AI 기능을 사용할 수 있습니다.</p></div><em className={`status-pill ${aiConfig?.configured ? 'online' : ''}`}>{aiConfig?.configured ? '설정됨' : '미설정'}</em></div>

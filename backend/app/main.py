@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 import httpx
 from fastapi import Body, Cookie, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import ai, google_calendar
@@ -47,6 +47,15 @@ async def enforce_demo_read_only(request: Request, call_next):
                         content=json.dumps({"detail": "체험 계정은 읽기 전용입니다. Google 로그인으로 실제 계정을 사용해 주세요."}, ensure_ascii=False),
                         media_type="application/json")
     return await call_next(request)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    summary = f"{type(exc).__name__}: {exc}"[:500]
+    with connection() as c:
+        c.execute("INSERT INTO error_logs(method,path,summary,created_at) VALUES(?,?,?,?)",
+                  (request.method, request.url.path, summary, now()))
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.on_event("startup")
@@ -869,6 +878,14 @@ def audit_log_list(limit: int = 100, user=Depends(require_user)):
     items = rows("audit_logs", user, "ORDER BY created_at DESC LIMIT ?", (max(1, min(limit, 500)),))
     for item in items:
         item["metadata"] = json.loads(item.get("metadata") or "{}")
+    return {"items": items}
+
+
+@app.get("/api/diagnostics/errors")
+def diagnostics_errors(limit: int = 20, user=Depends(require_user)):
+    with connection() as c:
+        items = [row_dict(r) for r in c.execute(
+            "SELECT * FROM error_logs ORDER BY id DESC LIMIT ?", (max(1, min(limit, 100)),)).fetchall()]
     return {"items": items}
 
 

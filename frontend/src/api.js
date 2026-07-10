@@ -59,6 +59,7 @@ export const api = {
   integrations: () => request('/settings/integrations'), googleStatus: () => request('/google/status'), googleCalendars: () => request('/google/calendars'), selectGoogleCalendar: calendar_id => request('/google/select',json('POST',{calendar_id})), syncGoogleCalendar: () => request('/google/sync',{method:'POST'}),
   exportData: () => request('/export'),
   auditLogs: (limit=100) => request(`/audit-logs?limit=${limit}`),
+  diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),
   restoreTrash: (table,id) => request(`/${encodeURIComponent(table)}/${id}/restore`,{method:'POST'}),
   cleanupTrash: (days=30) => request(`/trash?older_than_days=${days}`,{method:'DELETE'}),

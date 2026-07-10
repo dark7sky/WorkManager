@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-n-a-no-change-made-request-already-shipped-in-f75e3d5',
+    timestamp: '2026-07-11T05:54:02+09:00',
+    description: '자동 개선 루프가 N/A (no change made; request already shipped in f75e3d5) 변경을 반영했습니다.',
+  },
+  {
     id: '2026-07-11-subtask-visual-scale',
     timestamp: '2026-07-11T04:12:23+09:00',
     description: '업무 목록(간트)에서 하위 업무 행의 높이와 글씨 크기를 상위 업무보다 줄여, 들여쓰기와 함께 하위 업무임을 시각적으로 더 뚜렷하게 구분했습니다.',

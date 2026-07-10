@@ -65,6 +65,21 @@ class AuditLogRetentionTests(unittest.TestCase):
                 remaining = [row[0] for row in c.execute("SELECT entity_id FROM audit_logs ORDER BY entity_id").fetchall()]
             self.assertEqual(remaining, ["2"])
 
+    def test_init_db_prunes_error_logs_older_than_retention_window(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "errors.db")
+            with patch.dict(os.environ, {"DATABASE_PATH": path}):
+                init_db()
+                old = (datetime.now() - timedelta(days=181)).isoformat(timespec="seconds")
+                recent = (datetime.now() - timedelta(days=1)).isoformat(timespec="seconds")
+                with sqlite3.connect(path) as c:
+                    c.execute("INSERT INTO error_logs(method,path,summary,created_at) VALUES('GET','/api/old','old error',?)", (old,))
+                    c.execute("INSERT INTO error_logs(method,path,summary,created_at) VALUES('GET','/api/recent','recent error',?)", (recent,))
+                init_db()
+            with sqlite3.connect(path) as c:
+                remaining = [row[0] for row in c.execute("SELECT path FROM error_logs ORDER BY path").fetchall()]
+            self.assertEqual(remaining, ["/api/recent"])
+
 
 if __name__ == "__main__":
     unittest.main()

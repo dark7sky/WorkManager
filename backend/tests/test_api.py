@@ -434,6 +434,19 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(updated_status["approval_status"], "none")
         self.assertEqual(updated_status["status"], "doing")
 
+    def test_unhandled_exception_is_logged_and_visible_in_diagnostics(self):
+        a = self.client(self.token_a)
+        crashing_client = TestClient(self.app, raise_server_exceptions=False)
+        crashing_client.cookies.set("wm_session", self.token_a)
+        with patch("app.main.rows", side_effect=RuntimeError("boom-diagnostics")):
+            response = crashing_client.get("/api/tasks")
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()["detail"], "Internal Server Error")
+        errors = a.get("/api/diagnostics/errors?limit=5")
+        self.assertEqual(errors.status_code, 200, errors.text)
+        items = errors.json()["items"]
+        self.assertTrue(any("boom-diagnostics" in item["summary"] and item["path"] == "/api/tasks" for item in items))
+
 
 if __name__ == "__main__":
     unittest.main()
