@@ -42,6 +42,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] PDF reporting exports for customer and management reporting.
 - [x] Audit log browsing and filtering in the app UI.
 - [x] Feature request status management in the Changelog screen for the Codex improvement loop.
+- [x] Audit log retention limit: entries older than a configurable window (default 180 days, `AUDIT_LOG_RETENTION_DAYS`) are pruned on server startup instead of growing unbounded (Wave 7 item 36).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

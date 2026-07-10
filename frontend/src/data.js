@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-audit-log-retention',
+    timestamp: '2026-07-10T23:46:52+09:00',
+    description: '감사 로그(audit_logs)가 무한히 쌓이지 않도록 보존 기한(기본 180일)을 넘긴 기록을 서버 시작 시 자동 정리합니다. AUDIT_LOG_RETENTION_DAYS 환경변수로 기간을 조정할 수 있습니다.',
+  },
+  {
     id: '2026-07-10-changelog-screen-crash-fix',
     timestamp: '2026-07-10T23:15:41+09:00',
     description: '변경 화면이 요청일 정보가 없는 항목을 만나면 통째로 열리지 않던 문제를 고쳤습니다. 날짜가 없거나 잘못된 항목이 있어도 화면이 정상 표시됩니다.',

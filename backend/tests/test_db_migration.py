@@ -2,6 +2,7 @@ import os
 import sqlite3
 import tempfile
 import unittest
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from app.db import init_db, upsert_google_user
@@ -45,6 +46,24 @@ class LegacyMigrationTests(unittest.TestCase):
                 upsert_google_user("other-sub", "other@example.com")
             with sqlite3.connect(path) as c:
                 self.assertEqual(c.execute("SELECT user_id FROM tasks WHERE title='private'").fetchone()[0], "__legacy__")
+
+
+class AuditLogRetentionTests(unittest.TestCase):
+    def test_init_db_prunes_audit_logs_older_than_retention_window(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "audit.db")
+            with patch.dict(os.environ, {"DATABASE_PATH": path}):
+                init_db()
+                upsert_google_user("google-sub", "owner@example.com")
+                old = (datetime.now() - timedelta(days=181)).isoformat(timespec="seconds")
+                recent = (datetime.now() - timedelta(days=1)).isoformat(timespec="seconds")
+                with sqlite3.connect(path) as c:
+                    c.execute("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,created_at) VALUES('google-sub','create','tasks','1',?)", (old,))
+                    c.execute("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,created_at) VALUES('google-sub','create','tasks','2',?)", (recent,))
+                init_db()
+            with sqlite3.connect(path) as c:
+                remaining = [row[0] for row in c.execute("SELECT entity_id FROM audit_logs ORDER BY entity_id").fetchall()]
+            self.assertEqual(remaining, ["2"])
 
 
 if __name__ == "__main__":

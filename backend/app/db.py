@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta, timezone
 
 LEGACY_USER_ID = "__legacy__"
 DEMO_USER_ID = "__demo__"
+AUDIT_LOG_RETENTION_DAYS = int(os.getenv("AUDIT_LOG_RETENTION_DAYS", "180"))
 
 
 def decode_json_array(value):
@@ -88,6 +89,13 @@ def _migrate_scoped_kv(c):
         """)
 
 
+def _prune_audit_logs(c):
+    # audit_logs.created_at is written via app.main.now(), a naive local isoformat string;
+    # the cutoff must match that format for the string comparison to sort correctly.
+    cutoff = (datetime.now() - timedelta(days=AUDIT_LOG_RETENTION_DAYS)).isoformat(timespec="seconds")
+    c.execute("DELETE FROM audit_logs WHERE created_at<?", (cutoff,))
+
+
 def init_db():
     with connection() as c:
         # WAL is persistent and materially reduces reader/writer contention.
@@ -156,6 +164,7 @@ def init_db():
         c.execute("CREATE UNIQUE INDEX idx_events_google ON events(user_id,google_calendar_id,google_event_id) WHERE google_event_id IS NOT NULL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_local_uid ON events(user_id,local_uid) WHERE local_uid IS NOT NULL")
         c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('schema_version','6',?) ON CONFLICT(key) DO UPDATE SET value='6',updated_at=excluded.updated_at", (datetime.now(timezone.utc).isoformat(),))
+        _prune_audit_logs(c)
         _seed_demo_data(c)
 
 

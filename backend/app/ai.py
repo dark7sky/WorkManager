@@ -27,12 +27,22 @@ KNOWN_MODELS = {
     "openai": {"gpt-5-mini", "gpt-5", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"},
     "gemini": {"gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"},
 }
+KNOWN_API_KEY_PREFIXES = {
+    "openai": ("sk-",),
+    "gemini": ("AIza",),
+}
 
 
 def _model_matches_provider(provider: str, model: str) -> bool:
     """Reject a model only when it is known to belong to a *different* provider."""
     other_providers = [p for p in KNOWN_MODELS if p != provider]
     return not any(model in KNOWN_MODELS[p] for p in other_providers)
+
+
+def _api_key_matches_provider(provider: str, api_key: str) -> bool:
+    """Reject an api_key only when its prefix is known to belong to a *different* provider."""
+    other_providers = [p for p in KNOWN_API_KEY_PREFIXES if p != provider]
+    return not any(api_key.startswith(prefix) for p in other_providers for prefix in KNOWN_API_KEY_PREFIXES[p])
 
 
 def _host(url: str) -> str:
@@ -182,6 +192,8 @@ def save_user_config(user_id: str, payload: dict[str, Any]):
 
     api_key = str(payload.get("api_key") or "").strip() if "api_key" in payload else ""
     if api_key:
+        if not _api_key_matches_provider(provider, api_key):
+            raise ValueError(f"API key does not belong to provider '{provider}'")
         updates[_provider_setting_key(provider, "api_key")] = _enc(api_key)
     elif provider_settings["stored_api_key"]:
         updates[_provider_setting_key(provider, "api_key")] = _enc(provider_settings["stored_api_key"])
