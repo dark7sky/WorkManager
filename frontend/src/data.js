@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-mobile-audit-nav-eight-column-fix',
+    timestamp: '2026-07-10T19:15:22+09:00',
+    requestedAt: '2026-07-07T18:50:06+09:00',
+    requestContent: '감사 들어가면 모바일에서 하단 메뉴 ui가 깨짐',
+    description: '감사 화면으로 들어가도 모바일 하단 메뉴가 한 줄로 유지되도록 고정했습니다. 모바일 전용 네비게이션을 8칸 기준으로 명시해 탭이 밀리거나 다음 줄로 떨어지지 않게 했습니다.',
+  },
+  {
     id: '2026-07-10-mobile-quick-entry-submit-button',
     timestamp: '2026-07-10T18:35:23+09:00',
     description: '모바일에서 오늘 할 일·오늘 한 일 입력칸의 추가/기록 버튼이 숨겨져 있어 제출할 방법이 없던 문제를 고쳤습니다. 이제 모바일에서도 입력칸 오른쪽에 버튼이 표시됩니다.',
