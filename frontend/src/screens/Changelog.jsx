@@ -5,9 +5,13 @@ import { api } from '../api'
 import { changelogUpdates } from '../data'
 import { countPendingFeatureRequests, featureRequestStatusLabel } from '../featureRequests'
 
-const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
-  dateStyle: 'medium', timeStyle: 'short', hour12: false,
-}).format(new Date(value))
+const formatTimestamp = value => {
+  const parsed = value ? new Date(value) : null
+  if (!parsed || Number.isNaN(parsed.getTime())) return ''
+  return new Intl.DateTimeFormat('ko-KR', {
+    dateStyle: 'medium', timeStyle: 'short', hour12: false,
+  }).format(parsed)
+}
 
 const ultraTone = value => {
   if (!value) return value
@@ -78,7 +82,7 @@ export default function Changelog({ notify, publicMode = false }) {
       <ol className="changelog-list">
         {updates.map(update => <li key={update.id}>
           <time dateTime={update.timestamp}><Clock3 aria-hidden="true"/>{formatTimestamp(update.timestamp)}</time>
-          <div>{update.requestContent ? <p className="changelog-request"><b>요청</b> {ultraTone(update.requestContent)}<small>요청일 {formatTimestamp(update.requestedAt)}</small></p> : null}<p>{ultraTone(update.description)}</p></div>
+          <div>{update.requestContent ? <p className="changelog-request"><b>요청</b> {ultraTone(update.requestContent)}{update.requestedAt ? <small>요청일 {formatTimestamp(update.requestedAt)}</small> : null}</p> : null}<p>{ultraTone(update.description)}</p></div>
         </li>)}
       </ol>
     </section>
