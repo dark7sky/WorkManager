@@ -210,6 +210,13 @@ def status(user_id: str, provider: str | None = None):
         "api_key_set": config["api_key_set"],
         "message": f"{provider_name} 연결됨" if config["configured"] else f"{provider_name} 키 필요",
         "binding_label": binding_label,
+        "binding": {
+            "provider": config["provider"],
+            "provider_name": provider_name,
+            "model": config["model"],
+            "api_key_set": config["api_key_set"],
+            "label": binding_label,
+        },
         "selected_provider": config["selected_provider"],
         "saved_api_key": config["saved_api_key"],
         "has_user_settings": config["has_user_settings"],

@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-binding-structured-summary',
+    timestamp: '2026-07-10T20:44:59+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 응답에 provider, model, API key 상태를 한 번에 담는 binding 객체를 추가하고, 설정 화면이 그 구조를 그대로 읽어 현재 조합을 더 명확하게 보여주도록 정리했습니다.',
+  },
+  {
     id: '2026-07-10-ai-binding-summary-live-label',
     timestamp: '2026-07-10T20:36:49+09:00',
     requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',

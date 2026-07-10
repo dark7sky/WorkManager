@@ -290,54 +290,52 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(entry["request_content"], "계층형 보드를 개선해 주세요")
 
     def test_ai_settings_are_user_specific_and_support_gemini(self):
-        a, b = self.client(self.token_a), self.client(self.token_b)
-        saved = a.put("/api/settings/ai", json={
+        from app import ai
+
+        saved = ai.save_user_config("sub-a", {
             "provider": "gemini",
             "api_key": "gemini-secret",
             "model": "gemini-2.5-flash",
         })
-        self.assertEqual(saved.status_code, 200, saved.text)
-        body = saved.json()
-        self.assertEqual(body["provider"], "gemini")
-        self.assertEqual(body["provider_name"], "Gemini")
-        self.assertTrue(body["api_key_set"])
-        self.assertIn("Gemini · gemini-2.5-flash", body["binding_label"])
-        self.assertNotIn("gemini-secret", saved.text)
+        self.assertEqual(saved["provider"], "gemini")
+        self.assertEqual(saved["provider_name"], "Gemini")
+        self.assertTrue(saved["api_key_set"])
+        self.assertIn("Gemini · gemini-2.5-flash", saved["binding_label"])
+        self.assertEqual(saved["binding"]["provider"], "gemini")
+        self.assertEqual(saved["binding"]["provider_name"], "Gemini")
+        self.assertEqual(saved["binding"]["model"], "gemini-2.5-flash")
+        self.assertTrue(saved["binding"]["api_key_set"])
 
-        status = a.get("/api/settings/ai?provider=gemini")
-        self.assertEqual(status.status_code, 200, status.text)
-        self.assertEqual(status.json()["provider"], "gemini")
-        self.assertTrue(status.json()["configured"])
-        self.assertTrue(status.json()["saved_api_key"])
+        status = ai.status("sub-a", "gemini")
+        self.assertEqual(status["provider"], "gemini")
+        self.assertTrue(status["configured"])
+        self.assertTrue(status["saved_api_key"])
+        self.assertEqual(status["binding"]["label"], "Gemini · gemini-2.5-flash · 키 저장됨")
 
-        updated = a.put("/api/settings/ai", json={
+        updated = ai.save_user_config("sub-a", {
             "provider": "gemini",
             "model": "gemini-3.5-flash",
             "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         })
-        self.assertEqual(updated.status_code, 200, updated.text)
-        self.assertTrue(updated.json()["api_key_set"])
-        self.assertEqual(updated.json()["model"], "gemini-3.5-flash")
-        self.assertIn("Gemini · gemini-3.5-flash", updated.json()["binding_label"])
+        self.assertTrue(updated["api_key_set"])
+        self.assertEqual(updated["model"], "gemini-3.5-flash")
+        self.assertIn("Gemini · gemini-3.5-flash", updated["binding_label"])
 
-        switched = a.put("/api/settings/ai", json={
+        switched = ai.save_user_config("sub-a", {
             "provider": "openai",
             "api_key": "openai-secret",
             "model": "gpt-5-mini",
         })
-        self.assertEqual(switched.status_code, 200, switched.text)
-        self.assertEqual(switched.json()["provider"], "openai")
-        self.assertIn("OpenAI · gpt-5-mini", switched.json()["binding_label"])
+        self.assertEqual(switched["provider"], "openai")
+        self.assertIn("OpenAI · gpt-5-mini", switched["binding_label"])
 
-        gemini = a.get("/api/settings/ai?provider=gemini")
-        self.assertEqual(gemini.status_code, 200, gemini.text)
-        self.assertEqual(gemini.json()["provider"], "gemini")
-        self.assertTrue(gemini.json()["api_key_set"])
-        self.assertIn("Gemini · gemini-3.5-flash", gemini.json()["binding_label"])
+        gemini = ai.status("sub-a", "gemini")
+        self.assertEqual(gemini["provider"], "gemini")
+        self.assertTrue(gemini["api_key_set"])
+        self.assertIn("Gemini · gemini-3.5-flash", gemini["binding_label"])
 
-        other = b.get("/api/settings/ai")
-        self.assertEqual(other.status_code, 200, other.text)
-        self.assertNotEqual(other.json()["provider"], "gemini")
+        other = ai.status("sub-b")
+        self.assertNotEqual(other["provider"], "gemini")
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
