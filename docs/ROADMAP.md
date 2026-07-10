@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-10
 
-See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done).
+See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done).
 
 ## Real-Use Readiness (2026-07-10)
 
@@ -23,6 +23,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] PWA orientation locked to portrait (Wave 5).
 - [x] Mobile bottom nav fits its 7-item CSS again — Audit Log moved into a Settings section (Wave 5).
 - [x] Read-only sample login ("샘플로 미리 보기") with seeded demo data for pre-signup preview (Wave 5).
+- [x] Visual design refresh: consistent radius/shadow/motion tokens across cards, buttons, and inputs; pill-shaped progress bars; fixed six hardcoded-color dark-mode bugs found via screenshot verification (Wave 6).
 
 ## Task Management & Reporting
 
