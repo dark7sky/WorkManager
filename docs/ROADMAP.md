@@ -17,6 +17,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] E2e smoke test: login-bypass session token exercising full create/read/update/delete/restore round trip for every core entity (P4).
 - [x] AI performance summary shows a structured evidence list (which logs/tasks/events it used), not just prose (Wave 2).
 - [x] Undo action on delete toasts for tasks, events, todos, and work logs (Wave 4).
+- [x] Ctrl/Cmd+K quick capture: natural-language entry from any screen via the existing AI preview/apply pipeline (Wave 4).
 
 ## Task Management & Reporting
 

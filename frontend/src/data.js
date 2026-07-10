@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-quick-capture',
+    timestamp: '2026-07-10T12:06:57+09:00',
+    description: '어디서든 Ctrl/⌘+K로 빠른 입력창을 열 수 있습니다. "내일 오후 2시 고객 미팅"처럼 자연어로 입력하면 AI가 분석한 내용을 확인 후 바로 업무·일정·할 일·기록으로 추가합니다.',
+  },
+  {
     id: '2026-07-10-undo-delete-toast',
     timestamp: '2026-07-10T11:58:30+09:00',
     description: '업무·일정·오늘 할 일·업무 기록을 삭제하면 뜨는 알림에 "실행 취소" 버튼을 추가했습니다. 휴지통까지 가지 않아도 바로 되돌릴 수 있습니다. 오늘 한 일 목록의 글자가 세로로 한 자씩 쪼개져 보이던 표시 오류도 함께 고쳤습니다.',
