@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
@@ -16,6 +16,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [aiConfigs, setAiConfigs] = useState({})
   const [aiDrafts, setAiDrafts] = useState({})
   const [aiProvider, setAiProvider] = useState('openai')
+  const aiLoadSeq = useRef(0)
 
   const applyAiConfig = ai => {
     const provider = normalizeAiProvider(ai?.provider || ai?.selected_provider || 'openai')
@@ -61,7 +62,9 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   }
 
   const loadAiProvider = async provider => {
+    const loadSeq = ++aiLoadSeq.current
     const next = await api.aiSettings(provider)
+    if (loadSeq !== aiLoadSeq.current) return
     applyAiConfig(next)
   }
 

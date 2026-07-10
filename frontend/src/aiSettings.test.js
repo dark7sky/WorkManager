@@ -22,3 +22,16 @@ test('upsertAiConfig stores provider configs under the normalized provider key',
   assert.deepEqual(Object.keys(configs), ['gemini'])
   assert.equal(configs.gemini.model, 'gemini-2.5-flash')
 })
+
+test('upsertAiConfig prefers the explicit provider over selected_provider', () => {
+  const configs = upsertAiConfig({}, {
+    provider: 'gemini',
+    selected_provider: 'openai',
+    model: 'gemini-3.5-flash',
+    api_key: 'gemini-key',
+  })
+
+  assert.deepEqual(Object.keys(configs), ['gemini'])
+  assert.equal(configs.gemini.provider, 'gemini')
+  assert.equal(configs.gemini.selected_provider, 'openai')
+})

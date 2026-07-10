@@ -12,6 +12,12 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-ai-settings-stale-provider-load-guard',
+    timestamp: '2026-07-10T19:52:59+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 화면에서 제공자별 조회 응답이 늦게 도착해 이전 제공자의 모델·키 초안을 덮어쓰지 않도록 보호했습니다. 이제 OpenAI와 Gemini를 빠르게 오가도 선택한 제공자의 설정만 유지됩니다.',
+  },
+  {
     id: '2026-07-10-fix-keep-ai-provider-drafts-separated',
     timestamp: '2026-07-10T19:52:51+09:00',
     description: 'Codex 자동 개선 루프가 - `fix: keep AI provider drafts separated 변경을 반영했습니다.',
