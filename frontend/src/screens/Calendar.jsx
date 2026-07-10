@@ -28,9 +28,10 @@ function EventForm({ event, date, onSave, onDelete, onCancel }) {
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => event?.tags || [])
   const [suggestions, setSuggestions] = useState([])
+  const [startValue, setStartValue] = useState(() => localInput(event?.start_at || event?.start || `${date}T09:00:00`))
+  const [endValue, setEndValue] = useState(() => localInput(event?.end_at || event?.end || `${date}T10:00:00`))
+  const endTouchedRef = useRef(false)
   const formRef = useRef(null)
-  const start = event?.start_at || event?.start || `${date}T09:00:00`
-  const end = event?.end_at || event?.end || `${date}T10:00:00`
   const recommendTags = async () => {
     const data = new FormData(formRef.current)
     setSaving(true)
@@ -41,6 +42,18 @@ function EventForm({ event, date, onSave, onDelete, onCancel }) {
     } catch (requestError) { setError(requestError.message) }
     finally { setSaving(false) }
   }
+  const addHour = value => {
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return value
+    d.setHours(d.getHours() + 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+  const onStartChange = e => {
+    const value = e.target.value
+    setStartValue(value)
+    if (!endTouchedRef.current) setEndValue(addHour(value))
+  }
+  const onEndChange = e => { endTouchedRef.current = true; setEndValue(e.target.value) }
   const submit = async formEvent => {
     formEvent.preventDefault()
     const data = Object.fromEntries(new FormData(formEvent.currentTarget))
@@ -53,8 +66,8 @@ function EventForm({ event, date, onSave, onDelete, onCancel }) {
   }
   return <form ref={formRef} className="form-grid" onSubmit={submit}>
     <label className="span-2">일정 제목<input name="title" defaultValue={event?.title || ''} required autoFocus/></label>
-    <label>시작<input name="start_at" type="datetime-local" required defaultValue={localInput(start)}/></label>
-    <label>종료<input name="end_at" type="datetime-local" required defaultValue={localInput(end)}/></label>
+    <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
+    <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange}/></label>
     <label className="span-2">장소<input name="location" defaultValue={event?.location || ''}/></label>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
@@ -96,7 +109,7 @@ export default function Calendar({ events, onCreate, onUpdate, onDelete, onDataC
     grid.setDate(1 - first.getDay())
     return Array.from({ length: 42 }, (_, index) => { const date = new Date(grid); date.setDate(grid.getDate() + index); return { date, current: date.getMonth() === cursor.getMonth() } })
   }, [cursor, view])
-  const eventsByDay = useMemo(() => new Map(cells.map(cell => [dateKey(cell.date), filtered.filter(event => overlapsDay(event, cell.date))])), [cells, filtered])
+  const eventsByDay = useMemo(() => new Map(cells.map(cell => [dateKey(cell.date), filtered.filter(event => overlapsDay(event, cell.date)).sort((a, b) => parseDate(a.start_at || a.start) - parseDate(b.start_at || b.start))])), [cells, filtered])
   const sorted = useMemo(() => [...filtered].sort((a, b) => parseDate(a.start_at || a.start) - parseDate(b.start_at || b.start)), [filtered])
   const close = () => { setEditing(null); setNewDate(null) }
   return <>

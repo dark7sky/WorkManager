@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Bot, CalendarSync, Check, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun } from 'lucide-react'
+import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import TrashSection from '../components/TrashSection'
@@ -25,7 +25,7 @@ const aiModels = {
   ],
 }
 
-export default function Settings({ theme, setTheme, notify, onDataChanged, canInstall, onInstall, notificationPermission, onEnableNotifications }) {
+export default function Settings({ theme, setTheme, notify, onDataChanged, canInstall, onInstall, notificationPermission, onEnableNotifications, onOpenAudit }) {
   const [data, setData] = useState(null)
   const [calendars, setCalendars] = useState([])
   const [busy, setBusy] = useState('')
@@ -35,7 +35,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [aiDraft, setAiDraft] = useState({ provider: 'openai', api_key: '', base_url: '', model: '' })
 
   const applyAiConfig = ai => {
-    const provider = ai?.selected_provider || ai?.provider || 'openai'
+    const provider = ai?.provider || ai?.selected_provider || 'openai'
     const defaults = aiDefaults[provider] || aiDefaults.openai
     setAiConfig(ai)
     setAiDraft({
@@ -160,7 +160,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
 
   const connected = data?.connected ?? data?.google_connected ?? data?.google?.connected
   const selected = data?.selected_calendar_id ?? data?.google?.selected_calendar_id
-  const aiProvider = aiConfig?.provider || aiDraft.provider
+  const aiProvider = aiDraft.provider || aiConfig?.provider
   const aiDefault = aiDefaults[aiProvider] || aiDefaults.openai
   const aiModelList = aiModels[aiProvider] || []
   const aiModelOptions = aiDraft.model && !aiModelList.some(option => option.value === aiDraft.model)
@@ -193,6 +193,10 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>승인 워크플로</h2><p>완료 업무와 일정 변경에 승인 단계를 요구합니다. 혼자 사용할 때는 꺼 두세요.</p></div></div>
         {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? true} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><ClipboardList /></span><div><h2>감사 로그</h2><p>업무 공간에서 발생한 변경 이력을 확인합니다.</p></div></div>
+        <button className="secondary" onClick={onOpenAudit}>감사 로그 보기</button>
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>AI 설정</h2><p>OpenAI 또는 Gemini API 키를 등록하면 이 계정에서 AI 기능을 사용할 수 있습니다.</p></div><em className={`status-pill ${aiConfig?.configured ? 'online' : ''}`}>{aiConfig?.configured ? '설정됨' : '미설정'}</em></div>

@@ -1,5 +1,5 @@
-import { BarChart3, CalendarDays, CheckSquare2, ClipboardList, History, LayoutDashboard, ListTodo, LogOut, Search, Settings, Sparkles } from 'lucide-react'
-const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['audit',ClipboardList,'감사'],['changelog',History,'변경'],['settings',Settings,'설정']]
+import { BarChart3, CalendarDays, CheckSquare2, History, LayoutDashboard, ListTodo, LogOut, Search, Settings, Sparkles } from 'lucide-react'
+const items = [['today',LayoutDashboard,'오늘'],['tasks',CheckSquare2,'업무'],['calendar',CalendarDays,'일정'],['performance',BarChart3,'성과'],['ai',Sparkles,'AI'],['changelog',History,'변경'],['settings',Settings,'설정']]
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
 export default function AppShell({ page, setPage, children, onLogout, user, onQuickCapture }) {
   const initials = (user?.display_name || user?.email || user?.id || '나').slice(0,2).toUpperCase()
