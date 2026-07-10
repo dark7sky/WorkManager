@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-fix-keep-ai-provider-drafts-separated',
+    timestamp: '2026-07-10T19:52:51+09:00',
+    description: 'Codex 자동 개선 루프가 - `fix: keep AI provider drafts separated 변경을 반영했습니다.',
+  },
+  {
     id: '2026-07-10-google-calendar-history-window',
     timestamp: '2026-07-10T19:49:07+09:00',
     requestedAt: '2026-07-10T18:48:02+09:00',

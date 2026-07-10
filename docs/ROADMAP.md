@@ -7,6 +7,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 ## Real-Use Readiness (2026-07-10)
 
 - [x] Repair mojibake in AI settings UI and backend AI status strings; align PUT /api/settings/ai response with GET.
+- [x] Keep AI provider/model/API key drafts matched per provider in the Settings screen so switching vendors does not blend settings.
 - [x] Optional per-user approval workflow toggle so personal use skips self-approval of completed work and schedule changes.
 - [x] Today screen: completion toggle limited to the check icon to prevent accidental taps marking tasks done.
 - [x] Local state updates for todo/work-log mutations instead of full refetch (P2).

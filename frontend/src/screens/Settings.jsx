@@ -3,27 +3,9 @@ import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderC
 import Header from '../components/Header'
 import { api } from '../api'
 import TrashSection from '../components/TrashSection'
+import { aiDefaults, aiModels, getAiDraft, normalizeAiProvider, upsertAiConfig } from '../aiSettings'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
-const aiDefaults = {
-  openai: { model: 'gpt-5-mini', base_url: 'https://api.openai.com/v1' },
-  gemini: { model: 'gemini-3.5-flash', base_url: 'https://generativelanguage.googleapis.com/v1beta/openai/' },
-}
-const aiModels = {
-  openai: [
-    { value: 'gpt-5-mini', label: 'GPT-5 mini' },
-    { value: 'gpt-5', label: 'GPT-5' },
-    { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini' },
-    { value: 'gpt-4.1', label: 'GPT-4.1' },
-    { value: 'gpt-4o-mini', label: 'GPT-4o mini' },
-  ],
-  gemini: [
-    { value: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash' },
-    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-    { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
-  ],
-}
 
 export default function Settings({ theme, setTheme, notify, onDataChanged, canInstall, onInstall, notificationPermission, onEnableNotifications, onOpenAudit }) {
   const [data, setData] = useState(null)
@@ -31,19 +13,15 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [workflowSettings, setWorkflowSettings] = useState(null)
-  const [aiConfig, setAiConfig] = useState(null)
-  const [aiDraft, setAiDraft] = useState({ provider: 'openai', api_key: '', base_url: '', model: '' })
+  const [aiConfigs, setAiConfigs] = useState({})
+  const [aiDrafts, setAiDrafts] = useState({})
+  const [aiProvider, setAiProvider] = useState('openai')
 
   const applyAiConfig = ai => {
-    const provider = ai?.provider || ai?.selected_provider || 'openai'
-    const defaults = aiDefaults[provider] || aiDefaults.openai
-    setAiConfig(ai)
-    setAiDraft({
-      provider,
-      api_key: '',
-      base_url: ai?.base_url || defaults.base_url,
-      model: ai?.model || defaults.model,
-    })
+    const provider = normalizeAiProvider(ai?.provider || ai?.selected_provider || 'openai')
+    setAiConfigs(current => upsertAiConfig(current, ai))
+    setAiProvider(provider)
+    setAiDrafts(current => ({ ...current, [provider]: getAiDraft(provider, current, ai) }))
   }
 
   const load = async () => {
@@ -89,11 +67,12 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
 
   const saveAi = async event => {
     event.preventDefault()
-    const provider = aiDraft.provider || 'openai'
-    const payload = { provider, model: aiDraft.model.trim(), base_url: aiDraft.base_url.trim() }
-    const apiKey = aiDraft.api_key.trim()
+    const provider = aiProvider || 'openai'
+    const currentDraft = getAiDraft(provider, aiDrafts, aiConfigs[provider])
+    const payload = { provider, model: currentDraft.model.trim(), base_url: currentDraft.base_url.trim() }
+    const apiKey = currentDraft.api_key.trim()
     if (apiKey) payload.api_key = apiKey
-    else if (!(aiConfig?.api_key_set || aiConfig?.saved_api_key)) {
+    else if (!(aiConfigs[provider]?.api_key_set || aiConfigs[provider]?.saved_api_key)) {
       notify('API key를 입력해 주세요.', 'error')
       return
     }
@@ -160,7 +139,9 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
 
   const connected = data?.connected ?? data?.google_connected ?? data?.google?.connected
   const selected = data?.selected_calendar_id ?? data?.google?.selected_calendar_id
-  const aiProvider = aiDraft.provider || aiConfig?.provider
+  const aiConfig = aiConfigs[aiProvider] || null
+  const aiDraft = getAiDraft(aiProvider, aiDrafts, aiConfig)
+  const aiFormReady = !!aiDrafts[aiProvider] || !!aiConfig
   const aiDefault = aiDefaults[aiProvider] || aiDefaults.openai
   const aiModelList = aiModels[aiProvider] || []
   const aiModelOptions = aiDraft.model && !aiModelList.some(option => option.value === aiDraft.model)
@@ -200,14 +181,14 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>AI 설정</h2><p>OpenAI 또는 Gemini API 키를 등록하면 이 계정에서 AI 기능을 사용할 수 있습니다.</p></div><em className={`status-pill ${aiConfig?.configured ? 'online' : ''}`}>{aiConfig?.configured ? '설정됨' : '미설정'}</em></div>
-        {!aiConfig ? <div className="skeleton lines" /> : <form className="ai-settings-form" onSubmit={saveAi}>
+        {!aiFormReady ? <div className="skeleton lines" /> : <form className="ai-settings-form" onSubmit={saveAi}>
           <div className="ai-settings-grid">
-            <label>제공자<select value={aiDraft.provider} onChange={event => { const provider = event.target.value; const defaults = aiDefaults[provider] || aiDefaults.openai; setAiDraft(current => ({ ...current, provider, base_url: defaults.base_url, model: defaults.model })); loadAiProvider(provider).catch(() => notify('AI 설정을 불러오지 못했습니다.', 'error')) }}><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option></select></label>
-            <label>API key<input type="password" value={aiDraft.api_key} onChange={event => setAiDraft(current => ({ ...current, api_key: event.target.value }))} placeholder={aiConfig.api_key_set ? '변경하려면 새 키 입력' : 'API 키 입력'} /></label>
-            <label>모델<select value={aiDraft.model} onChange={event => setAiDraft(current => ({ ...current, model: event.target.value }))}>{aiModelOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-            <label>Base URL<input value={aiDraft.base_url} onChange={event => setAiDraft(current => ({ ...current, base_url: event.target.value }))} placeholder={aiDefault.base_url} /></label>
+            <label>제공자<select value={aiProvider} onChange={event => { const provider = event.target.value; setAiProvider(provider); setAiDrafts(current => ({ ...current, [provider]: current[provider] || getAiDraft(provider, current, aiConfigs[provider]) })); loadAiProvider(provider).catch(() => notify('AI 설정을 불러오지 못했습니다.', 'error')) }}><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option></select></label>
+            <label>API key<input type="password" value={aiDraft.api_key} onChange={event => setAiDrafts(current => ({ ...current, [aiProvider]: { ...aiDraft, provider: aiProvider, api_key: event.target.value } }))} placeholder={aiConfig?.api_key_set ? '변경하려면 새 키 입력' : 'API 키 입력'} /></label>
+            <label>모델<select value={aiDraft.model} onChange={event => setAiDrafts(current => ({ ...current, [aiProvider]: { ...aiDraft, provider: aiProvider, model: event.target.value } }))}>{aiModelOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+            <label>Base URL<input value={aiDraft.base_url} onChange={event => setAiDrafts(current => ({ ...current, [aiProvider]: { ...aiDraft, provider: aiProvider, base_url: event.target.value } }))} placeholder={aiDefault.base_url} /></label>
           </div>
-          <div className="integration-body ai-settings-footer"><div><strong>{aiConfig.provider_name || (aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI')}</strong><small>API 키는 서버에 암호화되어 저장되며, Google 로그인 정보와는 별개로 관리됩니다.</small></div><button className="primary" disabled={busy === 'ai-save'}>{busy === 'ai-save' ? <LoaderCircle className="spin" /> : <Bot />} 저장</button></div>
+          <div className="integration-body ai-settings-footer"><div><strong>{aiConfig?.provider_name || (aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI')}</strong><small>제공자별로 모델과 API 키를 따로 저장합니다. 선택한 제공자에 맞는 설정만 불러옵니다.</small></div><button className="primary" disabled={busy === 'ai-save'}>{busy === 'ai-save' ? <LoaderCircle className="spin" /> : <Bot />} 저장</button></div>
         </form>}
         {aiConfig ? <dl className="diagnostics"><div><dt>제공자</dt><dd>{aiConfig.provider_name || aiConfig.provider}</dd></div><div><dt>모델</dt><dd>{aiConfig.model || 'API 키 필요'}</dd></div><div><dt>상태</dt><dd>{aiConfig.message || '정보 없음'}</dd></div><div><dt>설정 출처</dt><dd>{aiConfig.source_label || aiConfig.source || '알 수 없음'}</dd></div><div><dt>저장된 키</dt><dd>{aiConfig.saved_api_key ? '있음' : '없음'}</dd></div></dl> : null}
       </section>
