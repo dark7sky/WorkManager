@@ -21,6 +21,16 @@ export const aiModels = {
 
 export const normalizeAiProvider = provider => (provider === 'gemini' ? 'gemini' : 'openai')
 
+export const aiProviderName = provider => (normalizeAiProvider(provider) === 'gemini' ? 'Gemini' : 'OpenAI')
+
+export const describeAiBinding = (provider, draft = {}, config = null) => {
+  const normalized = normalizeAiProvider(provider)
+  const defaults = aiDefaults[normalized] || aiDefaults.openai
+  const model = (draft.model || config?.model || defaults.model || '').trim() || '모델 필요'
+  const apiKeySet = Boolean((typeof draft.api_key === 'string' && draft.api_key.trim()) || config?.api_key_set || config?.saved_api_key)
+  return `${aiProviderName(normalized)} · ${model} · ${apiKeySet ? '키 저장됨' : '키 필요'}`
+}
+
 export const getAiDraft = (provider, drafts = {}, config = null) => {
   const normalized = normalizeAiProvider(provider)
   const defaults = aiDefaults[normalized] || aiDefaults.openai

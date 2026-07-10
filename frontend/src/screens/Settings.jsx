@@ -3,7 +3,7 @@ import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderC
 import Header from '../components/Header'
 import { api } from '../api'
 import TrashSection from '../components/TrashSection'
-import { aiDefaults, aiModels, getAiDraft, normalizeAiProvider, upsertAiConfig } from '../aiSettings'
+import { aiDefaults, aiModels, describeAiBinding, getAiDraft, normalizeAiProvider, upsertAiConfig } from '../aiSettings'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
 
@@ -147,6 +147,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const aiFormReady = !!aiDrafts[aiProvider] || !!aiConfig
   const aiDefault = aiDefaults[aiProvider] || aiDefaults.openai
   const aiModelList = aiModels[aiProvider] || []
+  const aiBindingLabel = describeAiBinding(aiProvider, aiDraft, aiConfig)
   const aiModelOptions = aiDraft.model && !aiModelList.some(option => option.value === aiDraft.model)
     ? [{ value: aiDraft.model, label: `현재값: ${aiDraft.model}` }, ...aiModelList]
     : aiModelList
@@ -191,7 +192,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
             <label>모델<select value={aiDraft.model} onChange={event => setAiDrafts(current => ({ ...current, [aiProvider]: { ...aiDraft, provider: aiProvider, model: event.target.value } }))}>{aiModelOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
             <label>Base URL<input value={aiDraft.base_url} onChange={event => setAiDrafts(current => ({ ...current, [aiProvider]: { ...aiDraft, provider: aiProvider, base_url: event.target.value } }))} placeholder={aiDefault.base_url} /></label>
           </div>
-          <div className="integration-body ai-settings-footer"><div><strong>{aiConfig?.provider_name || (aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI')}</strong><small>제공자별로 모델과 API 키를 따로 저장합니다. 선택한 제공자에 맞는 설정만 불러옵니다.</small></div><button className="primary" disabled={busy === 'ai-save'}>{busy === 'ai-save' ? <LoaderCircle className="spin" /> : <Bot />} 저장</button></div>
+          <div className="integration-body ai-settings-footer"><div><strong>{aiBindingLabel}</strong><small>제공자별로 모델과 API 키를 따로 저장합니다. 선택한 제공자에 맞는 설정만 불러옵니다.</small></div><button className="primary" disabled={busy === 'ai-save'}>{busy === 'ai-save' ? <LoaderCircle className="spin" /> : <Bot />} 저장</button></div>
         </form>}
         {aiConfig ? <dl className="diagnostics"><div><dt>제공자</dt><dd>{aiConfig.provider_name || aiConfig.provider}</dd></div><div><dt>모델</dt><dd>{aiConfig.model || 'API 키 필요'}</dd></div><div><dt>매칭</dt><dd>{aiConfig.binding_label || aiConfig.message || '정보 없음'}</dd></div><div><dt>상태</dt><dd>{aiConfig.message || '정보 없음'}</dd></div><div><dt>설정 출처</dt><dd>{aiConfig.source_label || aiConfig.source || '알 수 없음'}</dd></div><div><dt>저장된 키</dt><dd>{aiConfig.saved_api_key ? '있음' : '없음'}</dd></div></dl> : null}
       </section>

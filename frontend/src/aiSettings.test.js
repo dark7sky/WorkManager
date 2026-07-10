@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { getAiDraft, upsertAiConfig } from './aiSettings.js'
+import { describeAiBinding, getAiDraft, upsertAiConfig } from './aiSettings.js'
 
 test('getAiDraft keeps separate draft state per provider', () => {
   const drafts = {
@@ -46,4 +46,15 @@ test('upsertAiConfig prefers the explicit provider over selected_provider', () =
   assert.deepEqual(Object.keys(configs), ['gemini'])
   assert.equal(configs.gemini.provider, 'gemini')
   assert.equal(configs.gemini.selected_provider, 'gemini')
+})
+
+test('describeAiBinding keeps provider, model, and key state aligned', () => {
+  assert.equal(
+    describeAiBinding('gemini', { model: 'gemini-2.5-flash', api_key: '' }, { api_key_set: true }),
+    'Gemini · gemini-2.5-flash · 키 저장됨',
+  )
+  assert.equal(
+    describeAiBinding('openai', {}, { model: 'gpt-5-mini', api_key_set: false }),
+    'OpenAI · gpt-5-mini · 키 필요',
+  )
 })
