@@ -12,6 +12,20 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-google-calendar-history-window',
+    timestamp: '2026-07-10T19:49:07+09:00',
+    requestedAt: '2026-07-10T18:48:02+09:00',
+    requestContent: '캘린더 연동된 항목에 규글 캘린더 몇년전 과거 데이터들이 보이고 있어.',
+    description: 'Google 캘린더 연동이 기본 최근 90일 이내 일정만 가져오도록 바꿨습니다. 이미 들어와 있던 몇 년 전 과거 일정도 다음 동기화 때 자동으로 정리됩니다. 정리는 앱 안에서만 이루어지며 실제 Google 캘린더의 일정은 그대로 남습니다. 기간은 GOOGLE_CALENDAR_HISTORY_DAYS 설정으로 조절할 수 있습니다.',
+  },
+  {
+    id: '2026-07-10-ai-provider-model-key-draft-matching',
+    timestamp: '2026-07-10T19:39:24+09:00',
+    requestedAt: '2026-07-10T18:31:54+09:00',
+    requestContent: 'AI 모델-프로바이더-키 매칭시켜줘',
+    description: 'AI 설정 화면이 제공자별로 모델과 API 키 초안을 따로 기억하도록 바꿔, OpenAI와 Gemini를 오갈 때 서로의 설정이 섞이지 않게 했습니다.',
+  },
+  {
     id: '2026-07-10-mobile-audit-nav-columns-from-items',
     timestamp: '2026-07-10T19:31:59+09:00',
     requestedAt: '2026-07-07T18:50:06+09:00',
