@@ -15,8 +15,8 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import ai, google_calendar
-from .auth import create_session, require_user, revoke_session
-from .db import connection, decode_json_array, init_db, row_dict, upsert_google_user
+from .auth import DEMO_SESSION_TTL, create_session, require_user, revoke_session, session_user_id
+from .db import DEMO_USER_ID, connection, decode_json_array, init_db, row_dict, upsert_google_user
 
 app = FastAPI(title="WorkManager API", version="2.0.0")
 origins = [x.rstrip("/") for x in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if x]
@@ -32,6 +32,20 @@ async def verify_request_origin(request: Request, call_next):
         allowed = set(origins) | {os.getenv("FRONTEND_URL", "").rstrip("/")}
         if request.headers.get("origin", "").rstrip("/") not in allowed:
             return Response(status_code=403, content="Invalid request origin")
+    return await call_next(request)
+
+
+DEMO_WRITE_EXEMPT_PATHS = {"/api/auth/logout", "/api/auth/demo"}
+
+
+@app.middleware("http")
+async def enforce_demo_read_only(request: Request, call_next):
+    if (request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.url.path.startswith("/api/")
+            and request.url.path not in DEMO_WRITE_EXEMPT_PATHS
+            and session_user_id(request.cookies.get("wm_session")) == DEMO_USER_ID):
+        return Response(status_code=403,
+                        content=json.dumps({"detail": "체험 계정은 읽기 전용입니다. Google 로그인으로 실제 계정을 사용해 주세요."}, ensure_ascii=False),
+                        media_type="application/json")
     return await call_next(request)
 
 
@@ -135,6 +149,15 @@ def me(user=Depends(require_user)):
 @app.get("/api/auth/config")
 def auth_config():
     return {"google_enabled": bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))}
+
+
+@app.post("/api/auth/demo")
+def start_demo(request: Request, response: Response):
+    enforce_rate(request.client.host if request.client else "unknown", "demo-login", 20, 3600)
+    response.set_cookie("wm_session", create_session(DEMO_USER_ID, ttl=DEMO_SESSION_TTL), httponly=True, samesite="lax",
+                        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+                        max_age=DEMO_SESSION_TTL, path="/")
+    return {"ok": True}
 
 
 @app.get("/api/auth/google/start")

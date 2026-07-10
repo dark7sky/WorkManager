@@ -50,6 +50,33 @@ class ApiTests(unittest.TestCase):
         response = TestClient(self.app).post("/api/auth/login", json={"user_id": "admin", "password": "password"})
         self.assertEqual(response.status_code, 404)
 
+    def test_demo_login_grants_read_only_session_with_seeded_data(self):
+        from app.db import DEMO_USER_ID
+        started = TestClient(self.app).post("/api/auth/demo")
+        self.assertEqual(started.status_code, 200, started.text)
+        token = started.cookies.get("wm_session")
+        self.assertTrue(token)
+        demo = self.client(token)
+        me = demo.get("/api/auth/me")
+        self.assertEqual(me.status_code, 200, me.text)
+        self.assertEqual(me.json()["user"]["id"], DEMO_USER_ID)
+        self.assertTrue(demo.get("/api/tasks").json())
+        self.assertTrue(demo.get("/api/events").json())
+        blocked = demo.post("/api/tasks", json={"title": "should be blocked"})
+        self.assertEqual(blocked.status_code, 403, blocked.text)
+        self.assertIn("읽기 전용", blocked.json()["detail"])
+        existing_task_id = demo.get("/api/tasks").json()[0]["id"]
+        self.assertEqual(demo.patch(f"/api/tasks/{existing_task_id}", json={"progress": 99}).status_code, 403)
+        self.assertEqual(demo.delete(f"/api/tasks/{existing_task_id}").status_code, 403)
+        self.assertEqual(demo.post("/api/auth/logout").status_code, 200)
+
+    def test_demo_session_bypasses_google_allowlist(self):
+        from app.auth import create_session
+        from app.db import DEMO_USER_ID
+        token = create_session(DEMO_USER_ID)
+        with patch.dict(os.environ, {"GOOGLE_ALLOWED_EMAIL": "someone-else@example.com"}):
+            self.assertEqual(self.client(token).get("/api/auth/me").status_code, 200)
+
     def test_validation_rejects_bad_domain_values(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/tasks", json={"title": "x", "status": "invalid"}).status_code, 422)

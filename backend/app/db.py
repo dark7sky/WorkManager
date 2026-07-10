@@ -1,10 +1,12 @@
 import json
 import os
 import sqlite3
+import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 LEGACY_USER_ID = "__legacy__"
+DEMO_USER_ID = "__demo__"
 
 
 def decode_json_array(value):
@@ -154,6 +156,37 @@ def init_db():
         c.execute("CREATE UNIQUE INDEX idx_events_google ON events(user_id,google_calendar_id,google_event_id) WHERE google_event_id IS NOT NULL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_local_uid ON events(user_id,local_uid) WHERE local_uid IS NOT NULL")
         c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('schema_version','6',?) ON CONFLICT(key) DO UPDATE SET value='6',updated_at=excluded.updated_at", (datetime.now(timezone.utc).isoformat(),))
+        _seed_demo_data(c)
+
+
+def _seed_demo_data(c):
+    """Read-only sample account so visitors can try the app before signing in with Google."""
+    if c.execute("SELECT 1 FROM users WHERE id=?", (DEMO_USER_ID,)).fetchone():
+        return
+    now_iso = datetime.now(timezone.utc).isoformat()
+    c.execute("INSERT INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+              (DEMO_USER_ID, None, "demo@workmanager.local", "체험 계정", now_iso, now_iso))
+    today = date.today()
+    day = lambda offset: (today + timedelta(days=offset)).isoformat()
+    for title, description, status, priority, progress, start, due in [
+        ("분기 업무 보고서 작성", "지난 분기 실적과 다음 분기 계획을 정리합니다.", "doing", "high", 65, day(-2), day(3)),
+        ("신규 프로젝트 요구사항 정리", "이해관계자 인터뷰 내용을 문서로 정리합니다.", "todo", "normal", 0, day(0), day(7)),
+        ("지난주 회의록 배포", "참석자에게 회의록을 공유합니다.", "done", "low", 100, day(-6), day(-4)),
+    ]:
+        c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,tags,created_at,updated_at)
+          VALUES(?,?,?,?,?,?,?,?,?,?,?)""", (DEMO_USER_ID, title, description, status, priority, progress, start, due, "[]", now_iso, now_iso))
+    for title, start_at, end_at, location in [
+        ("주간 팀 회의", f"{day(0)}T10:00:00", f"{day(0)}T11:00:00", "회의실 A"),
+        ("고객사 미팅", f"{day(1)}T14:00:00", f"{day(1)}T15:30:00", "온라인"),
+    ]:
+        c.execute("""INSERT INTO events(user_id,local_uid,title,start_at,end_at,location,tags,created_at,sync_state)
+          VALUES(?,?,?,?,?,?,?,?,?)""", (DEMO_USER_ID, str(uuid.uuid4()), title, start_at, end_at, location, "[]", now_iso, "clean"))
+    for title, completed in [("오늘 할 일 목록 정리", 0), ("팀원과 1:1 미팅 준비", 1)]:
+        c.execute("INSERT INTO todos(user_id,title,todo_date,completed,tags,created_at) VALUES(?,?,?,?,?,?)",
+                  (DEMO_USER_ID, title, day(0), completed, "[]", now_iso))
+    for content, log_date in [("신규 기능 배포 완료", day(0)), ("고객 피드백 정리", day(-1))]:
+        c.execute("INSERT INTO work_logs(user_id,content,log_date,tags,created_at) VALUES(?,?,?,?,?)",
+                  (DEMO_USER_ID, content, log_date, "[]", now_iso))
 
 
 def upsert_google_user(google_sub, email, display_name="", picture_url=None):
@@ -168,7 +201,7 @@ def upsert_google_user(google_sub, email, display_name="", picture_url=None):
         user_id = row["id"]
         # Legacy data is never assigned by login order. Operators must explicitly
         # nominate its owner before starting a multi-user deployment.
-        real_users = c.execute("SELECT COUNT(*) n FROM users WHERE id<>?", (LEGACY_USER_ID,)).fetchone()["n"]
+        real_users = c.execute("SELECT COUNT(*) n FROM users WHERE id NOT IN (?,?)", (LEGACY_USER_ID, DEMO_USER_ID)).fetchone()["n"]
         claimed = c.execute("SELECT value FROM migration_state WHERE key='legacy_owner_claimed'").fetchone()
         legacy_owner = os.getenv("LEGACY_OWNER_EMAIL", "").strip().lower()
         allowed_emails = [value.strip().lower() for value in os.getenv("GOOGLE_ALLOWED_EMAIL", "").split(",") if value.strip()]
