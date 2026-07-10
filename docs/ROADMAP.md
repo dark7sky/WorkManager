@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-10
 
-See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done).
+See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done).
 
 ## Real-Use Readiness (2026-07-10)
 
@@ -18,6 +18,11 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] AI performance summary shows a structured evidence list (which logs/tasks/events it used), not just prose (Wave 2).
 - [x] Undo action on delete toasts for tasks, events, todos, and work logs (Wave 4).
 - [x] Ctrl/Cmd+K quick capture: natural-language entry from any screen via the existing AI preview/apply pipeline (Wave 4).
+- [x] AI parse/apply handles multiple actions from one input, previewed and applied one at a time (Wave 5).
+- [x] Calendar event end time auto-follows start+1h until manually edited; day-cell events sort chronologically (Wave 5).
+- [x] PWA orientation locked to portrait (Wave 5).
+- [x] Mobile bottom nav fits its 7-item CSS again — Audit Log moved into a Settings section (Wave 5).
+- [x] Read-only sample login ("샘플로 미리 보기") with seeded demo data for pre-signup preview (Wave 5).
 
 ## Task Management & Reporting
 
