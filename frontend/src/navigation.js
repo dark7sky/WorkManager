@@ -12,3 +12,4 @@ export const navItems = [
 ]
 
 export const mobileNavItems = navItems.filter(([id]) => id !== 'audit')
+export const mobileNavColumns = mobileNavItems.length

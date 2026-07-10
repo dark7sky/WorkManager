@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-10-mobile-audit-nav-columns-from-items',
+    timestamp: '2026-07-10T19:31:59+09:00',
+    requestedAt: '2026-07-07T18:50:06+09:00',
+    requestContent: '감사 들어가면 모바일에서 하단 메뉴 ui가 깨짐',
+    description: '모바일 하단 메뉴의 열 수를 항목 개수에서 직접 계산하도록 바꿔, 감사 화면으로 이동해도 버튼이 밀리거나 다음 줄로 떨어지지 않게 했습니다.',
+  },
+  {
     id: '2026-07-10-mobile-audit-nav-seven-column-fix',
     timestamp: '2026-07-10T19:22:34+09:00',
     requestedAt: '2026-07-07T18:50:06+09:00',
