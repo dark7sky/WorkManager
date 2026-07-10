@@ -25,7 +25,7 @@ export const getAiDraft = (provider, drafts = {}, config = null) => {
   const normalized = normalizeAiProvider(provider)
   const defaults = aiDefaults[normalized] || aiDefaults.openai
   const current = drafts[normalized]
-  if (current) {
+  if (current && current.provider === normalized) {
     return {
       provider: normalized,
       api_key: typeof current.api_key === 'string' ? current.api_key : '',
