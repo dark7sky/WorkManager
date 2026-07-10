@@ -376,6 +376,33 @@ def prepare_restore_event(user_id, event_id):
         return row_dict(c.execute("SELECT * FROM events WHERE id=? AND user_id=?", (event_id, user_id)).fetchone())
 
 
+def _history_days():
+    try:
+        days = int(os.getenv("GOOGLE_CALENDAR_HISTORY_DAYS", "90"))
+    except ValueError:
+        days = 90
+    return max(7, min(days, 36500))
+
+
+def _history_cutoff_date():
+    return (datetime.now(timezone.utc) - timedelta(days=_history_days())).date().isoformat()
+
+
+def _prune_history(user_id):
+    """Drop imported mirrors of Google events that ended before the history window.
+
+    Rows are removed directly, never through the tombstone flow, so the
+    originals stay untouched in Google Calendar. Dirty or conflicted rows are
+    kept until they resolve; purely local events are never pruned.
+    """
+    cutoff = _history_cutoff_date()
+    with connection() as c:
+        cur = c.execute("""DELETE FROM events WHERE user_id=? AND google_event_id IS NOT NULL
+          AND sync_state!='dirty' AND conflict_remote_json IS NULL AND substr(end_at,1,10)<?""",
+                        (user_id, cutoff))
+        return cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
+
+
 def _sync_token(user_id, calendar_id):
     with connection() as c:
         row = c.execute("SELECT sync_token FROM google_sync_state WHERE user_id=? AND calendar_id=?", (user_id, calendar_id)).fetchone()
@@ -399,12 +426,7 @@ def _fetch_remote_pages(user_id, base, sync_token=None):
         if sync_token:
             params["syncToken"] = sync_token
         else:
-            try:
-                history_days = int(os.getenv("GOOGLE_CALENDAR_HISTORY_DAYS", "3650"))
-            except ValueError:
-                history_days = 3650
-            history_days = max(365, min(history_days, 36500))
-            params["timeMin"] = (datetime.now(timezone.utc) - timedelta(days=history_days)).isoformat()
+            params["timeMin"] = (datetime.now(timezone.utc) - timedelta(days=_history_days())).isoformat()
         if page:
             params["pageToken"] = page
         data = _request(user_id, "GET", base, params=params, allow_gone=True) or {}
@@ -464,6 +486,8 @@ def _sync_calendar(user_id, calendar_id):
                 start_obj, end_obj = remote.get("start", {}), remote.get("end", {})
                 start_raw = start_obj.get("dateTime") or start_obj.get("date")
                 end_raw = end_obj.get("dateTime") or end_obj.get("date")
+                if not existing and end_raw and end_raw[:10] < _history_cutoff_date():
+                    continue  # incremental syncs can still carry edits to ancient events
                 is_all_day = int(bool(start_obj.get("date")))
                 recurring_id = remote.get("recurringEventId")
                 recurrence = _series_recurrence(user_id, calendar_id, recurring_id, recurrence_cache)
@@ -569,4 +593,5 @@ def sync(user_id):
             total["calendars"].append({"calendar_id": calendar_id, "ok": False, "error": str(exc.detail)})
         finally:
             _release_sync_lease(user_id, calendar_id, owner)
+    total["pruned"] = _prune_history(user_id)
     return total

@@ -81,5 +81,56 @@ class GoogleCalendarHelpersTests(unittest.TestCase):
         self.assertTrue(gone)
 
 
+class GoogleCalendarHistoryWindowTests(unittest.TestCase):
+    def test_history_days_defaults_to_90_and_clamps(self):
+        import os
+        from unittest.mock import patch as env_patch
+        with env_patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("GOOGLE_CALENDAR_HISTORY_DAYS", None)
+            self.assertEqual(gc._history_days(), 90)
+        with env_patch.dict(os.environ, {"GOOGLE_CALENDAR_HISTORY_DAYS": "1"}):
+            self.assertEqual(gc._history_days(), 7)
+        with env_patch.dict(os.environ, {"GOOGLE_CALENDAR_HISTORY_DAYS": "not-a-number"}):
+            self.assertEqual(gc._history_days(), 90)
+
+    def test_initial_fetch_limits_history_with_time_min(self):
+        with patch.object(gc, "_request", return_value={"items": [], "nextSyncToken": "s"}) as request:
+            gc._fetch_remote_pages("user", "/calendar", None)
+        params = request.call_args.kwargs["params"]
+        self.assertIn("timeMin", params)
+        self.assertNotIn("syncToken", params)
+
+    def test_prune_removes_only_old_synced_google_mirrors(self):
+        import os
+        import tempfile
+        from datetime import date, timedelta
+        from unittest.mock import patch as env_patch
+        with tempfile.TemporaryDirectory() as folder, env_patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "t.db")}):
+            from app.db import connection, init_db
+            init_db()
+            old_day = (date.today() - timedelta(days=400)).isoformat()
+            recent_day = (date.today() - timedelta(days=3)).isoformat()
+            rows = [
+                # (title, end date, google_event_id, sync_state, conflict)
+                ("old google", old_day, "g-old", "synced", None),          # pruned
+                ("recent google", recent_day, "g-new", "synced", None),    # kept: inside window
+                ("old local", old_day, None, "clean", None),               # kept: not a Google mirror
+                ("old dirty", old_day, "g-dirty", "dirty", None),          # kept: unpushed local edits
+                ("old conflict", old_day, "g-conf", "synced", "{}"),       # kept: unresolved conflict
+            ]
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,created_at,updated_at) VALUES('u','u@example.com','2026-01-01','2026-01-01')")
+                for title, day, gid, state, conflict in rows:
+                    c.execute("""INSERT INTO events(user_id,title,start_at,end_at,tags,created_at,sync_state,
+                      google_event_id,google_calendar_id,conflict_remote_json)
+                      VALUES('u',?,?,?,'[]','2026-01-01',?,?,?,?)""",
+                              (title, f"{day}T10:00:00", f"{day}T11:00:00", state, gid, "cal" if gid else None, conflict))
+            pruned = gc._prune_history("u")
+            self.assertEqual(pruned, 1)
+            with connection() as c:
+                titles = {r["title"] for r in c.execute("SELECT title FROM events WHERE user_id='u'").fetchall()}
+            self.assertEqual(titles, {"recent google", "old local", "old dirty", "old conflict"})
+
+
 if __name__ == "__main__":
     unittest.main()
