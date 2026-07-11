@@ -66,7 +66,13 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const parentId = normalizedOptionalId(data.parent_id)
   const previousParentId = normalizedOptionalId(task?.parent_id)
   if (parentId !== taskId && (!task || parentId !== previousParentId)) payload.parent_id = parentId
-  payload.dependency_ids = normalizedDependencyIds(data.dependency_ids, taskId)
+
+  const dependencyIds = normalizedDependencyIds(data.dependency_ids, taskId)
+  const previousDependencyIds = normalizedDependencyIds(task?.dependency_ids, taskId)
+  const dependencyIdsChanged = !task
+    || dependencyIds.length !== previousDependencyIds.length
+    || dependencyIds.some(id => !previousDependencyIds.includes(id))
+  if (dependencyIdsChanged) payload.dependency_ids = dependencyIds
 
   return payload
 }

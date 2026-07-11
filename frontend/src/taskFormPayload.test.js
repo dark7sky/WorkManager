@@ -87,15 +87,40 @@ test('buildTaskPayload defaults missing select and invalid progress values durin
 })
 
 test('buildTaskPayload normalizes selected dependency IDs and excludes self/duplicates', () => {
-  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['3', '1', '3', 'x', '0'] }, { task: { id: 1 } })
+  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['3', '1', '3', 'x', '0'] }, { task: { id: 1, dependency_ids: [] } })
 
   assert.deepEqual(payload.dependency_ids, [3])
 })
 
-test('buildTaskPayload defaults to no dependencies when none are selected', () => {
-  const payload = buildTaskPayload(baseData, { task: { id: 1 } })
+test('buildTaskPayload sends no dependencies for a new task when none are selected', () => {
+  const payload = buildTaskPayload(baseData, {})
 
   assert.deepEqual(payload.dependency_ids, [])
+})
+
+test('buildTaskPayload omits unchanged dependency_ids when editing an existing task', () => {
+  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['2'] }, { task: { id: 1, dependency_ids: [2] } })
+
+  assert.equal(Object.hasOwn(payload, 'dependency_ids'), false)
+})
+
+test('buildTaskPayload omits unchanged dependency_ids regardless of stored order', () => {
+  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['2', '4'] }, { task: { id: 1, dependency_ids: [4, 2] } })
+
+  assert.equal(Object.hasOwn(payload, 'dependency_ids'), false)
+})
+
+test('buildTaskPayload does not re-trigger cycle validation for an unrelated edit on a task with pre-existing cyclic dependencies', () => {
+  const payload = buildTaskPayload({ ...baseData, title: '제목만 변경', dependency_ids: ['2'] }, { task: { id: 1, dependency_ids: [2] } })
+
+  assert.equal(Object.hasOwn(payload, 'dependency_ids'), false)
+  assert.equal(payload.title, '제목만 변경')
+})
+
+test('buildTaskPayload sends dependency_ids when the selection actually changes', () => {
+  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['2', '3'] }, { task: { id: 1, dependency_ids: [2] } })
+
+  assert.deepEqual(payload.dependency_ids, [2, 3])
 })
 
 test('initialTaskDateValue keeps blank dates blank when editing an existing task', () => {
