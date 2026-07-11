@@ -6,14 +6,15 @@ import { TagChips, TagFilter } from '../components/TagsInput'
 import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset } from '../performanceReport'
 
 const iso = date => date.toLocaleDateString('en-CA')
-const getRange = preset => {
+export const getRange = preset => {
   const end = new Date(), start = new Date(end)
   if (preset === 'month') start.setDate(1)
   else if (preset === 'quarter') start.setMonth(Math.floor(end.getMonth() / 3) * 3, 1)
+  else if (preset === 'lastweek') { const dow = end.getDay() || 7; end.setDate(end.getDate() - dow); start.setTime(end.getTime()); start.setDate(end.getDate() - 6) }
   else start.setMonth(0, 1)
   return [iso(start), iso(end)]
 }
-const PRESETS = [['year', '올해'], ['quarter', '이번 분기'], ['month', '이번 달'], ['custom', '직접 선택']]
+const PRESETS = [['lastweek', '지난주 리뷰'], ['month', '이번 달'], ['quarter', '이번 분기'], ['year', '올해'], ['custom', '직접 선택']]
 
 export default function Performance({ notify, onDataChanged }) {
   const [preset, setPreset] = useState('month')

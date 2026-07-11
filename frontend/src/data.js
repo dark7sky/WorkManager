@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-improve-workmanager-frontend',
+    timestamp: '2026-07-11T14:05:37+09:00',
+    description: '자동 개선 루프가 improve workmanager frontend 변경을 반영했습니다.',
+  },
+  {
     id: '2026-07-11-gantt-schedule-order',
     timestamp: '2026-07-11T13:58:31+09:00',
     description: '업무 관리 화면의 간트 목록이 같은 상위 업무 아래에서 제목 가나다순으로만 정렬되어 일정 순서와 무관하게 보이던 것을, 시작일(없으면 완료 예정일) 순으로 정렬하고 날짜가 같거나 없으면 제목순으로 보완해 실제 일정 흐름대로 보이도록 했습니다.',
