@@ -60,6 +60,8 @@ export const api = {
   exportData: () => request('/export'),
   importPreview: data => request('/import/preview',json('POST',data)),
   importData: (mode,data) => request('/import',json('POST',{mode,data})),
+  tags: () => request('/tags'),
+  renameTag: (from,to) => request('/tags/rename',json('POST',{from,to})),
   auditLogs: (limit=100) => request(`/audit-logs?limit=${limit}`),
   diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),
