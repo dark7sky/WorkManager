@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange } from './performanceReport.js'
 
 test('performanceReportMarkdown: generates basic structure', () => {
   const data = { summary: { completed_tasks: 5, work_logs: 10, events: 3, active_tasks: 2, completed_todos: 8 }, timeline: [] }
@@ -212,4 +212,13 @@ test('deleteReportPreset: handles deleting non-existent preset', () => {
 
   assert.strictEqual(result.length, 1)
   assert.strictEqual(result[0].name, 'preset1')
+})
+
+test('presetRange lastweek returns previous Monday through Sunday', () => {
+  // 2026-07-11 is a Saturday: last week = 6/29(Mon) ~ 7/5(Sun)
+  assert.deepEqual(presetRange('lastweek', new Date(2026, 6, 11)), ['2026-06-29', '2026-07-05'])
+  // On a Sunday (7/12), last week is still 6/29 ~ 7/5? No: 7/12 dow=0→7, end=7/5, start=6/29
+  assert.deepEqual(presetRange('lastweek', new Date(2026, 6, 12)), ['2026-06-29', '2026-07-05'])
+  // On a Monday (7/13), last week = 7/6 ~ 7/12
+  assert.deepEqual(presetRange('lastweek', new Date(2026, 6, 13)), ['2026-07-06', '2026-07-12'])
 })

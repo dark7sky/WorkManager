@@ -1,5 +1,16 @@
 const REPORT_PRESETS_KEY = 'workmanager.reportPresets'
 
+const isoDay = date => date.toLocaleDateString('en-CA')
+
+export const presetRange = (preset, today = new Date()) => {
+  const end = new Date(today), start = new Date(end)
+  if (preset === 'month') start.setDate(1)
+  else if (preset === 'quarter') start.setMonth(Math.floor(end.getMonth() / 3) * 3, 1)
+  else if (preset === 'lastweek') { const dow = end.getDay() || 7; end.setDate(end.getDate() - dow); start.setTime(end.getTime()); start.setDate(end.getDate() - 6) }
+  else start.setMonth(0, 1)
+  return [isoDay(start), isoDay(end)]
+}
+
 export const performanceReportMarkdown = (data, { start, end, tags = [], summary = null, generatedAt }) => {
   const stats = data?.summary || {}
   const items = data?.timeline || []
