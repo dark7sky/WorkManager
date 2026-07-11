@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-subtask-depth-scaling',
+    timestamp: '2026-07-11T13:56:44+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '하위 업무 행의 높이와 글씨 크기 축소가 모든 깊이에서 동일했던 것을, 중첩 단계(2단계, 3단계)가 깊어질수록 행 높이와 글씨 크기가 한 단계씩 더 작아지도록 개선했습니다.',
+  },
+  {
     id: '2026-07-11-pwa-portrait-lock-actually-applied',
     timestamp: '2026-07-11T13:46:43+09:00',
     requestedAt: '2026-07-08T05:44:56+09:00',
