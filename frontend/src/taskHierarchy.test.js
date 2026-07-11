@@ -42,3 +42,13 @@ test('subtaskCompletionSummary returns null for tasks without children', () => {
   assert.equal(subtaskCompletionSummary(tasks, 3), null)
   assert.equal(subtaskCompletionSummary(tasks, 4), null)
 })
+
+test('orderTasksHierarchically sorts sibling tasks by start date instead of title', () => {
+  const scheduled = [
+    { id: 1, title: 'Zeta', start_date: '2026-07-10' },
+    { id: 2, title: 'Alpha', start_date: '2026-07-20' },
+    { id: 3, title: 'Beta', start_date: null },
+  ]
+  const ordered = orderTasksHierarchically(scheduled, scheduled)
+  assert.deepEqual(ordered.map(item => item.task.id), [1, 2, 3])
+})

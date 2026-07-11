@@ -45,6 +45,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Audit log retention limit: entries older than a configurable window (default 180 days, `AUDIT_LOG_RETENTION_DAYS`) are pruned on server startup instead of growing unbounded (Wave 7 item 36).
 - [x] docker-compose.yml healthcheck for the api container (`/api/ready`), with backup/web waiting on `condition: service_healthy`, matching the existing portainer-stack.yml pattern (Wave 7 item 35).
 - [x] Subtask completion summary ("하위 업무 n/m 완료") shown on parent rows in the task list (Wave 7 item 37).
+- [x] Gantt task list sorts sibling rows by start date (falling back to due date, then title) instead of alphabetically, so the visible order matches the actual schedule (Wave 8 item 38).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

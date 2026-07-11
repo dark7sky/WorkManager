@@ -1,4 +1,9 @@
 const byTitle = (a, b) => (a.title || '').localeCompare(b.title || '', 'ko')
+const bySchedule = (a, b) => {
+  const ad = a.start_date || a.due_date || '', bd = b.start_date || b.due_date || ''
+  if (ad !== bd) return ad ? (bd ? (ad < bd ? -1 : 1) : -1) : 1
+  return byTitle(a, b)
+}
 
 export const childTaskIds = (tasks, taskId) => {
   if (!taskId) return new Set()
@@ -64,7 +69,7 @@ export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks) 
     group.push(task)
     children.set(parent, group)
   }
-  for (const group of children.values()) group.sort(byTitle)
+  for (const group of children.values()) group.sort(bySchedule)
   const ordered = []
   const visit = task => {
     ordered.push(task)
