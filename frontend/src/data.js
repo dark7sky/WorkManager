@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-backup-restore-import',
+    timestamp: '2026-07-11T13:56:37+09:00',
+    description: '설정 화면에 "백업에서 복원" 기능을 추가했습니다. 내보내기로 만든 JSON 파일을 선택하면 반영 전에 항목 수를 확인할 수 있고, 기존 데이터에 추가(merge)하거나 지우고 교체(replace)할 수 있습니다. 업무의 상하위 관계와 의존성, 기록-업무 연결도 그대로 복원되며, 복원된 일정은 Google 캘린더에 어떤 변경도 일으키지 않는 로컬 일정으로 들어옵니다.',
+  },
+  {
     id: '2026-07-11-subtask-depth-scaling',
     timestamp: '2026-07-11T13:56:44+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
