@@ -639,6 +639,12 @@ def create_item(table, data, user_id):
 
 def update_item(table, item_id, data, user_id):
     became_done = False
+    if table == "tasks" and "start_date" in data and "due_date" in data:
+        with connection() as c:
+            existing_row = c.execute("SELECT start_date, due_date FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
+        if existing_row and data["start_date"] == existing_row["start_date"] and data["due_date"] == existing_row["due_date"] \
+                and data["due_date"] and data["start_date"] and data["due_date"] < data["start_date"]:
+            data["start_date"], data["due_date"] = data["due_date"], data["start_date"]
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id, item_id)
@@ -676,6 +682,12 @@ def update_item(table, item_id, data, user_id):
                 normalized = normalize_legacy_task_date(existing[key])
                 if normalized != existing[key] and key not in data:
                     data[key] = normalized
+            effective_start = data.get("start_date", existing["start_date"])
+            effective_due = data.get("due_date", existing["due_date"])
+            start_unchanged = data.get("start_date", existing["start_date"]) == existing["start_date"]
+            due_unchanged = data.get("due_date", existing["due_date"]) == existing["due_date"]
+            if effective_start and effective_due and effective_due < effective_start and start_unchanged and due_unchanged:
+                data["start_date"], data["due_date"] = effective_due, effective_start
             normalized_parent_id = normalize_legacy_optional_task_id(existing["parent_id"])
             if normalized_parent_id != existing["parent_id"] and "parent_id" not in data:
                 data["parent_id"] = normalized_parent_id

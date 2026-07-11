@@ -41,7 +41,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const submit = async e => {
     e.preventDefault()
     const data = Object.fromEntries(new FormData(e.currentTarget))
-    if (data.start_date && data.due_date && data.due_date < data.start_date) {
+    const startChanged = data.start_date !== (task?.start_date || '')
+    const dueChanged = data.due_date !== (task?.due_date || '')
+    if (data.start_date && data.due_date && data.due_date < data.start_date && (startChanged || dueChanged)) {
       setError('완료 예정일은 시작일보다 빠를 수 없습니다.')
       return
     }

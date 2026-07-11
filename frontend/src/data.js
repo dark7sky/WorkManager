@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-fix-task-edit-save-reversed-dates',
+    timestamp: '2026-07-11T10:06:38+09:00',
+    description: '시작일이 완료 예정일보다 늦게 저장되어 있던 예전 업무를 수정 후 저장할 때 날짜를 건드리지 않아도 오류가 발생하며 저장이 막히던 문제를 해결했습니다. 이제 두 날짜가 뒤바뀐 채 저장되어 있어도 자동으로 순서를 바로잡아 저장됩니다.',
+  },
+  {
     id: '2026-07-11-subtask-completion-summary',
     timestamp: '2026-07-11T07:27:23+09:00',
     description: '업무 목록에서 하위 업무가 있는 업무에 "하위 업무 n/m 완료" 요약을 표시합니다.',
