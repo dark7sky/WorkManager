@@ -62,7 +62,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 ## Backlog (identified 2026-07-11, not yet implemented)
 
 - [x] Global search across tasks/events/todos/work logs from a single command palette or search box — already covered by the Ctrl/⌘+K command palette (`commandPalette.js` `searchItems`/`searchScreens`, wired into `QuickCapture`), found already implemented while auditing this backlog.
-- [x] Bulk task actions: multi-select checkboxes in the Gantt list with a bulk action bar to complete or delete several tasks at once (2026-07-11). Bulk retag is still not implemented.
+- [x] Bulk task actions: multi-select checkboxes in the Gantt list with a bulk action bar to complete or delete several tasks at once (2026-07-11), plus bulk tag add for selected tasks (2026-07-12).
 - [ ] Configurable reminder digest (e.g. daily email/notification summary of due-soon and overdue tasks) beyond the in-app banner.
 
 ## Removed (2026-07-10): Team/Assignee Features

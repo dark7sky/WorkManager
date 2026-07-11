@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies } from './taskFilters.js'
+import { filterTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -80,4 +80,18 @@ test('summarizeBlockedTasks counts unfinished tasks blocked by incomplete depend
   assert.equal(summary.blockerTotal, 1)
   assert.equal(summary.nextDueDate, '2026-07-10')
   assert.deepEqual(summary.items[0].blockers.map(task => task.id), [1])
+})
+
+test('withAddedTag appends a new tag to an existing list', () => {
+  assert.deepEqual(withAddedTag(['기획'], '긴급'), ['기획', '긴급'])
+})
+
+test('withAddedTag skips duplicates case-insensitively and trims whitespace', () => {
+  const tags = ['기획', 'Urgent']
+  assert.equal(withAddedTag(tags, 'urgent '), tags)
+})
+
+test('withAddedTag ignores a blank tag and handles a missing tag list', () => {
+  assert.deepEqual(withAddedTag(undefined, '  '), [])
+  assert.deepEqual(withAddedTag(undefined, '긴급'), ['긴급'])
 })

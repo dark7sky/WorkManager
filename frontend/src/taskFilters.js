@@ -1,5 +1,13 @@
 export const isTaskOverdue = (task, todayIso) => task.status !== 'done' && task.due_date && todayIso && task.due_date < todayIso
 
+export const withAddedTag = (tags, tag) => {
+  const trimmed = (tag || '').trim()
+  if (!trimmed) return tags || []
+  const existing = tags || []
+  if (existing.some(x => x.toLowerCase() === trimmed.toLowerCase())) return existing
+  return [...existing, trimmed]
+}
+
 export const taskBlockingDependencies = (task, tasks) => {
   const ids = new Set((task.dependency_ids || []).map(Number))
   if (!ids.size || task.status === 'done') return []
