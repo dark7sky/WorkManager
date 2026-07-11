@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-dependency-cycle-picker-fix',
+    timestamp: '2026-07-12T01:45:36+09:00',
+    description: '업무 수정 시 "선행 업무" 선택 목록에서 이미 이 업무에 의존하고 있는 업무(직접·간접 포함)를 제외했습니다. 순환 의존 관계가 되는 조합을 아예 선택할 수 없게 되어, 저장 시 서버가 순환 오류로 저장을 거부하던 문제가 사라집니다.',
+  },
+  {
     id: '2026-07-12-subtask-visual-scale-already-shipped',
     timestamp: '2026-07-12T01:38:37+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',

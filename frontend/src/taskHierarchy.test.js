@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { orderTasksHierarchically, subtaskCompletionSummary, taskParentOptions } from './taskHierarchy.js'
+import { orderTasksHierarchically, subtaskCompletionSummary, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
 
 const tasks = [
   { id: 1, title: 'Alpha' },
@@ -41,6 +41,25 @@ test('subtaskCompletionSummary counts direct children only and reports done vs t
 test('subtaskCompletionSummary returns null for tasks without children', () => {
   assert.equal(subtaskCompletionSummary(tasks, 3), null)
   assert.equal(subtaskCompletionSummary(tasks, 4), null)
+})
+
+test('taskDependencyOptions excludes tasks that already transitively depend on the current task', () => {
+  const linked = [
+    { id: 1, title: 'Alpha' },
+    { id: 2, title: 'Bravo', dependency_ids: [1] },
+    { id: 3, title: 'Charlie', dependency_ids: [2] },
+    { id: 4, title: 'Delta' },
+  ]
+  assert.deepEqual(taskDependencyOptions(linked, 1).map(option => option.id), [4])
+  assert.deepEqual(taskDependencyOptions(linked, 2).map(option => option.id), [1, 4])
+})
+
+test('taskDependencyOptions includes all tasks when creating a new task', () => {
+  const linked = [
+    { id: 1, title: 'Alpha' },
+    { id: 2, title: 'Bravo', dependency_ids: [1] },
+  ]
+  assert.deepEqual(taskDependencyOptions(linked).map(option => option.id), [1, 2])
 })
 
 test('orderTasksHierarchically sorts sibling tasks by start date instead of title', () => {

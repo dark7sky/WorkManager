@@ -33,10 +33,34 @@ export const taskParentOptions = (tasks, currentTaskId) => {
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
 }
 
-export const taskDependencyOptions = (tasks, currentTaskId) =>
-  orderTasksHierarchically(tasks, tasks)
-    .filter(({ task }) => task.id !== currentTaskId)
+export const dependentTaskIds = (tasks, taskId) => {
+  if (!taskId) return new Set()
+  const dependents = new Map()
+  for (const task of tasks) {
+    for (const depId of task.dependency_ids || []) {
+      const group = dependents.get(depId) || []
+      group.push(task.id)
+      dependents.set(depId, group)
+    }
+  }
+  const result = new Set()
+  const stack = [...(dependents.get(taskId) || [])]
+  while (stack.length) {
+    const id = stack.pop()
+    if (result.has(id)) continue
+    result.add(id)
+    stack.push(...(dependents.get(id) || []))
+  }
+  return result
+}
+
+export const taskDependencyOptions = (tasks, currentTaskId) => {
+  const blocked = dependentTaskIds(tasks, currentTaskId)
+  if (currentTaskId) blocked.add(currentTaskId)
+  return orderTasksHierarchically(tasks, tasks)
+    .filter(({ task }) => !blocked.has(task.id))
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
+}
 
 export const subtaskCompletionSummary = (tasks, taskId) => {
   const children = tasks.filter(task => task.parent_id === taskId)
