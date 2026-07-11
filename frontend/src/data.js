@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-subtask-visual-scale-reconfirmed-2',
+    timestamp: '2026-07-12T02:37:34+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '동일한 요청이 큐에 세 번째로 접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록에서 하위 업무 행(subtask-row)은 상위 업무보다 행 높이와 글씨 크기가 작고, 중첩 2·3단계로 갈수록 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx, frontend/src/styles.css). 코드 변경 없이 요청을 완료 처리합니다.',
+  },
+  {
     id: '2026-07-12-subtask-visual-scale-reconfirmed',
     timestamp: '2026-07-12T02:34:52+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
