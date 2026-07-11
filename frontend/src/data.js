@@ -18,10 +18,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-12T06:16:49+09:00',
+    timestamp: '2026-07-12T07:30:39+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '하위 업무 행의 높이·글씨 크기 축소(및 간트 막대 크기 조정)는 이미 구현되어 있음을 다시 확인했습니다. 이번에는 같은 요청이 큐에 반복 접수되는 동안 실수로 깨지는 일이 없도록, 행 클래스(subtask-row/subtask-depth-N)와 들여쓰기 계산을 taskHierarchy.js의 순수 함수(subtaskRowClass, taskIndent)로 분리하고 단위 테스트를 추가해 깊이별 축소 동작을 회귀 테스트로 고정했습니다.',
+    description: '동일한 요청(#13)이 큐에 다시 접수되어 재확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 그대로 정상 동작함을 프런트/백엔드 전체 테스트와 빌드로 다시 확인했으며, 코드 변경 없이 이번 재확인만 이 항목에 갱신해 로그 중복을 방지했습니다.',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
