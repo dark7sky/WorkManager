@@ -980,6 +980,48 @@ def import_data(payload: dict = Body(...), user=Depends(require_user)):
     return {"ok": True, "mode": mode, "imported": counts}
 
 
+@app.get("/api/tags")
+def tag_usage(user=Depends(require_user)):
+    counts = {}
+    with connection() as c:
+        for table in IMPORT_TABLES:
+            for row in c.execute(f"SELECT tags FROM {table} WHERE user_id=? AND deleted_at IS NULL AND tags!='[]'", (user,)):
+                for tag in json.loads(row["tags"] or "[]"):
+                    entry = counts.setdefault(tag, {"tag": tag, "total": 0, "tables": {t: 0 for t in IMPORT_TABLES}})
+                    entry["total"] += 1
+                    entry["tables"][table] += 1
+    items = sorted(counts.values(), key=lambda x: (-x["total"], x["tag"]))
+    return {"items": items}
+
+
+@app.post("/api/tags/rename")
+def tag_rename(payload: dict = Body(...), user=Depends(require_user)):
+    source = str(payload.get("from") or "").strip()
+    target = str(payload.get("to") or "").strip()
+    if not source:
+        raise HTTPException(422, "바꿀 태그 이름(from)이 필요합니다")
+    if len(target) > 50:
+        raise HTTPException(422, "태그는 최대 50자입니다")
+    timestamp = now()
+    changed = 0
+    with connection() as c:
+        for table in IMPORT_TABLES:
+            for row in c.execute(f"SELECT id,tags FROM {table} WHERE user_id=? AND tags!='[]'", (user,)).fetchall():
+                tags = json.loads(row["tags"] or "[]")
+                if source not in tags:
+                    continue
+                renamed, seen = [], set()
+                for tag in tags:
+                    value = target if tag == source else tag
+                    if value and value.casefold() not in seen:
+                        seen.add(value.casefold()); renamed.append(value)
+                c.execute(f"UPDATE {table} SET tags=? WHERE id=? AND user_id=?",
+                          (json.dumps(renamed, ensure_ascii=False), row["id"], user))
+                changed += 1
+    audit(user, "rename", "tags", metadata={"from": source, "to": target, "changed": changed})
+    return {"ok": True, "from": source, "to": target, "changed": changed}
+
+
 @app.get("/api/audit-logs")
 def audit_log_list(limit: int = 100, user=Depends(require_user)):
     items = rows("audit_logs", user, "ORDER BY created_at DESC LIMIT ?", (max(1, min(limit, 500)),))

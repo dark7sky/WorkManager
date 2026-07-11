@@ -481,6 +481,37 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(merged.status_code, 200, merged.text)
         self.assertEqual(len([t for t in a.get("/api/tasks").json() if t["title"] == "복원 부모"]), 2)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_tag_usage_and_bulk_rename_across_tables(self, *_):
+        b = self.client(self.token_b)
+        b.post("/api/tasks", json={"title": "태그 업무", "status": "todo", "progress": 0, "tags": ["보고", "긴급"]})
+        b.post("/api/todos", json={"title": "태그 할 일", "todo_date": "2026-08-01", "tags": ["보고"]})
+        b.post("/api/work_logs", json={"content": "태그 기록", "log_date": "2026-08-01", "tags": ["보고", "회의"]})
+
+        usage = b.get("/api/tags").json()["items"]
+        top = usage[0]
+        self.assertEqual(top["tag"], "보고")
+        self.assertEqual(top["total"], 3)
+        self.assertEqual(top["tables"]["tasks"], 1)
+
+        renamed = b.post("/api/tags/rename", json={"from": "보고", "to": "주간보고"}).json()
+        self.assertEqual(renamed["changed"], 3)
+        tags_now = {item["tag"] for item in b.get("/api/tags").json()["items"]}
+        self.assertIn("주간보고", tags_now)
+        self.assertNotIn("보고", tags_now)
+
+        # merging into an existing tag deduplicates instead of doubling
+        b.post("/api/tags/rename", json={"from": "긴급", "to": "회의"})
+        task_tags = b.get("/api/tasks").json()[-1]["tags"]
+        self.assertEqual(task_tags.count("회의"), 1)
+
+        # empty target removes the tag entirely
+        removed = b.post("/api/tags/rename", json={"from": "회의", "to": ""}).json()
+        self.assertGreaterEqual(removed["changed"], 1)
+        self.assertNotIn("회의", {item["tag"] for item in b.get("/api/tags").json()["items"]})
+        self.assertEqual(b.post("/api/tags/rename", json={"to": "x"}).status_code, 422)
+
     def test_import_rejects_unknown_version_and_bad_mode(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/import/preview", json={"version": 2}).status_code, 422)
