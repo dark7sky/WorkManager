@@ -17,11 +17,11 @@ export const changelogUpdates = [
     description: '자주 만드는 업무를 템플릿으로 저장하고 새 업무 등록 폼에서 선택해 제목·우선순위·반복·태그·기간(시작일 기준)을 한 번에 채울 수 있게 했습니다. 템플릿은 기기 로컬(localStorage)에 저장됩니다.',
   },
   {
-    id: '2026-07-12-subtask-visual-scale-reconfirmed-8',
-    timestamp: '2026-07-12T06:01:59+09:00',
+    id: '2026-07-12-subtask-gantt-bar-scale-fix',
+    timestamp: '2026-07-12T06:03:32+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 또 재접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록의 하위 업무 행(subtask-row)은 상위 업무보다 행 높이·글씨 크기가 작고, 중첩 2·3단계로 갈수록 한 단계씩 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx의 subtask-row/subtask-depth-N 클래스, frontend/src/styles.css의 해당 규칙). 코드 변경 없이 이번 재확인 내용만 이 항목에 갱신해 로그 중복을 방지했습니다.',
+    description: '하위 업무 행(subtask-row)의 행 높이·글씨 크기는 이미 축소되어 있었지만, 간트 막대(gantt-bar)는 고정된 top/height 값을 그대로 써서 2·3단계로 갈수록 줄어든 행 높이보다 막대가 커져 아래 행과 겹쳐 보이는 문제가 있었습니다. 하위 업무 깊이별로 막대 높이와 위치도 함께 축소해 행 안에 정확히 들어맞도록 수정했습니다(frontend/src/styles.css).',
   },
   {
     id: '2026-07-12-bulk-tag-add',
