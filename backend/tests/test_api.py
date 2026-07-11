@@ -447,6 +447,47 @@ class ApiTests(unittest.TestCase):
         items = errors.json()["items"]
         self.assertTrue(any("boom-diagnostics" in item["summary"] and item["path"] == "/api/tasks" for item in items))
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_export_import_round_trip_preserves_hierarchy_and_links(self, *_):
+        a = self.client(self.token_a)
+        parent = a.post("/api/tasks", json={"title": "복원 부모", "status": "todo", "progress": 0}).json()
+        child = a.post("/api/tasks", json={"title": "복원 자식", "status": "todo", "progress": 0,
+                                           "parent_id": parent["id"], "dependency_ids": [parent["id"]]}).json()
+        a.post("/api/events", json={"title": "복원 일정", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"})
+        a.post("/api/todos", json={"title": "복원 할 일", "todo_date": "2026-08-01"})
+        a.post("/api/work_logs", json={"content": "복원 기록", "log_date": "2026-08-01", "task_id": child["id"]})
+        exported = a.get("/api/export").json()
+
+        preview = a.post("/api/import/preview", json=exported)
+        self.assertEqual(preview.status_code, 200, preview.text)
+        self.assertGreaterEqual(preview.json()["importable"]["tasks"], 2)
+
+        result = a.post("/api/import", json={"mode": "replace", "data": exported})
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertGreaterEqual(result.json()["imported"]["tasks"], 2)
+
+        tasks = {t["title"]: t for t in a.get("/api/tasks").json()}
+        restored_parent, restored_child = tasks["복원 부모"], tasks["복원 자식"]
+        self.assertNotEqual(restored_parent["id"], parent["id"])  # replace re-created rows
+        self.assertEqual(restored_child["parent_id"], restored_parent["id"])
+        self.assertEqual(restored_child["dependency_ids"], [restored_parent["id"]])
+        logs = a.get("/api/work_logs").json()
+        self.assertEqual(logs[0]["task_id"], restored_child["id"])
+        events = a.get("/api/events").json()
+        self.assertEqual(events[0]["title"], "복원 일정")
+
+        merged = a.post("/api/import", json={"mode": "merge", "data": exported})
+        self.assertEqual(merged.status_code, 200, merged.text)
+        self.assertEqual(len([t for t in a.get("/api/tasks").json() if t["title"] == "복원 부모"]), 2)
+
+    def test_import_rejects_unknown_version_and_bad_mode(self):
+        a = self.client(self.token_a)
+        self.assertEqual(a.post("/api/import/preview", json={"version": 2}).status_code, 422)
+        self.assertEqual(a.post("/api/import", json={"mode": "wipe", "data": {"version": 1}}).status_code, 422)
+        bad = a.post("/api/import", json={"mode": "merge", "data": {"version": 1, "tasks": [{"title": ""}]}})
+        self.assertEqual(bad.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

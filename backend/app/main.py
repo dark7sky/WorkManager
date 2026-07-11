@@ -885,6 +885,101 @@ def export_data(user=Depends(require_user)):
             "feature_requests": rows("feature_requests", user)}
 
 
+IMPORT_TABLES = ("tasks", "events", "todos", "work_logs")
+
+
+def _import_rows(payload):
+    if not isinstance(payload, dict) or payload.get("version") != 1:
+        raise HTTPException(422, "지원하지 않는 백업 파일 형식입니다. /api/export로 내려받은 version 1 파일이 필요합니다.")
+    result = {}
+    for table in IMPORT_TABLES:
+        items = payload.get(table) or []
+        if not isinstance(items, list) or not all(isinstance(x, dict) for x in items):
+            raise HTTPException(422, f"{table} 항목이 올바른 목록이 아닙니다")
+        result[table] = items
+    return result
+
+
+def _normalize_import_row(table, index, raw):
+    allowed = CONFIG[table][0]
+    try:
+        return normalize(table, {k: v for k, v in raw.items() if k in allowed})
+    except HTTPException as exc:
+        raise HTTPException(422, f"{table} {index + 1}번째 항목: {exc.detail}")
+
+
+@app.post("/api/import/preview")
+def import_preview(payload: dict = Body(...), user=Depends(require_user)):
+    data = _import_rows(payload)
+    for table, items in data.items():
+        for i, raw in enumerate(items):
+            _normalize_import_row(table, i, raw)
+    with connection() as c:
+        existing = {t: c.execute(f"SELECT COUNT(*) n FROM {t} WHERE user_id=? AND deleted_at IS NULL", (user,)).fetchone()["n"]
+                    for t in IMPORT_TABLES}
+    return {"ok": True, "exported_at": payload.get("exported_at"),
+            "importable": {t: len(v) for t, v in data.items()}, "existing": existing}
+
+
+@app.post("/api/import")
+def import_data(payload: dict = Body(...), user=Depends(require_user)):
+    enforce_rate(user, "import", 6, 60)
+    mode = payload.get("mode")
+    if mode not in {"merge", "replace"}:
+        raise HTTPException(422, "mode must be merge or replace")
+    data = _import_rows(payload.get("data") or {})
+    timestamp = now()
+    normalized = {table: [_normalize_import_row(table, i, raw) for i, raw in enumerate(items)]
+                  for table, items in data.items()}
+    task_id_map, pending_links, counts = {}, [], {t: 0 for t in IMPORT_TABLES}
+    # One transaction: any bad row rolls the whole import back.
+    with connection() as c:
+        if mode == "replace":
+            for table in IMPORT_TABLES:
+                c.execute(f"DELETE FROM {table} WHERE user_id=?", (user,))
+        for table in IMPORT_TABLES:
+            for i, item in enumerate(normalized[table]):
+                raw = data[table][i]
+                item["user_id"] = user
+                item["created_at"] = raw.get("created_at") or timestamp
+                if table in ("tasks", "events"):
+                    item["updated_at"] = raw.get("updated_at") or timestamp
+                if table == "tasks":
+                    links = (item.pop("parent_id", None), item.pop("dependency_ids", None))
+                    if item.get("status") == "done":
+                        item["completed_at"] = raw.get("completed_at") or timestamp
+                    if item.get("recurrence_rule") == "monthly":
+                        anchor_value = item.get("due_date") or item.get("start_date")
+                        if anchor_value:
+                            anchor = date.fromisoformat(anchor_value)
+                            item["recurrence_anchor_day"] = anchor.day
+                            item["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+                if table == "events":
+                    # Restored events stay local-only: no Google linkage, no push.
+                    item["local_uid"] = str(uuid.uuid4())
+                    item["sync_state"] = "clean"
+                if table == "work_logs" and item.get("task_id") is not None:
+                    item["task_id"] = task_id_map.get(raw.get("task_id"))
+                cols = list(item)
+                cur = c.execute(f"INSERT INTO {table} ({','.join(cols)}) VALUES ({','.join('?' for _ in cols)})",
+                                [item[x] for x in cols])
+                counts[table] += 1
+                if table == "tasks":
+                    task_id_map[raw.get("id")] = cur.lastrowid
+                    if links[0] is not None or links[1]:
+                        pending_links.append((cur.lastrowid, links[0], links[1]))
+            if table == "tasks":
+                # Second pass: children can precede parents in the export, so
+                # remap hierarchy/dependencies only after every task exists.
+                for new_id, old_parent, old_deps in pending_links:
+                    mapped_parent = task_id_map.get(old_parent)
+                    mapped_deps = sorted({task_id_map[d] for d in json.loads(old_deps or "[]") if d in task_id_map})
+                    c.execute("UPDATE tasks SET parent_id=?,dependency_ids=? WHERE id=?",
+                              (mapped_parent, json.dumps(mapped_deps), new_id))
+    audit(user, "import", "backup", metadata={"mode": mode, **counts})
+    return {"ok": True, "mode": mode, "imported": counts}
+
+
 @app.get("/api/audit-logs")
 def audit_log_list(limit: int = 100, user=Depends(require_user)):
     items = rows("audit_logs", user, "ORDER BY created_at DESC LIMIT ?", (max(1, min(limit, 500)),))

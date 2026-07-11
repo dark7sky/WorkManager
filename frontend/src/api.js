@@ -58,6 +58,8 @@ export const api = {
   workflowSettings: () => request('/settings/workflow'), saveWorkflowSettings: data => request('/settings/workflow',json('PUT',data)),
   integrations: () => request('/settings/integrations'), googleStatus: () => request('/google/status'), googleCalendars: () => request('/google/calendars'), selectGoogleCalendar: calendar_id => request('/google/select',json('POST',{calendar_id})), syncGoogleCalendar: () => request('/google/sync',{method:'POST'}),
   exportData: () => request('/export'),
+  importPreview: data => request('/import/preview',json('POST',data)),
+  importData: (mode,data) => request('/import',json('POST',{mode,data})),
   auditLogs: (limit=100) => request(`/audit-logs?limit=${limit}`),
   diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),

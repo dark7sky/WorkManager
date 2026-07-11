@@ -98,3 +98,5 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}.skip-link{position:fixed;lef
 
 .empty-state{display:grid;justify-items:center;gap:6px}
 .empty-state:before{content:"";display:block;width:36px;height:36px;margin-bottom:2px;border-radius:50%;background:color-mix(in srgb,var(--blue) 10%,var(--surface-2));border:1px dashed var(--line)}
+
+.import-plan{display:grid;gap:8px}.import-plan label{display:flex;align-items:center;gap:7px;font-size:13px}.import-plan-actions{display:flex;gap:8px;align-items:flex-start}

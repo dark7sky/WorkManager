@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun } from 'lucide-react'
+import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun, Upload } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import TrashSection from '../components/TrashSection'
@@ -17,7 +17,10 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [aiConfigs, setAiConfigs] = useState({})
   const [aiDrafts, setAiDrafts] = useState({})
   const [aiProvider, setAiProvider] = useState('openai')
+  const [importPlan, setImportPlan] = useState(null)
+  const [importMode, setImportMode] = useState('merge')
   const aiLoadSeq = useRef(0)
+  const importFileRef = useRef(null)
 
   const applyAiConfig = ai => {
     const provider = normalizeAiProvider(ai?.provider || ai?.selected_provider || 'openai')
@@ -126,6 +129,41 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const pickImportFile = async e => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setBusy('import-preview')
+    try {
+      const parsed = JSON.parse(await file.text())
+      const preview = await api.importPreview(parsed)
+      setImportPlan({ data: parsed, preview, name: file.name })
+      setImportMode('merge')
+    } catch (err) {
+      notify(err instanceof SyntaxError ? 'JSON 파일을 읽을 수 없습니다.' : err.message, 'error')
+      setImportPlan(null)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const applyImport = async () => {
+    if (!importPlan) return
+    if (importMode === 'replace' && !confirm('기존 데이터를 모두 지우고 파일 내용으로 교체합니다. 계속할까요?')) return
+    setBusy('import-apply')
+    try {
+      const result = await api.importData(importMode, importPlan.data)
+      const total = Object.values(result.imported || {}).reduce((a, b) => a + b, 0)
+      notify(`복원했습니다 · ${total}개 항목`)
+      setImportPlan(null)
+      await onDataChanged?.()
+    } catch (err) {
+      notify(err.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
   const toggleWorkflowSettings = async e => {
     const newValue = e.target.checked
     setBusy("workflow-save")
@@ -173,6 +211,15 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><Download /></span><div><h2>내 데이터 내보내기</h2><p>업무, 일정, Todo와 업무 기록을 JSON 파일로 보관합니다.</p></div></div>
         <div className="integration-body"><div><strong>현재 Google 계정의 데이터만 포함됩니다.</strong><small>Google access token과 API 키 같은 인증 정보는 포함되지 않습니다.</small></div><button className="secondary" disabled={!!busy} onClick={exportData}><Download /> {busy === 'export' ? '준비 중…' : 'JSON 내보내기'}</button></div>
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><Upload /></span><div><h2>백업에서 복원</h2><p>내보내기로 만든 JSON 파일을 불러와 데이터를 되살립니다.</p></div></div>
+        <input ref={importFileRef} type="file" accept="application/json,.json" hidden onChange={pickImportFile} />
+        {!importPlan ? <div className="integration-body"><div><strong>먼저 파일을 선택하면 반영 전에 내용을 확인할 수 있습니다.</strong><small>복원된 일정은 Google 캘린더와 연결되지 않은 로컬 일정으로 들어옵니다.</small></div><button className="secondary" disabled={!!busy} onClick={() => importFileRef.current?.click()}><Upload /> {busy === 'import-preview' ? '확인 중…' : 'JSON 파일 선택'}</button></div>
+        : <div className="integration-body import-plan"><div><strong>{importPlan.name}</strong><small>{importPlan.preview.exported_at ? `내보낸 시각 ${importPlan.preview.exported_at}` : '내보낸 시각 정보 없음'} · 업무 {importPlan.preview.importable.tasks} · 일정 {importPlan.preview.importable.events} · 할 일 {importPlan.preview.importable.todos} · 기록 {importPlan.preview.importable.work_logs}건 (현재 보유: 업무 {importPlan.preview.existing.tasks} · 일정 {importPlan.preview.existing.events} · 할 일 {importPlan.preview.existing.todos} · 기록 {importPlan.preview.existing.work_logs}건)</small>
+          <label><input type="radio" name="import-mode" checked={importMode === 'merge'} onChange={() => setImportMode('merge')} /> 기존 데이터에 추가 (merge)</label>
+          <label><input type="radio" name="import-mode" checked={importMode === 'replace'} onChange={() => setImportMode('replace')} /> 기존 데이터를 지우고 교체 (replace)</label></div>
+          <div className="import-plan-actions"><button className="primary" disabled={!!busy} onClick={applyImport}>{busy === 'import-apply' ? <LoaderCircle className="spin" /> : <Upload />} 복원 실행</button><button className="secondary" disabled={!!busy} onClick={() => setImportPlan(null)}>취소</button></div></div>}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><CalendarSync /></span><div><h2>Google 캘린더</h2><p>업무용 캘린더의 일정을 WorkManager와 동기화합니다.</p></div><em className={`status-pill ${connected ? 'online' : ''}`}>{connected ? '연결됨' : '연결 안 됨'}</em></div>
