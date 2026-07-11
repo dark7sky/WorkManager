@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { orderTasksHierarchically, subtaskCompletionSummary, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+import { orderTasksHierarchically, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
 
 const tasks = [
   { id: 1, title: 'Alpha' },
@@ -70,4 +70,20 @@ test('orderTasksHierarchically sorts sibling tasks by start date instead of titl
   ]
   const ordered = orderTasksHierarchically(scheduled, scheduled)
   assert.deepEqual(ordered.map(item => item.task.id), [1, 2, 3])
+})
+
+test('subtaskRowClass leaves top-level rows unmarked and shrinks nested rows deeper per depth, capped at 3', () => {
+  assert.equal(subtaskRowClass(0), '')
+  assert.equal(subtaskRowClass(1), ' subtask-row subtask-depth-1')
+  assert.equal(subtaskRowClass(2), ' subtask-row subtask-depth-2')
+  assert.equal(subtaskRowClass(3), ' subtask-row subtask-depth-3')
+  assert.equal(subtaskRowClass(5), ' subtask-row subtask-depth-3')
+})
+
+test('taskIndent increases with depth and caps indentation beyond depth 5', () => {
+  assert.equal(taskIndent(0), '8px')
+  assert.equal(taskIndent(1), '26px')
+  assert.equal(taskIndent(3), '62px')
+  assert.equal(taskIndent(5), '98px')
+  assert.equal(taskIndent(9), '98px')
 })

@@ -89,6 +89,10 @@ export const taskHierarchyDepths = tasks => {
   return depths
 }
 
+export const subtaskRowClass = depth => depth > 0 ? ` subtask-row subtask-depth-${Math.min(depth, 3)}` : ''
+
+export const taskIndent = depth => `${8 + Math.min(depth, 5) * 18}px`
+
 export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks) => {
   const visible = new Set(visibleTasks.map(task => task.id))
   const children = new Map()

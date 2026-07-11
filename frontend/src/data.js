@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-subtask-row-scale-regression-test',
+    timestamp: '2026-07-12T06:16:49+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '하위 업무 행의 높이·글씨 크기 축소(및 간트 막대 크기 조정)는 이미 구현되어 있음을 다시 확인했습니다. 이번에는 같은 요청이 큐에 반복 접수되는 동안 실수로 깨지는 일이 없도록, 행 클래스(subtask-row/subtask-depth-N)와 들여쓰기 계산을 taskHierarchy.js의 순수 함수(subtaskRowClass, taskIndent)로 분리하고 단위 테스트를 추가해 깊이별 축소 동작을 회귀 테스트로 고정했습니다.',
+  },
+  {
     id: '2026-07-12-tasks-skeleton-loading',
     timestamp: '2026-07-12T06:12:00+09:00',
     description: '업무 화면을 열거나 새로고침할 때 데이터를 불러오는 동안 목록이 잠깐 "조건에 맞는 업무가 없습니다" 빈 상태로 보이던 것을, 이미 설정 화면 등에서 쓰던 회색 블록 애니메이션(스켈레톤)으로 바꿔 로딩 중임을 명확히 보여주도록 했습니다.',
