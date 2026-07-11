@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-task-templates',
+    timestamp: '2026-07-12T03:18:47+09:00',
+    description: '자주 만드는 업무를 템플릿으로 저장하고 새 업무 등록 폼에서 선택해 제목·우선순위·반복·태그·기간(시작일 기준)을 한 번에 채울 수 있게 했습니다. 템플릿은 기기 로컬(localStorage)에 저장됩니다.',
+  },
+  {
     id: '2026-07-12-subtask-visual-scale-reconfirmed-3',
     timestamp: '2026-07-12T02:39:20+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',

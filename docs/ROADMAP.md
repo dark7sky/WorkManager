@@ -13,7 +13,8 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Tag management in Settings: usage counts, bulk rename/merge/remove across all four tables.
 - [x] Compose healthcheck for the api container; audit-log retention (180d default); scheduled backup container with verify (33/35/36, partly via the Codex loop).
 - [ ] Server error visibility panel (37) — diagnostics endpoint exists; surfacing polish pending.
-- [ ] Gantt bar drag (39), calendar event drag (40), skeleton loading (41), mobile form polish (42), task templates (44).
+- [ ] Gantt bar drag (39), calendar event drag (40), skeleton loading (41), mobile form polish (42).
+- [x] Task templates (44): save the current new-task form as a named template (title/priority/recurrence/tags/duration) and prefill a new task from a saved template; localStorage-only (`frontend/src/taskTemplates.js`).
 
 ## Real-Use Readiness (2026-07-10)
 

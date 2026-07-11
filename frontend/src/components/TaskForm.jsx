@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { buildTaskPayload, initialTaskDateValue } from '../taskFormPayload'
 import { taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
+import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import TagsInput from './TagsInput'
 
 export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
@@ -9,10 +10,45 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
   const [suggestions, setSuggestions] = useState([])
+  const [templates, setTemplates] = useState(() => loadTaskTemplates())
+  const [prefill, setPrefill] = useState(null)
   const formRef = useRef(null)
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
   const dependencyOptions = taskDependencyOptions(tasks, task?.id)
+
+  const [prefillKey, setPrefillKey] = useState(0)
+  const applyTemplate = id => {
+    const template = templates.find(t => t.id === id)
+    if (!template) return
+    const filled = applyTaskTemplate(template, today)
+    setPrefill(filled)
+    setPrefillKey(k => k + 1)
+    setTags(filled.tags)
+  }
+
+  const saveAsTemplate = () => {
+    const data = new FormData(formRef.current)
+    const name = window.prompt('템플릿 이름을 입력하세요.', data.get('title') || '')
+    if (!name) return
+    const template = buildTaskTemplate({
+      name,
+      title: data.get('title'),
+      priority: data.get('priority'),
+      recurrence_rule: data.get('recurrence_rule'),
+      tags,
+      durationDays: durationDaysBetween(data.get('start_date'), data.get('due_date')),
+    })
+    const next = addTaskTemplate(templates, template)
+    setTemplates(next)
+    saveTaskTemplates(next)
+  }
+
+  const deleteTemplate = id => {
+    const next = removeTaskTemplate(templates, id)
+    setTemplates(next)
+    saveTaskTemplates(next)
+  }
 
   useEffect(() => {
     setSaving(false)
@@ -59,18 +95,22 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   }
 
   return <form ref={formRef} className="form-grid" onSubmit={submit}>
-    <label className="span-2">업무 제목<input name="title" required autoFocus defaultValue={task?.title || ''}/></label>
-    <label>시작일<input name="start_date" type="date" defaultValue={initialTaskDateValue(task, 'start_date', today)}/></label>
-    <label>완료 예정일<input name="due_date" type="date" defaultValue={initialTaskDateValue(task, 'due_date', today)}/></label>
+    {!task ? <div className="span-2 task-template-bar">
+      <label>업무 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+      {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
+    </div> : null}
+    <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus defaultValue={prefill?.title ?? task?.title ?? ''}/></label>
+    <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)}/></label>
+    <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
-    <label>우선순위<select name="priority" defaultValue={task?.priority || 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
-    <label>반복<select name="recurrence_rule" defaultValue={task?.recurrence_rule || ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
+    <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
+    <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" defaultValue={prefill?.recurrence_rule ?? task?.recurrence_rule ?? ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <label className="span-2">선행 업무 (완료되어야 진행 가능)<select name="dependency_ids" multiple size={Math.min(5, Math.max(3, dependencyOptions.length))} defaultValue={(task?.dependency_ids || []).map(String)}>{dependencyOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
-    <div className="form-actions span-2">{task && onDelete ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}<span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : task ? '변경사항 저장' : '업무 등록'}</button></div>
+    <div className="form-actions span-2">{task && onDelete ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : task ? '변경사항 저장' : '업무 등록'}</button></div>
   </form>
 }
