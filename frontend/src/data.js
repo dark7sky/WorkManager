@@ -17,11 +17,11 @@ export const changelogUpdates = [
     description: '자주 만드는 업무를 템플릿으로 저장하고 새 업무 등록 폼에서 선택해 제목·우선순위·반복·태그·기간(시작일 기준)을 한 번에 채울 수 있게 했습니다. 템플릿은 기기 로컬(localStorage)에 저장됩니다.',
   },
   {
-    id: '2026-07-12-subtask-visual-scale-reconfirmed-5',
-    timestamp: '2026-07-12T03:22:12+09:00',
+    id: '2026-07-12-subtask-visual-scale-reconfirmed-6',
+    timestamp: '2026-07-12T04:27:42+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청이 큐에 계속 재접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록의 하위 업무 행(subtask-row)은 상위 업무보다 행 높이·글씨 크기가 작고, 중첩 2·3단계로 갈수록 한 단계씩 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx의 subtask-row/subtask-depth-N 클래스, frontend/src/styles.css의 해당 규칙). 반복되는 중복 확인 로그를 정리해 이전 재확인 항목 4건을 이 항목 하나로 합쳤습니다. 코드 변경 없이 요청을 완료 처리합니다.',
+    description: '동일한 요청이 큐에 계속 재접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록의 하위 업무 행(subtask-row)은 상위 업무보다 행 높이·글씨 크기가 작고, 중첩 2·3단계로 갈수록 한 단계씩 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx의 subtask-row/subtask-depth-N 클래스, frontend/src/styles.css의 해당 규칙). 반복되는 중복 확인 로그를 정리해 이전 재확인 항목들을 이 항목 하나로 합쳤습니다. 코드 변경 없이 요청을 완료 처리합니다.',
   },
   {
     id: '2026-07-12-bulk-tag-add',
@@ -37,13 +37,6 @@ export const changelogUpdates = [
     id: '2026-07-12-dependency-cycle-picker-fix',
     timestamp: '2026-07-12T01:45:36+09:00',
     description: '업무 수정 시 "선행 업무" 선택 목록에서 이미 이 업무에 의존하고 있는 업무(직접·간접 포함)를 제외했습니다. 순환 의존 관계가 되는 조합을 아예 선택할 수 없게 되어, 저장 시 서버가 순환 오류로 저장을 거부하던 문제가 사라집니다.',
-  },
-  {
-    id: '2026-07-12-subtask-visual-scale-already-shipped',
-    timestamp: '2026-07-12T01:38:37+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청을 확인한 결과 하위 업무 행의 높이·글씨 크기 축소(중첩 단계별 추가 축소 포함)가 이미 반영되어 있어 추가 변경 없이 요청을 완료 처리합니다.',
   },
   {
     id: '2026-07-12-tag-management',
