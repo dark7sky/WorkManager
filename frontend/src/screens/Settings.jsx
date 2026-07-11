@@ -18,6 +18,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [aiConfigs, setAiConfigs] = useState({})
   const [aiDrafts, setAiDrafts] = useState({})
   const [aiProvider, setAiProvider] = useState('openai')
+  const [errorsRefreshing, setErrorsRefreshing] = useState(false)
   const [importPlan, setImportPlan] = useState(null)
   const [importMode, setImportMode] = useState('merge')
   const aiLoadSeq = useRef(0)
@@ -54,6 +55,18 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   }
 
   useEffect(() => { load() }, [])
+
+  const refreshServerErrors = async () => {
+    setErrorsRefreshing(true)
+    try {
+      const errors = await api.diagnosticsErrors(5)
+      setServerErrors(errors.items || [])
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setErrorsRefreshing(false)
+    }
+  }
 
   const select = async id => {
     setBusy('select')
@@ -235,7 +248,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         <button className="secondary" onClick={onOpenAudit}>감사 로그 보기</button>
       </section>
       <section className="settings-card">
-        <div className="settings-heading"><span><ClipboardList /></span><div><h2>서버 오류 진단</h2><p>처리되지 않은 서버 오류 중 최근 5건을 보여줍니다.</p></div></div>
+        <div className="settings-heading"><span><ClipboardList /></span><div><h2>서버 오류 진단</h2><p>처리되지 않은 서버 오류 중 최근 5건을 보여줍니다.</p></div><button className="secondary" disabled={errorsRefreshing} onClick={refreshServerErrors}>{errorsRefreshing ? <LoaderCircle className="spin" /> : <RefreshCw />} 새로고침</button></div>
         {!serverErrors ? <div className="skeleton lines" /> : serverErrors.length ? <ul className="error-log-list">{serverErrors.map(item => <li key={item.id}><time dateTime={item.created_at}>{new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(item.created_at))}</time><div><strong>{item.method} {item.path}</strong><p>{item.summary}</p></div></li>)}</ul> : <p className="empty-state">최근 서버 오류가 없습니다.</p>}
       </section>
       <section className="settings-card">

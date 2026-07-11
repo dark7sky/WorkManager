@@ -12,7 +12,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Event-start notifications 15 minutes ahead while the app is open.
 - [x] Tag management in Settings: usage counts, bulk rename/merge/remove across all four tables.
 - [x] Compose healthcheck for the api container; audit-log retention (180d default); scheduled backup container with verify (33/35/36, partly via the Codex loop).
-- [ ] Server error visibility panel (37) — diagnostics endpoint exists; surfacing polish pending.
+- [x] Server error visibility panel (37): Settings shows the last 5 unhandled server errors with a manual 새로고침 button to reload without a full page refresh.
 - [ ] Gantt bar drag (39), calendar event drag (40), mobile form polish (42).
 - [x] Skeleton loading (41): Tasks/Gantt list shows shimmering skeleton rows (reusing the existing `.skeleton` pattern from Settings) instead of the empty-state message while `dataLoading` is true and no tasks have arrived yet.
 - [x] Task templates (44): save the current new-task form as a named template (title/priority/recurrence/tags/duration) and prefill a new task from a saved template; localStorage-only (`frontend/src/taskTemplates.js`).
