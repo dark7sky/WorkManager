@@ -33,6 +33,11 @@ export const taskParentOptions = (tasks, currentTaskId) => {
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
 }
 
+export const taskDependencyOptions = (tasks, currentTaskId) =>
+  orderTasksHierarchically(tasks, tasks)
+    .filter(({ task }) => task.id !== currentTaskId)
+    .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
+
 export const subtaskCompletionSummary = (tasks, taskId) => {
   const children = tasks.filter(task => task.parent_id === taskId)
   if (!children.length) return null

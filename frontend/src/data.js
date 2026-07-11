@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-11-task-dependency-picker',
+    timestamp: '2026-07-11T14:37:17+09:00',
+    description: '업무 등록/수정 화면에 "선행 업무" 다중 선택 항목을 추가했습니다. 그동안 선행 업무 차단 알림은 표시됐지만 실제로 선행 업무를 지정할 방법이 없었는데, 이제 화면에서 직접 선택할 수 있고 자기 자신 선택과 순환 의존은 서버에서 계속 차단합니다.',
+  },
+  {
     id: '2026-07-11-improve-workmanager-frontend',
     timestamp: '2026-07-11T14:05:37+09:00',
     description: '자동 개선 루프가 improve workmanager frontend 변경을 반영했습니다.',

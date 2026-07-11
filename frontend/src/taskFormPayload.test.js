@@ -86,6 +86,18 @@ test('buildTaskPayload defaults missing select and invalid progress values durin
   assert.equal(payload.progress, 0)
 })
 
+test('buildTaskPayload normalizes selected dependency IDs and excludes self/duplicates', () => {
+  const payload = buildTaskPayload({ ...baseData, dependency_ids: ['3', '1', '3', 'x', '0'] }, { task: { id: 1 } })
+
+  assert.deepEqual(payload.dependency_ids, [3])
+})
+
+test('buildTaskPayload defaults to no dependencies when none are selected', () => {
+  const payload = buildTaskPayload(baseData, { task: { id: 1 } })
+
+  assert.deepEqual(payload.dependency_ids, [])
+})
+
 test('initialTaskDateValue keeps blank dates blank when editing an existing task', () => {
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'start_date', '2026-07-08'), '')
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'due_date', '2026-07-08'), '')

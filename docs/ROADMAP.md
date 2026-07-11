@@ -46,6 +46,13 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] docker-compose.yml healthcheck for the api container (`/api/ready`), with backup/web waiting on `condition: service_healthy`, matching the existing portainer-stack.yml pattern (Wave 7 item 35).
 - [x] Subtask completion summary ("하위 업무 n/m 완료") shown on parent rows in the task list (Wave 7 item 37).
 - [x] Gantt task list sorts sibling rows by start date (falling back to due date, then title) instead of alphabetically, so the visible order matches the actual schedule (Wave 8 item 38).
+- [x] Task dependency picker in the task form: `dependency_ids` had full backend cycle-prevention and blocker display, but no UI ever let a user set it — the form now includes a "선행 업무" multi-select (Wave 9 item 39).
+
+## Backlog (identified 2026-07-11, not yet implemented)
+
+- [ ] Global search across tasks/events/todos/work logs from a single command palette or search box (today search only covers each screen's own list).
+- [ ] Bulk task actions (multi-select rows in the Gantt list to complete/delete/retag several tasks at once).
+- [ ] Configurable reminder digest (e.g. daily email/notification summary of due-soon and overdue tasks) beyond the in-app banner.
 
 ## Removed (2026-07-10): Team/Assignee Features
 

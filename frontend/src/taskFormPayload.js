@@ -31,6 +31,18 @@ const normalizedOptionalId = value => {
   const number = Number(value)
   return Number.isInteger(number) && number > 0 ? number : null
 }
+const normalizedDependencyIds = (ids, excludeId) => {
+  const cleaned = []
+  const seen = new Set()
+  for (const raw of Array.isArray(ids) ? ids : []) {
+    const number = Number(raw)
+    if (!Number.isInteger(number) || number <= 0 || number === excludeId || seen.has(number)) continue
+    seen.add(number)
+    cleaned.push(number)
+    if (cleaned.length >= 100) break
+  }
+  return cleaned
+}
 
 export const initialTaskDateValue = (task, field, today) => {
   if (task) return task?.[field] || ''
@@ -54,6 +66,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
   const parentId = normalizedOptionalId(data.parent_id)
   const previousParentId = normalizedOptionalId(task?.parent_id)
   if (parentId !== taskId && (!task || parentId !== previousParentId)) payload.parent_id = parentId
+  payload.dependency_ids = normalizedDependencyIds(data.dependency_ids, taskId)
 
   return payload
 }
