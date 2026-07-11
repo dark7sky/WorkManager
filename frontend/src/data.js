@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-subtask-visual-scale-already-shipped',
+    timestamp: '2026-07-12T01:38:37+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '요청을 확인한 결과 하위 업무 행의 높이·글씨 크기 축소(중첩 단계별 추가 축소 포함)가 이미 반영되어 있어 추가 변경 없이 요청을 완료 처리합니다.',
+  },
+  {
     id: '2026-07-12-tag-management',
     timestamp: '2026-07-12T00:28:35+09:00',
     description: '설정 화면에 태그 관리 섹션을 추가했습니다. 사용 중인 모든 태그를 사용 횟수와 함께 보여주고, 태그를 누르면 업무·일정·할 일·기록 전체에서 이름을 한 번에 바꾸거나 태그를 제거할 수 있습니다. 같은 이름으로 합치면 중복 없이 병합됩니다.',
