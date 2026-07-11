@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-tasks-skeleton-loading',
+    timestamp: '2026-07-12T06:12:00+09:00',
+    description: '업무 화면을 열거나 새로고침할 때 데이터를 불러오는 동안 목록이 잠깐 "조건에 맞는 업무가 없습니다" 빈 상태로 보이던 것을, 이미 설정 화면 등에서 쓰던 회색 블록 애니메이션(스켈레톤)으로 바꿔 로딩 중임을 명확히 보여주도록 했습니다.',
+  },
+  {
     id: '2026-07-12-task-templates',
     timestamp: '2026-07-12T03:18:47+09:00',
     description: '자주 만드는 업무를 템플릿으로 저장하고 새 업무 등록 폼에서 선택해 제목·우선순위·반복·태그·기간(시작일 기준)을 한 번에 채울 수 있게 했습니다. 템플릿은 기기 로컬(localStorage)에 저장됩니다.',
