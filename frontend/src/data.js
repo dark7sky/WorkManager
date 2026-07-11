@@ -17,11 +17,11 @@ export const changelogUpdates = [
     description: '자주 만드는 업무를 템플릿으로 저장하고 새 업무 등록 폼에서 선택해 제목·우선순위·반복·태그·기간(시작일 기준)을 한 번에 채울 수 있게 했습니다. 템플릿은 기기 로컬(localStorage)에 저장됩니다.',
   },
   {
-    id: '2026-07-12-subtask-visual-scale-reconfirmed-6',
-    timestamp: '2026-07-12T04:27:42+09:00',
+    id: '2026-07-12-subtask-visual-scale-reconfirmed-7',
+    timestamp: '2026-07-12T04:30:16+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청이 큐에 계속 재접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록의 하위 업무 행(subtask-row)은 상위 업무보다 행 높이·글씨 크기가 작고, 중첩 2·3단계로 갈수록 한 단계씩 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx의 subtask-row/subtask-depth-N 클래스, frontend/src/styles.css의 해당 규칙). 반복되는 중복 확인 로그를 정리해 이전 재확인 항목들을 이 항목 하나로 합쳤습니다. 코드 변경 없이 요청을 완료 처리합니다.',
+    description: '동일한 요청(#13)이 큐에 또 재접수되어 다시 확인했습니다. 업무 관리 화면 간트 목록의 하위 업무 행(subtask-row)은 상위 업무보다 행 높이·글씨 크기가 작고, 중첩 2·3단계로 갈수록 한 단계씩 더 작아지도록 이미 구현되어 있습니다(frontend/src/screens/Tasks.jsx의 subtask-row/subtask-depth-N 클래스, frontend/src/styles.css의 해당 규칙). 코드 변경 없이 이번 재확인 내용만 이 항목에 갱신해 로그 중복을 방지했습니다.',
   },
   {
     id: '2026-07-12-bulk-tag-add',
