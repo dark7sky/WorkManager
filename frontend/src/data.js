@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-subtask-row-scaling-reconfirm-2',
+    timestamp: '2026-07-12T21:41:16+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)을 다시 점검했습니다. 하위 업무 행(subtask-row)의 높이·글씨 크기와 간트 막대·우선순위 표시가 깊이(1~3단계)별로 모두 정상적으로 축소되어 있음을 재확인했으며, 관련 테스트(taskHierarchy.test.js)도 모두 통과했습니다. 코드 변경은 없습니다.',
+  },
+  {
     id: '2026-07-12-calendar-ics-export',
     timestamp: '2026-07-12T21:29:00+09:00',
     description: '일정 화면에 ICS(iCalendar) 내보내기 버튼을 추가해, 현재 태그 필터가 적용된 일정 목록을 Google 캘린더/Outlook/Apple 캘린더 등 다른 캘린더 앱으로 가져갈 수 있는 .ics 파일로 내려받을 수 있게 했습니다.',
