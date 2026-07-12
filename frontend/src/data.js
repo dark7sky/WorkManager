@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-calendar-week-view-drag',
+    timestamp: '2026-07-12T14:14:36+09:00',
+    description: '캘린더 주간 보기에서도 월간 보기처럼 일정을 다른 날짜로 드래그해 옮길 수 있도록 개선했습니다.',
+  },
+  {
     id: '2026-07-12-configurable-reminder-digest',
     timestamp: '2026-07-12T12:20:11+09:00',
     description: '설정 > "오늘 업무 알림"에 지연·2일 내 마감 업무까지 포함하는 알림 다이제스트 옵션을 추가했습니다(기본값은 기존과 동일하게 오늘 마감만). 기기 알림 범위를 이 설정에서 바로 켜고 끌 수 있습니다.',
