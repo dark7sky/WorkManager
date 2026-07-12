@@ -75,6 +75,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Task duplication: starting a new task similar to an existing one meant retyping title/dates/priority/tags from scratch, since recurrence rules only cover exact repeats. Added a "복제" button on each Gantt row that copies the task (title suffixed "(복사본)", schedule, priority, tags, parent, dependencies) into a new todo with progress/approval state reset (`buildTaskDuplicatePayload` in `frontend/src/taskFormPayload.js`, wired into `Tasks.jsx`/`App.jsx`, 2026-07-12).
 
 - [x] Trash search/filter: the 휴지통 (trash) section only ever listed every soft-deleted row with no way to narrow it down, which got unwieldy once several tasks/events/todos/logs were deleted. Added a search box (title/content) and a type filter (업무/일정/오늘 할 일/업무 기록) to `TrashSection.jsx`, backed by a pure `filterTrashItems`/`trashTables` module with tests (`frontend/src/trashFilter.js`, 2026-07-13).
+- [x] "Due this week" task status filter: the Tasks screen status filter only had "지연 업무" (overdue) to spot at-risk work, with no quick way to see everything coming due in the next 7 days for weekly planning. Added a `due_this_week` option to the existing status filter (`filterTasks` in `frontend/src/taskFilters.js`, wired into `Tasks.jsx`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

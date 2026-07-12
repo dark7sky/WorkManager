@@ -41,6 +41,16 @@ test('filterTasks narrows active tasks by priority', () => {
   assert.deepEqual(shown.map(task => task.id), [1, 4])
 })
 
+test('filterTasks status=due_this_week keeps only unfinished tasks due within the next 6 days', () => {
+  const weekTasks = [
+    ...tasks,
+    { id: 5, title: '이번주 마감', status: 'todo', due_date: '2026-07-12', progress: 0, tags: [] },
+    { id: 6, title: '다음주 마감', status: 'todo', due_date: '2026-07-20', progress: 0, tags: [] },
+  ]
+  const shown = filterTasks(weekTasks, { status: 'due_this_week', todayIso: '2026-07-07' })
+  assert.deepEqual(shown.map(task => task.id), [1, 2, 5])
+})
+
 test('filterTasks can isolate completion and schedule approval queues', () => {
   const approvalTasks = [
     ...tasks,

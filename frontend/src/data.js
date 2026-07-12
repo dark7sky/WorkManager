@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-due-this-week-filter',
+    timestamp: '2026-07-13T05:04:25+09:00',
+    description: '업무 화면 상태 필터에 "이번 주 마감" 항목을 추가했습니다. 지연 업무(overdue)만으로는 앞으로 일주일 내 마감될 업무를 한눈에 보기 어려웠던 문제를 해소합니다 (frontend/src/taskFilters.js).',
+  },
+  {
     id: '2026-07-13-trash-search-filter',
     timestamp: '2026-07-13T05:01:32+09:00',
     description: '휴지통 항목이 쌓이면 원하는 항목을 찾기 어려웠던 문제를 개선했습니다. 설정 화면의 휴지통 섹션에 제목/내용 검색창과 업무·일정·오늘 할 일·업무 기록 유형 필터를 추가했습니다 (frontend/src/trashFilter.js).',
