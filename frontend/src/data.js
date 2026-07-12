@@ -18,31 +18,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-13-subtask-row-scaling-reconfirm-9',
-    timestamp: '2026-07-13T04:35:25+09:00',
+    timestamp: '2026-07-13T04:39:17+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
-  },
-  {
-    id: '2026-07-13-subtask-row-scaling-reconfirm-8',
-    timestamp: '2026-07-13T04:34:25+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
-  },
-  {
-    id: '2026-07-13-subtask-row-scaling-reconfirm-7',
-    timestamp: '2026-07-13T03:59:41+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 코드 변경 없이 재확인 결과만 기록합니다.',
-  },
-  {
-    id: '2026-07-13-subtask-row-scaling-reconfirm-6',
-    timestamp: '2026-07-13T03:56:35+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
+    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 같은 재확인 내용이 반복 접수되며 변경 이력에 거의 동일한 항목이 여러 개 쌓였던 문제도 함께 정리해, 중복 항목들을 이 항목 하나로 통합했습니다.',
   },
   {
     id: '2026-07-12-task-duplicate',
