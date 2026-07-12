@@ -20,6 +20,11 @@ const addDays = (isoDate, days) => {
   return date.toLocaleDateString('en-CA')
 }
 
+export const DEFAULT_TASK_FILTERS = { query: '', status: 'active', selectedTags: [], priority: 'all' }
+
+export const hasActiveTaskFilters = ({ query = '', status = 'active', selectedTags = [], priority = 'all' }) =>
+  query.trim() !== '' || status !== DEFAULT_TASK_FILTERS.status || selectedTags.length > 0 || priority !== 'all'
+
 export const filterTasks = (tasks, { query = '', status = 'active', selectedTags = [], priority = 'all', todayIso }) => {
   const q = query.trim().toLowerCase()
   return tasks.filter(task => {

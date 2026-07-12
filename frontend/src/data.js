@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-task-filter-reset-button',
+    timestamp: '2026-07-12T17:22:00+09:00',
+    description: '업무 관리 화면에서 검색어·상태·우선순위·태그 필터를 하나씩 지워야 했던 불편을 줄이기 위해, 필터가 하나라도 켜져 있으면 "필터 초기화" 버튼이 나타나 모든 필터를 기본값으로 한 번에 되돌릴 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-12-feature-request-dedup',
     timestamp: '2026-07-12T17:14:13+09:00',
     description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)은 이미 정상 반영되어 있음을 재확인했습니다. 근본 원인도 함께 고쳤습니다: 동일한 내용의 요청이 공개 큐(POST /api/feature-requests)로 반복 재접수되면 처리 완료(done) 상태여도 매번 새로운 대기(pending) 항목이 쌓여 같은 요청이 계속 재작업 대상으로 뽑히는 문제가 있었는데, 동일 사용자·동일 내용의 요청이 이미 pending/in_progress/done 상태로 존재하면 새 항목을 만들지 않고 기존 항목을 반환하도록 수정했습니다.',

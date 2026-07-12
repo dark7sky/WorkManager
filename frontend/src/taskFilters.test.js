@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
+import { DEFAULT_TASK_FILTERS, filterTasks, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -8,6 +8,15 @@ const tasks = [
   { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, priority: 'low', tags: ['운영'] },
   { id: 4, title: '검토 대기', status: 'todo', due_date: '2026-07-06', progress: 10, priority: 'high', tags: [] },
 ]
+
+test('hasActiveTaskFilters is false at defaults and true once any filter is touched', () => {
+  assert.equal(hasActiveTaskFilters(DEFAULT_TASK_FILTERS), false)
+  assert.equal(hasActiveTaskFilters({ ...DEFAULT_TASK_FILTERS, query: '  ' }), false)
+  assert.equal(hasActiveTaskFilters({ ...DEFAULT_TASK_FILTERS, query: '보고서' }), true)
+  assert.equal(hasActiveTaskFilters({ ...DEFAULT_TASK_FILTERS, status: 'all' }), true)
+  assert.equal(hasActiveTaskFilters({ ...DEFAULT_TASK_FILTERS, selectedTags: ['기획'] }), true)
+  assert.equal(hasActiveTaskFilters({ ...DEFAULT_TASK_FILTERS, priority: 'high' }), true)
+})
 
 test('filterTasks narrows active tasks by tag without losing status filters', () => {
   const shown = filterTasks(tasks, {
