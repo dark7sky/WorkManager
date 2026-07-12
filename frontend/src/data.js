@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-subtask-row-scaling-recheck-53',
+    timestamp: '2026-07-13T08:40:09+09:00',
+    description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재확인했습니다(53번째 확인). 깊이별 행 높이·글씨 크기·간트 막대 크기 축소(taskHierarchy.js의 subtaskRowClass/taskIndent, styles.css)와 회귀 테스트가 모두 정상 동작함을 프론트(129개)/백엔드(96개) 전체 테스트와 빌드로 재확인했습니다. 소스 변경 없음.',
+  },
+  {
     id: '2026-07-13-due-this-week-filter',
     timestamp: '2026-07-13T05:04:25+09:00',
     description: '업무 화면 상태 필터에 "이번 주 마감" 항목을 추가했습니다. 지연 업무(overdue)만으로는 앞으로 일주일 내 마감될 업무를 한눈에 보기 어려웠던 문제를 해소합니다 (frontend/src/taskFilters.js).',
