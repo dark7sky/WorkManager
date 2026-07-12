@@ -483,6 +483,33 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["title"], "legacy stale parent edit saved")
             self.assertIsNone(updated["parent_id"])
 
+    def test_update_item_ignores_unrelated_corrupted_parent_self_loop_when_reparenting(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import init_db
+            from app.main import update_item
+
+            init_db()
+            db_path = os.environ["DATABASE_PATH"]
+            with sqlite3.connect(db_path) as c:
+                c.execute("PRAGMA foreign_keys=OFF")
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "unrelated task with self-loop", "", "doing", "normal", 0, None, None,
+                     "Dana", "none", "none", "[]", None, "2026-07-08T09:48:41", "2026-07-08T09:48:41"))
+                corrupted_id = cur.lastrowid
+                c.execute("UPDATE tasks SET parent_id=? WHERE id=?", (corrupted_id, corrupted_id))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,parent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "task being reparented", "", "doing", "normal", 0, None, None,
+                     "Dana", "none", "none", "[]", None, "2026-07-08T09:48:41", "2026-07-08T09:48:41"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"parent_id": corrupted_id}, "sub-a")
+
+            self.assertEqual(updated["parent_id"], corrupted_id)
+
     def test_update_item_repairs_stale_approval_state_on_active_task_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

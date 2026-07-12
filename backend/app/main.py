@@ -514,8 +514,9 @@ def validate_task_links(data, user_id, current_id=None):
             raise HTTPException(422, "Task dependencies must not contain a cycle")
     if current_id is not None and "parent_id" in data:
         with connection() as c:
-            parents = {r["id"]: r["parent_id"] for r in c.execute(
+            parents = {r["id"]: normalize_legacy_optional_task_id(r["parent_id"]) for r in c.execute(
                 "SELECT id,parent_id FROM tasks WHERE user_id=? AND deleted_at IS NULL", (user_id,)).fetchall()}
+        parents = {node: (None if parent == node else parent) for node, parent in parents.items()}
         parents[current_id] = data.get("parent_id")
         seen = set()
         node = current_id

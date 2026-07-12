@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-parent-cycle-check-legacy-selfloop-fix',
+    timestamp: '2026-07-12T14:25:40+09:00',
+    description: '계정 내 다른 업무에 자기 자신을 부모로 가리키는 손상된 레거시 데이터가 있으면, 그와 무관한 업무를 편집해 저장할 때도 "상위 업무 계층에 순환 참조가 있습니다" 오류가 잘못 발생하던 문제를 수정했습니다.',
+  },
+  {
     id: '2026-07-12-calendar-week-view-drag',
     timestamp: '2026-07-12T14:14:36+09:00',
     description: '캘린더 주간 보기에서도 월간 보기처럼 일정을 다른 날짜로 드래그해 옮길 수 있도록 개선했습니다.',
