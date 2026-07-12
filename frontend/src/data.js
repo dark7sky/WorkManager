@@ -63,10 +63,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-12T16:23:25+09:00',
+    timestamp: '2026-07-12T16:35:14+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 재접수되어 재차 확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (32회 이상 반복 재접수 확인됨 — 요청 큐가 동일 항목을 반복 재주입하는 것으로 보이며, 큐 소스 쪽 중복 제거 로직 점검이 시급합니다)',
+    description: '동일한 요청(#13)이 큐에 다시 재접수되어 재차 확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (33회 이상 반복 재접수 확인됨 — 요청 큐가 동일 항목을 반복 재주입하는 것으로 보이며, 큐 소스 쪽 중복 제거 로직 점검이 시급합니다)',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
