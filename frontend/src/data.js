@@ -68,10 +68,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-12T16:42:20+09:00',
+    timestamp: '2026-07-12T17:16:52+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 재접수되어 재차 확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (40회 이상 반복 재접수 확인됨 — 요청 큐가 동일 항목을 반복 재주입하는 것으로 보이며, 큐 소스 쪽 중복 제거 로직 점검이 시급합니다)',
+    description: '동일한 요청(#13)이 큐에 다시 재접수되어 재차 확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (백엔드 /api/feature-requests 중복 제출 방지 로직을 2026-07-12T17:14에 배포했음에도 동일 항목이 재접수되어, 중복 원인이 이 엔드포인트 밖에 있을 가능성이 있습니다 — 계속 추적 중)',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
