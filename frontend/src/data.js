@@ -78,7 +78,7 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-12T21:33:54+09:00',
+    timestamp: '2026-07-12T21:34:53+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
     description: '동일한 요청(#13)이 큐에 다시 재접수되어 재차 확인했습니다. 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(113개)/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
