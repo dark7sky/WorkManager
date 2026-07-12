@@ -12,6 +12,13 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-subtask-row-scaling-reconfirm-6',
+    timestamp: '2026-07-13T03:55:28+09:00',
+    requestedAt: '2026-07-11T00:14:41+09:00',
+    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
+    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
+  },
+  {
     id: '2026-07-12-task-duplicate',
     timestamp: '2026-07-12T22:31:04+09:00',
     description: '업무 목록의 각 행에 "복제" 버튼을 추가했습니다. 제목 뒤에 "(복사본)"을 붙여 일정·우선순위·태그·상위 업무·선행 업무를 그대로 복사한 새 할 일을 만들고, 상태/진행률은 초기화합니다. 반복 규칙 없이 비슷한 업무를 빠르게 새로 시작할 때 유용합니다 (`buildTaskDuplicatePayload`, `Tasks.jsx`).',
