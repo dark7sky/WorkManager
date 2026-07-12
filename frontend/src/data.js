@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-filter-presets',
+    timestamp: '2026-07-13T04:37:00+09:00',
+    description: '업무 관리 화면에서 자주 쓰는 검색어·상태·우선순위·태그 필터 조합을 매번 다시 설정해야 했던 불편을 줄이기 위해, 현재 필터를 이름 붙여 저장하고 드롭다운에서 바로 불러오거나 삭제할 수 있는 "저장된 필터" 기능을 추가했습니다. 업무 템플릿과 같은 방식으로 localStorage에 저장됩니다 (frontend/src/taskFilterPresets.js).',
+  },
+  {
     id: '2026-07-13-subtask-row-scaling-reconfirm-9',
     timestamp: '2026-07-13T04:35:25+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',

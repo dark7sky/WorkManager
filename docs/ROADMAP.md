@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-12 (22:31 KST)
+Last updated: 2026-07-13 (04:37 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -71,6 +71,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Filter reset on the Tasks screen: search/status/priority/tag filters each had to be cleared one at a time. A "필터 초기화" button now appears in the toolbar whenever any filter differs from the default and resets all of them at once (`hasActiveTaskFilters`/`DEFAULT_TASK_FILTERS` in `taskFilters.js`, 2026-07-12).
 - [x] Calendar ICS export: WorkManager had JSON/CSV/PDF export but no interoperable calendar format, so events couldn't be taken into Google Calendar/Outlook/Apple Calendar. Added a client-side "ICS" button on the Calendar screen toolbar that exports the currently tag-filtered event list as a standard `.ics` file (`eventsToIcs`/`icsFilename` in `frontend/src/ics.js`, wired into `Calendar.jsx`, 2026-07-12).
 - [x] AI settings connection test: saving an AI provider/key in Settings gave no feedback on whether the credentials actually worked until the next real AI parse silently fell back to local rules. Added a "연결 테스트" button that makes one minimal live call to the configured provider and reports success or a specific failure reason (bad key vs. server error) (`ai.test_connection` + `POST /api/settings/ai/test` in the backend, wired into `Settings.jsx`, 2026-07-12).
+- [x] Saved task filter presets: re-entering the same search/status/priority/tag filter combination on the Tasks screen every session was repetitive. Added "필터 저장" / "저장된 필터" dropdown / "필터 삭제" controls that name and persist the current filter combination to localStorage (same pattern as task templates), so a saved view can be reapplied in one click (`frontend/src/taskFilterPresets.js`, wired into `Tasks.jsx`, 2026-07-13).
 - [x] Task duplication: starting a new task similar to an existing one meant retyping title/dates/priority/tags from scratch, since recurrence rules only cover exact repeats. Added a "복제" button on each Gantt row that copies the task (title suffixed "(복사본)", schedule, priority, tags, parent, dependencies) into a new todo with progress/approval state reset (`buildTaskDuplicatePayload` in `frontend/src/taskFormPayload.js`, wired into `Tasks.jsx`/`App.jsx`, 2026-07-12).
 
 ## Removed (2026-07-10): Team/Assignee Features
