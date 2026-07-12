@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-trash-search-filter',
+    timestamp: '2026-07-13T05:01:32+09:00',
+    description: '휴지통 항목이 쌓이면 원하는 항목을 찾기 어려웠던 문제를 개선했습니다. 설정 화면의 휴지통 섹션에 제목/내용 검색창과 업무·일정·오늘 할 일·업무 기록 유형 필터를 추가했습니다 (frontend/src/trashFilter.js).',
+  },
+  {
     id: '2026-07-13-task-filter-presets',
     timestamp: '2026-07-13T04:37:00+09:00',
     description: '업무 관리 화면에서 자주 쓰는 검색어·상태·우선순위·태그 필터 조합을 매번 다시 설정해야 했던 불편을 줄이기 위해, 현재 필터를 이름 붙여 저장하고 드롭다운에서 바로 불러오거나 삭제할 수 있는 "저장된 필터" 기능을 추가했습니다. 업무 템플릿과 같은 방식으로 localStorage에 저장됩니다 (frontend/src/taskFilterPresets.js).',
