@@ -23,10 +23,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-13-subtask-row-scaling-reconfirm-9',
-    timestamp: '2026-07-13T04:58:26+09:00',
+    timestamp: '2026-07-13T05:02:15+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다(22번째). subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 같은 재확인 내용이 반복 접수되고 있어, 새 항목을 추가하는 대신 이 항목의 타임스탬프와 확인 횟수만 갱신해 변경 이력이 계속 불어나지 않도록 정리했습니다. 프론트 테스트 122개 통과, 빌드 정상, 코드 변경 없음.',
+    description: '요청 #13이 다시 접수되어 재확인했습니다(23번째). subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 같은 재확인 내용이 반복 접수되고 있어, 새 항목을 추가하는 대신 이 항목의 타임스탬프와 확인 횟수만 갱신해 변경 이력이 계속 불어나지 않도록 정리했습니다. 프론트 테스트 128개 통과, 빌드 정상, 코드 변경 없음.',
   },
   {
     id: '2026-07-12-task-duplicate',
