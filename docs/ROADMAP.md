@@ -65,7 +65,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 
 - [x] Global search across tasks/events/todos/work logs from a single command palette or search box — already covered by the Ctrl/⌘+K command palette (`commandPalette.js` `searchItems`/`searchScreens`, wired into `QuickCapture`), found already implemented while auditing this backlog.
 - [x] Bulk task actions: multi-select checkboxes in the Gantt list with a bulk action bar to complete or delete several tasks at once (2026-07-11), plus bulk tag add for selected tasks (2026-07-12).
-- [ ] Configurable reminder digest (e.g. daily email/notification summary of due-soon and overdue tasks) beyond the in-app banner.
+- [x] Configurable reminder digest: a Settings toggle lets the existing daily device notification widen from "due today only" to "overdue + due within 2 days", stored locally per device (`reminderDigestTasks` in `taskFilters.js`). Server-side scheduled email/push digests remain out of scope (no outbound email infra yet).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

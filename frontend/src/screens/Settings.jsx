@@ -5,6 +5,7 @@ import { api } from '../api'
 import TrashSection from '../components/TrashSection'
 import TagManager from '../components/TagManager'
 import { aiDefaults, aiModels, describeAiBinding, getAiDraft, normalizeAiProvider, upsertAiConfig } from '../aiSettings'
+import { REMINDER_DIGEST_STORAGE_KEY } from '../taskFilters'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
 
@@ -21,6 +22,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [errorsRefreshing, setErrorsRefreshing] = useState(false)
   const [importPlan, setImportPlan] = useState(null)
   const [importMode, setImportMode] = useState('merge')
+  const [reminderDigestScope, setReminderDigestScope] = useState(() => (localStorage.getItem(REMINDER_DIGEST_STORAGE_KEY) === 'due_soon' ? 'due_soon' : 'today'))
   const aiLoadSeq = useRef(0)
   const importFileRef = useRef(null)
 
@@ -221,6 +223,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><Bell /></span><div><h2>오늘 업무 알림</h2><p>앱을 열었을 때 오늘 예정된 업무를 기기 알림으로 알려줍니다.</p></div><em className={`status-pill ${notificationPermission === 'granted' ? 'online' : ''}`}>{notificationPermission === 'granted' ? '허용됨' : '꺼짐'}</em></div>
         <div className="integration-body"><div><strong>알림 내용은 이 기기에서만 만들어집니다.</strong><small>브라우저가 완전히 종료된 상태의 예약 푸시는 향후 서버 알림 기능에서 지원할 수 있습니다.</small></div>{notificationPermission !== 'granted' ? <button className="secondary" disabled={notificationPermission === 'unsupported'} onClick={onEnableNotifications}><Bell /> 알림 켜기</button> : null}</div>
+        <label><input type="checkbox" checked={reminderDigestScope === 'due_soon'} onChange={e => { const scope = e.target.checked ? 'due_soon' : 'today'; setReminderDigestScope(scope); localStorage.setItem(REMINDER_DIGEST_STORAGE_KEY, scope) }}/> <span>지연·2일 내 마감 업무까지 알림에 포함 (기본: 오늘 마감만)</span></label>
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Download /></span><div><h2>내 데이터 내보내기</h2><p>업무, 일정, Todo와 업무 기록을 JSON 파일로 보관합니다.</p></div></div>

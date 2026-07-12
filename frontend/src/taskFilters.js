@@ -63,6 +63,17 @@ export const summarizeDueReminders = (tasks, todayIso, upcomingDays = 2) => {
   return summary
 }
 
+export const REMINDER_DIGEST_STORAGE_KEY = 'wm-reminder-digest-scope'
+
+export const reminderDigestTasks = (tasks, todayIso, scope = 'today') => {
+  if (!todayIso) return []
+  if (scope === 'due_soon') {
+    const soonLimit = addDays(todayIso, 2)
+    return tasks.filter(task => task.status !== 'done' && task.due_date && task.due_date <= soonLimit)
+  }
+  return tasks.filter(task => task.status !== 'done' && task.due_date === todayIso)
+}
+
 export const summarizeBlockedTasks = tasks => {
   const blocked = tasks
     .filter(task => taskBlockingDependencies(task, tasks).length)

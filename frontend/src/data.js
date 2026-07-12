@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-configurable-reminder-digest',
+    timestamp: '2026-07-12T12:20:11+09:00',
+    description: '설정 > "오늘 업무 알림"에 지연·2일 내 마감 업무까지 포함하는 알림 다이제스트 옵션을 추가했습니다(기본값은 기존과 동일하게 오늘 마감만). 기기 알림 범위를 이 설정에서 바로 켜고 끌 수 있습니다.',
+  },
+  {
     id: '2026-07-12-server-error-panel-refresh',
     timestamp: '2026-07-12T06:20:09+09:00',
     description: '설정 화면의 "서버 오류 진단" 패널에 새로고침 버튼을 추가해, 페이지를 다시 열지 않고도 최근 서버 오류 5건을 즉시 다시 불러올 수 있게 했습니다.',

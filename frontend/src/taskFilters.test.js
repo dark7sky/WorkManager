@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { filterTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
+import { filterTasks, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -58,6 +58,16 @@ test('summarizeDueReminders counts overdue today and upcoming unfinished tasks',
     total: 4,
     nextDueDate: '2026-07-06',
   })
+})
+
+test('reminderDigestTasks defaults to only tasks due today', () => {
+  const due = reminderDigestTasks(tasks, '2026-07-06')
+  assert.deepEqual(due.map(task => task.id), [4])
+})
+
+test('reminderDigestTasks with due_soon scope also includes tasks due within 2 days', () => {
+  const due = reminderDigestTasks(tasks, '2026-07-06', 'due_soon')
+  assert.deepEqual(due.map(task => task.id).sort(), [1, 4])
 })
 
 test('taskBlockingDependencies returns unfinished dependency blockers only', () => {
