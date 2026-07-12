@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-feature-request-dedup',
+    timestamp: '2026-07-12T17:14:13+09:00',
+    description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)은 이미 정상 반영되어 있음을 재확인했습니다. 근본 원인도 함께 고쳤습니다: 동일한 내용의 요청이 공개 큐(POST /api/feature-requests)로 반복 재접수되면 처리 완료(done) 상태여도 매번 새로운 대기(pending) 항목이 쌓여 같은 요청이 계속 재작업 대상으로 뽑히는 문제가 있었는데, 동일 사용자·동일 내용의 요청이 이미 pending/in_progress/done 상태로 존재하면 새 항목을 만들지 않고 기존 항목을 반환하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-12-improve-workmanager-frontend',
     timestamp: '2026-07-12T16:35:07+09:00',
     description: '자동 개선 루프가 improve workmanager frontend 변경을 반영했습니다.',

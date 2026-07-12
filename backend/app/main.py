@@ -1112,6 +1112,11 @@ def feature_request_create(payload: dict = Body(...), user=Depends(require_user)
         raise HTTPException(422, "content is required")
     timestamp = now()
     with connection() as c:
+        duplicate = c.execute("""SELECT * FROM feature_requests WHERE user_id=? AND content=?
+          AND status IN ('pending','in_progress','done') ORDER BY created_at DESC LIMIT 1""",
+                              (user, content)).fetchone()
+        if duplicate:
+            return row_dict(duplicate)
         cur = c.execute("""INSERT INTO feature_requests(user_id,content,source,status,created_at,updated_at)
           VALUES(?,?,?,?,?,?)""", (user, content, source, "pending", timestamp, timestamp))
         item = row_dict(c.execute("SELECT * FROM feature_requests WHERE id=? AND user_id=?", (cur.lastrowid, user)).fetchone())

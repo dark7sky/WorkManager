@@ -270,6 +270,25 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(pending.status_code, 200, pending.text)
         self.assertEqual(pending.json()["items"], [])
 
+    def test_duplicate_feature_request_content_is_not_requeued(self):
+        a = self.client(self.token_a)
+        first = a.post("/api/feature-requests", json={"content": "하위 업무 표시를 줄여주세요", "source": "public_changelog"})
+        self.assertEqual(first.status_code, 200, first.text)
+        resubmitted = a.post("/api/feature-requests", json={"content": "하위 업무 표시를 줄여주세요", "source": "public_changelog"})
+        self.assertEqual(resubmitted.status_code, 200, resubmitted.text)
+        self.assertEqual(resubmitted.json()["id"], first.json()["id"])
+        self.assertEqual(len(a.get("/api/feature-requests").json()["items"]), 1)
+
+        headers = {"Authorization": "Bearer test-codex-admin-token"}
+        anonymous = TestClient(self.app)
+        completed = anonymous.patch(f"/api/admin/feature-requests/{first.json()['id']}", headers=headers,
+                                    json={"status": "done", "description": "이미 반영되었습니다."})
+        self.assertEqual(completed.status_code, 200, completed.text)
+        resubmitted_after_done = a.post("/api/feature-requests", json={"content": "하위 업무 표시를 줄여주세요", "source": "public_changelog"})
+        self.assertEqual(resubmitted_after_done.status_code, 200, resubmitted_after_done.text)
+        self.assertEqual(resubmitted_after_done.json()["id"], first.json()["id"])
+        self.assertEqual(resubmitted_after_done.json()["status"], "done")
+
     def test_public_improvement_queue_and_codex_completion_changelog(self):
         a, b = self.client(self.token_a), self.client(self.token_b)
         first = a.post("/api/feature-requests", json={"content": "계층형 보드를 개선해 주세요"}).json()
