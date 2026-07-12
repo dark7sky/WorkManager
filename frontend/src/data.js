@@ -12,13 +12,6 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
-    id: '2026-07-13-subtask-row-scale-reconfirm-61',
-    timestamp: '2026-07-13T08:53:35+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(61번째 확인). 하위 업무 행의 높이·글씨 크기 축소는 taskHierarchy.js(subtaskRowClass/taskIndent), screens/Tasks.jsx, styles.css에 여전히 정상 반영되어 있고, 관련 회귀 테스트(taskHierarchy.test.js)와 전체 테스트(프론트 132개, 백엔드 96개)/빌드가 모두 통과함을 확인했습니다. 반복 재접수는 앱 API가 아닌 외부 요청 큐 메커니즘에서 비롯된 것으로, 앱 측 추가 조치는 필요하지 않습니다.',
-  },
-  {
     id: '2026-07-13-task-sort-persist',
     timestamp: '2026-07-13T08:42:52+09:00',
     description: '업무 관리 화면의 정렬(일정순/우선순위순/진행률순/제목순) 선택이 새로고침이나 재방문 시 초기화되던 문제를 고쳐, 마지막으로 고른 정렬 방식을 기기에 저장해 다음에도 그대로 적용되게 했습니다.',
@@ -115,10 +108,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-13T08:52:36+09:00',
+    timestamp: '2026-07-13T08:55:35+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(60번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 132개, 백엔드 96개)/빌드로 재확인되어 정상 동작합니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
+    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(62번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 132개, 백엔드 96개)/빌드로 재확인되어 정상 동작합니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
