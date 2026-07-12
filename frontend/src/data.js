@@ -23,10 +23,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scaling-reconfirm-5',
-    timestamp: '2026-07-13T03:21:01+09:00',
+    timestamp: '2026-07-13T03:22:04+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트/백엔드 테스트 모두 통과, 코드 변경 없음.',
+    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
   },
   {
     id: '2026-07-12-subtask-row-scaling-reconfirm-4',
