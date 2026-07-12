@@ -18,7 +18,7 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-13-subtask-row-scaling-reconfirm-9',
-    timestamp: '2026-07-13T04:41:00+09:00',
+    timestamp: '2026-07-13T04:42:09+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
     description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 같은 재확인 내용이 반복 접수되며 변경 이력에 거의 동일한 항목이 여러 개 쌓였던 문제도 함께 정리해, 중복 항목들을 이 항목 하나로 통합했습니다. 프론트 테스트 122개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
@@ -32,34 +32,6 @@ export const changelogUpdates = [
     id: '2026-07-12-ai-settings-test-connection',
     timestamp: '2026-07-12T22:22:04+09:00',
     description: '설정 화면의 AI 설정 카드에 "연결 테스트" 버튼을 추가했습니다. 저장된 API 키/모델/base URL로 실제 최소 호출을 보내 성공 여부와 원인(키 오류, 서버 오류 등)을 바로 확인할 수 있어, 실제 AI 파싱을 시도하기 전에 설정 문제를 미리 발견할 수 있습니다 (backend `ai.test_connection` + `POST /api/settings/ai/test`).',
-  },
-  {
-    id: '2026-07-12-subtask-row-scaling-reconfirm-5',
-    timestamp: '2026-07-13T03:23:36+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 115개, 백엔드 테스트 96개 모두 통과, 코드 변경 없음.',
-  },
-  {
-    id: '2026-07-12-subtask-row-scaling-reconfirm-4',
-    timestamp: '2026-07-12T22:05:42+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 프론트 테스트 113개, 백엔드 테스트 94개 모두 통과, 코드 변경 없음.',
-  },
-  {
-    id: '2026-07-12-subtask-row-scaling-reconfirm-3',
-    timestamp: '2026-07-12T21:59:06+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)이 동일 내용으로 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링이 여전히 정상 동작하며, 다른 화면(캘린더·대시보드 등)에는 하위 업무 목록이 없어 추가 적용 대상이 없음을 확인했습니다. 프론트 테스트 113개, 백엔드 테스트 94개 모두 통과, 코드 변경 없음.',
-  },
-  {
-    id: '2026-07-12-subtask-row-scaling-reconfirm-2',
-    timestamp: '2026-07-12T21:41:16+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)을 다시 점검했습니다. 하위 업무 행(subtask-row)의 높이·글씨 크기와 간트 막대·우선순위 표시가 깊이(1~3단계)별로 모두 정상적으로 축소되어 있음을 재확인했으며, 관련 테스트(taskHierarchy.test.js)도 모두 통과했습니다. 코드 변경은 없습니다.',
   },
   {
     id: '2026-07-12-calendar-ics-export',
