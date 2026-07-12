@@ -447,11 +447,14 @@ def normalize(table, data):
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
     if table == "tasks":
-        if result.get("status") == "done" or result.get("progress") == 100:
+        status_sent = "status" in result
+        if result.get("status") == "done" or (not status_sent and result.get("progress") == 100):
             result.update(status="done", progress=100)
         elif result.get("status") == "todo":
             result["progress"] = 0
-        elif "progress" in result:
+        elif status_sent and result.get("progress", 0) >= 100:
+            result["progress"] = 99
+        elif not status_sent and "progress" in result:
             result["status"] = "doing" if result["progress"] > 0 else "todo"
         if result.get("status") and result["status"] != "done":
             result["approval_status"] = "none"

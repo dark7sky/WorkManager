@@ -4,6 +4,18 @@ const bySchedule = (a, b) => {
   if (ad !== bd) return ad ? (bd ? (ad < bd ? -1 : 1) : -1) : 1
   return byTitle(a, b)
 }
+const PRIORITY_RANK = { high: 0, normal: 1, low: 2 }
+const byPriority = (a, b) => {
+  const ar = PRIORITY_RANK[a.priority] ?? 1, br = PRIORITY_RANK[b.priority] ?? 1
+  return ar !== br ? ar - br : bySchedule(a, b)
+}
+const byProgress = (a, b) => {
+  const ap = a.progress ?? 0, bp = b.progress ?? 0
+  return ap !== bp ? bp - ap : bySchedule(a, b)
+}
+
+export const TASK_SORT_COMPARATORS = { schedule: bySchedule, priority: byPriority, progress: byProgress, title: byTitle }
+export const DEFAULT_TASK_SORT = 'schedule'
 
 export const childTaskIds = (tasks, taskId) => {
   if (!taskId) return new Set()
@@ -93,7 +105,8 @@ export const subtaskRowClass = depth => depth > 0 ? ` subtask-row subtask-depth-
 
 export const taskIndent = depth => `${8 + Math.min(depth, 5) * 18}px`
 
-export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks) => {
+export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, sortBy = DEFAULT_TASK_SORT) => {
+  const compare = TASK_SORT_COMPARATORS[sortBy] || bySchedule
   const visible = new Set(visibleTasks.map(task => task.id))
   const children = new Map()
   for (const task of visibleTasks) {
@@ -102,7 +115,7 @@ export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks) 
     group.push(task)
     children.set(parent, group)
   }
-  for (const group of children.values()) group.sort(bySchedule)
+  for (const group of children.values()) group.sort(compare)
   const ordered = []
   const visit = task => {
     ordered.push(task)

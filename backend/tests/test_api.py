@@ -159,6 +159,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_reopening_a_done_task_is_not_reverted_by_stale_progress_field(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "finished task"}).json()
+        done = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
+        self.assertEqual(done["status"], "done")
+        # The edit form always resends both fields; a user reopening a done task via the
+        # status dropdown may leave the stale progress=100 value untouched in the same request.
+        reopened = a.patch(f"/api/tasks/{task['id']}", json={"status": "todo", "progress": 100}).json()
+        self.assertEqual(reopened["status"], "todo", reopened)
+        self.assertEqual(reopened["progress"], 0)
+        self.assertEqual(reopened["approval_status"], "none")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_links_cannot_cross_users(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         private = a.post("/api/tasks", json={"title": "private dependency"}).json()

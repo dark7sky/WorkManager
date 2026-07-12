@@ -72,6 +72,41 @@ test('orderTasksHierarchically sorts sibling tasks by start date instead of titl
   assert.deepEqual(ordered.map(item => item.task.id), [1, 2, 3])
 })
 
+test('orderTasksHierarchically sorts siblings by priority when sortBy is priority', () => {
+  const items = [
+    { id: 1, title: 'Zeta', priority: 'low', start_date: '2026-07-01' },
+    { id: 2, title: 'Alpha', priority: 'high', start_date: '2026-07-20' },
+    { id: 3, title: 'Beta', priority: 'normal', start_date: '2026-07-10' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'priority')
+  assert.deepEqual(ordered.map(item => item.task.id), [2, 3, 1])
+})
+
+test('orderTasksHierarchically sorts siblings by progress descending when sortBy is progress', () => {
+  const items = [
+    { id: 1, title: 'Zeta', progress: 10 },
+    { id: 2, title: 'Alpha', progress: 90 },
+    { id: 3, title: 'Beta', progress: 50 },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'progress')
+  assert.deepEqual(ordered.map(item => item.task.id), [2, 3, 1])
+})
+
+test('orderTasksHierarchically sorts siblings by title when sortBy is title', () => {
+  const items = [
+    { id: 1, title: 'Zeta' },
+    { id: 2, title: 'Alpha' },
+    { id: 3, title: 'Beta' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'title')
+  assert.deepEqual(ordered.map(item => item.task.id), [2, 3, 1])
+})
+
+test('orderTasksHierarchically keeps children grouped under their parent regardless of sortBy', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks, 'title')
+  assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[1, 0], [2, 1], [3, 2], [4, 0]])
+})
+
 test('subtaskRowClass leaves top-level rows unmarked and shrinks nested rows deeper per depth, capped at 3', () => {
   assert.equal(subtaskRowClass(0), '')
   assert.equal(subtaskRowClass(1), ' subtask-row subtask-depth-1')

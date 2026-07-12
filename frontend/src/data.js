@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-improve-workmanager-frontend',
+    timestamp: '2026-07-12T16:35:07+09:00',
+    description: '자동 개선 루프가 improve workmanager frontend 변경을 반영했습니다.',
+  },
+  {
     id: '2026-07-12-mobile-form-touch-targets',
     timestamp: '2026-07-12T16:31:46+09:00',
     description: '모바일에서 업무·일정 입력 폼의 입력칸(제목, 날짜, 선택 목록 등)이 터치 권장 크기보다 작던 것을 44px 높이로 키워 손가락으로 정확히 누르기 쉽게 했습니다.',
