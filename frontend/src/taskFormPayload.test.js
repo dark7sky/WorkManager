@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskPayload, initialTaskDateValue } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, initialTaskDateValue } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -131,4 +131,26 @@ test('initialTaskDateValue keeps blank dates blank when editing an existing task
 test('initialTaskDateValue still defaults new task dates to today', () => {
   assert.equal(initialTaskDateValue(null, 'start_date', '2026-07-08'), '2026-07-08')
   assert.equal(initialTaskDateValue(undefined, 'due_date', '2026-07-08'), '2026-07-08')
+})
+
+test('buildTaskDuplicatePayload copies schedule/priority/tags and resets progress to a fresh todo', () => {
+  const payload = buildTaskDuplicatePayload({
+    id: 5, title: '분기 보고서', description: '메모', start_date: '2026-07-10', due_date: '2026-07-12',
+    status: 'done', priority: 'high', progress: 100, recurrence_rule: 'monthly', tags: ['보고', '#보고'],
+    parent_id: 2, dependency_ids: [3, 5, 5],
+  })
+
+  assert.equal(payload.title, '분기 보고서 (복사본)')
+  assert.equal(payload.status, 'todo')
+  assert.equal(payload.progress, 0)
+  assert.equal(payload.priority, 'high')
+  assert.deepEqual(payload.tags, ['보고'])
+  assert.equal(payload.parent_id, 2)
+  assert.deepEqual(payload.dependency_ids, [3])
+})
+
+test('buildTaskDuplicatePayload caps a duplicated title to the backend text limit', () => {
+  const payload = buildTaskDuplicatePayload({ id: 1, title: '제'.repeat(300) })
+
+  assert.equal(payload.title.length, 300)
 })

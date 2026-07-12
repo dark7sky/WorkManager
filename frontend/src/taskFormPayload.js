@@ -76,3 +76,20 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
 
   return payload
 }
+
+export const buildTaskDuplicatePayload = task => {
+  const sourceId = normalizedOptionalId(task?.id)
+  return {
+    title: normalizedTaskText('title', `${trimField(task?.title)} (복사본)`),
+    description: normalizedTaskText('description', task?.description),
+    start_date: task?.start_date || null,
+    due_date: task?.due_date || null,
+    status: 'todo',
+    priority: normalizedPriority(task?.priority),
+    progress: 0,
+    recurrence_rule: task?.recurrence_rule || null,
+    tags: normalizedTaskTags(task?.tags),
+    parent_id: normalizedOptionalId(task?.parent_id),
+    dependency_ids: normalizedDependencyIds(task?.dependency_ids, sourceId),
+  }
+}
