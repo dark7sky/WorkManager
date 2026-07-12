@@ -1,0 +1,48 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { dayAtOffset, ganttDragDates, ganttDragPreview } from './ganttDrag.js'
+
+test('dayAtOffset maps pixels to day cells and clamps to the window', () => {
+  assert.equal(dayAtOffset(0, 1400), 0)
+  assert.equal(dayAtOffset(150, 1400), 1)
+  assert.equal(dayAtOffset(1399, 1400), 13)
+  assert.equal(dayAtOffset(-50, 1400), 0)
+  assert.equal(dayAtOffset(9999, 1400), 13)
+  assert.equal(dayAtOffset(100, 0), 0)
+})
+
+const task = { start_date: '2026-07-10', due_date: '2026-07-12' }
+
+test('move shifts both dates by the dragged day delta', () => {
+  assert.deepEqual(ganttDragDates('move', task, { grabDay: 2, dropDay: 5 }),
+    { start_date: '2026-07-13', due_date: '2026-07-15' })
+  assert.deepEqual(ganttDragDates('move', task, { grabDay: 5, dropDay: 2 }),
+    { start_date: '2026-07-07', due_date: '2026-07-09' })
+  assert.equal(ganttDragDates('move', task, { grabDay: 3, dropDay: 3 }), null)
+})
+
+test('move crosses month boundaries correctly', () => {
+  const eom = { start_date: '2026-07-30', due_date: '2026-07-31' }
+  assert.deepEqual(ganttDragDates('move', eom, { grabDay: 0, dropDay: 2 }),
+    { start_date: '2026-08-01', due_date: '2026-08-02' })
+})
+
+test('resize-end sets due date from the window and never before start', () => {
+  assert.deepEqual(ganttDragDates('resize-end', task, { dropDay: 6, windowStartIso: '2026-07-09' }),
+    { start_date: '2026-07-10', due_date: '2026-07-15' })
+  assert.deepEqual(ganttDragDates('resize-end', task, { dropDay: 0, windowStartIso: '2026-07-09' }),
+    { start_date: '2026-07-10', due_date: '2026-07-10' })
+  assert.equal(ganttDragDates('resize-end', task, { dropDay: 3, windowStartIso: '2026-07-09' }), null)
+})
+
+test('tasks without explicit dates are not draggable', () => {
+  assert.equal(ganttDragDates('move', { start_date: null, due_date: '2026-07-12' }, { grabDay: 0, dropDay: 1 }), null)
+  assert.equal(ganttDragDates('move', { start_date: '2026-07-10' }, { grabDay: 0, dropDay: 1 }), null)
+})
+
+test('preview clamps to the visible window', () => {
+  assert.deepEqual(ganttDragPreview('move', { left: 2, width: 3 }, { grabDay: 3, dropDay: 6 }), { left: 5, width: 3 })
+  assert.deepEqual(ganttDragPreview('move', { left: 0, width: 3 }, { grabDay: 5, dropDay: 0 }), { left: -2, width: 3 })
+  assert.deepEqual(ganttDragPreview('resize-end', { left: 2, width: 3 }, { dropDay: 9 }), { left: 2, width: 8 })
+  assert.deepEqual(ganttDragPreview('resize-end', { left: 2, width: 3 }, { dropDay: 0 }), { left: 2, width: 1 })
+})
