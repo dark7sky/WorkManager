@@ -13,7 +13,7 @@ export const seedEvents = [
 export const changelogUpdates = [
   {
     id: '2026-07-12-subtask-row-scaling-reconfirm-3',
-    timestamp: '2026-07-12T21:57:57+09:00',
+    timestamp: '2026-07-12T21:59:06+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
     description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)이 동일 내용으로 다시 접수되어 재확인했습니다. subtask-row/subtask-depth-1~3 CSS 규칙과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링이 여전히 정상 동작하며, 다른 화면(캘린더·대시보드 등)에는 하위 업무 목록이 없어 추가 적용 대상이 없음을 확인했습니다. 프론트 테스트 113개, 백엔드 테스트 94개 모두 통과, 코드 변경 없음.',
