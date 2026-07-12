@@ -67,6 +67,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Global search across tasks/events/todos/work logs from a single command palette or search box — already covered by the Ctrl/⌘+K command palette (`commandPalette.js` `searchItems`/`searchScreens`, wired into `QuickCapture`), found already implemented while auditing this backlog.
 - [x] Bulk task actions: multi-select checkboxes in the Gantt list with a bulk action bar to complete or delete several tasks at once (2026-07-11), plus bulk tag add for selected tasks (2026-07-12).
 - [x] Configurable reminder digest: a Settings toggle lets the existing daily device notification widen from "due today only" to "overdue + due within 2 days", stored locally per device (`reminderDigestTasks` in `taskFilters.js`). Server-side scheduled email/push digests remain out of scope (no outbound email infra yet).
+- [x] Task list sort order: the Gantt/task list only ever sorted siblings by start date. Added a "정렬" dropdown (일정순/우선순위순/진행률순/제목순) on the Tasks screen; hierarchy grouping (parent above children) is unchanged, only sibling order within a group changes (`TASK_SORT_COMPARATORS` in `taskHierarchy.js`, 2026-07-12).
 
 ## Removed (2026-07-10): Team/Assignee Features
 
