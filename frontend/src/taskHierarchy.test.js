@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { orderTasksHierarchically, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+import { DEFAULT_TASK_SORT, loadTaskSort, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+
+class MemoryStorage {
+  constructor() { this.store = new Map() }
+  getItem(key) { return this.store.has(key) ? this.store.get(key) : null }
+  setItem(key, value) { this.store.set(key, String(value)) }
+}
 
 const tasks = [
   { id: 1, title: 'Alpha' },
@@ -36,6 +42,22 @@ test('orderTasksHierarchically keeps matching children visible when parent is fi
 test('subtaskCompletionSummary counts direct children only and reports done vs total', () => {
   assert.deepEqual(subtaskCompletionSummary(tasks, 1), { total: 1, done: 1 })
   assert.deepEqual(subtaskCompletionSummary(tasks, 2), { total: 1, done: 0 })
+})
+
+test('loadTaskSort defaults to schedule when nothing is stored', () => {
+  assert.equal(loadTaskSort(new MemoryStorage()), DEFAULT_TASK_SORT)
+})
+
+test('loadTaskSort ignores an unrecognized stored value', () => {
+  const storage = new MemoryStorage()
+  storage.setItem('wm-task-sort', 'bogus')
+  assert.equal(loadTaskSort(storage), DEFAULT_TASK_SORT)
+})
+
+test('saveTaskSort persists a valid sort key for loadTaskSort to read back', () => {
+  const storage = new MemoryStorage()
+  saveTaskSort('priority', storage)
+  assert.equal(loadTaskSort(storage), 'priority')
 })
 
 test('subtaskCompletionSummary returns null for tasks without children', () => {

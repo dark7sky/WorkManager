@@ -6,7 +6,7 @@ import { taskCsvFilename, tasksToCsv } from '../csv'
 import { taskReportFilename, tasksToPrintableReport } from '../taskReport'
 import { DEFAULT_TASK_FILTERS, filterTasks, hasActiveTaskFilters, isTaskOverdue, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies } from '../taskFilters'
 import { addFilterPreset, buildFilterPreset, loadFilterPresets, removeFilterPreset, saveFilterPresets } from '../taskFilterPresets'
-import { DEFAULT_TASK_SORT, orderTasksHierarchically, subtaskCompletionSummary, subtaskRowClass, taskIndent } from '../taskHierarchy'
+import { loadTaskSort, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent } from '../taskHierarchy'
 import { dayAtOffset, ganttDragDates, ganttDragPreview } from '../ganttDrag'
 
 const labels={todo:'할 일',doing:'진행 중',in_progress:'진행 중',done:'완료',overdue:'지연'}
@@ -16,7 +16,8 @@ const iso=d=>d.toLocaleDateString('en-CA')
 const dayMs=86400000
 
 export default function Tasks({tasks,loading,onNew,onEdit,onProgress,onApprove,onBulkComplete,onBulkDelete,onBulkAddTag,onReschedule,onDuplicate}){
-  const [query,setQuery]=useState(''),[status,setStatus]=useState('active'),[selectedTags,setSelectedTags]=useState([]),[priority,setPriority]=useState('all'),[sortBy,setSortBy]=useState(DEFAULT_TASK_SORT),[draft,setDraft]=useState({}),[selected,setSelected]=useState(()=>new Set()),[bulkTag,setBulkTag]=useState('')
+  const [query,setQuery]=useState(''),[status,setStatus]=useState('active'),[selectedTags,setSelectedTags]=useState([]),[priority,setPriority]=useState('all'),[sortBy,setSortByState]=useState(()=>loadTaskSort()),[draft,setDraft]=useState({}),[selected,setSelected]=useState(()=>new Set()),[bulkTag,setBulkTag]=useState('')
+  const setSortBy=value=>{setSortByState(value);saveTaskSort(value)}
   const toggleSelected=id=>setSelected(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n})
   const clearSelected=()=>setSelected(new Set())
   const allTags=useMemo(()=>[...new Set(tasks.flatMap(t=>t.tags||[]))].sort(),[tasks])

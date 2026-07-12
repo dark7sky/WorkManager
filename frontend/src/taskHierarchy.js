@@ -16,6 +16,20 @@ const byProgress = (a, b) => {
 
 export const TASK_SORT_COMPARATORS = { schedule: bySchedule, priority: byPriority, progress: byProgress, title: byTitle }
 export const DEFAULT_TASK_SORT = 'schedule'
+export const TASK_SORT_STORAGE_KEY = 'wm-task-sort'
+
+export const loadTaskSort = (storage = localStorage) => {
+  try {
+    const saved = storage.getItem(TASK_SORT_STORAGE_KEY)
+    return saved && TASK_SORT_COMPARATORS[saved] ? saved : DEFAULT_TASK_SORT
+  } catch {
+    return DEFAULT_TASK_SORT
+  }
+}
+
+export const saveTaskSort = (sortBy, storage = localStorage) => {
+  storage.setItem(TASK_SORT_STORAGE_KEY, sortBy)
+}
 
 export const childTaskIds = (tasks, taskId) => {
   if (!taskId) return new Set()

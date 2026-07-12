@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-sort-persist',
+    timestamp: '2026-07-13T08:42:52+09:00',
+    description: '업무 관리 화면의 정렬(일정순/우선순위순/진행률순/제목순) 선택이 새로고침이나 재방문 시 초기화되던 문제를 고쳐, 마지막으로 고른 정렬 방식을 기기에 저장해 다음에도 그대로 적용되게 했습니다.',
+  },
+  {
     id: '2026-07-13-subtask-row-scaling-recheck-53',
     timestamp: '2026-07-13T08:40:09+09:00',
     description: '요청 #13(하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재확인했습니다(53번째 확인). 깊이별 행 높이·글씨 크기·간트 막대 크기 축소(taskHierarchy.js의 subtaskRowClass/taskIndent, styles.css)와 회귀 테스트가 모두 정상 동작함을 프론트(129개)/백엔드(96개) 전체 테스트와 빌드로 재확인했습니다. 소스 변경 없음.',

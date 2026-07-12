@@ -76,6 +76,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 
 - [x] Trash search/filter: the 휴지통 (trash) section only ever listed every soft-deleted row with no way to narrow it down, which got unwieldy once several tasks/events/todos/logs were deleted. Added a search box (title/content) and a type filter (업무/일정/오늘 할 일/업무 기록) to `TrashSection.jsx`, backed by a pure `filterTrashItems`/`trashTables` module with tests (`frontend/src/trashFilter.js`, 2026-07-13).
 - [x] "Due this week" task status filter: the Tasks screen status filter only had "지연 업무" (overdue) to spot at-risk work, with no quick way to see everything coming due in the next 7 days for weekly planning. Added a `due_this_week` option to the existing status filter (`filterTasks` in `frontend/src/taskFilters.js`, wired into `Tasks.jsx`, 2026-07-13).
+- [x] Task sort persistence: the Tasks screen "정렬" dropdown (일정순/우선순위순/진행률순/제목순) reset to 일정순 on every reload/revisit, losing a user's preferred order. Added `loadTaskSort`/`saveTaskSort` (localStorage, same pattern as the existing filter presets) in `frontend/src/taskHierarchy.js`, wired into `Tasks.jsx`, 2026-07-13.
 
 ## Removed (2026-07-10): Team/Assignee Features
 
