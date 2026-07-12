@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-ai-settings-test-connection',
+    timestamp: '2026-07-12T22:22:04+09:00',
+    description: '설정 화면의 AI 설정 카드에 "연결 테스트" 버튼을 추가했습니다. 저장된 API 키/모델/base URL로 실제 최소 호출을 보내 성공 여부와 원인(키 오류, 서버 오류 등)을 바로 확인할 수 있어, 실제 AI 파싱을 시도하기 전에 설정 문제를 미리 발견할 수 있습니다 (backend `ai.test_connection` + `POST /api/settings/ai/test`).',
+  },
+  {
     id: '2026-07-12-subtask-row-scaling-reconfirm-5',
     timestamp: '2026-07-12T22:20:56+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',

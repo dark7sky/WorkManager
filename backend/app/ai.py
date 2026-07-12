@@ -506,6 +506,25 @@ async def _remote_json(system: str, payload: dict, user_id: str | None = None) -
     return json.loads(response.json()["choices"][0]["message"]["content"])
 
 
+async def test_connection(user_id: str) -> dict[str, Any]:
+    """Makes one minimal real call to the configured provider to verify the saved key/model/base_url work."""
+    config = get_user_config(user_id)
+    provider_name = "OpenAI" if config["provider"] == "openai" else "Gemini"
+    if not config["api_key"]:
+        return {"ok": False, "message": f"{provider_name} API 키가 설정되지 않았습니다."}
+    try:
+        result = await _remote_json('Reply with JSON {"ok": true} only.', {"ping": "test"}, user_id)
+        if not isinstance(result, dict):
+            raise ValueError("unexpected response shape")
+        return {"ok": True, "message": f"{provider_name} · {config['model']} 연결에 성공했습니다."}
+    except httpx.HTTPStatusError as exc:
+        status_code = exc.response.status_code
+        detail = "API 키가 올바르지 않습니다." if status_code in (401, 403) else f"서버 응답 오류 ({status_code})."
+        return {"ok": False, "message": f"{provider_name} 연결에 실패했습니다: {detail}"}
+    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
+        return {"ok": False, "message": f"{provider_name} 연결에 실패했습니다 ({type(exc).__name__})."}
+
+
 async def smart_tag_recommendations(text, existing_tags=None, limit=5, user_id: str | None = None):
     fallback = tag_recommendations(text, existing_tags, limit)
     try:

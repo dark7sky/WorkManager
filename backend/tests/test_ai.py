@@ -82,6 +82,29 @@ class ValidationAndStatusTests(unittest.TestCase):
         self.assertEqual(result["model"], "test-model")
         self.assertNotIn("super-secret", repr(result))
 
+    def test_test_connection_without_api_key_reports_not_configured(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db"), "AI_API_KEY": ""}):
+            from app.db import init_db
+            init_db()
+            result = asyncio.run(ai.test_connection("__legacy__"))
+        self.assertFalse(result["ok"])
+        self.assertIn("API 키", result["message"])
+
+    def test_test_connection_reports_success_on_valid_response(self):
+        class FakeResponse:
+            def raise_for_status(self): pass
+            def json(self): return {"choices": [{"message": {"content": '{"ok": true}'}}]}
+        class FakeClient:
+            async def __aenter__(self): return self
+            async def __aexit__(self, *a): return False
+            async def post(self, *a, **k): return FakeResponse()
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db"), "AI_API_KEY": "test-key", "AI_MODEL": "gpt-4o-mini"}):
+            from app.db import init_db
+            init_db()
+            with patch('app.ai.httpx.AsyncClient', return_value=FakeClient()):
+                result = asyncio.run(ai.test_connection("__legacy__"))
+        self.assertTrue(result["ok"])
+
     def test_recommendations_prioritize_due_date(self):
         tasks = [
             {"id": 1, "title": "later", "status": "todo", "progress": 0, "priority": "high", "due_date": "2999-01-01"},

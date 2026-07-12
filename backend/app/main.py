@@ -1228,6 +1228,12 @@ def ai_settings_update(payload: dict = Body(...), user=Depends(require_user)):
         raise HTTPException(500, str(exc))
 
 
+@app.post("/api/settings/ai/test")
+async def ai_settings_test(user=Depends(require_user)):
+    enforce_rate(user, "ai", 20, 60)
+    return await ai.test_connection(user)
+
+
 @app.get("/api/settings/workflow")
 def workflow_settings(user=Depends(require_user)):
     approval_workflow_on = load_approval_workflow_setting(user)
