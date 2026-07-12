@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-12-calendar-ics-export',
+    timestamp: '2026-07-12T21:29:00+09:00',
+    description: '일정 화면에 ICS(iCalendar) 내보내기 버튼을 추가해, 현재 태그 필터가 적용된 일정 목록을 Google 캘린더/Outlook/Apple 캘린더 등 다른 캘린더 앱으로 가져갈 수 있는 .ics 파일로 내려받을 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-12-task-filter-reset-button',
     timestamp: '2026-07-12T17:22:00+09:00',
     description: '업무 관리 화면에서 검색어·상태·우선순위·태그 필터를 하나씩 지워야 했던 불편을 줄이기 위해, 필터가 하나라도 켜져 있으면 "필터 초기화" 버튼이 나타나 모든 필터를 기본값으로 한 번에 되돌릴 수 있게 했습니다.',

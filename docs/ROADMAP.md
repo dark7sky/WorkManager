@@ -69,6 +69,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Configurable reminder digest: a Settings toggle lets the existing daily device notification widen from "due today only" to "overdue + due within 2 days", stored locally per device (`reminderDigestTasks` in `taskFilters.js`). Server-side scheduled email/push digests remain out of scope (no outbound email infra yet).
 - [x] Task list sort order: the Gantt/task list only ever sorted siblings by start date. Added a "정렬" dropdown (일정순/우선순위순/진행률순/제목순) on the Tasks screen; hierarchy grouping (parent above children) is unchanged, only sibling order within a group changes (`TASK_SORT_COMPARATORS` in `taskHierarchy.js`, 2026-07-12).
 - [x] Filter reset on the Tasks screen: search/status/priority/tag filters each had to be cleared one at a time. A "필터 초기화" button now appears in the toolbar whenever any filter differs from the default and resets all of them at once (`hasActiveTaskFilters`/`DEFAULT_TASK_FILTERS` in `taskFilters.js`, 2026-07-12).
+- [x] Calendar ICS export: WorkManager had JSON/CSV/PDF export but no interoperable calendar format, so events couldn't be taken into Google Calendar/Outlook/Apple Calendar. Added a client-side "ICS" button on the Calendar screen toolbar that exports the currently tag-filtered event list as a standard `.ics` file (`eventsToIcs`/`icsFilename` in `frontend/src/ics.js`, wired into `Calendar.jsx`, 2026-07-12).
 
 ## Removed (2026-07-10): Team/Assignee Features
 
