@@ -27,13 +27,6 @@ export const changelogUpdates = [
     description: '업무 관리 화면에서 자주 쓰는 검색어·상태·우선순위·태그 필터 조합을 매번 다시 설정해야 했던 불편을 줄이기 위해, 현재 필터를 이름 붙여 저장하고 드롭다운에서 바로 불러오거나 삭제할 수 있는 "저장된 필터" 기능을 추가했습니다. 업무 템플릿과 같은 방식으로 localStorage에 저장됩니다 (frontend/src/taskFilterPresets.js).',
   },
   {
-    id: '2026-07-13-subtask-row-scaling-reconfirm-9',
-    timestamp: '2026-07-13T07:52:27+09:00',
-    requestedAt: '2026-07-11T00:14:41+09:00',
-    requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '요청 #13이 다시 접수되어 재확인했습니다(40번째). subtask-row/subtask-depth-1~3 CSS 규칙(높이·글씨 크기 축소)과 taskIndent 들여쓰기, Tasks 화면의 hierarchicalShown 렌더링, 관련 회귀 테스트(taskHierarchy.test.js)가 모두 정상 동작함을 확인했습니다. 같은 재확인 내용이 반복 접수되고 있어, 새 항목을 추가하는 대신 이 항목의 타임스탬프와 확인 횟수만 갱신해 변경 이력이 계속 불어나지 않도록 정리했습니다. 프론트 테스트 전량 통과(129개), 빌드 정상, 코드 변경 없음.',
-  },
-  {
     id: '2026-07-12-task-duplicate',
     timestamp: '2026-07-12T22:31:04+09:00',
     description: '업무 목록의 각 행에 "복제" 버튼을 추가했습니다. 제목 뒤에 "(복사본)"을 붙여 일정·우선순위·태그·상위 업무·선행 업무를 그대로 복사한 새 할 일을 만들고, 상태/진행률은 초기화합니다. 반복 규칙 없이 비슷한 업무를 빠르게 새로 시작할 때 유용합니다 (`buildTaskDuplicatePayload`, `Tasks.jsx`).',
@@ -110,10 +103,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-13T07:53:30+09:00',
+    timestamp: '2026-07-13T07:54:35+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(41번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 129개, 백엔드 96개)/빌드로 재확인되어 정상 동작합니다. 코드 변경 없이 이번 재확인 시각만 이 항목에 갱신해 로그 중복을 방지했습니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
+    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(42번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 129개, 백엔드 96개)/빌드로 재확인되어 정상 동작합니다. 이번 회차에는 별도 실행에서 각자 생성/갱신되어 온 중복 재확인 항목(2026-07-13-subtask-row-scaling-reconfirm-9)을 이 항목 하나로 병합해 changelog 중복을 정리했습니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
