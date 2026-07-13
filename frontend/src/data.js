@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-priority-sort',
+    timestamp: '2026-07-13T23:18:28+09:00',
+    description: '오늘 화면의 할 일 목록이 고정된 항목 다음으로 우선순위(높음 → 보통 → 낮음) 순으로 정렬되도록 개선했습니다. 지금까지는 우선순위를 표시만 하고 목록 순서에는 반영하지 않아, 급한 할 일을 직접 고정하지 않으면 눈에 띄지 않는 문제가 있었습니다 (frontend/src/todoPins.js).',
+  },
+  {
     id: '2026-07-13-event-related-link',
     timestamp: '2026-07-13T23:17:31+09:00',
     description: '업무에만 있던 "관련 링크" 필드를 일정에도 추가했습니다. 일정 등록/수정 폼에 관련 링크 입력란이 생겼고, 링크가 있는 일정은 모바일 일정 목록에서 바로 열 수 있는 배지로 표시됩니다 (backend/app/main.py의 EventPayload/CONFIG, backend/app/db.py, frontend/src/screens/Calendar.jsx).',

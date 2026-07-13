@@ -19,8 +19,11 @@ export const togglePinnedTodo = (pinnedIds, todoId) => {
   return next
 }
 
+const priorityRank = { high: 0, normal: 1, low: 2 }
+
 export const orderTodosByPin = (todos, pinnedIds) =>
   [...todos].sort((a, b) => {
     const pinDiff = (pinnedIds.has(b.id) ? 1 : 0) - (pinnedIds.has(a.id) ? 1 : 0)
-    return pinDiff !== 0 ? pinDiff : 0
+    if (pinDiff !== 0) return pinDiff
+    return (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1)
   })

@@ -46,3 +46,23 @@ test('orderTodosByPin does not mutate the input array', () => {
   orderTodosByPin(todos, new Set([2]))
   assert.deepEqual(todos, copy)
 })
+
+test('orderTodosByPin sorts unpinned todos by priority (high, normal, low) while preserving relative order within a tier', () => {
+  const todos = [
+    { id: 1, priority: 'normal' },
+    { id: 2, priority: 'high' },
+    { id: 3, priority: 'low' },
+    { id: 4, priority: 'high' },
+  ]
+  assert.deepEqual(orderTodosByPin(todos, new Set()).map(t => t.id), [2, 4, 1, 3])
+})
+
+test('orderTodosByPin ranks pin above priority', () => {
+  const todos = [{ id: 1, priority: 'high' }, { id: 2, priority: 'low' }]
+  assert.deepEqual(orderTodosByPin(todos, new Set([2])).map(t => t.id), [2, 1])
+})
+
+test('orderTodosByPin treats a missing priority as normal', () => {
+  const todos = [{ id: 1 }, { id: 2, priority: 'high' }]
+  assert.deepEqual(orderTodosByPin(todos, new Set()).map(t => t.id), [2, 1])
+})
