@@ -136,3 +136,20 @@ export const auditLogsToCsv = logs => {
 }
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
+
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '장소', '태그', '메모']
+
+export const eventsToCsv = events => {
+  const rows = events.map(event => [
+    event.title,
+    event.start_at || event.start,
+    event.end_at || event.end,
+    event.google_is_all_day ? 'Y' : 'N',
+    event.location,
+    (event.tags || []).join('; '),
+    event.description,
+  ])
+  return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+}
+
+export const eventCsvFilename = date => `workmanager-events-${date}.csv`

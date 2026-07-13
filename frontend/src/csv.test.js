@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -65,6 +65,31 @@ test('auditLogsToCsv exports audit rows with labels and metadata', () => {
 
 test('auditLogCsvFilename uses the requested date', () => {
   assert.equal(auditLogCsvFilename('2026-07-13'), 'workmanager-audit-log-2026-07-13.csv')
+})
+
+test('eventsToCsv exports event rows with labels and escaping', () => {
+  const csv = eventsToCsv([
+    {
+      title: '회의, 기획',
+      start_at: '2026-07-13T10:00:00',
+      end_at: '2026-07-13T11:00:00',
+      google_is_all_day: false,
+      location: '3층 회의실',
+      tags: ['내부'],
+      description: '분기 계획\n검토',
+    },
+    { title: '휴가', start_at: '2026-07-14T00:00:00', end_at: '2026-07-15T00:00:00', google_is_all_day: true, location: null, tags: [], description: null },
+  ])
+
+  assert.equal(csv, [
+    '제목,시작,종료,종일 여부,장소,태그,메모',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,3층 회의실,내부,"분기 계획\n검토"',
+    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,,,',
+  ].join('\n'))
+})
+
+test('eventCsvFilename uses the requested date', () => {
+  assert.equal(eventCsvFilename('2026-07-13'), 'workmanager-events-2026-07-13.csv')
 })
 
 test('parseTasksCsv reads back an exported task row', () => {

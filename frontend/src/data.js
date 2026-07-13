@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-calendar-csv-export',
+    timestamp: '2026-07-13T13:37:27+09:00',
+    description: '일정(캘린더) 화면에 CSV 내보내기 버튼을 추가했습니다. 기존 ICS 내보내기 옆에 나란히 배치되어, 현재 태그 필터가 적용된 일정 목록을 제목/시작/종료/종일 여부/장소/태그/메모 컬럼의 CSV 파일로 내려받을 수 있습니다 (frontend/src/csv.js, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-task-estimated-time',
     timestamp: '2026-07-13T13:34:11+09:00',
     description: '업무에 "예상 소요 시간(분)" 필드를 추가했습니다. 업무 등록/수정 폼에서 입력할 수 있고, 업무 목록에는 예상 시간이 표시되며, 성과 화면과 보고서(Markdown)에는 완료된 업무의 예상 소요 시간 합계가 실제 기록된 소요 시간과 나란히 표시되어 계획 대비 실적을 비교할 수 있습니다 (backend/app/db.py, backend/app/main.py, frontend/src/taskFormPayload.js, frontend/src/components/TaskForm.jsx, frontend/src/screens/Tasks.jsx, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',
