@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-dependency-checkbox-picker',
+    timestamp: '2026-07-13T13:05:08+09:00',
+    description: '업무 등록/수정 화면의 "선행 업무" 선택이 브라우저 기본 다중 선택 상자(Ctrl/Cmd+클릭 없이는 해제 불가)였던 문제를 고쳤습니다. 이제 체크박스 목록으로 바뀌어 항목을 클릭 한 번으로 자유롭게 선택·해제할 수 있습니다 (frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-13-ai-numbered-list-todo-tag-matching',
     timestamp: '2026-07-13T13:01:29+09:00',
     description: 'AI 도우미에 "오늘해야할일 1.AAA 2. BBB 3. CCC"처럼 번호 목록을 한 줄로 입력하면 첫 항목만 인식되던 문제를 고쳤습니다. 이제 줄바꿈 없이 번호로 나열한 항목도 각각 별도의 오늘 할 일로 분리되고, 최근 업무의 제목·태그와 겹치는 항목에는 관련 태그를 자동으로 매칭해 붙여줍니다 (backend/app/ai.py의 rule_parse_multi, _match_tags).',
