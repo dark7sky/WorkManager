@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight, CalendarClock, Check, ChevronRight, Circle, Clock3, Copy, Pencil, Play, Plus, Sparkles, Square, Star, Trash2, X } from 'lucide-react'
+import { ArrowUpRight, CalendarClock, Check, ChevronRight, Circle, Clock3, Copy, Download, Pencil, Play, Plus, Sparkles, Square, Star, Trash2, X } from 'lucide-react'
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { filterTodosByQuery, filterLogsByQuery } from '../todaySearch'
+import { todoCsvFilename, todosToCsv } from '../csv'
 
 function localDate(value) {
   if (!value) return null
@@ -136,6 +137,10 @@ export default function Today(props) {
     finally { setSaving('') }
   }
   const recommendationButtons = (key, tags, setTags) => (tagSuggestions[key] || []).map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)
+  const exportTodos = () => {
+    const csv = `﻿${todosToCsv(shownTodos)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
+  }
   return <>
     <Header title="오늘" subtitle={`${dateText} · 중요한 일에 집중해 보세요.`}/>
     <div className="content today-grid">
@@ -148,6 +153,7 @@ export default function Today(props) {
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''} ${todo.priority === 'high' ? 'priority-high' : ''}`} key={todo.id}>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>

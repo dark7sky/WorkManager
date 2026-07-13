@@ -153,3 +153,20 @@ export const eventsToCsv = events => {
 }
 
 export const eventCsvFilename = date => `workmanager-events-${date}.csv`
+
+const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '태그']
+const todoRecurrenceLabels = { daily: '매일', weekly: '매주' }
+
+export const todosToCsv = todos => {
+  const rows = todos.map(todo => [
+    todo.title,
+    todo.completed ? 'Y' : 'N',
+    todo.priority,
+    todoRecurrenceLabels[todo.recurrence_rule] || '',
+    todo.todo_date,
+    (todo.tags || []).join('; '),
+  ])
+  return [todoHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+}
+
+export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
