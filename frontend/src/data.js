@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-related-work-logs',
+    timestamp: '2026-07-13T23:37:39+09:00',
+    description: '업무 화면 Gantt 행에 "기록" 버튼을 추가해 해당 업무에 연결된 업무 기록(오늘 한 일)을 날짜·소요 시간과 함께 모달로 볼 수 있게 했습니다. 지금까지는 업무 기록에 업무를 연결할 수는 있었지만(오늘 화면), 업무 쪽에서는 그 기록들을 확인할 방법이 없었습니다 (frontend/src/taskLogs.js, frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-performance-tag-breakdown',
     timestamp: '2026-07-13T23:36:13+09:00',
     description: '성과 화면에 태그별 소요 시간/완료 업무 건수 분석을 추가했습니다. 지금까지는 전체 합계만 볼 수 있어 시간을 어디에 썼는지 태그별로 비교할 방법이 없었습니다. Markdown 보고서 내보내기에도 태그별 소요 시간 표를 함께 담았습니다 (backend/app/main.py의 /api/achievements, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',

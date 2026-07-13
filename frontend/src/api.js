@@ -52,6 +52,7 @@ export const api = {
   createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
   createLog: data => request('/work_logs',json('POST',data)), updateLog: (id,data) => request(`/work_logs/${id}`,json('PATCH',data)), deleteLog: id => request(`/work_logs/${id}`,{method:'DELETE'}),
+  workLogs: () => request('/work_logs'),
   todos: () => request('/todos'),
   createTodo: data => request('/todos',json('POST',data)), updateTodo: (id,data) => request(`/todos/${id}`,json('PATCH',data)), deleteTodo: id => request(`/todos/${id}`,{method:'DELETE'}),
   aiPreview: text => request('/ai/parse',json('POST',{text})), aiApply: data => request('/ai/apply',json('POST',data)), aiRecommendations: (limit=5) => request(`/ai/recommendations?limit=${limit}`), aiStatus: () => request('/ai/status'),
