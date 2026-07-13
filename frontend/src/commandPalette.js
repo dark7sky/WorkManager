@@ -19,24 +19,25 @@ export function searchScreens(query) {
 }
 
 const ITEM_SOURCES = [
-  ['task', 'tasks', item => item.title, item => item.due_date ? `마감 ${item.due_date}` : item.status, 'tasks'],
-  ['event', 'events', item => item.title, item => (item.start_at || '').slice(0, 16).replace('T', ' '), 'calendar'],
-  ['todo', 'todos', item => item.title, item => item.todo_date, 'today'],
-  ['log', 'work_logs', item => item.content, item => item.log_date, 'today'],
+  ['task', 'tasks', item => item.title, item => item.due_date ? `마감 ${item.due_date}` : item.status, 'tasks', item => item.description],
+  ['event', 'events', item => item.title, item => (item.start_at || '').slice(0, 16).replace('T', ' '), 'calendar', item => item.description],
+  ['todo', 'todos', item => item.title, item => item.todo_date, 'today', null],
+  ['log', 'work_logs', item => item.content, item => item.log_date, 'today', null],
 ]
 
 export function searchItems(query, data, limit = 8) {
   const q = norm(query)
   if (!q) return []
   const results = []
-  for (const [type, key, getTitle, getDetail, page] of ITEM_SOURCES) {
+  for (const [type, key, getTitle, getDetail, page, getBody] of ITEM_SOURCES) {
     for (const item of data?.[key] || []) {
       const title = String(getTitle(item) || '')
       const tags = (item.tags || []).map(x => String(x).toLowerCase())
+      const body = String((getBody ? getBody(item) : '') || '').toLowerCase()
       const haystack = title.toLowerCase()
-      if (haystack.includes(q) || tags.some(t => t.includes(q))) {
+      if (haystack.includes(q) || tags.some(t => t.includes(q)) || body.includes(q)) {
         results.push({ type, id: item.id, title, detail: getDetail(item) || '', page,
-          rank: haystack.startsWith(q) ? 0 : 1 })
+          rank: haystack.startsWith(q) ? 0 : haystack.includes(q) || tags.some(t => t.includes(q)) ? 1 : 2 })
       }
     }
   }

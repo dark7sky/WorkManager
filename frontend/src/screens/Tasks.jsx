@@ -28,6 +28,7 @@ export default function Tasks({tasks,loading,onNew,onEdit,onProgress,onApprove,o
   const start=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return d},[])
   const todayIso=iso(start)
   const days=useMemo(()=>Array.from({length:14},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d}),[start])
+  const [pinnedIds,setPinnedIds]=useState(()=>loadPinnedTaskIds())
   const shown=useMemo(()=>filterTasks(tasks,{query,status,selectedTags,priority,todayIso}),[tasks,query,status,selectedTags,priority,todayIso])
   const filtersActive=hasActiveTaskFilters({query,status,selectedTags,priority})
   const resetFilters=()=>{setQuery(DEFAULT_TASK_FILTERS.query);setStatus(DEFAULT_TASK_FILTERS.status);setSelectedTags(DEFAULT_TASK_FILTERS.selectedTags);setPriority(DEFAULT_TASK_FILTERS.priority)}
@@ -61,7 +62,6 @@ export default function Tasks({tasks,loading,onNew,onEdit,onProgress,onApprove,o
     if(!parsed.length){window.alert(errors.length?errors.join('\n'):'가져올 업무가 없습니다.');return}
     await onImport(parsed,errors)
   }
-  const [pinnedIds,setPinnedIds]=useState(()=>loadPinnedTaskIds())
   const togglePin=(e,t)=>{e.stopPropagation();setPinnedIds(ids=>{const next=togglePinnedTask(ids,t.id);savePinnedTaskIds(next);return next})}
   const [drag,setDrag]=useState(null),dragRef=useRef(null)
   const startBarDrag=(e,t,mode)=>{if(!t.start_date||!t.due_date||!onReschedule)return;e.preventDefault();e.stopPropagation();const track=e.currentTarget.closest('.timeline-cells');if(!track)return;const rect=track.getBoundingClientRect(),day=dayAtOffset(e.clientX-rect.left,rect.width);dragRef.current=rect;e.currentTarget.setPointerCapture?.(e.pointerId);setDrag({id:t.id,mode,grabDay:day,dropDay:day})}

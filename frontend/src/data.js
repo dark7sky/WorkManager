@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-tasks-screen-crash-fix',
+    timestamp: '2026-07-13T23:05:00+09:00',
+    description: '업무 메뉴에 들어가면 에러 페이지로 연결되는 오류를 수정했습니다. 업무 목록 정렬에 쓰이는 고정(핀) 상태 값이 선언되기 전에 참조되어 화면이 항상 충돌했습니다 (frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-13-task-ics-export',
     timestamp: '2026-07-13T18:56:44+09:00',
     description: '캘린더 화면은 일정을 ICS로 내보낼 수 있었지만, 업무 화면은 CSV/PDF만 지원해 업무 기한을 외부 캘린더 앱(구글 캘린더, 아웃룩 등)으로 가져갈 방법이 없었습니다. 업무 목록 툴바에 "ICS" 버튼을 추가해, 현재 필터링된 업무들의 기한을 종일 일정으로 내보낼 수 있습니다 (frontend/src/ics.js tasksToIcs, frontend/src/screens/Tasks.jsx).',
