@@ -53,3 +53,10 @@ test('buildTodoDuplicatePayload and buildTaskFromTodoPayload carry link_url', ()
   assert.equal(buildTaskFromTodoPayload(todo).link_url, 'https://example.com')
   assert.equal(buildTaskFromTodoPayload({ title: '무제' }).link_url, null)
 })
+
+test('buildTodoDuplicatePayload and buildTaskFromTodoPayload carry memo', () => {
+  const todo = { title: '자료 확인', memo: '참고: 3층 회의실' }
+  assert.equal(buildTodoDuplicatePayload(todo).memo, '참고: 3층 회의실')
+  assert.equal(buildTaskFromTodoPayload(todo).description, '참고: 3층 회의실')
+  assert.equal(buildTaskFromTodoPayload({ title: '무제' }).description, null)
+})
