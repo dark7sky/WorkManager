@@ -499,6 +499,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
+        a = self.client(self.token_a)
+        default_todo = a.post("/api/todos", json={"title": "default priority"}).json()
+        self.assertEqual(default_todo["priority"], "normal")
+        high = a.post("/api/todos", json={"title": "water plants", "todo_date": "2026-07-06", "recurrence_rule": "daily", "priority": "high"}).json()
+        self.assertEqual(high["priority"], "high")
+        completed = a.patch(f"/api/todos/{high['id']}", json={"completed": True}).json()
+        spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["priority"], "high")
+        lowered = a.patch(f"/api/todos/{high['id']}", json={"priority": "low"}).json()
+        self.assertEqual(lowered["priority"], "low")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()

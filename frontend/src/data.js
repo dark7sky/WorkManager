@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-priority',
+    timestamp: '2026-07-13T18:25:02+09:00',
+    description: '오늘 할 일(Todo)에는 업무와 달리 우선순위 개념이 없어, 중요한 할 일이 목록 안에 묻혀 눈에 띄지 않았습니다. Todo에 우선순위(낮음/보통/높음)를 추가해 등록·수정 시 지정할 수 있고, 높음으로 표시한 항목은 목록에서 좌측 강조선과 "우선순위 높음" 배지로 구분됩니다. 반복 생성되는 다음 회차와 "복제" 기능도 우선순위를 그대로 이어받습니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',
+  },
+  {
     id: '2026-07-13-event-recurrence',
     timestamp: '2026-07-13T18:20:39+09:00',
     description: '업무·오늘 할 일은 반복 등록이 가능했지만 캘린더 일정에는 반복 옵션이 없어, 매주 하는 회의 같은 일정을 매번 새로 등록해야 했습니다. 새 일정 등록 폼에 "반복"(매일/매주/매월)과 "반복 종료일"을 추가해, 등록 시 지정한 기간까지의 개별 일정을 한 번에 만들 수 있습니다 (frontend/src/eventRecurrence.js, frontend/src/screens/Calendar.jsx, frontend/src/App.jsx).',

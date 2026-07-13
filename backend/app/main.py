@@ -286,6 +286,7 @@ class TodoPayload(StrictPayload):
     completed: bool | None = None
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly"] | None = None
+    priority: Literal["low", "normal", "high"] | None = None
 
     @field_validator("recurrence_rule", mode="before")
     @classmethod
@@ -330,7 +331,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule"}, None),
+    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "priority"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
 }
 
@@ -608,9 +609,9 @@ def spawn_recurring_todo(todo, user_id):
         if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,created_at)
-          VALUES(?,?,?,0,?,?,?)""",
-          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, timestamp))
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,priority,created_at)
+          VALUES(?,?,?,0,?,?,?,?)""",
+          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, todo.get("priority", "normal"), timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id
