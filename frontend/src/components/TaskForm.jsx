@@ -59,6 +59,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setTags(task?.tags || [])
     setChecklist(task?.checklist || [])
     setChecklistText('')
+    setEditingChecklistId(null)
   }, [task?.id, task?.tags, task?.checklist])
 
   const addChecklistItem = () => {
@@ -69,6 +70,14 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   }
   const toggleChecklistItem = id => setChecklist(checklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const removeChecklistItem = id => setChecklist(checklist.filter(item => item.id !== id))
+  const [editingChecklistId, setEditingChecklistId] = useState(null)
+  const [editingChecklistText, setEditingChecklistText] = useState('')
+  const beginEditChecklistItem = item => { setEditingChecklistId(item.id); setEditingChecklistText(item.text) }
+  const saveEditChecklistItem = id => {
+    const text = editingChecklistText.trim()
+    if (text) setChecklist(checklist.map(item => item.id === id ? { ...item, text } : item))
+    setEditingChecklistId(null)
+  }
 
   const recommend = async () => {
     const data = new FormData(formRef.current)
@@ -125,7 +134,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item"><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
-      {checklist.map(item => <label key={item.id} className="checklist-editor-item"><input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/><span className={item.done ? 'checklist-done-text' : ''}>{item.text}</span><button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button></label>)}
+      {checklist.map(item => <div key={item.id} className="checklist-editor-item">
+        <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>
+        {editingChecklistId === item.id
+          ? <input type="text" className="inline-edit" autoFocus value={editingChecklistText} onChange={e => setEditingChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditChecklistItem(item.id) } if (e.key === 'Escape') setEditingChecklistId(null) }} onBlur={() => saveEditChecklistItem(item.id)}/>
+          : <span className={item.done ? 'checklist-done-text' : ''} onClick={() => beginEditChecklistItem(item)}>{item.text}</span>}
+        <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
+      </div>)}
       <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
     </div>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-checklist-item-edit',
+    timestamp: '2026-07-13T18:51:57+09:00',
+    description: '업무 체크리스트 항목은 등록 후 잘못 입력해도 삭제하고 다시 추가하는 것 외에는 고칠 방법이 없었습니다. 체크리스트 항목 텍스트를 클릭하면 바로 수정할 수 있도록 인라인 편집을 추가했습니다 (frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-13-todo-pin',
     timestamp: '2026-07-13T18:51:11+09:00',
     description: '업무 화면의 "고정" 기능은 있었지만 오늘 화면의 오늘 할 일(Todo) 목록에는 없어, 중요한 할 일이 다른 항목 사이에 묻히기 쉬웠습니다. Todo 각 행에 "고정" 별표 버튼을 추가해 고정된 항목이 목록 맨 위에 먼저 표시되도록 했습니다 (frontend/src/todoPins.js, frontend/src/screens/Today.jsx).',
