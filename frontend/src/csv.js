@@ -36,6 +36,48 @@ export const tasksToCsv = (tasks, todayIso) => {
 
 export const taskCsvFilename = date => `workmanager-tasks-${date}.csv`
 
+const priorityLabelToValue = { 낮음: 'low', 보통: 'normal', 높음: 'high', low: 'low', normal: 'normal', high: 'high' }
+
+const parseCsvRows = text => {
+  const rows = []
+  let row = [], cell = '', inQuotes = false
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { cell += '"'; i++ } else inQuotes = false
+      } else cell += ch
+    } else if (ch === '"') inQuotes = true
+    else if (ch === ',') { row.push(cell); cell = '' }
+    else if (ch === '\r') continue
+    else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = '' }
+    else cell += ch
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row) }
+  return rows.filter(r => r.some(c => c !== ''))
+}
+
+export const parseTasksCsv = text => {
+  const rows = parseCsvRows(text.replace(/^﻿/, ''))
+  if (!rows.length) return { tasks: [], errors: [] }
+  const header = rows[0].map(h => h.trim())
+  const col = name => header.indexOf(name)
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iDue = col('기한'), iTags = col('태그'), iDescription = col('메모')
+  const tasks = [], errors = []
+  rows.slice(1).forEach((cells, idx) => {
+    const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
+    if (!title) { errors.push(`${idx + 2}행: 제목이 없어 건너뜀`); return }
+    const task = { title }
+    if (iPriority >= 0 && cells[iPriority]) task.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
+    if (iStart >= 0 && cells[iStart]) task.start_date = cells[iStart].trim()
+    if (iDue >= 0 && cells[iDue]) task.due_date = cells[iDue].trim()
+    if (iTags >= 0 && cells[iTags]) task.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
+    if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
+    tasks.push(task)
+  })
+  return { tasks, errors }
+}
+
 const timelineHeaders = ['날짜', '구분', '제목', '태그']
 
 export const timelineToCsv = items => {

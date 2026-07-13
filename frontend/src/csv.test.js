@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -65,4 +65,39 @@ test('auditLogsToCsv exports audit rows with labels and metadata', () => {
 
 test('auditLogCsvFilename uses the requested date', () => {
   assert.equal(auditLogCsvFilename('2026-07-13'), 'workmanager-audit-log-2026-07-13.csv')
+})
+
+test('parseTasksCsv reads back an exported task row', () => {
+  const csv = [
+    '제목,상태,우선순위,시작일,기한,진행률,분류,태그,메모',
+    '"보고서, 검토",지연,high,2026-07-06,2026-07-10,25%,기획,분기; 고객,"첫 줄\n둘째 줄"',
+  ].join('\n')
+
+  const { tasks, errors } = parseTasksCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(tasks, [{
+    title: '보고서, 검토',
+    priority: 'high',
+    start_date: '2026-07-06',
+    due_date: '2026-07-10',
+    tags: ['분기', '고객'],
+    description: '첫 줄\n둘째 줄',
+  }])
+})
+
+test('parseTasksCsv strips a UTF-8 BOM and translates Korean priority labels', () => {
+  const csv = '﻿제목,우선순위\n예산안 작성,낮음\n'
+  const { tasks } = parseTasksCsv(csv)
+  assert.deepEqual(tasks, [{ title: '예산안 작성', priority: 'low' }])
+})
+
+test('parseTasksCsv skips rows without a title and reports the row number', () => {
+  const csv = '제목,우선순위\n,high\n두 번째 업무,normal\n'
+  const { tasks, errors } = parseTasksCsv(csv)
+  assert.deepEqual(tasks, [{ title: '두 번째 업무', priority: 'normal' }])
+  assert.deepEqual(errors, ['2행: 제목이 없어 건너뜀'])
+})
+
+test('parseTasksCsv returns nothing for empty input', () => {
+  assert.deepEqual(parseTasksCsv(''), { tasks: [], errors: [] })
 })

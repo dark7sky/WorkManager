@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-csv-import',
+    timestamp: '2026-07-13T13:19:14+09:00',
+    description: '업무 화면에 CSV 가져오기 버튼을 추가했습니다. 기존 CSV 내보내기와 같은 형식(제목/우선순위/시작일/기한/태그/메모)의 파일을 업로드하면 새 업무로 일괄 생성되어, 스프레드시트로 준비한 업무 목록을 한 번에 옮길 수 있습니다 (frontend/src/csv.js parseTasksCsv, frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-audit-log-csv-export',
     timestamp: '2026-07-13T13:18:00+09:00',
     description: '감사 로그 화면에 CSV 내보내기 버튼을 추가했습니다. 현재 검색/대상 필터가 적용된 결과를 일시·작업·대상·상세 열로 내려받아 규정 준수 보고나 외부 검토에 바로 활용할 수 있습니다 (frontend/src/csv.js, frontend/src/screens/AuditLog.jsx).',
