@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-work-log-csv-export',
+    timestamp: '2026-07-14T04:39:44+09:00',
+    description: '오늘 화면의 업무 기록(오늘 한 일) 목록에 CSV 내보내기 버튼을 추가했습니다. Todo/업무/일정/감사 로그와 동일한 방식으로 날짜·내용·소요 시간·연결 업무·태그를 내려받을 수 있습니다 (frontend/src/csv.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-trash-bulk-restore',
     timestamp: '2026-07-14T04:36:15+09:00',
     description: '휴지통에 일괄 복원 기능을 추가했습니다. 각 항목에 선택 체크박스가 생겼고, 여러 개를 선택하면 나타나는 작업 바에서 한 번에 복원할 수 있습니다 (frontend/src/components/TrashSection.jsx).',

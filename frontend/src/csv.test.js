@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -142,4 +142,21 @@ test('todosToCsv exports todo rows with labels and escaping', () => {
 
 test('todoCsvFilename uses the requested date', () => {
   assert.equal(todoCsvFilename('2026-07-13'), 'workmanager-todos-2026-07-13.csv')
+})
+
+test('workLogsToCsv exports work log rows with linked task title and escaping', () => {
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-14', content: '회의, 진행', duration_minutes: 30, task_id: 5, tags: ['분기'] },
+    { log_date: '2026-07-13', content: '문서 정리', duration_minutes: null, task_id: null, tags: [] },
+  ], new Map([[5, '보고서 작성']]))
+
+  assert.equal(csv, [
+    '날짜,내용,소요 시간(분),연결 업무,태그',
+    '2026-07-14,"회의, 진행",30,#5 보고서 작성,분기',
+    '2026-07-13,문서 정리,,,',
+  ].join('\n'))
+})
+
+test('workLogCsvFilename uses the requested date', () => {
+  assert.equal(workLogCsvFilename('2026-07-14'), 'workmanager-work-logs-2026-07-14.csv')
 })

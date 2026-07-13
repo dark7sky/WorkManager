@@ -170,3 +170,18 @@ export const todosToCsv = todos => {
 }
 
 export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
+
+const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그']
+
+export const workLogsToCsv = (logs, taskTitleById) => {
+  const rows = logs.map(log => [
+    log.log_date,
+    log.content,
+    log.duration_minutes ?? '',
+    log.task_id ? (taskTitleById?.get(log.task_id) ? `#${log.task_id} ${taskTitleById.get(log.task_id)}` : `#${log.task_id}`) : '',
+    (log.tags || []).join('; '),
+  ])
+  return [workLogHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+}
+
+export const workLogCsvFilename = date => `workmanager-work-logs-${date}.csv`
