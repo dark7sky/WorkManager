@@ -60,3 +60,37 @@ export const tasksToIcs = tasks => {
 }
 
 export const taskIcsFilename = date => `workmanager-tasks-${date}.ics`
+
+const unfoldIcs = text => text.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '')
+
+const unescapeIcsText = value => value.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\')
+
+const parseIcsDate = value => {
+  const m = /^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/.exec(value)
+  if (!m) return null
+  const [, y, mo, d, h, mi, s, z] = m
+  if (h === undefined) return `${y}-${mo}-${d}T00:00:00`
+  const iso = `${y}-${mo}-${d}T${h}:${mi}:${s}${z ? 'Z' : ''}`
+  return new Date(iso).toISOString()
+}
+
+export const parseIcs = text => {
+  const lines = unfoldIcs(text).split('\n').map(l => l.trim()).filter(Boolean)
+  const events = []
+  let current = null
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') { current = {}; continue }
+    if (line === 'END:VEVENT') { if (current?.title && current.start_at) events.push(current); current = null; continue }
+    if (!current) continue
+    const sep = line.indexOf(':')
+    if (sep < 0) continue
+    const key = line.slice(0, sep).split(';')[0]
+    const value = unescapeIcsText(line.slice(sep + 1))
+    if (key === 'SUMMARY') current.title = value
+    else if (key === 'DESCRIPTION') current.description = value
+    else if (key === 'LOCATION') current.location = value
+    else if (key === 'DTSTART') current.start_at = parseIcsDate(value)
+    else if (key === 'DTEND') current.end_at = parseIcsDate(value)
+  }
+  return events.filter(e => e.start_at && e.end_at)
+}

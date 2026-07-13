@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-calendar-ics-import',
+    timestamp: '2026-07-13T23:10:00+09:00',
+    description: '캘린더 화면에 ICS 가져오기 기능을 추가했습니다. 외부 캘린더(Google/Outlook/Apple)에서 내보낸 .ics 파일을 업로드하면 안에 담긴 일정을 그대로 등록할 수 있습니다 (frontend/src/ics.js parseIcs, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-tasks-screen-crash-fix',
     timestamp: '2026-07-13T23:05:00+09:00',
     description: '업무 메뉴에 들어가면 에러 페이지로 연결되는 오류를 수정했습니다. 업무 목록 정렬에 쓰이는 고정(핀) 상태 값이 선언되기 전에 참조되어 화면이 항상 충돌했습니다 (frontend/src/screens/Tasks.jsx).',
