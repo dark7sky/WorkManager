@@ -84,6 +84,7 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}.skip-link{position:fixed;lef
 
 .mini-progress{border-radius:999px;overflow:hidden}.mini-progress i{border-radius:999px}
 .progress-slider input[type=range]{accent-color:var(--blue)}
+.progress-slider .progress-number{width:44px!important;min-width:44px!important;height:26px;padding:0 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--text);font-size:11px;text-align:right}
 
 .task-row,.recommendation-list li,.mobile-agenda>button,.day-event,.week-grid>div,.calendar-grid>div,.preset-chip,.feature-request{transition:background-color .15s var(--ease),box-shadow .15s var(--ease),transform .15s var(--ease),border-color .15s var(--ease)}
 .cal-event{transition:transform .12s var(--ease),box-shadow .12s var(--ease)}

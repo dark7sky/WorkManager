@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-progress-number-input',
+    timestamp: '2026-07-13T23:25:00+09:00',
+    description: '업무 목록의 진행률 슬라이더 옆에 숫자 직접 입력 칸을 추가했습니다. 모바일이나 정밀한 값 입력 시 슬라이더를 끌지 않고 정확한 %를 타이핑해 저장할 수 있습니다 (frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-13-todo-promote-to-task',
     timestamp: '2026-07-13T23:10:47+09:00',
     description: '오늘 할 일을 업무로 전환하는 기능을 추가했습니다. 오늘 화면의 할 일 항목에 "업무로 전환" 버튼을 누르면 제목·태그·우선순위·완료 상태를 그대로 이어받은 업무가 생성되고 원래 할 일은 삭제됩니다 (frontend/src/todoDuplicate.js의 buildTaskFromTodoPayload, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
