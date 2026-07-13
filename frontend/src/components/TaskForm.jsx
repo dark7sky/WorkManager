@@ -104,6 +104,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
+    <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" defaultValue={prefill?.recurrence_rule ?? task?.recurrence_rule ?? ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>

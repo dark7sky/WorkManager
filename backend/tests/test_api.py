@@ -437,6 +437,23 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_estimated_minutes_is_persisted_and_summed_for_completed_tasks(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "estimate me", "estimated_minutes": 90})
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["estimated_minutes"], 90)
+        patched = a.patch(f"/api/tasks/{task.json()['id']}", json={"estimated_minutes": 45})
+        self.assertEqual(patched.status_code, 200, patched.text)
+        self.assertEqual(patched.json()["estimated_minutes"], 45)
+        done = a.patch(f"/api/tasks/{task.json()['id']}", json={"status": "done", "progress": 100})
+        self.assertEqual(done.status_code, 200, done.text)
+        report = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        self.assertEqual(report.status_code, 200, report.text)
+        self.assertGreaterEqual(report.json()["summary"]["estimated_minutes"], 45)
+        self.assertEqual(a.post("/api/tasks", json={"title": "too long", "estimated_minutes": 100001}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_dependency_cycle_is_rejected(self, *_):
         a = self.client(self.token_a)
         first = a.post("/api/tasks", json={"title": "first"}).json()

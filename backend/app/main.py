@@ -237,8 +237,9 @@ class TaskPayload(StrictPayload):
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     parent_id: int | None = Field(None, ge=1)
     dependency_ids: list[int] | None = Field(None, max_length=100)
+    estimated_minutes: int | None = Field(None, ge=0, le=100000)
 
-    @field_validator("start_date", "due_date", "recurrence_rule", "parent_id", mode="before")
+    @field_validator("start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -321,7 +322,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
@@ -442,7 +443,7 @@ def normalize(table, data):
     for key in text_fields:
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
-    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id"},
+    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes"},
                 "events": set(), "todos": set(), "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
@@ -1191,6 +1192,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
                         "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
+                        "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
             "tags": available_tags, "timeline": timeline,
             "tasks": tasks, "work_logs": logs, "events": events, "todos": todos}

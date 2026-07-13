@@ -31,6 +31,7 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
     `- 완료 업무: ${stats.completed_tasks || 0}`,
     `- 업무 기록: ${stats.work_logs || 0}`,
     `- 기록된 소요 시간: ${formatDuration(stats.tracked_minutes)}`,
+    `- 완료 업무 예상 소요 시간: ${formatDuration(stats.estimated_minutes)}`,
     `- 일정: ${stats.events || 0}`,
     `- 진행 중 업무: ${stats.active_tasks || 0}`,
     `- 완료한 오늘 할 일: ${stats.completed_todos || 0}`,

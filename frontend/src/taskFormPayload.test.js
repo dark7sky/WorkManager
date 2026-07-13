@@ -154,3 +154,15 @@ test('buildTaskDuplicatePayload caps a duplicated title to the backend text limi
 
   assert.equal(payload.title.length, 300)
 })
+
+test('buildTaskPayload normalizes estimated_minutes to a non-negative integer or null', () => {
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '90' }, { task: { id: 1 } }).estimated_minutes, 90)
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '' }, { task: { id: 1 } }).estimated_minutes, null)
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '-5' }, { task: { id: 1 } }).estimated_minutes, null)
+})
+
+test('buildTaskDuplicatePayload copies estimated_minutes', () => {
+  const payload = buildTaskDuplicatePayload({ id: 1, title: '업무', estimated_minutes: 60 })
+
+  assert.equal(payload.estimated_minutes, 60)
+})

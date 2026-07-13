@@ -31,6 +31,11 @@ const normalizedOptionalId = value => {
   const number = Number(value)
   return Number.isInteger(number) && number > 0 ? number : null
 }
+const normalizedEstimatedMinutes = value => {
+  if (value === '' || value === null || value === undefined) return null
+  const number = Number(value)
+  return Number.isFinite(number) && number >= 0 ? Math.round(number) : null
+}
 const normalizedDependencyIds = (ids, excludeId) => {
   const cleaned = []
   const seen = new Set()
@@ -59,6 +64,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     priority: normalizedPriority(data.priority),
     progress: normalizedProgress(data.progress),
     recurrence_rule: data.recurrence_rule || null,
+    estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes),
     tags: normalizedTaskTags(tags),
   }
 
@@ -88,6 +94,7 @@ export const buildTaskDuplicatePayload = task => {
     priority: normalizedPriority(task?.priority),
     progress: 0,
     recurrence_rule: task?.recurrence_rule || null,
+    estimated_minutes: normalizedEstimatedMinutes(task?.estimated_minutes),
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),
     dependency_ids: normalizedDependencyIds(task?.dependency_ids, sourceId),

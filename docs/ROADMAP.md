@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (13:19 KST)
+Last updated: 2026-07-13 (13:34 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -84,6 +84,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Task CSV import: WorkManager could export tasks to CSV/PDF but had no way to bring a bulk-prepared task list back in, so onboarding a backlog of existing work meant creating each task by hand. Added a "CSV 가져오기" button on the Tasks screen that reads a file in the same column format as the existing export (제목/우선순위/시작일/기한/태그/메모), skips rows without a title, and bulk-creates the rest via the existing `POST /api/tasks` (`parseTasksCsv` in `frontend/src/csv.js`, wired into `Tasks.jsx`/`App.jsx`, 2026-07-13).
 - [x] Clear completed todos on the Today screen: the 오늘 할 일 quick-todo list had no bulk cleanup, so completed items had to be deleted one at a time to keep the list tidy. Added a "완료된 항목 정리 (n)" button that appears once at least one visible todo is completed and deletes all of them (reusing the existing delete-confirmation dialog) in one action (`Today.jsx`/`App.jsx`, 2026-07-13).
 - [x] Task pinning: the Tasks screen sort dropdown (일정순/우선순위순/진행률순/제목순) always reordered the whole list, so an important task could scroll out of easy reach depending on the chosen sort. Added a "고정" star button on each Gantt row that keeps pinned tasks first among their siblings regardless of `sortBy`, backed by a localStorage set (same pattern as filter presets/task templates) in `frontend/src/taskPins.js`, applied inside `orderTasksHierarchically` in `frontend/src/taskHierarchy.js`, 2026-07-13.
+- [x] Task estimated vs. actual time: work logs already tracked `duration_minutes`, but tasks had no planned-effort field to compare it against, so Performance reports could show time spent but never whether it matched the plan. Added a nullable `estimated_minutes` column on tasks (backend `TaskPayload`/`CONFIG`/`db.py` migration), an input on the task form, an "예상 Xh" badge on Gantt rows, and an "완료 업무 예상 소요 시간" stat/report line next to the existing "기록된 소요 시간" total (`backend/app/main.py` achievements summary, `frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

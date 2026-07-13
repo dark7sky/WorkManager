@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-estimated-time',
+    timestamp: '2026-07-13T13:34:11+09:00',
+    description: '업무에 "예상 소요 시간(분)" 필드를 추가했습니다. 업무 등록/수정 폼에서 입력할 수 있고, 업무 목록에는 예상 시간이 표시되며, 성과 화면과 보고서(Markdown)에는 완료된 업무의 예상 소요 시간 합계가 실제 기록된 소요 시간과 나란히 표시되어 계획 대비 실적을 비교할 수 있습니다 (backend/app/db.py, backend/app/main.py, frontend/src/taskFormPayload.js, frontend/src/components/TaskForm.jsx, frontend/src/screens/Tasks.jsx, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',
+  },
+  {
     id: '2026-07-13-task-pin',
     timestamp: '2026-07-13T13:36:00+09:00',
     description: '업무 관리 화면에 "고정" 기능을 추가했습니다. 중요한 업무의 고정 버튼을 누르면 선택한 정렬 기준(일정순/우선순위순/진행률순/제목순)과 무관하게 같은 계층의 형제 업무 중 항상 맨 위에 표시되어, 자주 확인해야 하는 업무를 목록이 바뀌어도 놓치지 않을 수 있습니다. 고정 상태는 기기별 로컬 저장소에 보관됩니다 (frontend/src/taskPins.js, frontend/src/taskHierarchy.js, frontend/src/screens/Tasks.jsx).',

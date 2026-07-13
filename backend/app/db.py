@@ -143,7 +143,7 @@ def init_db():
             "recurrence_spawned_at": "TEXT", "recurrence_anchor_day": "INTEGER",
             "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "completed_at": "TEXT",
             "assignee_name": "TEXT NOT NULL DEFAULT ''", "approval_status": "TEXT NOT NULL DEFAULT 'none'",
-            "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'",
+            "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'", "estimated_minutes": "INTEGER",
         }.items():
             _add_column(c, "tasks", name, definition)
         for name, definition in {
