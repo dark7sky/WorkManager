@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-pwa-portrait-fallback',
+    timestamp: '2026-07-13T12:47:22+09:00',
+    description: 'PWA 앱 설치 후에도 화면이 자동으로 회전되던 문제를 보완했습니다. iOS 등 일부 환경은 화면 회전 잠금 API와 매니페스트의 방향 고정 설정을 무시하므로, 설치된 앱이 가로 모드가 되면 세로로 돌려달라는 안내와 함께 화면을 잠그도록 CSS 대체 처리를 추가했습니다 (frontend/src/mobile-fixes.css).',
+  },
+  {
     id: '2026-07-13-task-sort-persist',
     timestamp: '2026-07-13T08:42:52+09:00',
     description: '업무 관리 화면의 정렬(일정순/우선순위순/진행률순/제목순) 선택이 새로고침이나 재방문 시 초기화되던 문제를 고쳐, 마지막으로 고른 정렬 방식을 기기에 저장해 다음에도 그대로 적용되게 했습니다.',

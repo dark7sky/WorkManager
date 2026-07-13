@@ -1,3 +1,27 @@
+/* Screen Orientation API lock (pwa.js) and the manifest's orientation field
+   are both silently ignored on iOS Safari standalone and some Android
+   launchers, so the device still physically rotates. This CSS fallback
+   blocks the app UI in landscape whenever it's running installed, so the
+   app itself never ends up unusable-rotated even when the OS rotates it. */
+@media (display-mode: standalone) and (orientation: landscape) and (max-width: 900px) {
+  #root { display: none; }
+  body::before {
+    content: "화면을 세로 방향으로 돌려주세요";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.5;
+    background: #0078d4;
+    color: #fff;
+  }
+}
+
 @media (max-width: 680px) {
   .page-header p {
     display: block;
