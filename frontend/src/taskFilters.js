@@ -34,7 +34,9 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
         ? isTaskOverdue(task, todayIso)
         : status === 'due_this_week'
           ? task.status !== 'done' && task.due_date && todayIso && task.due_date >= todayIso && task.due_date <= addDays(todayIso, 6)
-          : status === 'active'
+          : status === 'no_due_date'
+            ? task.status !== 'done' && !task.due_date
+            : status === 'active'
             ? task.status !== 'done'
             : status === 'in_progress'
               ? ['in_progress', 'doing'].includes(task.status)

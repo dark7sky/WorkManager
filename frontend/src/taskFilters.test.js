@@ -51,6 +51,16 @@ test('filterTasks status=due_this_week keeps only unfinished tasks due within th
   assert.deepEqual(shown.map(task => task.id), [1, 2, 5])
 })
 
+test('filterTasks status=no_due_date keeps only unfinished tasks with no due date', () => {
+  const noDueTasks = [
+    ...tasks,
+    { id: 5, title: '기한 없는 업무', status: 'todo', due_date: null, progress: 0, tags: [] },
+    { id: 6, title: '완료된 기한 없는 업무', status: 'done', due_date: null, progress: 100, tags: [] },
+  ]
+  const shown = filterTasks(noDueTasks, { status: 'no_due_date', todayIso: '2026-07-07' })
+  assert.deepEqual(shown.map(task => task.id), [5])
+})
+
 test('filterTasks can isolate completion and schedule approval queues', () => {
   const approvalTasks = [
     ...tasks,
