@@ -40,9 +40,9 @@ const metadataText = metadata => {
   return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
 }
 
-export default function AuditLog() {
+export default function AuditLog({ focus }) {
   const [logs,setLogs] = useState([]), [loading,setLoading] = useState(true), [error,setError] = useState('')
-  const [query,setQuery] = useState(''), [entity,setEntity] = useState('all')
+  const [query,setQuery] = useState(()=>focus?.query||''), [entity,setEntity] = useState(()=>focus?.entity||'all')
   const load = async () => {
     setLoading(true); setError('')
     try {

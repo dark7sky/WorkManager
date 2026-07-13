@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-audit-history-link',
+    timestamp: '2026-07-13T17:59:12+09:00',
+    description: '업무 변경 이력을 확인하려면 감사 로그 화면으로 이동해 대상 업무를 직접 검색해야 했습니다. 업무 목록의 각 행에 "이력" 버튼을 추가해, 클릭하면 감사 로그 화면이 해당 업무로 미리 필터링된 상태로 열립니다 (frontend/src/screens/Tasks.jsx, frontend/src/screens/AuditLog.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-keyboard-shortcuts-help',
     timestamp: '2026-07-13T17:55:35+09:00',
     description: '자주 쓰는 단축키(⌘/Ctrl+K 빠른 입력 등)를 기억하기 어렵다는 문제를 개선했습니다. "?" 키를 누르거나 사이드바의 "?" 버튼을 클릭하면 사용 가능한 단축키 안내 창이 열립니다 (frontend/src/components/KeyboardShortcuts.jsx, frontend/src/App.jsx, frontend/src/components/AppShell.jsx).',
