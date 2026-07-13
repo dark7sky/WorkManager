@@ -36,6 +36,10 @@ const normalizedEstimatedMinutes = value => {
   const number = Number(value)
   return Number.isFinite(number) && number >= 0 ? Math.round(number) : null
 }
+const normalizedLinkUrl = value => {
+  const trimmed = trimField(value).slice(0, 2000)
+  return trimmed && /^https?:\/\//.test(trimmed) ? trimmed : null
+}
 const normalizedDependencyIds = (ids, excludeId) => {
   const cleaned = []
   const seen = new Set()
@@ -65,6 +69,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     progress: normalizedProgress(data.progress),
     recurrence_rule: data.recurrence_rule || null,
     estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes),
+    link_url: normalizedLinkUrl(data.link_url),
     tags: normalizedTaskTags(tags),
   }
 
@@ -95,6 +100,7 @@ export const buildTaskDuplicatePayload = task => {
     progress: 0,
     recurrence_rule: task?.recurrence_rule || null,
     estimated_minutes: normalizedEstimatedMinutes(task?.estimated_minutes),
+    link_url: normalizedLinkUrl(task?.link_url),
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),
     dependency_ids: normalizedDependencyIds(task?.dependency_ids, sourceId),

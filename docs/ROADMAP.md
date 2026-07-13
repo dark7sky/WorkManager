@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (18:20 KST)
+Last updated: 2026-07-13 (18:29 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -98,6 +98,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Todo duplication: Tasks and Calendar events already had a one-click "복제" button, but the Today screen's quick-todo list had no equivalent, so recreating a similar recurring or one-off todo meant retyping it from scratch. Added a duplicate button on each todo row that copies title/tags/recurrence into a new todo dated today with completion reset (`frontend/src/todoDuplicate.js`, wired into `Today.jsx`/`App.jsx`, 2026-07-13).
 - [x] Calendar event recurrence: tasks and todos both had a `recurrence_rule` (daily/weekly), but locally-created calendar events had no repeat option at all — the existing `events.recurrence` column only ever held Google's own RRULE strings mirrored during sync, never something a user could set for a local event. Added a "반복"(매일/매주/매월) + "반복 종료일" control to the new-event form that expands into individual event rows up to the end date (capped at 52 occurrences) via a pure `expandRecurringEvent` (`frontend/src/eventRecurrence.js`, with tests), wired into `Calendar.jsx`'s `EventForm` and `App.jsx`'s bulk-create `onCreate` handler, 2026-07-13.
 - [x] Todo priority: tasks had low/normal/high priority but the Today screen's quick-todo list had no way to flag something as more important than the rest, so urgent todos blended in with routine ones. Added a nullable `priority` column on todos (backend `TodoPayload`/`CONFIG`/`db.py` migration, default `normal`), a priority select on the add/edit todo forms, a left-border accent + "우선순위 높음" badge for high-priority rows, and priority carried through on recurrence spawn and duplication (`backend/app/main.py`, `frontend/src/screens/Today.jsx`, `frontend/src/todoDuplicate.js`, 2026-07-13).
+- [x] Task related link: tasks had a free-text 메모(description) field but no structured way to attach a reference URL (design doc, ticket, meeting notes), so links ended up pasted inline in the memo where they were easy to miss. Added a nullable `link_url` column on tasks (backend `TaskPayload`/`CONFIG`/`db.py` migration, http(s)-only validation), a "관련 링크" input on the task form, and a clickable "관련 링크" badge (opens in a new tab) on Gantt rows when a task has one (`backend/app/main.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/taskFormPayload.js`, `frontend/src/screens/Tasks.jsx`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

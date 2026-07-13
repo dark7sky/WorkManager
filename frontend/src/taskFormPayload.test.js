@@ -166,3 +166,15 @@ test('buildTaskDuplicatePayload copies estimated_minutes', () => {
 
   assert.equal(payload.estimated_minutes, 60)
 })
+
+test('buildTaskPayload normalizes link_url, rejecting blank or non-http values', () => {
+  assert.equal(buildTaskPayload({ ...baseData, link_url: 'https://example.com/doc' }, { task: { id: 1 } }).link_url, 'https://example.com/doc')
+  assert.equal(buildTaskPayload({ ...baseData, link_url: '' }, { task: { id: 1 } }).link_url, null)
+  assert.equal(buildTaskPayload({ ...baseData, link_url: 'javascript:alert(1)' }, { task: { id: 1 } }).link_url, null)
+})
+
+test('buildTaskDuplicatePayload copies link_url', () => {
+  const payload = buildTaskDuplicatePayload({ id: 1, title: '업무', link_url: 'https://example.com/doc' })
+
+  assert.equal(payload.link_url, 'https://example.com/doc')
+})

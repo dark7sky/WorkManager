@@ -454,6 +454,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_link_url_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "with link", "link_url": "https://example.com/doc"})
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["link_url"], "https://example.com/doc")
+        cleared = a.patch(f"/api/tasks/{task.json()['id']}", json={"link_url": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["link_url"])
+        self.assertEqual(a.post("/api/tasks", json={"title": "bad link", "link_url": "not-a-url"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_dependency_cycle_is_rejected(self, *_):
         a = self.client(self.token_a)
         first = a.post("/api/tasks", json={"title": "first"}).json()

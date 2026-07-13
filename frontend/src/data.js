@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-link-url',
+    timestamp: '2026-07-13T18:29:19+09:00',
+    description: '업무에 관련 문서·티켓·회의록 등 외부 자료 링크를 남길 방법이 없어, 항상 메모란에 URL을 섞어 적어야 했습니다. 업무 등록/수정 폼에 "관련 링크" 입력란을 추가하고(https만 허용), 업무 목록의 각 행에 링크가 있으면 새 탭에서 여는 "관련 링크" 배지를 표시합니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/taskFormPayload.js, frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-13-todo-priority',
     timestamp: '2026-07-13T18:25:02+09:00',
     description: '오늘 할 일(Todo)에는 업무와 달리 우선순위 개념이 없어, 중요한 할 일이 목록 안에 묻혀 눈에 띄지 않았습니다. Todo에 우선순위(낮음/보통/높음)를 추가해 등록·수정 시 지정할 수 있고, 높음으로 표시한 항목은 목록에서 좌측 강조선과 "우선순위 높음" 배지로 구분됩니다. 반복 생성되는 다음 회차와 "복제" 기능도 우선순위를 그대로 이어받습니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',
