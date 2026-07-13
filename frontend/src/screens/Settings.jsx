@@ -40,7 +40,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       const [integrations, ai, workflow, errors] = await Promise.all([
         api.googleStatus(),
         api.aiSettings().catch(() => api.aiStatus()),
-        api.workflowSettings().catch(() => ({ approval_workflow: true })),
+        api.workflowSettings().catch(() => ({ approval_workflow: false })),
         api.diagnosticsErrors(5).catch(() => ({ items: [] })),
       ])
       setData(integrations)
@@ -197,7 +197,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const toggleWorkflowSettings = async e => {
     const newValue = e.target.checked
     setBusy("workflow-save")
-    const previousValue = workflowSettings?.approval_workflow ?? true
+    const previousValue = workflowSettings?.approval_workflow ?? false
     setWorkflowSettings(w => ({ ...w, approval_workflow: newValue }))
     try {
       const result = await api.saveWorkflowSettings({ approval_workflow: newValue })
@@ -258,7 +258,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>승인 워크플로</h2><p>완료 업무와 일정 변경에 승인 단계를 요구합니다. 혼자 사용할 때는 꺼 두세요.</p></div></div>
-        {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? true} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
+        {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? false} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><ClipboardList /></span><div><h2>감사 로그</h2><p>업무 공간에서 발생한 변경 이력을 확인합니다.</p></div></div>

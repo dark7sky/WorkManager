@@ -89,6 +89,18 @@ def _migrate_scoped_kv(c):
         """)
 
 
+def _backfill_approval_workflow_default_off(c):
+    flag = c.execute("SELECT value FROM migration_state WHERE key='approval_workflow_default_off_backfill'").fetchone()
+    if flag:
+        return
+    c.execute("""UPDATE tasks SET approval_status='none' WHERE approval_status='pending'
+      AND user_id NOT IN (SELECT user_id FROM app_settings WHERE key='approval_workflow' AND value='on')""")
+    c.execute("""UPDATE tasks SET schedule_approval_status='none' WHERE schedule_approval_status='pending'
+      AND user_id NOT IN (SELECT user_id FROM app_settings WHERE key='approval_workflow' AND value='on')""")
+    c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('approval_workflow_default_off_backfill','done',?)",
+               (datetime.now(timezone.utc).isoformat(),))
+
+
 def _prune_audit_logs(c):
     # audit_logs.created_at is written via app.main.now(), a naive local isoformat string;
     # the cutoff must match that format for the string comparison to sort correctly.
@@ -168,6 +180,7 @@ def init_db():
         c.execute("CREATE UNIQUE INDEX idx_events_google ON events(user_id,google_calendar_id,google_event_id) WHERE google_event_id IS NOT NULL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_local_uid ON events(user_id,local_uid) WHERE local_uid IS NOT NULL")
         c.execute("INSERT INTO migration_state(key,value,updated_at) VALUES('schema_version','6',?) ON CONFLICT(key) DO UPDATE SET value='6',updated_at=excluded.updated_at", (datetime.now(timezone.utc).isoformat(),))
+        _backfill_approval_workflow_default_off(c)
         _prune_audit_logs(c)
         _seed_demo_data(c)
 

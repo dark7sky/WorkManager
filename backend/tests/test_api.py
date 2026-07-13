@@ -465,17 +465,11 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
-    def test_approval_workflow_can_be_disabled_per_user(self, *_):
+    def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
-        default_task = a.post("/api/tasks", json={"title": "default workflow", "status": "done"}).json()
-        self.assertEqual(default_task["approval_status"], "pending")
-        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], True)
-        disabled = a.put("/api/settings/workflow", json={"approval_workflow": False})
-        self.assertEqual(disabled.status_code, 200, disabled.text)
-        self.assertEqual(disabled.json()["approval_workflow"], False)
-        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], False)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()
         self.assertEqual(personal_task["approval_status"], "none")
+        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], False)
         task_for_schedule_test = a.post("/api/tasks", json={"title": "schedule test", "due_date": "2026-07-10"}).json()
         self.assertEqual(task_for_schedule_test["schedule_approval_status"], "none")
         updated = a.patch(f"/api/tasks/{task_for_schedule_test['id']}", json={"due_date": "2026-07-15"}).json()
@@ -483,6 +477,12 @@ class ApiTests(unittest.TestCase):
         updated_status = a.patch(f"/api/tasks/{personal_task['id']}", json={"status": "doing", "progress": 50}).json()
         self.assertEqual(updated_status["approval_status"], "none")
         self.assertEqual(updated_status["status"], "doing")
+        enabled = a.put("/api/settings/workflow", json={"approval_workflow": True})
+        self.assertEqual(enabled.status_code, 200, enabled.text)
+        self.assertEqual(enabled.json()["approval_workflow"], True)
+        self.assertEqual(a.get("/api/settings/workflow").json()["approval_workflow"], True)
+        enabled_task = a.post("/api/tasks", json={"title": "enabled workflow task", "status": "done"}).json()
+        self.assertEqual(enabled_task["approval_status"], "pending")
 
     def test_unhandled_exception_is_logged_and_visible_in_diagnostics(self):
         a = self.client(self.token_a)

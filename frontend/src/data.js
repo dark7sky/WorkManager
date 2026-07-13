@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-approval-workflow-off-by-default',
+    timestamp: '2026-07-13T13:16:00+09:00',
+    description: '혼자 쓰는 프로그램 특성에 맞춰 완료 업무/일정 변경 승인 워크플로가 기본적으로 꺼지도록 변경했습니다. 새로 완료 처리한 업무는 별도 승인 없이 바로 확정되며, 승인 절차가 필요하면 설정 화면에서 다시 켤 수 있습니다. 기존에 승인 대기 중이던 업무도 자동으로 정리됩니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Settings.jsx).',
+  },
+  {
     id: '2026-07-13-work-log-duration-tracking',
     timestamp: '2026-07-13T13:11:27+09:00',
     description: '업무 기록(오늘 한 일)에 소요 시간(분)을 함께 남길 수 있도록 했습니다. "오늘" 화면 기록 입력/수정에 분 입력칸이 추가되었고, 성과 화면 요약 카드와 Markdown 보고서에 기간 내 총 소요 시간이 표시됩니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',

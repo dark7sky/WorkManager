@@ -98,7 +98,7 @@ def audit(user_id, action, entity_type, entity_id=None, metadata=None):
 def load_approval_workflow_setting(user_id):
     with connection() as c:
         row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, "approval_workflow")).fetchone()
-    return row["value"] != "off" if row else True
+    return row["value"] == "on" if row else False
 
 
 _rate_buckets = {}

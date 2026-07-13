@@ -121,6 +121,8 @@ class TaskUpdateValidationTests(unittest.TestCase):
             with connection() as c:
                 c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
                           ("sub-a", "a@example.com", "A", "2026-07-07", "2026-07-07"))
+                c.execute("INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)",
+                          ("sub-a", "approval_workflow", "on", "2026-07-07"))
 
             task = create_item("tasks", {"title": "reviewable work"}, "sub-a")
             completed = update_item("tasks", task["id"], {"status": "done"}, "sub-a")
@@ -144,6 +146,8 @@ class TaskUpdateValidationTests(unittest.TestCase):
             with connection() as c:
                 c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
                           ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                c.execute("INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)",
+                          ("sub-a", "approval_workflow", "on", "2026-07-08"))
 
             task = create_item("tasks", {"title": "scheduled work", "start_date": "2026-07-08", "due_date": "2026-07-10"}, "sub-a")
             self.assertEqual(task["schedule_approval_status"], "none")
@@ -252,6 +256,8 @@ class TaskUpdateValidationTests(unittest.TestCase):
             with connection() as c:
                 c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
                           ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                c.execute("INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)",
+                          ("sub-a", "approval_workflow", "on", "2026-07-08"))
                 cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
                     assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     ("sub-a", "legacy progress edit", "", "doing", "normal", 135, None, None,
