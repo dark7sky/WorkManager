@@ -12,16 +12,6 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
-    id: '2026-07-13-subtask-row-scale-reconfirm-73',
-    timestamp: '2026-07-13T09:12:03+09:00',
-    description: '동일한 요청(#13, 하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재차 확인했습니다(73번째 확인). 하위 업무 행의 높이·글씨 크기·간트 막대·우선순위 표시 크기 축소가 깊이(1~3단계)별로 모두 정상 동작하며, taskHierarchy.test.js의 관련 회귀 테스트(subtaskRowClass, taskIndent)도 통과함을 재확인했습니다. 소스 변경은 없습니다.',
-  },
-  {
-    id: '2026-07-13-subtask-row-scale-reconfirm-72',
-    timestamp: '2026-07-13T09:10:55+09:00',
-    description: '동일한 요청(#13, 하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재차 확인했습니다(72번째 확인). 하위 업무 행의 높이·글씨 크기·간트 막대·우선순위 표시 크기 축소가 깊이(1~3단계)별로 모두 정상 동작하며, taskHierarchy.test.js의 관련 회귀 테스트(subtaskRowClass, taskIndent)도 통과함을 재확인했습니다. 소스 변경은 없습니다.',
-  },
-  {
     id: '2026-07-13-task-sort-persist',
     timestamp: '2026-07-13T08:42:52+09:00',
     description: '업무 관리 화면의 정렬(일정순/우선순위순/진행률순/제목순) 선택이 새로고침이나 재방문 시 초기화되던 문제를 고쳐, 마지막으로 고른 정렬 방식을 기기에 저장해 다음에도 그대로 적용되게 했습니다.',
@@ -118,10 +108,10 @@ export const changelogUpdates = [
   },
   {
     id: '2026-07-12-subtask-row-scale-regression-test',
-    timestamp: '2026-07-13T09:09:53+09:00',
+    timestamp: '2026-07-13T09:12:59+09:00',
     requestedAt: '2026-07-11T00:14:41+09:00',
     requestContent: '업무에서 하위업무는 표시되는 높이와 글씨크기를 줄여서 하위업무임을 더 나타내줘',
-    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(72번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 132개)/빌드로 재확인되어 정상 동작합니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
+    description: '동일한 요청(#13)이 큐에 다시 접수되어 재차 확인했습니다(74번째 확인). 하위 업무 행의 높이·글씨 크기 축소(및 간트 막대·우선순위 표시 크기 조정)와 깊이별 회귀 테스트(taskHierarchy.test.js의 subtaskRowClass/taskIndent 테스트)가 모두 소스 코드(taskHierarchy.js, screens/Tasks.jsx, styles.css)와 전체 테스트(프론트 132개)/빌드로 재확인되어 정상 동작합니다. (백엔드 /api/feature-requests 중복 제출 방지 로직 배포 이후에도 동일 항목이 재접수되어, 이는 앱 API가 아닌 외부 요청 큐 메커니즘에서 재주입되는 것으로 확인됨 — 앱 측 추가 조치는 불필요)',
   },
   {
     id: '2026-07-12-tasks-skeleton-loading',
