@@ -23,7 +23,7 @@ function overlapsDay(event, day) {
 export default function Today(props) {
   const {
     tasks = [], allTasks = [], events = [], todos = [], logs = [], loading,
-    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo,
+    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onClearCompletedTodos,
     onAddLog, onUpdateLog, onDeleteLog, onToggleTask, goAI,
   } = props
   const now = new Date()
@@ -53,6 +53,7 @@ export default function Today(props) {
   const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
   const shownTodos = todos.filter(matches)
+  const completedTodos = shownTodos.filter(todo => todo.completed)
   const shownLogs = logs.filter(matches)
 
   const submitTodo = async event => {
@@ -115,6 +116,7 @@ export default function Today(props) {
           <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><button disabled={saving === 'todo'}>추가</button></div>
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>
         </form>
+        {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''}`} key={todo.id}>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>
           <div>{editable('todo', todo) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`todo-${todo.id}`, 'todo', editText)}>AI 태그 추천</button>{recommendationButtons(`todo-${todo.id}`, editTags, setEditTags)}</div></> : <><span>{todo.title}</span><TagChips tags={todo.tags}/></>}</div>

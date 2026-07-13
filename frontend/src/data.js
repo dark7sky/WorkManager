@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-today-clear-completed-todos',
+    timestamp: '2026-07-13T13:23:20+09:00',
+    description: '오늘 화면의 Todo 목록에서 완료된 항목을 하나씩 지워야 했던 불편을 줄였습니다. 완료된 항목이 있으면 "완료된 항목 정리" 버튼이 나타나 확인 후 한 번에 모두 삭제할 수 있습니다 (frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-task-csv-import',
     timestamp: '2026-07-13T13:19:14+09:00',
     description: '업무 화면에 CSV 가져오기 버튼을 추가했습니다. 기존 CSV 내보내기와 같은 형식(제목/우선순위/시작일/기한/태그/메모)의 파일을 업로드하면 새 업무로 일괄 생성되어, 스프레드시트로 준비한 업무 목록을 한 번에 옮길 수 있습니다 (frontend/src/csv.js parseTasksCsv, frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',
