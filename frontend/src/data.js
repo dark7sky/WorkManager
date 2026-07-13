@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-event-related-link',
+    timestamp: '2026-07-13T23:17:31+09:00',
+    description: '업무에만 있던 "관련 링크" 필드를 일정에도 추가했습니다. 일정 등록/수정 폼에 관련 링크 입력란이 생겼고, 링크가 있는 일정은 모바일 일정 목록에서 바로 열 수 있는 배지로 표시됩니다 (backend/app/main.py의 EventPayload/CONFIG, backend/app/db.py, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-task-progress-number-input',
     timestamp: '2026-07-13T23:25:00+09:00',
     description: '업무 목록의 진행률 슬라이더 옆에 숫자 직접 입력 칸을 추가했습니다. 모바일이나 정밀한 값 입력 시 슬라이더를 끌지 않고 정확한 %를 타이핑해 저장할 수 있습니다 (frontend/src/screens/Tasks.jsx).',
