@@ -617,6 +617,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_link_url_is_persisted_validated_and_carries_to_recurrence_spawn(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "with link", "todo_date": "2026-07-06", "recurrence_rule": "daily", "link_url": "https://example.com/doc"})
+        self.assertEqual(todo.status_code, 200, todo.text)
+        self.assertEqual(todo.json()["link_url"], "https://example.com/doc")
+        completed = a.patch(f"/api/todos/{todo.json()['id']}", json={"completed": True}).json()
+        spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["link_url"], "https://example.com/doc")
+        cleared = a.patch(f"/api/todos/{todo.json()['id']}", json={"link_url": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["link_url"])
+        self.assertEqual(a.post("/api/todos", json={"title": "bad link", "link_url": "not-a-url"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()

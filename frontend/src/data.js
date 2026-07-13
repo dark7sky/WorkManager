@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-link-url',
+    timestamp: '2026-07-14T04:31:18+09:00',
+    description: '업무/일정에 있던 "관련 링크" 필드를 오늘 할 일(Todo)에도 추가했습니다. 링크를 입력하면 목록에 클릭 가능한 배지로 표시되고, 반복 생성/복제/업무 전환 시에도 함께 이어집니다 (backend link_url 컬럼, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',
+  },
+  {
     id: '2026-07-14-bulk-postpone',
     timestamp: '2026-07-14T04:30:21+09:00',
     description: '업무 화면에서 여러 업무를 선택했을 때 일정을 한 번에 미룰 수 있는 "연기" 일괄 작업을 추가했습니다. 일수를 입력하면 선택된 업무 중 기한이 있는 항목의 시작일/기한을 함께 밀어줍니다 (frontend/src/screens/Tasks.jsx, frontend/src/App.jsx, 기존 postponeTaskDates 재사용).',

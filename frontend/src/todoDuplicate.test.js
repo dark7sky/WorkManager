@@ -39,3 +39,10 @@ test('buildTaskFromTodoPayload maps a completed todo to a done task', () => {
   assert.equal(result.priority, 'normal')
   assert.equal(result.due_date, null)
 })
+
+test('buildTodoDuplicatePayload and buildTaskFromTodoPayload carry link_url', () => {
+  const todo = { title: '자료 확인', link_url: 'https://example.com' }
+  assert.equal(buildTodoDuplicatePayload(todo).link_url, 'https://example.com')
+  assert.equal(buildTaskFromTodoPayload(todo).link_url, 'https://example.com')
+  assert.equal(buildTaskFromTodoPayload({ title: '무제' }).link_url, null)
+})
