@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-subtask-row-scale-reconfirm',
+    timestamp: '2026-07-13T09:02:29+09:00',
+    description: '하위 업무 행 시각 구분(요청 #13) 재점검: 깊이별로 행 높이·글씨 크기·간트 막대 크기가 순차적으로 줄어드는 동작(subtask-depth-1/2/3)과 관련 테스트를 확인해 정상 동작을 재확인했습니다.',
+  },
+  {
     id: '2026-07-13-task-sort-persist',
     timestamp: '2026-07-13T08:42:52+09:00',
     description: '업무 관리 화면의 정렬(일정순/우선순위순/진행률순/제목순) 선택이 새로고침이나 재방문 시 초기화되던 문제를 고쳐, 마지막으로 고른 정렬 방식을 기기에 저장해 다음에도 그대로 적용되게 했습니다.',
