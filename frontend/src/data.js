@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-bulk-priority-change',
+    timestamp: '2026-07-14T05:38:00+09:00',
+    description: '업무 목록의 일괄 작업 도구모음은 선택한 업무를 완료 처리/태그 추가/연기/삭제할 수 있었지만 우선순위를 한꺼번에 바꿀 방법은 없어, 여러 업무의 중요도를 재조정하려면 하나씩 열어 수정해야 했습니다. 선택 항목이 있을 때 "우선순위 변경" 선택 상자와 적용 버튼을 일괄 작업 도구모음에 추가했습니다 (frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-14-todo-monthly-recurrence',
     timestamp: '2026-07-14T05:35:00+09:00',
     description: '업무(Task)는 매월 반복을 지원했지만 Todo는 매일/매주만 가능해 "월간 보고서 제출" 같은 월 단위 반복 일정을 Todo로 만들 수 없었습니다. Todo 반복 규칙에 "매월"을 추가하고, 월말 기준일이 다음 달 말일로 자동 보정되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx).',
