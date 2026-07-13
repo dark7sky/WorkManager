@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-calendar-holiday-markers',
+    timestamp: '2026-07-13T23:35:00+09:00',
+    description: '캘린더 월간/주간 보기에 고정 양력 공휴일(신정, 삼일절, 어린이날, 현충일, 광복절, 개천절, 한글날, 성탄절)을 빨간색으로 표시했습니다. 지금까지는 캘린더에 휴일 구분이 전혀 없어 일정을 잡을 때 공휴일을 놓치기 쉬웠습니다. 음력 기반 공휴일(설날, 추석 등)과 대체공휴일은 이번 범위에서 제외했습니다 (frontend/src/holidays.js, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-todo-priority-filter',
     timestamp: '2026-07-13T23:25:23+09:00',
     description: '오늘 화면의 할 일 목록에 우선순위 필터(모든 우선순위/높음/보통/낮음)를 추가했습니다. 지금까지는 태그와 검색어로만 좁혀볼 수 있어, 급한 할 일만 골라보려면 목록을 눈으로 훑어야 했습니다 (frontend/src/todaySearch.js, frontend/src/screens/Today.jsx).',
