@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-ics-export',
+    timestamp: '2026-07-13T18:56:44+09:00',
+    description: '캘린더 화면은 일정을 ICS로 내보낼 수 있었지만, 업무 화면은 CSV/PDF만 지원해 업무 기한을 외부 캘린더 앱(구글 캘린더, 아웃룩 등)으로 가져갈 방법이 없었습니다. 업무 목록 툴바에 "ICS" 버튼을 추가해, 현재 필터링된 업무들의 기한을 종일 일정으로 내보낼 수 있습니다 (frontend/src/ics.js tasksToIcs, frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-13-checklist-item-edit',
     timestamp: '2026-07-13T18:51:57+09:00',
     description: '업무 체크리스트 항목은 등록 후 잘못 입력해도 삭제하고 다시 추가하는 것 외에는 고칠 방법이 없었습니다. 체크리스트 항목 텍스트를 클릭하면 바로 수정할 수 있도록 인라인 편집을 추가했습니다 (frontend/src/components/TaskForm.jsx).',

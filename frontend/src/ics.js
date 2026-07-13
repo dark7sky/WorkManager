@@ -37,3 +37,26 @@ export const eventsToIcs = events => {
 }
 
 export const icsFilename = date => `workmanager-events-${date}.ics`
+
+const toIcsAllDayDate = value => {
+  const date = new Date(`${value}T00:00:00`)
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`
+}
+
+export const tasksToIcs = tasks => {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//WorkManager//Task Export//KO']
+  for (const task of tasks) {
+    if (!task.due_date) continue
+    lines.push('BEGIN:VEVENT')
+    lines.push(`UID:task-${task.id}@workmanager`)
+    lines.push(`DTSTAMP:${toIcsDate(new Date())}`)
+    lines.push(`DTSTART;VALUE=DATE:${toIcsAllDayDate(task.due_date)}`)
+    lines.push(`SUMMARY:${escapeIcsText(`[업무] ${task.title}`)}`)
+    if (task.description) lines.push(`DESCRIPTION:${escapeIcsText(task.description)}`)
+    lines.push('END:VEVENT')
+  }
+  lines.push('END:VCALENDAR')
+  return lines.map(foldLine).join('\r\n')
+}
+
+export const taskIcsFilename = date => `workmanager-tasks-${date}.ics`

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { eventsToIcs, icsFilename } from './ics.js'
+import { eventsToIcs, icsFilename, taskIcsFilename, tasksToIcs } from './ics.js'
 
 test('eventsToIcs emits a VEVENT per event with escaped text fields', () => {
   const ics = eventsToIcs([
@@ -22,4 +22,20 @@ test('eventsToIcs skips events missing start or end', () => {
 
 test('icsFilename uses the requested date', () => {
   assert.equal(icsFilename('2026-07-12'), 'workmanager-events-2026-07-12.ics')
+})
+
+test('tasksToIcs emits an all-day VEVENT per task with a due date', () => {
+  const ics = tasksToIcs([
+    { id: 5, title: '기획, 승인', description: '검토\n필요', due_date: '2026-07-20' },
+    { id: 6, title: '기한 없음' },
+  ])
+  assert.match(ics, /BEGIN:VEVENT[\s\S]*UID:task-5@workmanager[\s\S]*END:VEVENT/)
+  assert.match(ics, /DTSTART;VALUE=DATE:20260720/)
+  assert.match(ics, /SUMMARY:\[업무\] 기획\\, 승인/)
+  assert.match(ics, /DESCRIPTION:검토\\n필요/)
+  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 1)
+})
+
+test('taskIcsFilename uses the requested date', () => {
+  assert.equal(taskIcsFilename('2026-07-12'), 'workmanager-tasks-2026-07-12.ics')
 })
