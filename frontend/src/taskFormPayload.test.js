@@ -123,6 +123,14 @@ test('buildTaskPayload sends dependency_ids when the selection actually changes'
   assert.deepEqual(payload.dependency_ids, [2, 3])
 })
 
+test('buildTaskPayload only keeps recurrence_end_date when a recurrence rule is set', () => {
+  const withoutRule = buildTaskPayload({ ...baseData, recurrence_rule: '', recurrence_end_date: '2026-08-01' }, { task: { id: 1 } })
+  assert.equal(withoutRule.recurrence_end_date, null)
+
+  const withRule = buildTaskPayload({ ...baseData, recurrence_rule: 'weekly', recurrence_end_date: '2026-08-01' }, { task: { id: 1 } })
+  assert.equal(withRule.recurrence_end_date, '2026-08-01')
+})
+
 test('initialTaskDateValue keeps blank dates blank when editing an existing task', () => {
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'start_date', '2026-07-08'), '')
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'due_date', '2026-07-08'), '')

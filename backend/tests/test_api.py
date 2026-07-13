@@ -202,6 +202,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_task_stops_spawning_past_recurrence_end_date(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-06",
+                                           "due_date": "2026-07-06", "recurrence_rule": "weekly",
+                                           "recurrence_end_date": "2026-07-10"}).json()
+        done = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
+        self.assertNotIn("next_recurrence_id", done)
+        children = [x for x in a.get("/api/tasks").json() if x.get("parent_id") == task["id"]]
+        self.assertEqual(len(children), 0)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_reopening_a_done_task_is_not_reverted_by_stale_progress_field(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "finished task"}).json()

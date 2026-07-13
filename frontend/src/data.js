@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-recurrence-end-date',
+    timestamp: '2026-07-14T04:53:48+09:00',
+    description: '반복 업무에 "반복 종료일"을 설정할 수 있게 했습니다. 지금까지는 매일/매주/매월 반복 업무가 끝없이 다음 업무를 계속 생성했는데, 이제 종료일을 지정하면 그 날짜를 넘기는 다음 회차부터 생성을 멈춥니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/taskFormPayload.js).',
+  },
+  {
     id: '2026-07-14-task-recurrence-badge',
     timestamp: '2026-07-14T04:42:14+09:00',
     description: '업무 관리 화면의 반복 업무에 "매일/매주/매월 반복" 배지를 추가해 목록에서 바로 반복 여부를 확인할 수 있게 했습니다 (frontend/src/screens/Tasks.jsx).',

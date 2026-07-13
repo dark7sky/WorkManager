@@ -250,6 +250,7 @@ class TaskPayload(StrictPayload):
     schedule_approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
+    recurrence_end_date: date | None = None
     parent_id: int | None = Field(None, ge=1)
     dependency_ids: list[int] | None = Field(None, max_length=100)
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
@@ -269,7 +270,7 @@ class TaskPayload(StrictPayload):
             cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "text": text, "done": bool(item.get("done"))})
         return cleaned
 
-    @field_validator("start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes", "link_url", mode="before")
+    @field_validator("start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -387,7 +388,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "priority", "link_url"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
@@ -508,7 +509,7 @@ def normalize(table, data):
     for key in text_fields:
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
-    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes", "link_url"},
+    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url"},
                 "events": {"link_url"}, "todos": {"recurrence_rule", "link_url"}, "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
@@ -643,16 +644,22 @@ def spawn_recurring_task(task, user_id):
     anchor_end = bool(task.get("recurrence_anchor_month_end"))
     start_date = next_recurrence_date(task.get("start_date"), rule, anchor_day, anchor_end)
     due_date = next_recurrence_date(task.get("due_date"), rule, anchor_day, anchor_end)
+    end_date = task.get("recurrence_end_date")
+    if end_date and (start_date or due_date) and (start_date or due_date) > end_date:
+        with connection() as c:
+            c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
+                      (timestamp, task["id"], user_id))
+        return None
     with connection() as c:
         # The conditional marker update makes concurrent completion requests idempotent.
         if not c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, task["id"], user_id)).rowcount:
             return None
         cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,tags,
-          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
-           start_date, due_date, json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), task["id"],
-           json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
+           start_date, due_date, json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
+           task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
     return next_id

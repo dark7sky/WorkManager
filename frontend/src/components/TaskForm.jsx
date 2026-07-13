@@ -10,6 +10,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
   const [checklist, setChecklist] = useState(() => task?.checklist || [])
+  const [recurrenceRule, setRecurrenceRule] = useState(() => task?.recurrence_rule || '')
   const [checklistText, setChecklistText] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [templates, setTemplates] = useState(() => loadTaskTemplates())
@@ -27,6 +28,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setPrefill(filled)
     setPrefillKey(k => k + 1)
     setTags(filled.tags)
+    setRecurrenceRule(filled.recurrence_rule || '')
   }
 
   const saveAsTemplate = () => {
@@ -60,7 +62,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setChecklist(task?.checklist || [])
     setChecklistText('')
     setEditingChecklistId(null)
-  }, [task?.id, task?.tags, task?.checklist])
+    setRecurrenceRule(task?.recurrence_rule || '')
+  }, [task?.id, task?.tags, task?.checklist, task?.recurrence_rule])
 
   const addChecklistItem = () => {
     const text = checklistText.trim()
@@ -130,7 +133,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
-    <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" defaultValue={prefill?.recurrence_rule ?? task?.recurrence_rule ?? ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
+    <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
+    {recurrenceRule ? <label key={`recurrence-end-${prefillKey}`}>반복 종료일<input name="recurrence_end_date" type="date" defaultValue={task?.recurrence_end_date ?? ''}/></label> : null}
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item"><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>

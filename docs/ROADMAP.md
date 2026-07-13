@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-14 (04:30 KST)
+Last updated: 2026-07-14 (04:53 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -125,6 +125,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Trash bulk restore: the Tasks screen's Gantt rows already had multi-select checkboxes and a bulk action bar (complete/tag/postpone/delete), but the 휴지통 (Trash) section only ever restored one item at a time, making recovery from an accidental multi-delete tedious. Added the same checkbox + bulk-action-bar pattern to `TrashSection.jsx` — selecting several trashed items surfaces a "선택 복원" button that restores them all in one action (`frontend/src/components/TrashSection.jsx`, `frontend/src/styles.css`, 2026-07-14).
 - [x] Work log CSV export: Tasks/Calendar/Todos/Audit Log/Performance timeline all had a CSV export, but the Today screen's 업무 기록 (work log) list was the last one missing it, so pulling logged work into a spreadsheet meant retyping it by hand. Added a "CSV 내보내기" button next to the work-log timer that downloads the currently filtered logs (날짜/내용/소요 시간/연결 업무/태그) as CSV, matching the existing per-screen export pattern (`workLogsToCsv`/`workLogCsvFilename` in `frontend/src/csv.js`, wired into `frontend/src/screens/Today.jsx`, 2026-07-14).
 - [x] Task recurrence badge: the task form already let a task repeat daily/weekly/monthly, but the Gantt row list gave no indication a task was part of a recurring series (unlike the existing checklist/estimate/link badges), so it was easy to forget which tasks would keep respawning. Added a "매일/매주/매월 반복" badge next to the other row badges when `task.recurrence_rule` is set (`frontend/src/screens/Tasks.jsx`, `frontend/src/styles.css`, 2026-07-14).
+- [x] Task recurrence end date: recurring tasks (daily/weekly/monthly) had no way to stop — completing one always spawned the next occurrence forever, which is unworkable for a fixed-duration project or a task someone wants to eventually retire. Added a nullable `recurrence_end_date` column on tasks (backend `TaskPayload`/`CONFIG`/`db.py` migration), a "반복 종료일" date input on the task form shown only while a recurrence rule is selected, and a check in `spawn_recurring_task` that stops creating further occurrences once the next start/due date would fall after the end date (marking the series as spawned so it doesn't retry) (`backend/app/main.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/taskFormPayload.js`, regression test `test_recurring_task_stops_spawning_past_recurrence_end_date` in `backend/tests/test_api.py`, 2026-07-14).
 
 ## Removed (2026-07-10): Team/Assignee Features
 
