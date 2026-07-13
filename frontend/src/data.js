@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-event-alert-lead-time',
+    timestamp: '2026-07-13T18:44:54+09:00',
+    description: '일정 시작 알림은 항상 15분 전으로 고정되어 있어, 이동 시간이 더 필요한 일정에는 알림이 너무 늦게 왔습니다. 설정 화면의 "오늘 업무 알림" 섹션에 알림 시점(5/10/15/30분 전) 선택을 추가했습니다 (frontend/src/eventAlerts.js, frontend/src/App.jsx, frontend/src/screens/Settings.jsx).',
+  },
+  {
     id: '2026-07-13-today-nav-badge',
     timestamp: '2026-07-13T18:52:00+09:00',
     description: '지연 업무 개수는 사이드바 "업무" 메뉴에 배지로 표시됐지만, 오늘 처리해야 할 할 일이 몇 건 남았는지는 오늘 화면을 열어야만 알 수 있었습니다. "오늘" 메뉴 아이콘에도 미완료 할 일 개수를 보여주는 배지를 추가했습니다 (frontend/src/App.jsx pendingTodoCount, frontend/src/components/AppShell.jsx, 기존 nav-badge 스타일 재사용).',
