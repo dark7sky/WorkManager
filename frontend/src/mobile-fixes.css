@@ -3,7 +3,7 @@
    launchers, so the device still physically rotates. This CSS fallback
    blocks the app UI in landscape whenever it's running installed, so the
    app itself never ends up unusable-rotated even when the OS rotates it. */
-@media (display-mode: standalone) and (orientation: landscape) and (max-width: 900px) {
+@media (display-mode: standalone) and (orientation: landscape) and (max-width: 1023px) {
   #root { display: none; }
   body::before {
     content: "화면을 세로 방향으로 돌려주세요";

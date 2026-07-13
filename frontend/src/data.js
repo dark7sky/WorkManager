@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-pwa-portrait-fallback-large-phones',
+    timestamp: '2026-07-13T12:49:46+09:00',
+    description: '가로 모드 잠금 안내 오버레이가 나오지 않던 문제를 수정했습니다. iPhone 14 Plus/Pro Max 등 화면이 큰 기기는 가로 모드 너비가 기존 기준(900px)을 넘어 오버레이가 표시되지 않았는데, 태블릿과 겹치지 않는 선에서 기준을 1023px로 올려 대형 스마트폰에서도 정상 동작하도록 했습니다 (frontend/src/mobile-fixes.css).',
+  },
+  {
     id: '2026-07-13-pwa-portrait-fallback',
     timestamp: '2026-07-13T12:47:22+09:00',
     description: 'PWA 앱 설치 후에도 화면이 자동으로 회전되던 문제를 보완했습니다. iOS 등 일부 환경은 화면 회전 잠금 API와 매니페스트의 방향 고정 설정을 무시하므로, 설치된 앱이 가로 모드가 되면 세로로 돌려달라는 안내와 함께 화면을 잠그도록 CSS 대체 처리를 추가했습니다 (frontend/src/mobile-fixes.css).',
