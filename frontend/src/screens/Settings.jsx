@@ -7,6 +7,7 @@ import TagManager from '../components/TagManager'
 import { aiDefaults, aiModels, describeAiBinding, getAiDraft, normalizeAiProvider, upsertAiConfig } from '../aiSettings'
 import { REMINDER_DIGEST_STORAGE_KEY } from '../taskFilters'
 import { EVENT_ALERT_LEAD_OPTIONS, EVENT_ALERT_LEAD_STORAGE_KEY, loadEventAlertLeadMinutes } from '../eventAlerts'
+import { clearNotificationHistory, loadNotificationHistory } from '../notificationHistory'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
 
@@ -27,6 +28,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [importMode, setImportMode] = useState('merge')
   const [reminderDigestScope, setReminderDigestScope] = useState(() => (localStorage.getItem(REMINDER_DIGEST_STORAGE_KEY) === 'due_soon' ? 'due_soon' : 'today'))
   const [eventAlertLead, setEventAlertLead] = useState(loadEventAlertLeadMinutes)
+  const [notificationHistory, setNotificationHistory] = useState(loadNotificationHistory)
   const aiLoadSeq = useRef(0)
   const importFileRef = useRef(null)
 
@@ -257,6 +259,10 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         <div className="integration-body"><div><strong>알림 내용은 이 기기에서만 만들어집니다.</strong><small>브라우저가 완전히 종료된 상태의 예약 푸시는 향후 서버 알림 기능에서 지원할 수 있습니다.</small></div>{notificationPermission !== 'granted' ? <button className="secondary" disabled={notificationPermission === 'unsupported'} onClick={onEnableNotifications}><Bell /> 알림 켜기</button> : null}</div>
         <label><input type="checkbox" checked={reminderDigestScope === 'due_soon'} onChange={e => { const scope = e.target.checked ? 'due_soon' : 'today'; setReminderDigestScope(scope); localStorage.setItem(REMINDER_DIGEST_STORAGE_KEY, scope) }}/> <span>지연·2일 내 마감 업무까지 알림에 포함 (기본: 오늘 마감만)</span></label>
         <label>일정 시작 전 알림 시점<select value={eventAlertLead} onChange={e => { const minutes = Number(e.target.value); setEventAlertLead(minutes); localStorage.setItem(EVENT_ALERT_LEAD_STORAGE_KEY, String(minutes)) }}>{EVENT_ALERT_LEAD_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes}분 전</option>)}</select></label>
+        {notificationHistory.length ? <div className="notification-history">
+          <div className="notification-history-head"><h3>최근 알림 기록</h3><button type="button" className="link-button" onClick={() => { clearNotificationHistory(); setNotificationHistory([]) }}>기록 지우기</button></div>
+          <ul>{notificationHistory.map((entry, i) => <li key={i}><strong>{entry.title}</strong><span>{entry.body}</span><time>{new Date(entry.firedAt).toLocaleString('ko-KR')}</time></li>)}</ul>
+        </div> : null}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Download /></span><div><h2>내 데이터 내보내기</h2><p>업무, 일정, Todo와 업무 기록을 JSON 파일로 보관합니다.</p></div></div>

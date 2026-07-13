@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-notification-history',
+    timestamp: '2026-07-14T05:20:00+09:00',
+    description: '알림 기록을 남기지 않아, 기기 알림을 놓치거나 닫아버리면 어떤 알림이 왔었는지 다시 확인할 방법이 없었습니다. 설정 > "오늘 업무 알림"에 최근 알림 기록 목록(제목/내용/시각)과 기록 지우기 버튼을 추가했습니다 (frontend/src/notificationHistory.js, frontend/src/App.jsx, frontend/src/screens/Settings.jsx).',
+  },
+  {
     id: '2026-07-14-task-search-checklist',
     timestamp: '2026-07-14T05:05:50+09:00',
     description: '업무 검색이 체크리스트 항목 텍스트까지 찾도록 했습니다. 체크리스트 기능이 추가된 뒤에도 업무 검색은 제목/메모/태그만 대상으로 했었는데, 이제 체크리스트에 적어둔 세부 항목으로도 업무를 찾을 수 있습니다 (frontend/src/taskFilters.js).',
