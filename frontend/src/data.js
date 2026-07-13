@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-bulk-postpone',
+    timestamp: '2026-07-14T04:30:21+09:00',
+    description: '업무 화면에서 여러 업무를 선택했을 때 일정을 한 번에 미룰 수 있는 "연기" 일괄 작업을 추가했습니다. 일수를 입력하면 선택된 업무 중 기한이 있는 항목의 시작일/기한을 함께 밀어줍니다 (frontend/src/screens/Tasks.jsx, frontend/src/App.jsx, 기존 postponeTaskDates 재사용).',
+  },
+  {
     id: '2026-07-14-active-sessions',
     timestamp: '2026-07-14T04:24:53+09:00',
     description: '보안 계정 관리 기능으로, 설정 화면에 "활성 세션" 섹션을 추가했습니다. 로그인된 모든 세션(생성/최근 접속/만료 시각)을 목록으로 보고, 낯선 세션은 개별적으로 로그아웃(강제 종료)할 수 있습니다 (backend: GET/DELETE /api/auth/sessions, backend/app/auth.py·main.py, frontend/src/screens/Settings.jsx, frontend/src/api.js).',
