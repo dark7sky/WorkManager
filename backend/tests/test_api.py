@@ -615,6 +615,17 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_todo_stops_spawning_past_recurrence_end_date(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "water plants until end date", "todo_date": "2026-07-06",
+                                           "recurrence_rule": "daily", "recurrence_end_date": "2026-07-06"}).json()
+        completed = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
+        self.assertNotIn("next_recurrence_id", completed)
+        children = [t for t in a.get("/api/todos").json() if t["title"] == "water plants until end date" and t["id"] != todo["id"]]
+        self.assertEqual(len(children), 0)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         default_todo = a.post("/api/todos", json={"title": "default priority"}).json()

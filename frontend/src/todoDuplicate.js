@@ -4,6 +4,7 @@ export const buildTodoDuplicatePayload = todo => ({
   completed: false,
   tags: Array.isArray(todo?.tags) ? todo.tags : [],
   recurrence_rule: todo?.recurrence_rule || null,
+  recurrence_end_date: todo?.recurrence_rule ? todo?.recurrence_end_date || null : null,
   priority: todo?.priority || 'normal',
   link_url: todo?.link_url || null,
 })

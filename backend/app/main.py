@@ -337,10 +337,11 @@ class TodoPayload(StrictPayload):
     completed: bool | None = None
     tags: list[str] | None = Field(None, max_length=50)
     recurrence_rule: Literal["daily", "weekly"] | None = None
+    recurrence_end_date: date | None = None
     priority: Literal["low", "normal", "high"] | None = None
     link_url: str | None = Field(None, max_length=2000)
 
-    @field_validator("recurrence_rule", "link_url", mode="before")
+    @field_validator("recurrence_rule", "recurrence_end_date", "link_url", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -390,7 +391,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "priority", "link_url"}, None),
+    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
 }
 
@@ -510,7 +511,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url"},
-                "events": {"link_url"}, "todos": {"recurrence_rule", "link_url"}, "work_logs": {"task_id", "duration_minutes"}}[table]
+                "events": {"link_url"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url"}, "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -671,14 +672,20 @@ def spawn_recurring_todo(todo, user_id):
         return None
     timestamp = now()
     next_date = next_recurrence_date(todo.get("todo_date"), rule)
+    end_date = todo.get("recurrence_end_date")
+    if end_date and next_date and next_date > end_date:
+        with connection() as c:
+            c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
+                      (timestamp, todo["id"], user_id))
+        return None
     with connection() as c:
         # The conditional marker update makes concurrent completion requests idempotent.
         if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,priority,link_url,created_at)
-          VALUES(?,?,?,0,?,?,?,?,?)""",
-          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, todo.get("priority", "normal"), todo.get("link_url"), timestamp))
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,recurrence_end_date,priority,link_url,created_at)
+          VALUES(?,?,?,0,?,?,?,?,?,?)""",
+          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, end_date, todo.get("priority", "normal"), todo.get("link_url"), timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id
