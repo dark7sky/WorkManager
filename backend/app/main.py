@@ -239,6 +239,20 @@ class TaskPayload(StrictPayload):
     dependency_ids: list[int] | None = Field(None, max_length=100)
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
     link_url: str | None = Field(None, max_length=2000)
+    checklist: list[dict] | None = Field(None, max_length=200)
+
+    @field_validator("checklist")
+    @classmethod
+    def checklist_items_well_formed(cls, value):
+        if value is None:
+            return value
+        cleaned = []
+        for item in value:
+            text = str(item.get("text", "")).strip()[:300]
+            if not text:
+                continue
+            cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "text": text, "done": bool(item.get("done"))})
+        return cleaned
 
     @field_validator("start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes", "link_url", mode="before")
     @classmethod
@@ -337,7 +351,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes", "link_url"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "priority"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
@@ -489,6 +503,8 @@ def normalize(table, data):
         result["dependency_ids"] = json.dumps(sorted(set(result["dependency_ids"])))
     if "recurrence" in result:
         result["recurrence"] = json.dumps(result["recurrence"])
+    if "checklist" in result:
+        result["checklist"] = json.dumps(result["checklist"], ensure_ascii=False)
     if "completed" in result:
         result["completed"] = int(result["completed"])
     if "google_is_all_day" in result:
@@ -549,7 +565,7 @@ def validate_task_links(data, user_id, current_id=None):
 
 def merged_resource_for_validation(table, existing, data):
     merged = {k: existing[k] for k in CONFIG[table][0] if k in existing.keys()}
-    json_fields = {"tags", "dependency_ids", "recurrence"}
+    json_fields = {"tags", "dependency_ids", "recurrence", "checklist"}
     for key in json_fields & merged.keys():
         merged[key] = normalize_legacy_json_array_field(key, merged[key])
     merged.update({k: v for k, v in data.items() if k in CONFIG[table][0]})

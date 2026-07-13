@@ -178,3 +178,22 @@ test('buildTaskDuplicatePayload copies link_url', () => {
 
   assert.equal(payload.link_url, 'https://example.com/doc')
 })
+
+test('buildTaskPayload normalizes checklist items, dropping blanks and capping text length', () => {
+  const payload = buildTaskPayload({
+    ...baseData,
+    checklist: [{ id: '1', text: '  초안 작성  ', done: true }, { id: '2', text: '   ', done: false }, { id: '3', text: '가'.repeat(310), done: false }],
+  }, { task: { id: 1 } })
+
+  assert.deepEqual(payload.checklist.map(i => i.text), ['초안 작성', '가'.repeat(300)])
+  assert.equal(payload.checklist[0].done, true)
+})
+
+test('buildTaskDuplicatePayload copies checklist items but resets done state', () => {
+  const payload = buildTaskDuplicatePayload({
+    id: 1, title: '업무', checklist: [{ id: '1', text: '초안 작성', done: true }],
+  })
+
+  assert.equal(payload.checklist[0].text, '초안 작성')
+  assert.equal(payload.checklist[0].done, false)
+})

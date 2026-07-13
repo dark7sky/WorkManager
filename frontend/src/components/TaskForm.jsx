@@ -9,6 +9,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
+  const [checklist, setChecklist] = useState(() => task?.checklist || [])
+  const [checklistText, setChecklistText] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [templates, setTemplates] = useState(() => loadTaskTemplates())
   const [prefill, setPrefill] = useState(null)
@@ -55,7 +57,18 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setError('')
     setSuggestions([])
     setTags(task?.tags || [])
-  }, [task?.id, task?.tags])
+    setChecklist(task?.checklist || [])
+    setChecklistText('')
+  }, [task?.id, task?.tags, task?.checklist])
+
+  const addChecklistItem = () => {
+    const text = checklistText.trim()
+    if (!text) return
+    setChecklist([...checklist, { id: `${Date.now()}`, text, done: false }])
+    setChecklistText('')
+  }
+  const toggleChecklistItem = id => setChecklist(checklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
+  const removeChecklistItem = id => setChecklist(checklist.filter(item => item.id !== id))
 
   const recommend = async () => {
     const data = new FormData(formRef.current)
@@ -80,6 +93,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     const formData = new FormData(e.currentTarget)
     const data = Object.fromEntries(formData)
     data.dependency_ids = formData.getAll('dependency_ids')
+    data.checklist = checklist
     const startChanged = data.start_date !== (task?.start_date || '')
     const dueChanged = data.due_date !== (task?.due_date || '')
     if (data.start_date && data.due_date && data.due_date < data.start_date && (startChanged || dueChanged)) {
@@ -110,6 +124,10 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" defaultValue={prefill?.recurrence_rule ?? task?.recurrence_rule ?? ''}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item"><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
+    <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
+      {checklist.map(item => <label key={item.id} className="checklist-editor-item"><input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/><span className={item.done ? 'checklist-done-text' : ''}>{item.text}</span><button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button></label>)}
+      <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
+    </div>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
