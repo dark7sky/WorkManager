@@ -459,11 +459,21 @@ def _sync_calendar(user_id, calendar_id):
         with connection() as c:
             c.execute("DELETE FROM google_sync_state WHERE user_id=? AND calendar_id=?", (user_id, calendar_id))
         all_pages, next_token, _ = _fetch_remote_pages(user_id, base, None)
+        token = None
+
+    # Google only guarantees "cancelled" tombstones for a limited window; a
+    # full (non-incremental) fetch can silently omit events deleted earlier.
+    # Track everything the listing actually confirmed so stale local mirrors
+    # can be reconciled below instead of lingering forever.
+    full_resync = token is None
+    remote_seen_ids = set()
 
     recurrence_cache = {}
     for items in all_pages:
         for remote in items:
             remote_id = remote.get("id")
+            if full_resync:
+                remote_seen_ids.add(remote_id)
             with connection() as c:
                 existing = c.execute("SELECT * FROM events WHERE user_id=? AND google_calendar_id=? AND google_event_id=?",
                                      (user_id, calendar_id, remote_id)).fetchone()
@@ -523,6 +533,21 @@ def _sync_calendar(user_id, calendar_id):
                       google_recurring_event_id,google_original_start,recurrence,google_is_all_day,created_at,updated_at,sync_state,google_event_id,google_calendar_id)
                       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                               (user_id, local_uid, *values[:-1], values[-1], values[-1], "synced", remote_id, calendar_id)); imported += 1
+
+    if full_resync:
+        cutoff = _history_cutoff_date()
+        with connection() as c:
+            mirrored = c.execute("""SELECT id,google_event_id FROM events WHERE user_id=? AND google_calendar_id=?
+              AND google_event_id IS NOT NULL AND deleted_at IS NULL AND sync_state NOT IN ('dirty','conflict')
+              AND google_is_series_master=0 AND substr(end_at,1,10)>=?""",
+              (user_id, calendar_id, cutoff)).fetchall()
+            stale_ids = [r["id"] for r in mirrored if r["google_event_id"] not in remote_seen_ids]
+            if stale_ids:
+                marks = ",".join("?" * len(stale_ids))
+                c.execute(f"UPDATE events SET deleted_at=?,sync_state='remote_deleted' WHERE id IN ({marks})",
+                          (datetime.now().isoformat(timespec="seconds"), *stale_ids))
+        remote_deleted_ids.extend(stale_ids)
+        updated += len(stale_ids)
 
     _save_sync_token(user_id, calendar_id, next_token)
     with connection() as c:

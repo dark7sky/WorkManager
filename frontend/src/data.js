@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-google-calendar-resync-stale-events',
+    timestamp: '2026-07-13T12:57:37+09:00',
+    description: '설정에서 캘린더를 다시 동기화해도 구글 캘린더에서 이미 삭제된 옛날 일정이 계속 남아있던 문제를 수정했습니다. 구글은 삭제된 일정을 "취소됨" 상태로 한동안만 알려주기 때문에, 그 기간이 지난 뒤 전체 재동기화를 하면 삭제 사실을 놓치고 있었습니다. 이제 전체 재동기화 시 실제 목록에 없는 로컬 일정을 대조해 정리합니다 (backend/app/google_calendar.py).',
+  },
+  {
     id: '2026-07-13-pwa-portrait-fallback-display-mode',
     timestamp: '2026-07-13T12:52:27+09:00',
     description: '설치된 PWA에서 세로 고정 안내가 뜨지 않고 여전히 화면이 회전되던 문제를 수정했습니다. manifest의 display_override 설정 때문에 브라우저가 display-mode를 standalone 대신 window-controls-overlay나 minimal-ui로 보고하는 경우가 있어 가로 모드 안내 오버레이 CSS가 매칭되지 않았는데, 세 가지 display-mode를 모두 감지하도록 수정했습니다 (frontend/src/mobile-fixes.css).',

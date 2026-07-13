@@ -131,6 +131,38 @@ class GoogleCalendarHistoryWindowTests(unittest.TestCase):
                 titles = {r["title"] for r in c.execute("SELECT title FROM events WHERE user_id='u'").fetchall()}
             self.assertEqual(titles, {"recent google", "old local", "old dirty", "old conflict"})
 
+    def test_full_resync_reconciles_mirrors_google_no_longer_confirms(self):
+        """Google's "cancelled" tombstones expire; a plain re-sync must still
+        drop local mirrors of events the current listing no longer includes,
+        instead of leaving stale events visible forever (request #15)."""
+        import os
+        import tempfile
+        from datetime import date, timedelta
+        from unittest.mock import patch as env_patch
+        with tempfile.TemporaryDirectory() as folder, env_patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "t.db")}):
+            from app.db import connection, init_db
+            init_db()
+            future_day = (date.today() + timedelta(days=1)).isoformat()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,created_at,updated_at) VALUES('u','u@example.com','2026-01-01','2026-01-01')")
+                c.execute("""INSERT INTO events(user_id,title,start_at,end_at,tags,created_at,sync_state,
+                  google_event_id,google_calendar_id,google_is_series_master) VALUES('u','살아있음',?,?,'[]','2026-01-01','synced','keep-1','cal',0)""",
+                          (f"{future_day}T10:00:00", f"{future_day}T11:00:00"))
+                c.execute("""INSERT INTO events(user_id,title,start_at,end_at,tags,created_at,sync_state,
+                  google_event_id,google_calendar_id,google_is_series_master) VALUES('u','구글에서 삭제됨',?,?,'[]','2026-01-01','synced','gone-1','cal',0)""",
+                          (f"{future_day}T12:00:00", f"{future_day}T13:00:00"))
+            confirmed = {"id": "keep-1", "status": "confirmed", "summary": "살아있음",
+                         "start": {"dateTime": f"{future_day}T10:00:00+09:00"}, "end": {"dateTime": f"{future_day}T11:00:00+09:00"},
+                         "etag": "e1", "updated": "2026-01-01T00:00:00Z"}
+            with patch.object(gc, "_request", return_value={"items": [confirmed], "nextSyncToken": "tok-1"}):
+                result = gc._sync_calendar("u", "cal")
+            self.assertEqual(len(result["remote_deleted_ids"]), 1)
+            with connection() as c:
+                rows = {r["google_event_id"]: r["deleted_at"] for r in c.execute(
+                    "SELECT google_event_id,deleted_at FROM events WHERE user_id='u'").fetchall()}
+            self.assertIsNone(rows["keep-1"])
+            self.assertIsNotNone(rows["gone-1"])
+
 
 if __name__ == "__main__":
     unittest.main()
