@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (13:44 KST)
+Last updated: 2026-07-13 (18:04 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -92,6 +92,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Todo recurrence: unlike tasks, the 오늘 할 일 quick-todo list had no repeat option, so daily/weekly chores had to be re-typed every day. Added a nullable `recurrence_rule` (매일/매주) on todos with the same idempotent spawn-on-completion pattern as recurring tasks (`spawn_recurring_todo` in `backend/app/main.py`, `backend/app/db.py` migration), a recurrence dropdown on the Today screen's add/edit todo forms, and a regression test `test_completing_recurring_todo_spawns_next_occurrence` in `backend/tests/test_api.py`, 2026-07-13.
 - [x] Keyboard shortcuts help: WorkManager had a Ctrl/⌘+K quick-capture shortcut but no discoverable list of shortcuts, so it was easy to forget it existed. Pressing "?" (or clicking a new "?" button in the sidebar) opens a modal listing the app's keyboard shortcuts (`frontend/src/components/KeyboardShortcuts.jsx`, wired into `App.jsx`/`AppShell.jsx`, 2026-07-13).
 - [x] Task audit history link: the 감사 로그 (audit log) screen could only be searched manually, so checking a single task's change history meant guessing its id in the search box. Added an "이력" button on each Gantt row that opens the audit log pre-filtered to that task (`onViewHistory` in `Tasks.jsx`, `focus` prop in `AuditLog.jsx`, wired into `App.jsx`, 2026-07-13).
+- [x] Calendar event search: the Calendar screen could only narrow events by tag, with no way to find a specific event by title/location/memo text the way Tasks and 휴지통 already could. Added a "제목, 장소, 메모 검색" search box next to the existing tag filter (`filterEventsByQuery` in `frontend/src/eventSearch.js`, wired into `Calendar.jsx`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

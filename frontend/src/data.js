@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-calendar-event-search',
+    timestamp: '2026-07-13T18:04:19+09:00',
+    description: '캘린더 화면은 태그로만 일정을 좁힐 수 있었고 제목·장소·메모로 특정 일정을 찾을 방법이 없었습니다. Tasks/휴지통 화면과 같은 검색창을 추가해 제목·장소·메모 텍스트로 일정을 실시간 필터링할 수 있습니다 (frontend/src/eventSearch.js, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-task-audit-history-link',
     timestamp: '2026-07-13T17:59:12+09:00',
     description: '업무 변경 이력을 확인하려면 감사 로그 화면으로 이동해 대상 업무를 직접 검색해야 했습니다. 업무 목록의 각 행에 "이력" 버튼을 추가해, 클릭하면 감사 로그 화면이 해당 업무로 미리 필터링된 상태로 열립니다 (frontend/src/screens/Tasks.jsx, frontend/src/screens/AuditLog.jsx, frontend/src/App.jsx).',
