@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-performance-tag-breakdown',
+    timestamp: '2026-07-13T23:36:13+09:00',
+    description: '성과 화면에 태그별 소요 시간/완료 업무 건수 분석을 추가했습니다. 지금까지는 전체 합계만 볼 수 있어 시간을 어디에 썼는지 태그별로 비교할 방법이 없었습니다. Markdown 보고서 내보내기에도 태그별 소요 시간 표를 함께 담았습니다 (backend/app/main.py의 /api/achievements, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',
+  },
+  {
     id: '2026-07-13-calendar-holiday-markers',
     timestamp: '2026-07-13T23:35:00+09:00',
     description: '캘린더 월간/주간 보기에 고정 양력 공휴일(신정, 삼일절, 어린이날, 현충일, 광복절, 개천절, 한글날, 성탄절)을 빨간색으로 표시했습니다. 지금까지는 캘린더에 휴일 구분이 전혀 없어 일정을 잡을 때 공휴일을 놓치기 쉬웠습니다. 음력 기반 공휴일(설날, 추석 등)과 대체공휴일은 이번 범위에서 제외했습니다 (frontend/src/holidays.js, frontend/src/screens/Calendar.jsx).',

@@ -37,6 +37,13 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
     `- 완료한 오늘 할 일: ${stats.completed_todos || 0}`,
   ]
 
+  const tagBreakdown = data?.tag_breakdown || []
+  if (tagBreakdown.length) {
+    lines.push('')
+    lines.push('## 태그별 소요 시간')
+    tagBreakdown.forEach(t => lines.push(`- ${t.tag}: ${formatDuration(t.tracked_minutes)} · 완료 ${t.completed_tasks}건`))
+  }
+
   if (summary && (summary.headline || summary.narrative)) {
     lines.push('')
     lines.push('## AI 요약')

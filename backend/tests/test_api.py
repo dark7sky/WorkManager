@@ -420,6 +420,25 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_achievement_report_includes_tag_breakdown(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "tagged task", "tags": ["Reporting"], "estimated_minutes": 30})
+        self.assertEqual(task.status_code, 200, task.text)
+        done = a.patch(f"/api/tasks/{task.json()['id']}", json={"status": "done", "progress": 100})
+        self.assertEqual(done.status_code, 200, done.text)
+        a.post("/api/work_logs", json={"content": "reporting work", "log_date": "2026-07-06", "duration_minutes": 60, "tags": ["Reporting"]})
+        a.post("/api/work_logs", json={"content": "untagged work", "log_date": "2026-07-06", "duration_minutes": 15})
+        report = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        self.assertEqual(report.status_code, 200, report.text)
+        breakdown = {row["tag"]: row for row in report.json()["tag_breakdown"]}
+        self.assertIn("Reporting", breakdown)
+        self.assertEqual(breakdown["Reporting"]["tracked_minutes"], 60)
+        self.assertGreaterEqual(breakdown["Reporting"]["completed_tasks"], 1)
+        self.assertIn("(태그 없음)", breakdown)
+        self.assertEqual(breakdown["(태그 없음)"]["tracked_minutes"], 15)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_duration_minutes_is_persisted_and_summed_in_report(self, *_):
         a = self.client(self.token_a)
         log = a.post("/api/work_logs", json={"content": "focused work", "log_date": "2026-07-06", "duration_minutes": 90})

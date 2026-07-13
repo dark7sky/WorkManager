@@ -31,6 +31,21 @@ test('performanceReportMarkdown: generates basic structure', () => {
   assert(md.includes('완료한 오늘 할 일: 8'))
 })
 
+test('performanceReportMarkdown: includes tag breakdown section when present', () => {
+  const data = { summary: {}, timeline: [], tag_breakdown: [{ tag: 'Reporting', tracked_minutes: 90, completed_tasks: 3 }] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(md.includes('## 태그별 소요 시간'))
+  assert(md.includes('- Reporting: 1시간 30분 · 완료 3건'))
+})
+
+test('performanceReportMarkdown: omits tag breakdown section when empty', () => {
+  const data = { summary: {}, timeline: [], tag_breakdown: [] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(!md.includes('## 태그별 소요 시간'))
+})
+
 test('performanceReportMarkdown: includes tags in period line', () => {
   const data = { summary: {}, timeline: [] }
   const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: ['sprint', 'Q1'], summary: null, generatedAt: '2026-01-31T10:00:00Z' })

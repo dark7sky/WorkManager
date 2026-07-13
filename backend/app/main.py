@@ -1266,13 +1266,24 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     timeline.extend({"type": "todo", "type_label": "완료 Todo", "id": x["id"], "date": x["todo_date"], "title": x["title"], "tags": x.get("tags", [])} for x in todos)
     timeline.sort(key=lambda x: x["date"], reverse=True)
     available_tags = sorted({tag for group in (tasks, logs, events, todos, all_tasks) for item in group for tag in item.get("tags", [])}, key=str.lower)
+    by_tag = {}
+    for x in tasks:
+        for tag in (x.get("tags") or ["(태그 없음)"]):
+            entry = by_tag.setdefault(tag, {"tag": tag, "completed_tasks": 0, "tracked_minutes": 0, "estimated_minutes": 0})
+            entry["completed_tasks"] += 1
+            entry["estimated_minutes"] += int(x.get("estimated_minutes") or 0)
+    for x in logs:
+        for tag in (x.get("tags") or ["(태그 없음)"]):
+            entry = by_tag.setdefault(tag, {"tag": tag, "completed_tasks": 0, "tracked_minutes": 0, "estimated_minutes": 0})
+            entry["tracked_minutes"] += int(x.get("duration_minutes") or 0)
+    tag_breakdown = sorted(by_tag.values(), key=lambda e: (e["tracked_minutes"], e["completed_tasks"]), reverse=True)
     return {"period": {"start": start, "end": end},
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
                         "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
-            "tags": available_tags, "timeline": timeline,
+            "tags": available_tags, "tag_breakdown": tag_breakdown, "timeline": timeline,
             "tasks": tasks, "work_logs": logs, "events": events, "todos": todos}
 
 
