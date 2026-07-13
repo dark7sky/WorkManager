@@ -91,6 +91,9 @@ html{scroll-behavior:smooth}body{overflow-x:hidden}.skip-link{position:fixed;lef
 
 .sidebar{box-shadow:1px 0 0 var(--line)}
 .sidebar nav button{border-radius:var(--radius-sm);transition:background-color .15s var(--ease),color .15s var(--ease)}
+.nav-badge{position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#e5484d;color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center}
+@media(max-width:1000px){.nav-badge{top:4px;right:8px}}
+@media(max-width:680px){.nav-badge{top:2px;right:16%}}
 .quick-capture-trigger{transition:border-color .15s var(--ease),background-color .15s var(--ease)}
 .quick-capture-trigger:hover{border-color:var(--blue);color:var(--blue)}
 

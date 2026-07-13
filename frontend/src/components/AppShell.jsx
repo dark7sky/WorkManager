@@ -1,21 +1,24 @@
 import { ListTodo, LogOut, Search } from 'lucide-react'
 import { mobileNavColumns, mobileNavItems, navItems } from '../navigation.js'
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || navigator.userAgent || '')
-export default function AppShell({ page, setPage, children, onLogout, user, onQuickCapture, onShortcuts }) {
+export default function AppShell({ page, setPage, children, onLogout, user, onQuickCapture, onShortcuts, navBadges = {} }) {
   const initials = (user?.display_name || user?.email || user?.id || '나').slice(0,2).toUpperCase()
   const navigate = id => {
     setPage(id)
     document.querySelector('.main-area')?.focus({ preventScroll: true })
   }
-  const navigation = (items = navItems, mobile = false) => items.map(([id,Icon,label]) => <button
-    key={id}
-    type="button"
-    className={page === id ? 'active' : ''}
-    aria-current={page === id ? 'page' : undefined}
-    aria-label={mobile ? label : undefined}
-    title={mobile ? label : undefined}
-    onClick={() => navigate(id)}
-  ><Icon size={mobile ? 20 : 19} aria-hidden="true"/><span>{label}</span></button>)
+  const navigation = (items = navItems, mobile = false) => items.map(([id,Icon,label]) => {
+    const badge = navBadges[id]
+    return <button
+      key={id}
+      type="button"
+      className={page === id ? 'active' : ''}
+      aria-current={page === id ? 'page' : undefined}
+      aria-label={mobile ? (badge ? `${label} (${badge}건 지연)` : label) : undefined}
+      title={mobile ? label : undefined}
+      onClick={() => navigate(id)}
+    ><Icon size={mobile ? 20 : 19} aria-hidden="true"/><span>{label}</span>{badge ? <span className="nav-badge" aria-hidden="true">{badge > 99 ? '99+' : badge}</span> : null}</button>
+  })
 
   return <div className="app-shell">
     <a className="skip-link" href="#main-content">본문으로 바로가기</a>

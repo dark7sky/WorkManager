@@ -9,7 +9,7 @@ import AuditLog from './screens/AuditLog'
 import { upsertTask } from './taskState'
 import { subtaskCompletionSummary } from './taskHierarchy'
 import { buildTaskDuplicatePayload } from './taskFormPayload'
-import { withAddedTag, reminderDigestTasks, REMINDER_DIGEST_STORAGE_KEY } from './taskFilters'
+import { withAddedTag, reminderDigestTasks, summarizeDueReminders, REMINDER_DIGEST_STORAGE_KEY } from './taskFilters'
 import { overdueIncompleteTodos } from './todoCarryover'
 
 const eventColors=['blue','purple','orange']
@@ -23,6 +23,7 @@ export default function App(){
  const [quickCaptureOpen,setQuickCaptureOpen]=useState(false)
  const [shortcutsOpen,setShortcutsOpen]=useState(false)
  const [auditFocus,setAuditFocus]=useState(null)
+ const overdueTaskCount=summarizeDueReminders(tasks,new Date().toLocaleDateString('en-CA')).overdue
  const notify=useCallback((message,type='success',action=null)=>{setToast({message,type,action});clearTimeout(toastTimer.current);toastTimer.current=window.setTimeout(()=>setToast(null),action?6000:4000)},[])
  const refresh=useCallback(async()=>{setDataLoading(true);setDataError('');try{const [allTasks,allEvents,today,everyTodo]=await Promise.all([api.tasks(),api.events(),api.today(),api.todos()]);setTasks(allTasks);setTodayTasks(today.tasks||[]);setEvents(allEvents.map((x,i)=>({...x,start:x.start_at,end:x.end_at,color:eventColors[i%eventColors.length]})));setTodos(today.todos||[]);setAllTodos(everyTodo);setLogs(today.work_logs||[]);return true}catch(e){setDataError(e.message);notify(e.message,'error');return false}finally{setDataLoading(false)}},[notify])
  const refreshTasksOnly=useCallback(async()=>{const latestTasks=await api.tasks();setTasks(latestTasks)},[])
@@ -59,7 +60,7 @@ export default function App(){
   changelog:<Changelog notify={notify}/>,
   settings:<Settings theme={preference} setTheme={setPreference} notify={notify} onDataChanged={refresh} canInstall={!!installPrompt} onInstall={async()=>{if(!installPrompt)return;await installPrompt.prompt();const result=await installPrompt.userChoice;if(result.outcome==='accepted')notify('WorkManager 앱을 설치했습니다.');setInstallPrompt(null)}} notificationPermission={notificationPermission} onEnableNotifications={async()=>{if(!('Notification' in window)){notify('이 브라우저는 알림을 지원하지 않습니다.','error');return}const result=await Notification.requestPermission();setNotificationPermission(result);notify(result==='granted'?'오늘 업무 알림을 켰습니다.':'브라우저 설정에서 알림 권한을 허용해 주세요.',result==='granted'?'success':'error')}} onOpenAudit={()=>setPage('audit')}/>
  }
- return <AppShell page={page} setPage={setPage} onLogout={async()=>{try{await api.logout()}finally{setUser(null)}}} user={user} onQuickCapture={()=>setQuickCaptureOpen(true)} onShortcuts={()=>setShortcutsOpen(true)}>{dataError?<div className="data-error" role="alert"><span>{dataError}</span><button onClick={refresh}>다시 시도</button></div>:null}{screens[page]}
+ return <AppShell page={page} setPage={setPage} onLogout={async()=>{try{await api.logout()}finally{setUser(null)}}} user={user} onQuickCapture={()=>setQuickCaptureOpen(true)} onShortcuts={()=>setShortcutsOpen(true)} navBadges={{tasks:overdueTaskCount}}>{dataError?<div className="data-error" role="alert"><span>{dataError}</span><button onClick={refresh}>다시 시도</button></div>:null}{screens[page]}
   {modal?.type==='task'?<Modal title={modal.task?'업무 수정':'새 업무'} onClose={()=>setModal(null)}><TaskForm key={modal.task?.id ?? 'new-task'} task={modal.task} tasks={tasks} onSave={async data=>{try{const savedTask=await (modal.task?api.updateTask(modal.task.id,data):api.createTask(data));try{await refreshTasksOnly();notify(modal.task?'업무를 수정했습니다.':'업무를 추가했습니다.')}catch(e){mergeSavedTask(savedTask);notify('업무는 저장했지만 목록을 다시 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.','error')}setModal(null);return {ok:true,error:''}}catch(e){notify(e.message,'error');return {ok:false,error:e.message}}}} onDelete={modal.task?()=>{const subtasks=subtaskCompletionSummary(tasks,modal.task.id);return askDelete(`'${modal.task.title}' 업무를 삭제합니다.${subtasks?` 하위 업무 ${subtasks.total}개는 최상위 업무로 이동됩니다.`:''}`,async()=>{await api.deleteTask(modal.task.id);setModal(null)},'업무를 삭제했습니다.',undoDelete('tasks',modal.task.id))}:null} onCancel={()=>setModal(null)}/></Modal>:null}
   {confirm?<ConfirmDialog message={confirm.message} busy={confirm.busy} onClose={()=>setConfirm(null)} onConfirm={runDelete}/>:null}<QuickCapture open={quickCaptureOpen} onClose={()=>setQuickCaptureOpen(false)} notify={notify} onApplied={refresh} data={{tasks,events,todos,work_logs:logs}} onNavigate={setPage}/>{shortcutsOpen?<Modal title="단축키 안내" onClose={()=>setShortcutsOpen(false)}><KeyboardShortcuts/></Modal>:null}<Toast toast={toast} onClose={()=>setToast(null)}/></AppShell>
 }

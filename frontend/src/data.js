@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-nav-overdue-badge',
+    timestamp: '2026-07-13T18:08:54+09:00',
+    description: '지연된 업무가 몇 건인지 확인하려면 매번 업무 화면을 열어야 했습니다. 사이드바·모바일 하단 메뉴의 "업무" 메뉴 아이콘에 지연 업무 개수를 보여주는 빨간 배지를 추가해, 어느 화면에 있든 한눈에 확인할 수 있습니다 (frontend/src/components/AppShell.jsx, frontend/src/App.jsx, 기존 summarizeDueReminders 재사용).',
+  },
+  {
     id: '2026-07-13-calendar-event-duplicate',
     timestamp: '2026-07-13T18:11:00+09:00',
     description: '반복 없이 비슷한 일정을 다시 만들 때마다 제목·시간·장소·태그를 처음부터 다시 입력해야 했습니다. 업무 화면의 "복제" 기능과 같은 방식으로, 일정 수정 화면에 "복제" 버튼을 추가해 제목에 "(사본)"을 붙인 새 일정을 한 번에 만들 수 있습니다 (frontend/src/eventDuplicate.js, frontend/src/screens/Calendar.jsx).',
