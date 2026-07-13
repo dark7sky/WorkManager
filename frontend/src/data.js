@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-keyboard-shortcuts-help',
+    timestamp: '2026-07-13T17:55:35+09:00',
+    description: '자주 쓰는 단축키(⌘/Ctrl+K 빠른 입력 등)를 기억하기 어렵다는 문제를 개선했습니다. "?" 키를 누르거나 사이드바의 "?" 버튼을 클릭하면 사용 가능한 단축키 안내 창이 열립니다 (frontend/src/components/KeyboardShortcuts.jsx, frontend/src/App.jsx, frontend/src/components/AppShell.jsx).',
+  },
+  {
     id: '2026-07-13-todo-recurrence',
     timestamp: '2026-07-13T17:51:57+09:00',
     description: '오늘 할 일에 매일/매주 반복 설정을 추가했습니다. 반복 할 일을 완료하면 다음 날짜의 할 일이 자동으로 생성되어, 매번 새로 입력하지 않아도 됩니다 (backend/app/main.py spawn_recurring_todo, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
