@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-today-nav-badge',
+    timestamp: '2026-07-13T18:52:00+09:00',
+    description: '지연 업무 개수는 사이드바 "업무" 메뉴에 배지로 표시됐지만, 오늘 처리해야 할 할 일이 몇 건 남았는지는 오늘 화면을 열어야만 알 수 있었습니다. "오늘" 메뉴 아이콘에도 미완료 할 일 개수를 보여주는 배지를 추가했습니다 (frontend/src/App.jsx pendingTodoCount, frontend/src/components/AppShell.jsx, 기존 nav-badge 스타일 재사용).',
+  },
+  {
     id: '2026-07-13-task-postpone',
     timestamp: '2026-07-13T18:41:37+09:00',
     description: '지연된 업무를 확인해도 일정을 다시 잡으려면 매번 수정 폼을 열어 날짜를 새로 입력해야 했습니다. 업무 목록의 지연 업무 행에 "미루기" 버튼을 추가해, 클릭 한 번으로 기한(및 기간을 유지한 시작일)을 하루 뒤로 미룰 수 있습니다 (frontend/src/ganttDrag.js postponeTaskDates, frontend/src/screens/Tasks.jsx, 기존 onReschedule 재사용).',

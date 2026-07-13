@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (18:29 KST)
+Last updated: 2026-07-13 (18:52 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -102,6 +102,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Work log timer: work logs already had a `duration_minutes` field, but it had to be typed in by hand after the fact, so recorded time was often a rough guess. Added a "타이머 시작/중지" control on the Today screen's 오늘 한 일 quick-entry form that tracks elapsed time client-side (localStorage-persisted, same pattern as `taskPins.js`) and fills `duration_minutes` automatically on stop (`frontend/src/workLogTimer.js`, wired into `frontend/src/screens/Today.jsx`, 2026-07-13).
 - [x] Task checklist: tasks already supported parent/child hierarchy for splitting big work into separate tasks, but had no lightweight way to track sub-steps within a single task as it progressed. Added a nullable `checklist` JSON column on tasks (backend `TaskPayload`/`CONFIG`/`db.py` migration, item shape `{id,text,done}`, also decoded during merged-resource validation in `merged_resource_for_validation`), an add/check/delete checklist editor in the task form, and a "체크리스트 n/m" progress badge on Gantt rows (`backend/app/main.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/taskFormPayload.js`, `frontend/src/screens/Tasks.jsx`, 2026-07-13).
 - [x] One-click task postpone: rescheduling an overdue task required opening the edit form and retyping both dates, even though the Gantt bar already supported drag-to-reschedule. Added a "미루기" button on overdue Gantt rows that shifts the due date (and start date, preserving duration) forward by one day via the existing `onReschedule`/`api.updateTask` path (`postponeTaskDates` in `frontend/src/ganttDrag.js`, wired into `frontend/src/screens/Tasks.jsx`, 2026-07-13).
+- [x] Today nav badge: the sidebar/mobile-nav already showed a red overdue-task count badge on "업무", but "오늘" had no equivalent, so knowing how many todos were still pending today required opening the Today screen. Added a badge showing the incomplete-todo count on the "오늘" nav item, reusing the same `nav-badge` styling and generalizing `AppShell`'s badge prop to carry a per-item label for the mobile aria description (`pendingTodoCount` in `frontend/src/App.jsx`, `frontend/src/components/AppShell.jsx`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

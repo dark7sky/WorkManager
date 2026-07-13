@@ -9,15 +9,16 @@ export default function AppShell({ page, setPage, children, onLogout, user, onQu
   }
   const navigation = (items = navItems, mobile = false) => items.map(([id,Icon,label]) => {
     const badge = navBadges[id]
+    const count = badge?.count || 0
     return <button
       key={id}
       type="button"
       className={page === id ? 'active' : ''}
       aria-current={page === id ? 'page' : undefined}
-      aria-label={mobile ? (badge ? `${label} (${badge}건 지연)` : label) : undefined}
+      aria-label={mobile ? (count ? `${label} (${count}건 ${badge.label})` : label) : undefined}
       title={mobile ? label : undefined}
       onClick={() => navigate(id)}
-    ><Icon size={mobile ? 20 : 19} aria-hidden="true"/><span>{label}</span>{badge ? <span className="nav-badge" aria-hidden="true">{badge > 99 ? '99+' : badge}</span> : null}</button>
+    ><Icon size={mobile ? 20 : 19} aria-hidden="true"/><span>{label}</span>{count ? <span className="nav-badge" aria-hidden="true">{count > 99 ? '99+' : count}</span> : null}</button>
   })
 
   return <div className="app-shell">
