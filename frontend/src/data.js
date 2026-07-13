@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-search-checklist',
+    timestamp: '2026-07-14T05:05:50+09:00',
+    description: '업무 검색이 체크리스트 항목 텍스트까지 찾도록 했습니다. 체크리스트 기능이 추가된 뒤에도 업무 검색은 제목/메모/태그만 대상으로 했었는데, 이제 체크리스트에 적어둔 세부 항목으로도 업무를 찾을 수 있습니다 (frontend/src/taskFilters.js).',
+  },
+  {
     id: '2026-07-14-todo-memo',
     timestamp: '2026-07-14T05:03:19+09:00',
     description: '오늘 할 일(Todo)에 메모 필드를 추가했습니다. 업무/일정은 이미 자유 메모를 남길 수 있었지만 Todo는 제목만 있어 세부 내용을 남길 곳이 없었는데, 이제 추가/수정 폼에서 메모를 입력하면 목록에 표시되고 복제·반복 생성·업무로 전환 시에도 함께 이어집니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',

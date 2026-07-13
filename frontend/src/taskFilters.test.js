@@ -29,6 +29,21 @@ test('filterTasks narrows active tasks by tag without losing status filters', ()
   assert.deepEqual(shown.map(task => task.id), [1])
 })
 
+test('filterTasks matches query text against checklist item text', () => {
+  const withChecklist = [
+    ...tasks,
+    { id: 5, title: '배포 준비', status: 'todo', due_date: '2026-07-10', progress: 0, priority: 'normal', tags: [], checklist: [{ id: '1', text: '스테이징 점검', done: false }] },
+  ]
+  const shown = filterTasks(withChecklist, {
+    query: '스테이징',
+    status: 'all',
+    selectedTags: [],
+    todayIso: '2026-07-07',
+  })
+
+  assert.deepEqual(shown.map(task => task.id), [5])
+})
+
 test('filterTasks narrows active tasks by priority', () => {
   const shown = filterTasks(tasks, {
     query: '',
