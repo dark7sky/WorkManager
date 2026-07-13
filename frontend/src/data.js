@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-delete-promotes-children',
+    timestamp: '2026-07-13T13:44:44+09:00',
+    description: '하위 업무가 있는 업무를 삭제하면 하위 업무가 화면에서만 최상위로 보이고 DB에는 삭제된 업무를 여전히 상위로 참조해, 나중에 휴지통에서 복원하면 하위 업무가 다시 조용히 나타나는 문제를 수정했습니다. 이제 업무 삭제 시 직속 하위 업무를 서버에서 실제로 최상위로 승격하고, 삭제 확인 메시지에도 몇 개가 이동하는지 안내합니다 (backend/app/main.py delete_endpoint, frontend/src/App.jsx, 회귀 테스트 backend/tests/test_e2e_smoke.py).',
+  },
+  {
     id: '2026-07-13-todo-carryover',
     timestamp: '2026-07-13T13:41:12+09:00',
     description: '오늘 화면의 오늘 할 일이 날짜가 지나도 자동으로 옮겨지지 않고 조용히 묻히던 문제를 개선했습니다. 완료하지 못한 지난 할 일이 있으면 배너로 알리고 "오늘로 이월" 버튼 한 번으로 오늘 날짜로 옮길 수 있습니다 (frontend/src/todoCarryover.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',

@@ -90,6 +90,21 @@ class SmokeE2ETests(unittest.TestCase):
         for expected in ("create", "update", "delete", "restore"):
             self.assertIn(expected, actions)
 
+    def test_deleting_parent_task_promotes_children_to_top_level(self):
+        parent_id = self.client.post("/api/tasks", json={"title": "Parent task", "status": "todo", "progress": 0}).json()["id"]
+        child_id = self.client.post("/api/tasks", json={"title": "Child task", "status": "todo", "progress": 0,
+                                                          "parent_id": parent_id}).json()["id"]
+
+        deleted = self.client.delete(f"/api/tasks/{parent_id}")
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+
+        child = self.client.get(f"/api/tasks/{child_id}").json()
+        self.assertIsNone(child["parent_id"])
+
+        actions = [row["action"] for row in self.client.get("/api/audit-logs").json()["items"]
+                   if row["entity_type"] == "tasks" and row["entity_id"] == str(child_id)]
+        self.assertIn("update", actions)
+
 
 if __name__ == "__main__":
     unittest.main()

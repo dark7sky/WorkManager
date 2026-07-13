@@ -775,6 +775,7 @@ for _table in CONFIG:
 
     def delete_endpoint(item_id: int, table=_table, user=Depends(require_user)):
         remote = None
+        promoted_children = []
         with connection() as c:
             existing = c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
             if not existing:
@@ -786,6 +787,11 @@ for _table in CONFIG:
                 c.execute("UPDATE events SET deleted_at=?,sync_state='deleted' WHERE id=? AND user_id=?", (now(), item_id, user))
             else:
                 c.execute(f"UPDATE {table} SET deleted_at=? WHERE id=? AND user_id=?", (now(), item_id, user))
+            if table == "tasks":
+                promoted_children = [r["id"] for r in c.execute(
+                    "SELECT id FROM tasks WHERE user_id=? AND parent_id=? AND deleted_at IS NULL", (user, item_id)).fetchall()]
+                if promoted_children:
+                    c.execute(f"UPDATE tasks SET parent_id=NULL WHERE user_id=? AND parent_id=?", (user, item_id))
         pending = False
         if remote:
             try:
@@ -793,6 +799,8 @@ for _table in CONFIG:
             except HTTPException:
                 pending = True
         audit(user, "delete", table, item_id, {"sync_pending": pending})
+        for child_id in promoted_children:
+            audit(user, "update", "tasks", child_id, {"parent_id": None, "reason": "parent_deleted"})
         return {"ok": True, "sync_pending": pending}
 
     app.add_api_route(f"/api/{_table}", list_endpoint, methods=["GET"], name=f"list_{_table}")

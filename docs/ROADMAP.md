@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (13:37 KST)
+Last updated: 2026-07-13 (13:44 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -87,6 +87,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Task estimated vs. actual time: work logs already tracked `duration_minutes`, but tasks had no planned-effort field to compare it against, so Performance reports could show time spent but never whether it matched the plan. Added a nullable `estimated_minutes` column on tasks (backend `TaskPayload`/`CONFIG`/`db.py` migration), an input on the task form, an "예상 Xh" badge on Gantt rows, and an "완료 업무 예상 소요 시간" stat/report line next to the existing "기록된 소요 시간" total (`backend/app/main.py` achievements summary, `frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`, 2026-07-13).
 - [x] Calendar CSV export: the Calendar screen only offered an ICS download; Tasks/Performance/Audit Log all also had a CSV export for spreadsheet/reporting use, but events didn't. Added a "CSV" button next to the existing ICS export that downloads the current tag-filtered event list (제목/시작/종료/종일 여부/장소/태그/메모) as CSV (`eventsToCsv`/`eventCsvFilename` in `frontend/src/csv.js`, wired into `Calendar.jsx`, 2026-07-13).
 - [x] Todo carryover: the Today screen's 오늘 할 일 list only ever fetched today's todos, so an incomplete todo from a past date silently disappeared from view instead of rolling forward like it does in other daily planners. Added a banner ("지난 할 일 n개가 남아 있습니다") with a one-click "오늘로 이월" button that bulk-updates those todos' `todo_date` to today (`overdueIncompleteTodos` in `frontend/src/todoCarryover.js`, wired into `Today.jsx`/`App.jsx`, 2026-07-13).
+- [x] Fix task-delete parent/child data divergence: deleting a task with subtasks only cleared the hierarchy visually (the frontend already treated an orphaned `parent_id` as top-level), but the DB row still pointed `parent_id` at the now-deleted parent, so restoring that parent from trash silently re-nested the children again. `DELETE /api/tasks/{id}` now clears `parent_id` on direct children in the same transaction (audited as an `update`), and the delete-confirmation dialog tells the user how many subtasks will be promoted (`backend/app/main.py` delete_endpoint, `frontend/src/App.jsx`, regression test `test_deleting_parent_task_promotes_children_to_top_level` in `backend/tests/test_e2e_smoke.py`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 
