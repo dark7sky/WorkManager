@@ -22,8 +22,8 @@ function overlapsDay(event, day) {
 
 export default function Today(props) {
   const {
-    tasks = [], allTasks = [], events = [], todos = [], logs = [], loading,
-    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onClearCompletedTodos,
+    tasks = [], allTasks = [], events = [], todos = [], overdueTodos = [], logs = [], loading,
+    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onClearCompletedTodos, onCarryOverTodos,
     onAddLog, onUpdateLog, onDeleteLog, onToggleTask, goAI,
   } = props
   const now = new Date()
@@ -117,6 +117,7 @@ export default function Today(props) {
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
+        {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''}`} key={todo.id}>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>
           <div>{editable('todo', todo) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`todo-${todo.id}`, 'todo', editText)}>AI 태그 추천</button>{recommendationButtons(`todo-${todo.id}`, editTags, setEditTags)}</div></> : <><span>{todo.title}</span><TagChips tags={todo.tags}/></>}</div>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-carryover',
+    timestamp: '2026-07-13T13:41:12+09:00',
+    description: '오늘 화면의 오늘 할 일이 날짜가 지나도 자동으로 옮겨지지 않고 조용히 묻히던 문제를 개선했습니다. 완료하지 못한 지난 할 일이 있으면 배너로 알리고 "오늘로 이월" 버튼 한 번으로 오늘 날짜로 옮길 수 있습니다 (frontend/src/todoCarryover.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-calendar-csv-export',
     timestamp: '2026-07-13T13:37:27+09:00',
     description: '일정(캘린더) 화면에 CSV 내보내기 버튼을 추가했습니다. 기존 ICS 내보내기 옆에 나란히 배치되어, 현재 태그 필터가 적용된 일정 목록을 제목/시작/종료/종일 여부/장소/태그/메모 컬럼의 CSV 파일로 내려받을 수 있습니다 (frontend/src/csv.js, frontend/src/screens/Calendar.jsx).',
