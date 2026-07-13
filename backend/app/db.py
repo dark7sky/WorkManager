@@ -159,6 +159,8 @@ def init_db():
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")
         for name, definition in {"lease_owner": "TEXT", "lease_until": "TEXT"}.items():
             _add_column(c, "google_sync_state", name, definition)
+        for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT"}.items():
+            _add_column(c, "todos", name, definition)
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")

@@ -482,6 +482,23 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_completing_recurring_todo_spawns_next_occurrence(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "water plants", "todo_date": "2026-07-06", "recurrence_rule": "daily"}).json()
+        completed = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
+        self.assertIn("next_recurrence_id", completed)
+        next_todo = a.get("/api/todos").json()
+        spawned = next(t for t in next_todo if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["todo_date"], "2026-07-07")
+        self.assertEqual(spawned["recurrence_rule"], "daily")
+        self.assertFalse(spawned["completed"])
+        # Re-patching an already-completed todo must not spawn a second occurrence.
+        recompleted = a.patch(f"/api/todos/{todo['id']}", json={"completed": True})
+        self.assertEqual(recompleted.status_code, 200, recompleted.text)
+        self.assertNotIn("next_recurrence_id", recompleted.json())
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()

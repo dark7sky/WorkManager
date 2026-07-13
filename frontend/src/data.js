@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-recurrence',
+    timestamp: '2026-07-13T17:51:57+09:00',
+    description: '오늘 할 일에 매일/매주 반복 설정을 추가했습니다. 반복 할 일을 완료하면 다음 날짜의 할 일이 자동으로 생성되어, 매번 새로 입력하지 않아도 됩니다 (backend/app/main.py spawn_recurring_todo, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-no-due-date-filter',
     timestamp: '2026-07-13T13:45:46+09:00',
     description: '업무 화면의 상태 필터에 "기한 미설정" 항목을 추가했습니다. 시작일/기한을 아예 입력하지 않은 미완료 업무는 지연 업무 필터로도 걸러지지 않아 조용히 방치되기 쉬웠는데, 이제 한 번의 필터 선택으로 일정이 비어 있는 업무만 모아 볼 수 있습니다 (frontend/src/taskFilters.js filterTasks, frontend/src/screens/Tasks.jsx).',

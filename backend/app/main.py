@@ -285,6 +285,12 @@ class TodoPayload(StrictPayload):
     todo_date: date | None = None
     completed: bool | None = None
     tags: list[str] | None = Field(None, max_length=50)
+    recurrence_rule: Literal["daily", "weekly"] | None = None
+
+    @field_validator("recurrence_rule", mode="before")
+    @classmethod
+    def empty_recurrence_to_null(cls, value):
+        return None if value == "" else value
 
 
 class WorkLogPayload(StrictPayload):
@@ -324,7 +330,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids", "estimated_minutes"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags"}, None),
+    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
 }
 
@@ -444,7 +450,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id", "estimated_minutes"},
-                "events": set(), "todos": set(), "work_logs": {"task_id", "duration_minutes"}}[table]
+                "events": set(), "todos": {"recurrence_rule"}, "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -591,6 +597,25 @@ def spawn_recurring_task(task, user_id):
     return next_id
 
 
+def spawn_recurring_todo(todo, user_id):
+    rule = todo.get("recurrence_rule")
+    if not rule or todo.get("recurrence_spawned_at"):
+        return None
+    timestamp = now()
+    next_date = next_recurrence_date(todo.get("todo_date"), rule)
+    with connection() as c:
+        # The conditional marker update makes concurrent completion requests idempotent.
+        if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
+                         (timestamp, todo["id"], user_id)).rowcount:
+            return None
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,created_at)
+          VALUES(?,?,?,0,?,?,?)""",
+          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, timestamp))
+        next_id = cur.lastrowid
+    audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
+    return next_id
+
+
 def create_item(table, data, user_id):
     data = normalize(table, data)
     if table == "tasks":
@@ -645,6 +670,7 @@ def create_item(table, data, user_id):
 
 def update_item(table, item_id, data, user_id):
     became_done = False
+    todo_became_done = False
     if table == "tasks" and "start_date" in data and "due_date" in data:
         with connection() as c:
             existing_row = c.execute("SELECT start_date, due_date FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
@@ -668,6 +694,8 @@ def update_item(table, item_id, data, user_id):
         existing = c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
         if not existing:
             raise HTTPException(404, "Item not found")
+        if table == "todos" and "completed" in data and data["completed"] and not existing["completed"]:
+            todo_became_done = True
         if table == "tasks":
             approval_workflow_on = load_approval_workflow_setting(user_id)
             visible_task_ids = None
@@ -751,6 +779,10 @@ def update_item(table, item_id, data, user_id):
     audit(user_id, "update", table, item_id, {"fields": sorted(data)})
     if table == "tasks" and became_done:
         next_id = spawn_recurring_task(item, user_id)
+        if next_id:
+            item["next_recurrence_id"] = next_id
+    if table == "todos" and todo_became_done:
+        next_id = spawn_recurring_todo(item, user_id)
         if next_id:
             item["next_recurrence_id"] = next_id
     return item
