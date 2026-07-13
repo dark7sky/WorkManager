@@ -5,7 +5,7 @@ import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
-import { filterTodosByQuery, filterLogsByQuery } from '../todaySearch'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
 import { todoCsvFilename, todosToCsv } from '../csv'
 
 function localDate(value) {
@@ -50,6 +50,7 @@ export default function Today(props) {
   const [saving, setSaving] = useState('')
   const [selectedTags, setSelectedTags] = useState([])
   const [query, setQuery] = useState('')
+  const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
   const [tagSuggestions, setTagSuggestions] = useState({})
   const [timer, setTimer] = useState(() => loadWorkLogTimer())
   const [timerNow, setTimerNow] = useState(() => new Date())
@@ -80,7 +81,7 @@ export default function Today(props) {
   const matches = item => !selectedTags.length || selectedTags.every(tag => (item.tags || []).includes(tag))
   const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
-  const shownTodos = orderTodosByPin(filterTodosByQuery(todos.filter(matches), query), pinnedTodoIds)
+  const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds)
   const completedTodos = shownTodos.filter(todo => todo.completed)
   const shownLogs = filterLogsByQuery(logs.filter(matches), query)
 
@@ -148,6 +149,7 @@ export default function Today(props) {
         <div className="section-title"><div><h2>오늘 할 일</h2><p>오늘 예정 업무와 빠른 Todo를 함께 확인합니다.</p></div>{loading ? <span className="status-pill">동기화 중…</span> : null}</div>
         <input className="search" type="search" value={query} onChange={event => setQuery(event.target.value)} aria-label="할 일/기록 검색" placeholder="할 일, 업무 기록 검색"/>
         <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
+        <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
         <form className="quick-entry" onSubmit={submitTodo}>
           <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><select aria-label="우선순위" value={todoPriority} onChange={event => setTodoPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={todoRecurrence} onChange={event => setTodoRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option></select><button disabled={saving === 'todo'}>추가</button></div>
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>

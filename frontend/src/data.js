@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-priority-filter',
+    timestamp: '2026-07-13T23:25:23+09:00',
+    description: '오늘 화면의 할 일 목록에 우선순위 필터(모든 우선순위/높음/보통/낮음)를 추가했습니다. 지금까지는 태그와 검색어로만 좁혀볼 수 있어, 급한 할 일만 골라보려면 목록을 눈으로 훑어야 했습니다 (frontend/src/todaySearch.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-13-todo-csv-export',
     timestamp: '2026-07-13T23:25:00+09:00',
     description: '오늘 화면의 할 일 목록에 CSV 내보내기 버튼을 추가했습니다. 업무/일정/감사 로그는 이미 CSV로 내보낼 수 있었지만 Todo만 화면에서만 확인할 수 있어 스프레드시트로 옮기려면 하나씩 옮겨 적어야 했습니다 (frontend/src/csv.js, frontend/src/screens/Today.jsx).',

@@ -1,10 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { filterTodosByQuery, filterLogsByQuery } from './todaySearch.js'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from './todaySearch.js'
 
 const todos = [
-  { id: 1, title: '보고서 작성' },
-  { id: 2, title: '이메일 확인' },
+  { id: 1, title: '보고서 작성', priority: 'high' },
+  { id: 2, title: '이메일 확인', priority: 'low' },
   { id: 3, title: '팀 회의 준비' },
 ]
 
@@ -28,4 +28,17 @@ test('filterLogsByQuery returns all logs for an empty query', () => {
 
 test('filterLogsByQuery matches by content', () => {
   assert.deepEqual(filterLogsByQuery(logs, '보고서').map(l => l.id), [1])
+})
+
+test('filterTodosByPriority returns all todos when priority is all', () => {
+  assert.equal(filterTodosByPriority(todos, 'all').length, 3)
+  assert.equal(filterTodosByPriority(todos).length, 3)
+})
+
+test('filterTodosByPriority matches an explicit priority', () => {
+  assert.deepEqual(filterTodosByPriority(todos, 'high').map(t => t.id), [1])
+})
+
+test('filterTodosByPriority treats a missing priority as normal', () => {
+  assert.deepEqual(filterTodosByPriority(todos, 'normal').map(t => t.id), [3])
 })
