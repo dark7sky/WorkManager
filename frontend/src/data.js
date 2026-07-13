@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-event-color',
+    timestamp: '2026-07-14T05:40:00+09:00',
+    description: '캘린더 일정은 모두 같은 파란색으로만 표시되어, 회의/개인 일정/마감 등 종류가 다른 일정을 색으로 구분할 방법이 없었습니다. 일정 등록/수정 폼에 "색상" 선택(빨강/주황/노랑/초록/보라/회색/기본)을 추가해 월간·주간 캘린더 칩에 선택한 색이 반영되도록 했고, 일정 복제 시 색상도 함께 복사되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/eventColors.js, frontend/src/screens/Calendar.jsx, frontend/src/eventDuplicate.js).',
+  },
+  {
     id: '2026-07-14-bulk-priority-change',
     timestamp: '2026-07-14T05:38:00+09:00',
     description: '업무 목록의 일괄 작업 도구모음은 선택한 업무를 완료 처리/태그 추가/연기/삭제할 수 있었지만 우선순위를 한꺼번에 바꿀 방법은 없어, 여러 업무의 중요도를 재조정하려면 하나씩 열어 수정해야 했습니다. 선택 항목이 있을 때 "우선순위 변경" 선택 상자와 적용 버튼을 일괄 작업 도구모음에 추가했습니다 (frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',

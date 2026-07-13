@@ -552,6 +552,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_color_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        event = a.post("/api/events", json={"title": "colored", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "color": "red"})
+        self.assertEqual(event.status_code, 200, event.text)
+        self.assertEqual(event.json()["color"], "red")
+        cleared = a.patch(f"/api/events/{event.json()['id']}", json={"color": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["color"])
+        self.assertEqual(a.post("/api/events", json={"title": "bad color", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "color": "not-a-color"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_checklist_is_persisted_and_sanitized(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "with checklist", "checklist": [

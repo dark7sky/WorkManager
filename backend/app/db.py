@@ -156,7 +156,7 @@ def init_db():
             "google_is_all_day": "INTEGER NOT NULL DEFAULT 0",
             "recurrence": "TEXT NOT NULL DEFAULT '[]'",
             "local_uid": "TEXT", "google_is_series_master": "INTEGER NOT NULL DEFAULT 0",
-            "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT",
+            "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT", "color": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")

@@ -5,4 +5,5 @@ export const buildEventDuplicatePayload = event => ({
   end_at: event?.end_at || event?.end || null,
   location: (event?.location || '').trim(),
   tags: Array.isArray(event?.tags) ? event.tags : [],
+  color: event?.color || null,
 })
