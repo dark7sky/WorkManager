@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-today-search',
+    timestamp: '2026-07-13T23:15:00+09:00',
+    description: '오늘 화면에 검색창을 추가했습니다. 태그로만 좁혀볼 수 있었던 오늘 할 일/업무 기록을 제목·내용 텍스트로도 필터할 수 있습니다 (frontend/src/todaySearch.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-13-calendar-ics-import',
     timestamp: '2026-07-13T23:10:00+09:00',
     description: '캘린더 화면에 ICS 가져오기 기능을 추가했습니다. 외부 캘린더(Google/Outlook/Apple)에서 내보낸 .ics 파일을 업로드하면 안에 담긴 일정을 그대로 등록할 수 있습니다 (frontend/src/ics.js parseIcs, frontend/src/screens/Calendar.jsx).',
