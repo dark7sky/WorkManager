@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-worklog-timer',
+    timestamp: '2026-07-13T18:33:11+09:00',
+    description: '업무 기록의 소요 시간(duration_minutes)은 이미 있었지만 직접 분 단위로 입력해야 해서, 일이 끝난 뒤 시간을 어림잡아 적는 경우가 많았습니다. 오늘 한 일 등록 폼에 "타이머 시작/중지" 버튼을 추가해, 작업 중 타이머를 켜두면 중지 시 경과 시간이 분 단위로 자동 입력됩니다 (frontend/src/workLogTimer.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-13-task-link-url',
     timestamp: '2026-07-13T18:29:19+09:00',
     description: '업무에 관련 문서·티켓·회의록 등 외부 자료 링크를 남길 방법이 없어, 항상 메모란에 URL을 섞어 적어야 했습니다. 업무 등록/수정 폼에 "관련 링크" 입력란을 추가하고(https만 허용), 업무 목록의 각 행에 링크가 있으면 새 탭에서 여는 "관련 링크" 배지를 표시합니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/taskFormPayload.js, frontend/src/screens/Tasks.jsx).',
