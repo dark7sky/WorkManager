@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-subtask-row-scale-reconfirm-2',
+    timestamp: '2026-07-13T09:03:31+09:00',
+    description: '하위 업무 행 시각 구분(요청 #13) 재점검: 깊이별로 행 높이·글씨 크기·간트 막대 크기가 순차적으로 줄어드는 동작(subtask-depth-1/2/3)과 관련 테스트(taskHierarchy.test.js)를 다시 확인해 정상 동작을 재확인했습니다.',
+  },
+  {
     id: '2026-07-13-subtask-row-scale-reconfirm',
     timestamp: '2026-07-13T09:02:29+09:00',
     description: '하위 업무 행 시각 구분(요청 #13) 재점검: 깊이별로 행 높이·글씨 크기·간트 막대 크기가 순차적으로 줄어드는 동작(subtask-depth-1/2/3)과 관련 테스트를 확인해 정상 동작을 재확인했습니다.',
