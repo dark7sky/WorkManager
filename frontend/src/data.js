@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-duplicate',
+    timestamp: '2026-07-13T18:18:00+09:00',
+    description: '업무·일정에는 이미 "복제" 버튼이 있었지만 오늘 할 일 목록에는 없어, 비슷한 할 일을 다시 만들려면 매번 새로 입력해야 했습니다. 각 할 일 행에 복제 버튼을 추가해 제목/태그/반복 설정을 그대로 복사한 새 할 일을(완료 상태는 초기화, 날짜는 오늘로) 한 번에 만들 수 있습니다 (frontend/src/todoDuplicate.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-nav-overdue-badge',
     timestamp: '2026-07-13T18:08:54+09:00',
     description: '지연된 업무가 몇 건인지 확인하려면 매번 업무 화면을 열어야 했습니다. 사이드바·모바일 하단 메뉴의 "업무" 메뉴 아이콘에 지연 업무 개수를 보여주는 빨간 배지를 추가해, 어느 화면에 있든 한눈에 확인할 수 있습니다 (frontend/src/components/AppShell.jsx, frontend/src/App.jsx, 기존 summarizeDueReminders 재사용).',
