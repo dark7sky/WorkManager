@@ -9,6 +9,7 @@ import { eventsToIcs, icsFilename } from '../ics'
 import { eventCsvFilename, eventsToCsv } from '../csv'
 import { filterEventsByQuery } from '../eventSearch'
 import { buildEventDuplicatePayload } from '../eventDuplicate'
+import { expandRecurringEvent } from '../eventRecurrence'
 import { api } from '../api'
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토']
@@ -35,6 +36,8 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
   const [suggestions, setSuggestions] = useState([])
   const [startValue, setStartValue] = useState(() => localInput(event?.start_at || event?.start || `${date}T09:00:00`))
   const [endValue, setEndValue] = useState(() => localInput(event?.end_at || event?.end || `${date}T10:00:00`))
+  const [repeatRule, setRepeatRule] = useState('')
+  const [repeatUntil, setRepeatUntil] = useState('')
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
   const recommendTags = async () => {
@@ -63,9 +66,12 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     formEvent.preventDefault()
     const data = Object.fromEntries(new FormData(formEvent.currentTarget))
     if (new Date(data.end_at) <= new Date(data.start_at)) { setError('종료 시간은 시작 시간보다 늦어야 합니다.'); return }
+    if (repeatRule && repeatUntil && new Date(repeatUntil) < new Date(data.start_at)) { setError('반복 종료일은 시작일 이후여야 합니다.'); return }
     setSaving(true)
     setError('')
-    const ok = await onSave({ ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags })
+    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags }
+    const toSave = !event && repeatRule && repeatUntil ? expandRecurringEvent(payload, repeatRule, repeatUntil) : payload
+    const ok = await onSave(toSave)
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 유지됩니다.')
     setSaving(false)
   }
@@ -74,6 +80,7 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
     <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange}/></label>
     <label className="span-2">장소<input name="location" defaultValue={event?.location || ''}/></label>
+    {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}

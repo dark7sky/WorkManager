@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (18:04 KST)
+Last updated: 2026-07-13 (18:20 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -96,6 +96,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Calendar event duplication: Tasks already had a one-click "복제" button to copy a similar item, but events had no equivalent, so recreating a similar one-off event meant retyping title/time/location/tags from scratch. Added a "복제" button in the event edit form that creates a new event titled "(사본)" with the same time/location/tags (`buildEventDuplicatePayload` in `frontend/src/eventDuplicate.js`, wired into `Calendar.jsx`, 2026-07-13).
 - [x] Overdue task count badge on navigation: the app had no at-a-glance indicator of how many tasks were overdue outside the Tasks screen itself. Added a red count badge on the "업무" sidebar/mobile-nav item, computed via the existing `summarizeDueReminders` overdue count and passed from `App.jsx` into `AppShell.jsx` as `navBadges` (2026-07-13).
 - [x] Todo duplication: Tasks and Calendar events already had a one-click "복제" button, but the Today screen's quick-todo list had no equivalent, so recreating a similar recurring or one-off todo meant retyping it from scratch. Added a duplicate button on each todo row that copies title/tags/recurrence into a new todo dated today with completion reset (`frontend/src/todoDuplicate.js`, wired into `Today.jsx`/`App.jsx`, 2026-07-13).
+- [x] Calendar event recurrence: tasks and todos both had a `recurrence_rule` (daily/weekly), but locally-created calendar events had no repeat option at all — the existing `events.recurrence` column only ever held Google's own RRULE strings mirrored during sync, never something a user could set for a local event. Added a "반복"(매일/매주/매월) + "반복 종료일" control to the new-event form that expands into individual event rows up to the end date (capped at 52 occurrences) via a pure `expandRecurringEvent` (`frontend/src/eventRecurrence.js`, with tests), wired into `Calendar.jsx`'s `EventForm` and `App.jsx`'s bulk-create `onCreate` handler, 2026-07-13.
 
 ## Removed (2026-07-10): Team/Assignee Features
 

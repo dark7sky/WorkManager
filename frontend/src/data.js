@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-event-recurrence',
+    timestamp: '2026-07-13T18:20:39+09:00',
+    description: '업무·오늘 할 일은 반복 등록이 가능했지만 캘린더 일정에는 반복 옵션이 없어, 매주 하는 회의 같은 일정을 매번 새로 등록해야 했습니다. 새 일정 등록 폼에 "반복"(매일/매주/매월)과 "반복 종료일"을 추가해, 등록 시 지정한 기간까지의 개별 일정을 한 번에 만들 수 있습니다 (frontend/src/eventRecurrence.js, frontend/src/screens/Calendar.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-13-todo-duplicate',
     timestamp: '2026-07-13T18:18:00+09:00',
     description: '업무·일정에는 이미 "복제" 버튼이 있었지만 오늘 할 일 목록에는 없어, 비슷한 할 일을 다시 만들려면 매번 새로 입력해야 했습니다. 각 할 일 행에 복제 버튼을 추가해 제목/태그/반복 설정을 그대로 복사한 새 할 일을(완료 상태는 초기화, 날짜는 오늘로) 한 번에 만들 수 있습니다 (frontend/src/todoDuplicate.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
