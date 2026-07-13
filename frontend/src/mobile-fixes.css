@@ -2,8 +2,15 @@
    are both silently ignored on iOS Safari standalone and some Android
    launchers, so the device still physically rotates. This CSS fallback
    blocks the app UI in landscape whenever it's running installed, so the
-   app itself never ends up unusable-rotated even when the OS rotates it. */
-@media (display-mode: standalone) and (orientation: landscape) and (max-width: 1023px) {
+   app itself never ends up unusable-rotated even when the OS rotates it.
+   manifest.webmanifest's display_override lists window-controls-overlay and
+   minimal-ui ahead of standalone, so the browser can report either of those
+   as the active display-mode instead of "standalone" - match all of them or
+   the overlay silently never triggers on those launchers. */
+@media
+  (display-mode: standalone) and (orientation: landscape) and (max-width: 1023px),
+  (display-mode: window-controls-overlay) and (orientation: landscape) and (max-width: 1023px),
+  (display-mode: minimal-ui) and (orientation: landscape) and (max-width: 1023px) {
   #root { display: none; }
   body::before {
     content: "화면을 세로 방향으로 돌려주세요";
