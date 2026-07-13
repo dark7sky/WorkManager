@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-13 (04:37 KST)
+Last updated: 2026-07-13 (13:11 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -79,6 +79,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Task sort persistence: the Tasks screen "정렬" dropdown (일정순/우선순위순/진행률순/제목순) reset to 일정순 on every reload/revisit, losing a user's preferred order. Added `loadTaskSort`/`saveTaskSort` (localStorage, same pattern as the existing filter presets) in `frontend/src/taskHierarchy.js`, wired into `Tasks.jsx`, 2026-07-13.
 - [x] Performance report CSV export: the 성과 (Performance) screen could only export the period report as Markdown, so pulling the activity timeline into a spreadsheet for management reporting meant retyping it. Added a "CSV 내보내기" button next to the existing Markdown export that downloads the same date/tag-filtered timeline as CSV (`timelineToCsv`/`timelineCsvFilename` in `frontend/src/csv.js`, wired into `Performance.jsx`, 2026-07-13).
 - [x] AI multi-item parsing only split requests on newlines, so a single-line numbered list like "오늘해야할일 1.AAA 2. BBB 3. CCC" (user request #16) was parsed as one item instead of three. `rule_parse_multi` now also splits numbered list markers (`1.`/`2)`) within a line, and each new task/todo has its tags auto-matched against existing tasks' titles/tags via `_match_tags`; the remote-AI prompt was updated with the same instructions (`backend/app/ai.py`, 2026-07-13).
+- [x] Work log time tracking: work logs had no notion of how long a piece of work took, so Performance reports could count activity but not effort. Added an optional `duration_minutes` field to work logs (backend `work_logs` table/`WorkLogPayload`), a minutes input on the Today screen's log entry/edit forms, and a "기록된 소요 시간" total in the Performance screen's stat tiles and Markdown report (`formatDuration` in `frontend/src/performanceReport.js`, 2026-07-13).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

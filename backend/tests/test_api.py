@@ -420,6 +420,23 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_duration_minutes_is_persisted_and_summed_in_report(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "focused work", "log_date": "2026-07-06", "duration_minutes": 90})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["duration_minutes"], 90)
+        second = a.post("/api/work_logs", json={"content": "more work", "log_date": "2026-07-06", "duration_minutes": 30})
+        self.assertEqual(second.status_code, 200, second.text)
+        report = a.get("/api/achievements?start_date=2026-07-01&end_date=2026-07-31")
+        self.assertEqual(report.status_code, 200, report.text)
+        self.assertGreaterEqual(report.json()["summary"]["tracked_minutes"], 120)
+        patched = a.patch(f"/api/work_logs/{log.json()['id']}", json={"duration_minutes": 45})
+        self.assertEqual(patched.status_code, 200, patched.text)
+        self.assertEqual(patched.json()["duration_minutes"], 45)
+        self.assertEqual(a.post("/api/work_logs", json={"content": "too long", "duration_minutes": 1441}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_dependency_cycle_is_rejected(self, *_):
         a = self.client(self.token_a)
         first = a.post("/api/tasks", json={"title": "first"}).json()

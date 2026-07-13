@@ -1,6 +1,21 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration } from './performanceReport.js'
+
+test('formatDuration: formats minutes as hours/minutes in Korean', () => {
+  assert.strictEqual(formatDuration(0), '0분')
+  assert.strictEqual(formatDuration(45), '45분')
+  assert.strictEqual(formatDuration(60), '1시간')
+  assert.strictEqual(formatDuration(125), '2시간 5분')
+  assert.strictEqual(formatDuration(null), '0분')
+})
+
+test('performanceReportMarkdown: includes tracked duration in summary', () => {
+  const data = { summary: { tracked_minutes: 125 }, timeline: [] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(md.includes('기록된 소요 시간: 2시간 5분'))
+})
 
 test('performanceReportMarkdown: generates basic structure', () => {
   const data = { summary: { completed_tasks: 5, work_logs: 10, events: 3, active_tasks: 2, completed_todos: 8 }, timeline: [] }

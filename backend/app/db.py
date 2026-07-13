@@ -125,6 +125,7 @@ def init_db():
             _add_column(c, table, "deleted_at", "TEXT")
             _add_column(c, table, "tags", "TEXT NOT NULL DEFAULT '[]'")
             c.execute(f"UPDATE {table} SET user_id=? WHERE user_id IS NULL", (LEGACY_USER_ID,))
+        _add_column(c, "work_logs", "duration_minutes", "INTEGER")
         for name, definition in {
             "recurrence_rule": "TEXT", "parent_id": "INTEGER", "dependency_ids": "TEXT NOT NULL DEFAULT '[]'",
             "recurrence_spawned_at": "TEXT", "recurrence_anchor_day": "INTEGER",

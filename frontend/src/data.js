@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-work-log-duration-tracking',
+    timestamp: '2026-07-13T13:11:27+09:00',
+    description: '업무 기록(오늘 한 일)에 소요 시간(분)을 함께 남길 수 있도록 했습니다. "오늘" 화면 기록 입력/수정에 분 입력칸이 추가되었고, 성과 화면 요약 카드와 Markdown 보고서에 기간 내 총 소요 시간이 표시됩니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js).',
+  },
+  {
     id: '2026-07-13-task-dependency-checkbox-picker',
     timestamp: '2026-07-13T13:05:08+09:00',
     description: '업무 등록/수정 화면의 "선행 업무" 선택이 브라우저 기본 다중 선택 상자(Ctrl/Cmd+클릭 없이는 해제 불가)였던 문제를 고쳤습니다. 이제 체크박스 목록으로 바뀌어 항목을 클릭 한 번으로 자유롭게 선택·해제할 수 있습니다 (frontend/src/components/TaskForm.jsx).',

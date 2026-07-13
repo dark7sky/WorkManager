@@ -11,6 +11,13 @@ export const presetRange = (preset, today = new Date()) => {
   return [isoDay(start), isoDay(end)]
 }
 
+export const formatDuration = minutes => {
+  const total = Math.max(0, Math.round(Number(minutes) || 0))
+  const h = Math.floor(total / 60), m = total % 60
+  if (!total) return '0분'
+  return [h ? `${h}시간` : '', m ? `${m}분` : ''].filter(Boolean).join(' ')
+}
+
 export const performanceReportMarkdown = (data, { start, end, tags = [], summary = null, generatedAt }) => {
   const stats = data?.summary || {}
   const items = data?.timeline || []
@@ -23,6 +30,7 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
     '## 요약',
     `- 완료 업무: ${stats.completed_tasks || 0}`,
     `- 업무 기록: ${stats.work_logs || 0}`,
+    `- 기록된 소요 시간: ${formatDuration(stats.tracked_minutes)}`,
     `- 일정: ${stats.events || 0}`,
     `- 진행 중 업무: ${stats.active_tasks || 0}`,
     `- 완료한 오늘 할 일: ${stats.completed_todos || 0}`,

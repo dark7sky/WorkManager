@@ -3,7 +3,7 @@ import { CalendarRange, CheckCircle2, Clipboard, Clock3, Download, LoaderCircle,
 import Header from '../components/Header'
 import { api } from '../api'
 import { TagChips, TagFilter } from '../components/TagsInput'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange } from '../performanceReport'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration } from '../performanceReport'
 import { timelineToCsv, timelineCsvFilename } from '../csv'
 
 const getRange = presetRange
@@ -122,7 +122,7 @@ export default function Performance({ notify, onDataChanged }) {
   }, [savedPresets, notify])
 
   const items = data?.timeline || [], stats = data?.summary || {}
-  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
+  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
     <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button></section>

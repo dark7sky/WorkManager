@@ -33,10 +33,12 @@ export default function Today(props) {
   const [logDraft, setLogDraft] = useState('')
   const [logTags, setLogTags] = useState([])
   const [logTaskId, setLogTaskId] = useState('')
+  const [logMinutes, setLogMinutes] = useState('')
   const [edit, setEdit] = useState(null)
   const [editText, setEditText] = useState('')
   const [editTags, setEditTags] = useState([])
   const [editTaskId, setEditTaskId] = useState('')
+  const [editMinutes, setEditMinutes] = useState('')
   const [saving, setSaving] = useState('')
   const [selectedTags, setSelectedTags] = useState([])
   const [tagSuggestions, setTagSuggestions] = useState({})
@@ -67,10 +69,11 @@ export default function Today(props) {
     event.preventDefault()
     if (!logDraft.trim()) return
     setSaving('log')
-    if (await onAddLog(logDraft.trim(), logTags, logTaskId ? Number(logTaskId) : null)) {
+    if (await onAddLog(logDraft.trim(), logTags, logTaskId ? Number(logTaskId) : null, logMinutes ? Number(logMinutes) : null)) {
       setLogDraft('')
       setLogTags([])
       setLogTaskId('')
+      setLogMinutes('')
     }
     setSaving('')
   }
@@ -78,7 +81,7 @@ export default function Today(props) {
     setEdit({ type, id: item.id })
     setEditText(item.title || item.content)
     setEditTags(item.tags || [])
-    if (type === 'log') setEditTaskId(item.task_id ?? '')
+    if (type === 'log') { setEditTaskId(item.task_id ?? ''); setEditMinutes(item.duration_minutes ?? '') }
   }
   const saveEdit = async item => {
     if (!editText.trim()) return
@@ -86,7 +89,7 @@ export default function Today(props) {
     setSaving(key)
     const ok = edit.type === 'todo'
       ? await onUpdateTodo(item.id, editText.trim(), editTags)
-      : await onUpdateLog(item.id, editText.trim(), editTags, editTaskId ? Number(editTaskId) : null)
+      : await onUpdateLog(item.id, editText.trim(), editTags, editTaskId ? Number(editTaskId) : null, editMinutes ? Number(editMinutes) : null)
     if (ok) setEdit(null)
     setSaving('')
   }
@@ -126,8 +129,8 @@ export default function Today(props) {
       </aside>
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
-        <form className="quick-entry" onSubmit={submitLog}><div className="quick-add"><Plus/><input value={logDraft} onChange={event => setLogDraft(event.target.value)} aria-label="오늘 한 일"/><button disabled={saving === 'log'}>기록</button></div><select aria-label="연결 업무" value={logTaskId} onChange={e=>setLogTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><TagsInput label="업무 기록 태그" value={logTags} onChange={setLogTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('log-new', 'work_log', logDraft)}>AI 태그 추천</button>{recommendationButtons('log-new', logTags, setLogTags)}</div></form>
-        <div className="done-notes">{shownLogs.map(log => <div key={log.id}><Check/><div>{editable('log', log) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><select aria-label="연결 업무" value={editTaskId} onChange={e=>setEditTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`log-${log.id}`, 'work_log', editText)}>AI 태그 추천</button>{recommendationButtons(`log-${log.id}`, editTags, setEditTags)}</div></> : <><span>{log.content}</span>{log.task_id&&taskTitle.has(log.task_id)?<small className="log-task-link">#{log.task_id} {taskTitle.get(log.task_id)}</small>:null}<TagChips tags={log.tags}/></>}</div><span className="row-actions">{editable('log', log) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `log-${log.id}`} onClick={() => saveEdit(log)}><Check/></button></> : <button aria-label={`${log.content} 수정`} onClick={() => beginEdit('log', log)}><Pencil/></button>}<button className="danger-icon" aria-label={`${log.content} 삭제`} onClick={() => onDeleteLog(log)}><Trash2/></button></span></div>)}</div>
+        <form className="quick-entry" onSubmit={submitLog}><div className="quick-add"><Plus/><input value={logDraft} onChange={event => setLogDraft(event.target.value)} aria-label="오늘 한 일"/><input className="log-minutes" type="number" min="0" max="1440" value={logMinutes} onChange={event => setLogMinutes(event.target.value)} aria-label="소요 시간(분)" placeholder="분"/><button disabled={saving === 'log'}>기록</button></div><select aria-label="연결 업무" value={logTaskId} onChange={e=>setLogTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><TagsInput label="업무 기록 태그" value={logTags} onChange={setLogTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('log-new', 'work_log', logDraft)}>AI 태그 추천</button>{recommendationButtons('log-new', logTags, setLogTags)}</div></form>
+        <div className="done-notes">{shownLogs.map(log => <div key={log.id}><Check/><div>{editable('log', log) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><input className="log-minutes" type="number" min="0" max="1440" value={editMinutes} onChange={event => setEditMinutes(event.target.value)} aria-label="소요 시간(분)" placeholder="분"/><select aria-label="연결 업무" value={editTaskId} onChange={e=>setEditTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`log-${log.id}`, 'work_log', editText)}>AI 태그 추천</button>{recommendationButtons(`log-${log.id}`, editTags, setEditTags)}</div></> : <><span>{log.content}</span>{log.task_id&&taskTitle.has(log.task_id)?<small className="log-task-link">#{log.task_id} {taskTitle.get(log.task_id)}</small>:null}{log.duration_minutes?<small className="log-task-link">{log.duration_minutes}분</small>:null}<TagChips tags={log.tags}/></>}</div><span className="row-actions">{editable('log', log) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `log-${log.id}`} onClick={() => saveEdit(log)}><Check/></button></> : <button aria-label={`${log.content} 수정`} onClick={() => beginEdit('log', log)}><Pencil/></button>}<button className="danger-icon" aria-label={`${log.content} 삭제`} onClick={() => onDeleteLog(log)}><Trash2/></button></span></div>)}</div>
       </section>
     </div>
   </>

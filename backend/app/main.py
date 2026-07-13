@@ -291,6 +291,7 @@ class WorkLogPayload(StrictPayload):
     log_date: date | None = None
     task_id: int | None = Field(None, ge=1)
     tags: list[str] | None = Field(None, max_length=50)
+    duration_minutes: int | None = Field(None, ge=0, le=1440)
 
 
 class FeatureRequestPayload(StrictPayload):
@@ -323,7 +324,7 @@ CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "parent_id", "dependency_ids"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags"}, None),
-    "work_logs": ({"content", "log_date", "task_id", "tags"}, None),
+    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
 }
 
 VALID_TASK_STATUSES = {"todo", "doing", "done"}
@@ -442,7 +443,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "parent_id"},
-                "events": set(), "todos": set(), "work_logs": {"task_id"}}[table]
+                "events": set(), "todos": set(), "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -1189,6 +1190,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     return {"period": {"start": start, "end": end},
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
+                        "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
             "tags": available_tags, "timeline": timeline,
             "tasks": tasks, "work_logs": logs, "events": events, "todos": todos}
