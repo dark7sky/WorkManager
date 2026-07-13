@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-ai-numbered-list-todo-tag-matching',
+    timestamp: '2026-07-13T13:01:29+09:00',
+    description: 'AI 도우미에 "오늘해야할일 1.AAA 2. BBB 3. CCC"처럼 번호 목록을 한 줄로 입력하면 첫 항목만 인식되던 문제를 고쳤습니다. 이제 줄바꿈 없이 번호로 나열한 항목도 각각 별도의 오늘 할 일로 분리되고, 최근 업무의 제목·태그와 겹치는 항목에는 관련 태그를 자동으로 매칭해 붙여줍니다 (backend/app/ai.py의 rule_parse_multi, _match_tags).',
+  },
+  {
     id: '2026-07-13-performance-timeline-csv-export',
     timestamp: '2026-07-13T13:00:23+09:00',
     description: '성과 화면에서 Markdown 보고서만 내려받을 수 있어 표 계산 프로그램으로 옮기려면 다시 정리해야 했습니다. 선택한 기간·태그의 활동 타임라인(완료 업무/업무 기록/일정/Todo)을 CSV로 내려받는 버튼을 Markdown 내보내기 옆에 추가했습니다 (frontend/src/csv.js의 timelineToCsv, Performance.jsx).',

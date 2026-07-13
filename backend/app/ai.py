@@ -308,44 +308,85 @@ def _title(text: str) -> str:
     return value[:160] or text.strip()[:160]
 
 
-def rule_parse(text: str) -> dict[str, Any]:
+def _match_tags(text: str, context: list[dict] | None) -> list[str]:
+    """Guess tags for a new item by matching it against tags/titles of existing records."""
+    if not context:
+        return []
+    words = {w for w in re.findall(r"[가-힣A-Za-z0-9]+", text) if len(w) > 1}
+    matched: list[str] = []
+    for item in context:
+        tags = item.get("tags") or []
+        if not tags:
+            continue
+        title_words = {w for w in re.findall(r"[가-힣A-Za-z0-9]+", str(item.get("title") or "")) if len(w) > 1}
+        if any(tag and tag in text for tag in tags) or words & title_words:
+            for tag in tags:
+                if tag and tag not in matched:
+                    matched.append(tag)
+    return matched[:5]
+
+
+def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> dict[str, Any]:
     """Conservative Korean parser used when no API key is configured."""
     clean = text.strip()
-    day, title = _day(clean), _title(clean)
+    combined = f"{hint} {clean}".strip() if hint else clean
+    day, title = _day(combined), _title(clean)
     update = re.search(r"(?:태스크|업무|할\s*일)\s*#?(\d+).*?(?:진행(?:률)?\s*)?(\d{1,3})\s*%", clean)
     if update:
         progress = max(0, min(100, int(update.group(2))))
         return {"action": "update", "entity": "task", "id": int(update.group(1)),
                 "data": {"progress": progress, "status": "done" if progress == 100 else "doing"},
                 "confidence": 0.94, "source": "local-rules"}
-    if any(word in clean for word in ("한 일", "완료 기록", "작업 기록", "처리함")):
+    if any(word in combined for word in ("한 일", "완료 기록", "작업 기록", "처리함")):
         return {"action": "create", "entity": "work_log", "data": {"content": title, "log_date": day},
                 "confidence": 0.78, "source": "local-rules"}
-    if any(word in clean for word in ("일정", "회의", "미팅", "약속", "방문")):
-        hour, minute = _time(clean)
+    if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
+        hour, minute = _time(combined)
         start = datetime.fromisoformat(day).replace(hour=hour, minute=minute)
         return {"action": "create", "entity": "event", "data": {"title": title, "description": "",
                 "start_at": start.isoformat(timespec="minutes"),
                 "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""},
                 "confidence": 0.8, "source": "local-rules"}
-    if any(word in clean.lower() for word in ("해야", "체크", "todo", "투두")):
-        return {"action": "create", "entity": "todo", "data": {"title": title, "todo_date": day, "completed": False},
+    if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
+        return {"action": "create", "entity": "todo",
+                "data": {"title": title, "todo_date": day, "completed": False, "tags": _match_tags(clean, context)},
                 "confidence": 0.76, "source": "local-rules"}
     return {"action": "create", "entity": "task", "data": {"title": title, "description": clean,
             "status": "todo", "priority": "normal", "progress": 0,
-            "start_date": date.today().isoformat(), "due_date": day, "tags": []},
+            "start_date": date.today().isoformat(), "due_date": day, "tags": _match_tags(clean, context)},
             "confidence": 0.58, "source": "local-rules"}
 
 
 MAX_BATCH_ITEMS = 10
+_LIST_MARKER_RE = re.compile(r"(?<!\d)\d{1,2}[.\)]\s*(?=[^\d\s])")
 
 
-def rule_parse_multi(text: str) -> list[dict[str, Any]]:
-    """Split multi-line input into one action per non-empty line."""
-    segments = [line.strip() for line in text.split("\n") if line.strip()]
+def _split_numbered_line(line: str) -> list[tuple[str, str]]:
+    """Split a single line like '오늘 할 일 1.AAA 2. BBB 3. CCC' into (segment, hint) pairs."""
+    matches = list(_LIST_MARKER_RE.finditer(line))
+    if len(matches) < 2:
+        return [(line, "")]
+    prefix = line[:matches[0].start()].strip()
+    segments = []
+    for i, m in enumerate(matches):
+        start = m.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(line)
+        segment = line[start:end].strip(" ,.-")
+        if segment:
+            segments.append((segment, prefix))
+    return segments if len(segments) >= 2 else [(line, "")]
+
+
+def rule_parse_multi(text: str, context: list[dict] | None = None) -> list[dict[str, Any]]:
+    """Split multi-line or numbered-list ('1. ... 2. ...') input into one action per item."""
+    segments: list[tuple[str, str]] = []
+    for line in text.split("\n"):
+        line = line.strip()
+        if line:
+            segments.extend(_split_numbered_line(line))
     if not segments:
-        segments = [text.strip()]
-    return [rule_parse(segment) for segment in segments[:MAX_BATCH_ITEMS]]
+        segments = [(text.strip(), "")]
+    return [rule_parse(segment, hint=hint, context=context) for segment, hint in segments[:MAX_BATCH_ITEMS]]
 
 
 def _normalize(result: Any) -> dict[str, Any]:
@@ -368,14 +409,17 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
     config = get_user_config(user_id) if user_id else get_user_config("__legacy__")
     key = config["api_key"]
     if not key:
-        return {"items": rule_parse_multi(text)}
+        return {"items": rule_parse_multi(text, context)}
     system = (
         "You convert Korean work-management commands into JSON actions. "
         "Allowed actions: create, update. Allowed entities: task, event, todo, work_log. "
         'Return {"items": [...]} where each item has keys action, entity, optional integer id, data, confidence. '
         "Never invent an id. Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
-        "If the input contains several separate requests (for example one per line), return one item per "
-        f"request, up to {MAX_BATCH_ITEMS} items. JSON only."
+        "If the input contains several separate requests, one per line or a numbered list like "
+        "'1. AAA 2. BBB 3. CCC', return one item per request, up to " + str(MAX_BATCH_ITEMS) + " items. "
+        "recent_tasks lists the user's existing tasks with their tags; when a new item clearly relates to one "
+        "of them (similar wording), copy its tags into the new item's data.tags so related work stays grouped. "
+        "JSON only."
     )
     prompt = {"today": date.today().isoformat(), "timezone": os.getenv("TZ", "Asia/Seoul"),
               "input": text, "recent_tasks": (context or [])[:20]}
@@ -399,7 +443,7 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
             item["source"] = "remote-ai"
         return {"items": items}
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        items = rule_parse_multi(text)
+        items = rule_parse_multi(text, context)
         items[0]["warning"] = f"AI 서비스 응답을 사용할 수 없어 로컬 규칙으로 분석했습니다 ({type(exc).__name__})."
         return {"items": items}
 

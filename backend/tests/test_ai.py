@@ -31,6 +31,23 @@ class RuleParserTests(unittest.TestCase):
         result = ai.rule_parse_multi(text)
         self.assertEqual(len(result), ai.MAX_BATCH_ITEMS)
 
+    def test_rule_parse_multi_splits_numbered_list_in_one_line(self):
+        result = ai.rule_parse_multi("오늘해야할일 1.AAA 2. BBB 3. CCC")
+        self.assertEqual(len(result), 3)
+        self.assertTrue(all(item["entity"] == "todo" for item in result))
+        self.assertEqual([item["data"]["title"] for item in result], ["AAA", "BBB", "CCC"])
+        self.assertTrue(all(item["data"]["todo_date"] == date.today().isoformat() for item in result))
+
+    def test_rule_parse_multi_numbered_list_matches_existing_tags(self):
+        context = [{"title": "결제 시스템 개선", "tags": ["결제", "백엔드"]}]
+        result = ai.rule_parse_multi("오늘해야할일 1.결제 점검 2. 기타 업무", context)
+        self.assertEqual(result[0]["data"]["tags"], ["결제", "백엔드"])
+        self.assertEqual(result[1]["data"]["tags"], [])
+
+    def test_rule_parse_multi_single_numbered_item_is_not_split(self):
+        result = ai.rule_parse_multi("1. 보고서 작성")
+        self.assertEqual(len(result), 1)
+
     def test_parse_text_without_api_key_returns_items_list(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import init_db
