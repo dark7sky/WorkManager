@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-performance-timeline-csv-export',
+    timestamp: '2026-07-13T13:00:23+09:00',
+    description: '성과 화면에서 Markdown 보고서만 내려받을 수 있어 표 계산 프로그램으로 옮기려면 다시 정리해야 했습니다. 선택한 기간·태그의 활동 타임라인(완료 업무/업무 기록/일정/Todo)을 CSV로 내려받는 버튼을 Markdown 내보내기 옆에 추가했습니다 (frontend/src/csv.js의 timelineToCsv, Performance.jsx).',
+  },
+  {
     id: '2026-07-13-google-calendar-resync-stale-events',
     timestamp: '2026-07-13T12:57:37+09:00',
     description: '설정에서 캘린더를 다시 동기화해도 구글 캘린더에서 이미 삭제된 옛날 일정이 계속 남아있던 문제를 수정했습니다. 구글은 삭제된 일정을 "취소됨" 상태로 한동안만 알려주기 때문에, 그 기간이 지난 뒤 전체 재동기화를 하면 삭제 사실을 놓치고 있었습니다. 이제 전체 재동기화 시 실제 목록에 없는 로컬 일정을 대조해 정리합니다 (backend/app/google_calendar.py).',

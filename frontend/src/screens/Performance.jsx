@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import { api } from '../api'
 import { TagChips, TagFilter } from '../components/TagsInput'
 import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange } from '../performanceReport'
+import { timelineToCsv, timelineCsvFilename } from '../csv'
 
 const getRange = presetRange
 const PRESETS = [['lastweek', '지난주 리뷰'], ['month', '이번 달'], ['quarter', '이번 분기'], ['year', '올해'], ['custom', '직접 선택']]
@@ -85,6 +86,21 @@ export default function Performance({ notify, onDataChanged }) {
     notify('성과 보고서를 Markdown으로 내려받았습니다.')
   }, [data, invalidRange, dates, selected, summary, notify])
 
+  const exportCsv = useCallback(() => {
+    if (!data || invalidRange) return
+    const csv = timelineToCsv(data.timeline || [])
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = timelineCsvFilename(dates[0], dates[1])
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+    notify('활동 타임라인을 CSV로 내려받았습니다.')
+  }, [data, invalidRange, dates, notify])
+
   const saveCurrentPreset = useCallback(() => {
     if (!presetName.trim()) return
     const newPresets = saveReportPreset(localStorage, savedPresets, { name: presetName, preset, start: dates[0], end: dates[1], tags: selected })
@@ -109,7 +125,7 @@ export default function Performance({ notify, onDataChanged }) {
   const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
-    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button></section>
+    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button></section>
     {invalidRange ? <p className="inline-error">종료일은 시작일 이후여야 합니다.</p> : null}
     <TagFilter tags={knownTags} selected={selected} onChange={setSelected}/>
     <div className="report-presets">

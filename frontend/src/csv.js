@@ -35,3 +35,17 @@ export const tasksToCsv = (tasks, todayIso) => {
 }
 
 export const taskCsvFilename = date => `workmanager-tasks-${date}.csv`
+
+const timelineHeaders = ['날짜', '구분', '제목', '태그']
+
+export const timelineToCsv = items => {
+  const rows = items.map(item => [
+    item.date,
+    item.type_label || item.type,
+    item.title || item.content,
+    (item.tags || []).join('; '),
+  ])
+  return [timelineHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+}
+
+export const timelineCsvFilename = (start, end) => `workmanager-report-${start}_${end}.csv`
