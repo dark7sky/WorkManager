@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-calendar-event-duplicate',
+    timestamp: '2026-07-13T18:11:00+09:00',
+    description: '반복 없이 비슷한 일정을 다시 만들 때마다 제목·시간·장소·태그를 처음부터 다시 입력해야 했습니다. 업무 화면의 "복제" 기능과 같은 방식으로, 일정 수정 화면에 "복제" 버튼을 추가해 제목에 "(사본)"을 붙인 새 일정을 한 번에 만들 수 있습니다 (frontend/src/eventDuplicate.js, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-calendar-event-search',
     timestamp: '2026-07-13T18:04:19+09:00',
     description: '캘린더 화면은 태그로만 일정을 좁힐 수 있었고 제목·장소·메모로 특정 일정을 찾을 방법이 없었습니다. Tasks/휴지통 화면과 같은 검색창을 추가해 제목·장소·메모 텍스트로 일정을 실시간 필터링할 수 있습니다 (frontend/src/eventSearch.js, frontend/src/screens/Calendar.jsx).',
