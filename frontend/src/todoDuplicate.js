@@ -6,3 +6,14 @@ export const buildTodoDuplicatePayload = todo => ({
   recurrence_rule: todo?.recurrence_rule || null,
   priority: todo?.priority || 'normal',
 })
+
+const TODO_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }
+
+export const buildTaskFromTodoPayload = todo => ({
+  title: (todo?.title || '').trim(),
+  tags: Array.isArray(todo?.tags) ? todo.tags : [],
+  priority: TODO_PRIORITY_TO_TASK[todo?.priority] || 'normal',
+  due_date: todo?.todo_date || null,
+  status: todo?.completed ? 'done' : 'todo',
+  progress: todo?.completed ? 100 : 0,
+})

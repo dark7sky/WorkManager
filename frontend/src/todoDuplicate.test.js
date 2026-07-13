@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildTodoDuplicatePayload } from './todoDuplicate.js'
+import { buildTodoDuplicatePayload, buildTaskFromTodoPayload } from './todoDuplicate.js'
 
 test('buildTodoDuplicatePayload copies fields, resets completion and dates to today', () => {
   const todo = { id: 3, title: '우유 사기', completed: true, tags: ['생활'], recurrence_rule: 'daily', todo_date: '2026-07-01', priority: 'high' }
@@ -19,4 +19,23 @@ test('buildTodoDuplicatePayload handles missing optional fields', () => {
   assert.deepEqual(result.tags, [])
   assert.equal(result.recurrence_rule, null)
   assert.equal(result.priority, 'normal')
+})
+
+test('buildTaskFromTodoPayload carries title/tags/priority/due date and completion state', () => {
+  const todo = { id: 5, title: '보고서 제출', completed: false, tags: ['업무'], todo_date: '2026-07-15', priority: 'high' }
+  const result = buildTaskFromTodoPayload(todo)
+  assert.equal(result.title, '보고서 제출')
+  assert.deepEqual(result.tags, ['업무'])
+  assert.equal(result.priority, 'high')
+  assert.equal(result.due_date, '2026-07-15')
+  assert.equal(result.status, 'todo')
+  assert.equal(result.progress, 0)
+})
+
+test('buildTaskFromTodoPayload maps a completed todo to a done task', () => {
+  const result = buildTaskFromTodoPayload({ title: '정리', completed: true })
+  assert.equal(result.status, 'done')
+  assert.equal(result.progress, 100)
+  assert.equal(result.priority, 'normal')
+  assert.equal(result.due_date, null)
 })
