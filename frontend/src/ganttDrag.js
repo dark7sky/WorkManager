@@ -31,6 +31,16 @@ export function ganttDragDates(mode, task, { grabDay, dropDay, windowStartIso })
   return null
 }
 
+// One-click "postpone" patch for an overdue task: shifts due_date (and
+// start_date, to preserve duration) forward by deltaDays. Returns null when
+// there is no due_date to shift.
+export function postponeTaskDates(task, deltaDays = 1) {
+  if (!task?.due_date) return null
+  const due_date = addDays(task.due_date, deltaDays)
+  if (!task.start_date) return { due_date }
+  return { start_date: addDays(task.start_date, deltaDays), due_date }
+}
+
 // Preview geometry (in day units within the visible window) while dragging.
 export function ganttDragPreview(mode, { left, width }, { grabDay, dropDay }, days = GANTT_DAYS) {
   if (mode === 'move') {

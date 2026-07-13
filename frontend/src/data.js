@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-postpone',
+    timestamp: '2026-07-13T18:41:37+09:00',
+    description: '지연된 업무를 확인해도 일정을 다시 잡으려면 매번 수정 폼을 열어 날짜를 새로 입력해야 했습니다. 업무 목록의 지연 업무 행에 "미루기" 버튼을 추가해, 클릭 한 번으로 기한(및 기간을 유지한 시작일)을 하루 뒤로 미룰 수 있습니다 (frontend/src/ganttDrag.js postponeTaskDates, frontend/src/screens/Tasks.jsx, 기존 onReschedule 재사용).',
+  },
+  {
     id: '2026-07-13-task-checklist',
     timestamp: '2026-07-13T18:47:00+09:00',
     description: '업무는 상위/하위 계층 구조는 지원했지만, 큰 업무 하나를 진행하며 그때그때 체크해 나갈 세부 항목 목록은 담을 곳이 없었습니다. 업무 편집 폼에 "체크리스트" 항목 추가/체크/삭제 UI를 추가하고(백엔드 tasks.checklist 컬럼), Gantt 목록 행에 "체크리스트 n/m" 진행 배지를 표시합니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/taskFormPayload.js, frontend/src/screens/Tasks.jsx).',

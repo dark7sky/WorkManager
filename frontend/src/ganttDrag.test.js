@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { dayAtOffset, ganttDragDates, ganttDragPreview } from './ganttDrag.js'
+import { dayAtOffset, ganttDragDates, ganttDragPreview, postponeTaskDates } from './ganttDrag.js'
 
 test('dayAtOffset maps pixels to day cells and clamps to the window', () => {
   assert.equal(dayAtOffset(0, 1400), 0)
@@ -38,6 +38,13 @@ test('resize-end sets due date from the window and never before start', () => {
 test('tasks without explicit dates are not draggable', () => {
   assert.equal(ganttDragDates('move', { start_date: null, due_date: '2026-07-12' }, { grabDay: 0, dropDay: 1 }), null)
   assert.equal(ganttDragDates('move', { start_date: '2026-07-10' }, { grabDay: 0, dropDay: 1 }), null)
+})
+
+test('postponeTaskDates shifts due date (and start date, keeping duration) by a day', () => {
+  assert.deepEqual(postponeTaskDates(task), { start_date: '2026-07-11', due_date: '2026-07-13' })
+  assert.deepEqual(postponeTaskDates({ due_date: '2026-07-12' }), { due_date: '2026-07-13' })
+  assert.equal(postponeTaskDates({ start_date: '2026-07-10' }), null)
+  assert.equal(postponeTaskDates(null), null)
 })
 
 test('preview clamps to the visible window', () => {
