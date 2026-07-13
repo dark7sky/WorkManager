@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -48,4 +48,21 @@ test('timelineToCsv exports report timeline rows', () => {
 
 test('timelineCsvFilename uses the requested range', () => {
   assert.equal(timelineCsvFilename('2026-07-01', '2026-07-31'), 'workmanager-report-2026-07-01_2026-07-31.csv')
+})
+
+test('auditLogsToCsv exports audit rows with labels and metadata', () => {
+  const csv = auditLogsToCsv([
+    { created_at: '2026-07-13T10:00:00', action: 'update', entity_type: 'tasks', entity_id: 5, metadata: { fields: ['title', 'status'] } },
+    { created_at: '2026-07-13T09:00:00', action: 'delete', entity_type: 'events', entity_id: 2, metadata: null },
+  ])
+
+  assert.equal(csv, [
+    '일시,작업,대상,대상 ID,상세',
+    '2026-07-13T10:00:00,수정,업무,5,"변경 필드: title, status"',
+    '2026-07-13T09:00:00,삭제,일정,2,',
+  ].join('\n'))
+})
+
+test('auditLogCsvFilename uses the requested date', () => {
+  assert.equal(auditLogCsvFilename('2026-07-13'), 'workmanager-audit-log-2026-07-13.csv')
 })

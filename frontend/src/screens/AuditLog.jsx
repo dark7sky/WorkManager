@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ClipboardList, Filter, LoaderCircle, Search } from 'lucide-react'
+import { ClipboardList, Download, Filter, LoaderCircle, Search } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
+import { auditLogCsvFilename, auditLogsToCsv } from '../csv'
 
 const actionLabels = {
   create: '생성',
@@ -59,10 +60,15 @@ export default function AuditLog() {
     const haystack = `${log.action} ${actionLabels[log.action] || ''} ${log.entity_type} ${entityLabels[log.entity_type] || ''} ${log.entity_id || ''} ${metadataText(log.metadata)}`.toLowerCase()
     return (entity === 'all' || log.entity_type === entity) && (!query.trim() || haystack.includes(query.trim().toLowerCase()))
   })
+  const exportShown = () => {
+    const csv=`﻿${auditLogsToCsv(shown)}`,blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a')
+    link.href=url;link.download=auditLogCsvFilename(new Date().toISOString().slice(0,10));document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url)
+  }
   return <><Header title="감사 로그" subtitle="업무 공간에서 발생한 주요 변경 이력을 확인하세요."/><div className="content audit-page">
     <div className="toolbar audit-toolbar">
       <div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="작업, 대상, 변경 내용 검색" /></div>
       <label className="filter-select"><Filter/><span>대상</span><select value={entity} onChange={e=>setEntity(e.target.value)}><option value="all">전체</option>{entities.map(value=><option key={value} value={value}>{entityLabels[value] || value}</option>)}</select></label>
+      <button type="button" className="text-button" onClick={exportShown} disabled={!shown.length}><Download/> CSV 내보내기</button>
     </div>
     <section className="audit-panel" aria-labelledby="audit-title">
       <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>최대 200개의 최신 변경을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>

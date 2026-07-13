@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-audit-log-csv-export',
+    timestamp: '2026-07-13T13:18:00+09:00',
+    description: '감사 로그 화면에 CSV 내보내기 버튼을 추가했습니다. 현재 검색/대상 필터가 적용된 결과를 일시·작업·대상·상세 열로 내려받아 규정 준수 보고나 외부 검토에 바로 활용할 수 있습니다 (frontend/src/csv.js, frontend/src/screens/AuditLog.jsx).',
+  },
+  {
     id: '2026-07-13-approval-workflow-off-by-default',
     timestamp: '2026-07-13T13:16:00+09:00',
     description: '혼자 쓰는 프로그램 특성에 맞춰 완료 업무/일정 변경 승인 워크플로가 기본적으로 꺼지도록 변경했습니다. 새로 완료 처리한 업무는 별도 승인 없이 바로 확정되며, 승인 절차가 필요하면 설정 화면에서 다시 켤 수 있습니다. 기존에 승인 대기 중이던 업무도 자동으로 정리됩니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Settings.jsx).',

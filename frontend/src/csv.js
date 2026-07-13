@@ -49,3 +49,48 @@ export const timelineToCsv = items => {
 }
 
 export const timelineCsvFilename = (start, end) => `workmanager-report-${start}_${end}.csv`
+
+const auditActionLabels = {
+  create: '생성',
+  update: '수정',
+  delete: '삭제',
+  restore: '복원',
+  purge: '정리',
+  sync: '동기화',
+  remote_delete: '원격 삭제',
+  resolve_conflict: '충돌 해결',
+  recurrence_create: '반복 생성',
+}
+
+const auditEntityLabels = {
+  tasks: '업무',
+  events: '일정',
+  todos: 'Todo',
+  work_logs: '업무 기록',
+  trash: '휴지통',
+  google_calendar: 'Google 캘린더',
+}
+
+const auditMetadataText = metadata => {
+  if (!metadata || !Object.keys(metadata).length) return ''
+  if (Array.isArray(metadata.fields)) return `변경 필드: ${metadata.fields.join(', ')}`
+  if (metadata.strategy) return `처리 방식: ${metadata.strategy}`
+  if (metadata.rule) return `반복 규칙: ${metadata.rule}`
+  if (metadata.older_than_days) return `${metadata.older_than_days}일 이전 항목 정리`
+  return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
+}
+
+const auditHeaders = ['일시', '작업', '대상', '대상 ID', '상세']
+
+export const auditLogsToCsv = logs => {
+  const rows = logs.map(log => [
+    log.created_at,
+    auditActionLabels[log.action] || log.action,
+    auditEntityLabels[log.entity_type] || log.entity_type,
+    log.entity_id ?? '',
+    auditMetadataText(log.metadata),
+  ])
+  return [auditHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+}
+
+export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
