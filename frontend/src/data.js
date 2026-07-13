@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-trash-bulk-restore',
+    timestamp: '2026-07-14T04:36:15+09:00',
+    description: '휴지통에 일괄 복원 기능을 추가했습니다. 각 항목에 선택 체크박스가 생겼고, 여러 개를 선택하면 나타나는 작업 바에서 한 번에 복원할 수 있습니다 (frontend/src/components/TrashSection.jsx).',
+  },
+  {
     id: '2026-07-14-todo-link-url',
     timestamp: '2026-07-14T04:31:18+09:00',
     description: '업무/일정에 있던 "관련 링크" 필드를 오늘 할 일(Todo)에도 추가했습니다. 링크를 입력하면 목록에 클릭 가능한 배지로 표시되고, 반복 생성/복제/업무 전환 시에도 함께 이어집니다 (backend link_url 컬럼, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',
