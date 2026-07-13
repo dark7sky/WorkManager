@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-monthly-recurrence',
+    timestamp: '2026-07-14T05:35:00+09:00',
+    description: '업무(Task)는 매월 반복을 지원했지만 Todo는 매일/매주만 가능해 "월간 보고서 제출" 같은 월 단위 반복 일정을 Todo로 만들 수 없었습니다. Todo 반복 규칙에 "매월"을 추가하고, 월말 기준일이 다음 달 말일로 자동 보정되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-notification-history',
     timestamp: '2026-07-14T05:20:00+09:00',
     description: '알림 기록을 남기지 않아, 기기 알림을 놓치거나 닫아버리면 어떤 알림이 왔었는지 다시 확인할 방법이 없었습니다. 설정 > "오늘 업무 알림"에 최근 알림 기록 목록(제목/내용/시각)과 기록 지우기 버튼을 추가했습니다 (frontend/src/notificationHistory.js, frontend/src/App.jsx, frontend/src/screens/Settings.jsx).',

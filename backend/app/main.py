@@ -336,7 +336,7 @@ class TodoPayload(StrictPayload):
     todo_date: date | None = None
     completed: bool | None = None
     tags: list[str] | None = Field(None, max_length=50)
-    recurrence_rule: Literal["daily", "weekly"] | None = None
+    recurrence_rule: Literal["daily", "weekly", "monthly"] | None = None
     recurrence_end_date: date | None = None
     priority: Literal["low", "normal", "high"] | None = None
     link_url: str | None = Field(None, max_length=2000)
@@ -672,7 +672,9 @@ def spawn_recurring_todo(todo, user_id):
     if not rule or todo.get("recurrence_spawned_at"):
         return None
     timestamp = now()
-    next_date = next_recurrence_date(todo.get("todo_date"), rule)
+    anchor_day = todo.get("recurrence_anchor_day")
+    anchor_end = bool(todo.get("recurrence_anchor_month_end"))
+    next_date = next_recurrence_date(todo.get("todo_date"), rule, anchor_day, anchor_end)
     end_date = todo.get("recurrence_end_date")
     if end_date and next_date and next_date > end_date:
         with connection() as c:
@@ -684,9 +686,9 @@ def spawn_recurring_todo(todo, user_id):
         if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,recurrence_end_date,priority,link_url,memo,created_at)
-          VALUES(?,?,?,0,?,?,?,?,?,?,?)""",
-          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), timestamp))
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,created_at)
+          VALUES(?,?,?,0,?,?,?,?,?,?,?,?,?)""",
+          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id
@@ -716,6 +718,10 @@ def create_item(table, data, user_id):
             anchor = date.fromisoformat(anchor_value)
             data["recurrence_anchor_day"] = anchor.day
             data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+    if table == "todos" and data.get("recurrence_rule") == "monthly" and data.get("todo_date"):
+        anchor = date.fromisoformat(data["todo_date"])
+        data["recurrence_anchor_day"] = anchor.day
+        data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
     if table == "tasks" and data.get("status") == "done":
         data["completed_at"] = timestamp
         approval_workflow_on = load_approval_workflow_setting(user_id)
@@ -838,6 +844,13 @@ def update_item(table, item_id, data, user_id):
                     anchor = date.fromisoformat(anchor_value)
                     data["recurrence_anchor_day"] = anchor.day
                     data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+        if table == "todos" and (data.get("recurrence_rule") == "monthly" or
+                                  (data.get("recurrence_rule", existing["recurrence_rule"]) == "monthly" and "todo_date" in data)):
+            anchor_value = data.get("todo_date", existing["todo_date"])
+            if anchor_value:
+                anchor = date.fromisoformat(anchor_value)
+                data["recurrence_anchor_day"] = anchor.day
+                data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
         # Validate cross-field date ordering using the merged resource.
         merged = merged_resource_for_validation(table, existing, data)
         try:
@@ -1076,6 +1089,10 @@ def import_data(payload: dict = Body(...), user=Depends(require_user)):
                             anchor = date.fromisoformat(anchor_value)
                             item["recurrence_anchor_day"] = anchor.day
                             item["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+                if table == "todos" and item.get("recurrence_rule") == "monthly" and item.get("todo_date"):
+                    anchor = date.fromisoformat(item["todo_date"])
+                    item["recurrence_anchor_day"] = anchor.day
+                    item["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
                 if table == "events":
                     # Restored events stay local-only: no Google linkage, no push.
                     item["local_uid"] = str(uuid.uuid4())

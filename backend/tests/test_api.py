@@ -655,6 +655,27 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_completing_monthly_todo_spawns_next_month_occurrence(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "monthly report", "todo_date": "2026-07-15", "recurrence_rule": "monthly"}).json()
+        completed = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
+        self.assertIn("next_recurrence_id", completed)
+        spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["todo_date"], "2026-08-15")
+        self.assertEqual(spawned["recurrence_rule"], "monthly")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_month_end_monthly_todo_returns_to_month_end(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "month end todo", "todo_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
+        feb = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
+        feb_todo = a.get("/api/todos").json()
+        spawned = next(t for t in feb_todo if t["id"] == feb["next_recurrence_id"])
+        self.assertEqual(spawned["todo_date"], "2027-02-28")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_memo_is_persisted_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "with memo", "todo_date": "2026-07-06", "recurrence_rule": "daily", "memo": "3층 회의실 참고"})
