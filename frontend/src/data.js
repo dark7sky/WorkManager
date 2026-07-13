@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-todo-pin',
+    timestamp: '2026-07-13T18:51:11+09:00',
+    description: '업무 화면의 "고정" 기능은 있었지만 오늘 화면의 오늘 할 일(Todo) 목록에는 없어, 중요한 할 일이 다른 항목 사이에 묻히기 쉬웠습니다. Todo 각 행에 "고정" 별표 버튼을 추가해 고정된 항목이 목록 맨 위에 먼저 표시되도록 했습니다 (frontend/src/todoPins.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-13-event-alert-lead-time',
     timestamp: '2026-07-13T18:44:54+09:00',
     description: '일정 시작 알림은 항상 15분 전으로 고정되어 있어, 이동 시간이 더 필요한 일정에는 알림이 너무 늦게 왔습니다. 설정 화면의 "오늘 업무 알림" 섹션에 알림 시점(5/10/15/30분 전) 선택을 추가했습니다 (frontend/src/eventAlerts.js, frontend/src/App.jsx, frontend/src/screens/Settings.jsx).',
