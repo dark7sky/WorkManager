@@ -130,7 +130,7 @@ export default function Calendar({ events, onCreate, onUpdate, onDelete, onDataC
     return Array.from({ length: 42 }, (_, index) => { const date = new Date(grid); date.setDate(grid.getDate() + index); return { date, current: date.getMonth() === cursor.getMonth() } })
   }, [cursor, view])
   const eventsByDay = useMemo(() => new Map(cells.map(cell => [dateKey(cell.date), filtered.filter(event => overlapsDay(event, cell.date)).sort((a, b) => parseDate(a.start_at || a.start) - parseDate(b.start_at || b.start))])), [cells, filtered])
-  const sorted = useMemo(() => [...filtered].sort((a, b) => parseDate(a.start_at || a.start) - parseDate(b.start_at || b.start)), [filtered])
+  const sorted = useMemo(() => { const byId = new Map(); for (const list of eventsByDay.values()) for (const event of list) byId.set(event.id, event); return [...byId.values()].sort((a, b) => parseDate(a.start_at || a.start) - parseDate(b.start_at || b.start)) }, [eventsByDay])
   const close = () => { setEditing(null); setNewDate(null) }
   const exportIcs = () => {
     const ics = eventsToIcs(sorted), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')

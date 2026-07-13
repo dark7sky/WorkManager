@@ -112,7 +112,30 @@ class ApiTests(unittest.TestCase):
         token = create_session("sub-a")
         with patch.dict(os.environ, {"GOOGLE_ALLOWED_EMAIL": "b@example.com"}):
             self.assertEqual(self.client(token).get("/api/auth/me").status_code, 403)
-        self.assertEqual(self.client(token).get("/api/auth/me").status_code, 401)
+
+    def test_sessions_lists_and_revokes_other_sessions_only(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                      ("sub-sessions", "sub-sessions", "sessions@example.com", "sessions@example.com", "2026-01-01", "2026-01-01"))
+        token_1, token_2 = create_session("sub-sessions"), create_session("sub-sessions")
+        client_1, client_2 = self.client(token_1), self.client(token_2)
+        listing = client_1.get("/api/auth/sessions").json()["sessions"]
+        self.assertEqual(len(listing), 2)
+        current = next(s for s in listing if s["current"])
+        other = next(s for s in listing if not s["current"])
+        self.assertEqual(client_1.delete(f"/api/auth/sessions/{current['id']}").status_code, 400)
+        self.assertEqual(client_1.delete(f"/api/auth/sessions/{other['id']}").status_code, 200)
+        self.assertEqual(client_2.get("/api/auth/me").status_code, 401)
+        self.assertEqual(client_1.get("/api/auth/me").status_code, 200)
+
+    def test_sessions_are_scoped_per_user(self):
+        from app.auth import _hash
+        b_session_id = self.client(self.token_b).get("/api/auth/sessions").json()["sessions"][0]["id"]
+        self.assertEqual(b_session_id, _hash(self.token_b))
+        self.assertEqual(self.client(self.token_a).delete(f"/api/auth/sessions/{b_session_id}").status_code, 404)
+        self.assertEqual(self.client(self.token_b).get("/api/auth/me").status_code, 200)
 
     def test_expired_session_is_deleted_persistently(self):
         import hashlib
@@ -142,6 +165,26 @@ class ApiTests(unittest.TestCase):
         restored = a.post(f"/api/todos/{item['id']}/restore")
         self.assertEqual(restored.status_code, 200, restored.text)
         self.assertEqual(restored.json()["title"], "recover me")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_purge_trash_supports_custom_retention_days(self, *_):
+        from datetime import datetime, timedelta
+        from app.db import connection
+        a = self.client(self.token_a)
+        old_item = a.post("/api/todos", json={"title": "old", "todo_date": "2026-07-06"}).json()
+        recent_item = a.post("/api/todos", json={"title": "recent", "todo_date": "2026-07-06"}).json()
+        self.assertEqual(a.delete(f"/api/todos/{old_item['id']}").status_code, 200)
+        self.assertEqual(a.delete(f"/api/todos/{recent_item['id']}").status_code, 200)
+        ten_days_ago = (datetime.now() - timedelta(days=10)).isoformat(timespec="seconds")
+        with connection() as c:
+            c.execute("UPDATE todos SET deleted_at=? WHERE id=?", (ten_days_ago, old_item["id"]))
+        result = a.delete("/api/trash?older_than_days=7")
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual(result.json()["purged"]["todos"], 1)
+        trash_ids = [x["id"] for x in a.get("/api/trash").json()["todos"]]
+        self.assertNotIn(old_item["id"], trash_ids)
+        self.assertIn(recent_item["id"], trash_ids)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

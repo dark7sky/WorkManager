@@ -43,6 +43,21 @@ def revoke_session(token):
             c.execute("DELETE FROM sessions WHERE token_hash=?", (_hash(token),))
 
 
+def list_sessions(user_id, current_token):
+    current_hash = _hash(current_token) if current_token else None
+    with connection() as c:
+        rows = c.execute("""SELECT token_hash,created_at,last_seen_at,expires_at FROM sessions
+          WHERE user_id=? ORDER BY last_seen_at DESC""", (user_id,)).fetchall()
+    return [{"id": row["token_hash"], "created_at": row["created_at"], "last_seen_at": row["last_seen_at"],
+             "expires_at": row["expires_at"], "current": row["token_hash"] == current_hash} for row in rows]
+
+
+def revoke_session_by_id(user_id, session_id):
+    with connection() as c:
+        cur = c.execute("DELETE FROM sessions WHERE token_hash=? AND user_id=?", (session_id, user_id))
+    return cur.rowcount > 0
+
+
 def require_user(wm_session: str | None = Cookie(default=None)) -> str:
     if not wm_session:
         raise HTTPException(401, "로그인이 필요합니다")

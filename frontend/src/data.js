@@ -12,6 +12,21 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-active-sessions',
+    timestamp: '2026-07-14T04:24:53+09:00',
+    description: '보안 계정 관리 기능으로, 설정 화면에 "활성 세션" 섹션을 추가했습니다. 로그인된 모든 세션(생성/최근 접속/만료 시각)을 목록으로 보고, 낯선 세션은 개별적으로 로그아웃(강제 종료)할 수 있습니다 (backend: GET/DELETE /api/auth/sessions, backend/app/auth.py·main.py, frontend/src/screens/Settings.jsx, frontend/src/api.js).',
+  },
+  {
+    id: '2026-07-14-trash-cleanup-7-days',
+    timestamp: '2026-07-14T04:22:39+09:00',
+    description: '휴지통 정리가 30일 지난 항목만 삭제할 수 있었는데, 설정 화면 휴지통 섹션에 "7일 지난 항목 정리" 버튼을 추가해 더 짧은 보관 기간으로도 영구 정리할 수 있게 했습니다 (frontend/src/components/TrashSection.jsx, backend/app/main.py의 기존 older_than_days 파라미터 활용).',
+  },
+  {
+    id: '2026-07-14-calendar-mobile-agenda-range',
+    timestamp: '2026-07-14T04:19:35+09:00',
+    description: '모바일 화면의 캘린더 목록(일정 리스트)이 현재 보고 있는 월/주 범위를 벗어난 모든 동기화된 Google 캘린더 일정(오래된 지난 일정 포함)을 그대로 나열하던 문제를 고쳤습니다. 웹 데스크톱 달력은 현재 월/주로 범위가 제한되어 있었지만 모바일 목록은 필터링 없이 전체를 보여주고 있었습니다. 이제 모바일 목록도 데스크톱 달력과 동일하게 현재 보고 있는 월/주 범위로 제한됩니다 (frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-13-task-related-work-logs',
     timestamp: '2026-07-13T23:37:39+09:00',
     description: '업무 화면 Gantt 행에 "기록" 버튼을 추가해 해당 업무에 연결된 업무 기록(오늘 한 일)을 날짜·소요 시간과 함께 모달로 볼 수 있게 했습니다. 지금까지는 업무 기록에 업무를 연결할 수는 있었지만(오늘 화면), 업무 쪽에서는 그 기록들을 확인할 방법이 없었습니다 (frontend/src/taskLogs.js, frontend/src/screens/Tasks.jsx, frontend/src/App.jsx).',

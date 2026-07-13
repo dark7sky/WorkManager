@@ -16,6 +16,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [workflowSettings, setWorkflowSettings] = useState(null)
+  const [sessions, setSessions] = useState(null)
   const [serverErrors, setServerErrors] = useState(null)
   const [aiConfigs, setAiConfigs] = useState({})
   const [aiDrafts, setAiDrafts] = useState({})
@@ -39,16 +40,18 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const load = async () => {
     setError('')
     try {
-      const [integrations, ai, workflow, errors] = await Promise.all([
+      const [integrations, ai, workflow, errors, sessionList] = await Promise.all([
         api.googleStatus(),
         api.aiSettings().catch(() => api.aiStatus()),
         api.workflowSettings().catch(() => ({ approval_workflow: false })),
         api.diagnosticsErrors(5).catch(() => ({ items: [] })),
+        api.sessions().catch(() => ({ sessions: [] })),
       ])
       setData(integrations)
       applyAiConfig(ai)
       setWorkflowSettings(workflow)
       setServerErrors(errors.items || [])
+      setSessions(sessionList.sessions || [])
       if (integrations.connected || integrations.google_connected || integrations.google?.connected) {
         const response = await api.googleCalendars()
         setCalendars(response.items || response.calendars || [])
@@ -70,6 +73,19 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       notify(e.message, 'error')
     } finally {
       setErrorsRefreshing(false)
+    }
+  }
+
+  const revokeSession = async id => {
+    setBusy(`session-${id}`)
+    try {
+      await api.revokeSession(id)
+      setSessions(list => (list || []).filter(s => s.id !== id))
+      notify('세션을 로그아웃했습니다.')
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setBusy('')
     }
   }
 
@@ -262,6 +278,10 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>승인 워크플로</h2><p>완료 업무와 일정 변경에 승인 단계를 요구합니다. 혼자 사용할 때는 꺼 두세요.</p></div></div>
         {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? false} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><Smartphone /></span><div><h2>활성 세션</h2><p>현재 로그인된 세션 목록입니다. 낯선 세션은 로그아웃할 수 있습니다.</p></div></div>
+        {!sessions ? <div className="skeleton lines" /> : sessions.length ? <ul className="error-log-list session-list">{sessions.map(s => <li key={s.id}><time>{new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.last_seen_at * 1000))}</time><div><strong>{s.current ? '현재 세션' : '다른 세션'}</strong><p>생성: {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.created_at * 1000))} · 만료: {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.expires_at * 1000))}</p></div>{!s.current ? <button className="secondary" disabled={busy === `session-${s.id}`} onClick={() => revokeSession(s.id)}>로그아웃</button> : null}</li>)}</ul> : <p className="empty-state">활성 세션이 없습니다.</p>}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><ClipboardList /></span><div><h2>감사 로그</h2><p>업무 공간에서 발생한 변경 이력을 확인합니다.</p></div></div>

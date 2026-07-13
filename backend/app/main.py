@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import ai, google_calendar
-from .auth import DEMO_SESSION_TTL, create_session, require_user, revoke_session, session_user_id
+from .auth import DEMO_SESSION_TTL, _hash, create_session, list_sessions, require_user, revoke_session, revoke_session_by_id, session_user_id
 from .db import DEMO_USER_ID, connection, decode_json_array, init_db, row_dict, upsert_google_user
 
 app = FastAPI(title="WorkManager API", version="2.0.0")
@@ -153,6 +153,21 @@ def me(user=Depends(require_user)):
     with connection() as c:
         row = c.execute("SELECT id,email,display_name,picture_url FROM users WHERE id=?", (user,)).fetchone()
     return {"user": dict(row) if row else {"id": user}}
+
+
+@app.get("/api/auth/sessions")
+def sessions(user=Depends(require_user), wm_session: str | None = Cookie(default=None)):
+    return {"sessions": list_sessions(user, wm_session)}
+
+
+@app.delete("/api/auth/sessions/{session_id}")
+def revoke_session_endpoint(session_id: str, user=Depends(require_user), wm_session: str | None = Cookie(default=None)):
+    if wm_session and _hash(wm_session) == session_id:
+        raise HTTPException(400, "현재 세션은 로그아웃 기능을 사용하세요")
+    if not revoke_session_by_id(user, session_id):
+        raise HTTPException(404, "세션을 찾을 수 없습니다")
+    audit(user, "delete", "session", session_id, {})
+    return {"ok": True}
 
 
 @app.get("/api/auth/config")
