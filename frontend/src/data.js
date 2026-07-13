@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-subtask-row-scale-reconfirm-73',
+    timestamp: '2026-07-13T09:12:03+09:00',
+    description: '동일한 요청(#13, 하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재차 확인했습니다(73번째 확인). 하위 업무 행의 높이·글씨 크기·간트 막대·우선순위 표시 크기 축소가 깊이(1~3단계)별로 모두 정상 동작하며, taskHierarchy.test.js의 관련 회귀 테스트(subtaskRowClass, taskIndent)도 통과함을 재확인했습니다. 소스 변경은 없습니다.',
+  },
+  {
     id: '2026-07-13-subtask-row-scale-reconfirm-72',
     timestamp: '2026-07-13T09:10:55+09:00',
     description: '동일한 요청(#13, 하위 업무 행 높이·글씨 크기 축소)이 큐에 다시 접수되어 재차 확인했습니다(72번째 확인). 하위 업무 행의 높이·글씨 크기·간트 막대·우선순위 표시 크기 축소가 깊이(1~3단계)별로 모두 정상 동작하며, taskHierarchy.test.js의 관련 회귀 테스트(subtaskRowClass, taskIndent)도 통과함을 재확인했습니다. 소스 변경은 없습니다.',
