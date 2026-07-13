@@ -129,6 +129,25 @@ test('orderTasksHierarchically keeps children grouped under their parent regardl
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[1, 0], [2, 1], [3, 2], [4, 0]])
 })
 
+test('orderTasksHierarchically puts pinned siblings first regardless of sortBy', () => {
+  const items = [
+    { id: 1, title: 'Zeta' },
+    { id: 2, title: 'Alpha' },
+    { id: 3, title: 'Beta' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'title', new Set([1]))
+  assert.deepEqual(ordered.map(item => item.task.id), [1, 2, 3])
+})
+
+test('orderTasksHierarchically ignores an empty pinned set', () => {
+  const items = [
+    { id: 1, title: 'Zeta' },
+    { id: 2, title: 'Alpha' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'title', new Set())
+  assert.deepEqual(ordered.map(item => item.task.id), [2, 1])
+})
+
 test('subtaskRowClass leaves top-level rows unmarked and shrinks nested rows deeper per depth, capped at 3', () => {
   assert.equal(subtaskRowClass(0), '')
   assert.equal(subtaskRowClass(1), ' subtask-row subtask-depth-1')

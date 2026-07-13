@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-13-task-pin',
+    timestamp: '2026-07-13T13:36:00+09:00',
+    description: '업무 관리 화면에 "고정" 기능을 추가했습니다. 중요한 업무의 고정 버튼을 누르면 선택한 정렬 기준(일정순/우선순위순/진행률순/제목순)과 무관하게 같은 계층의 형제 업무 중 항상 맨 위에 표시되어, 자주 확인해야 하는 업무를 목록이 바뀌어도 놓치지 않을 수 있습니다. 고정 상태는 기기별 로컬 저장소에 보관됩니다 (frontend/src/taskPins.js, frontend/src/taskHierarchy.js, frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-13-today-clear-completed-todos',
     timestamp: '2026-07-13T13:23:20+09:00',
     description: '오늘 화면의 Todo 목록에서 완료된 항목을 하나씩 지워야 했던 불편을 줄였습니다. 완료된 항목이 있으면 "완료된 항목 정리" 버튼이 나타나 확인 후 한 번에 모두 삭제할 수 있습니다 (frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
