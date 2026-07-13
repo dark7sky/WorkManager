@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-recurrence-badge',
+    timestamp: '2026-07-14T04:42:14+09:00',
+    description: '업무 관리 화면의 반복 업무에 "매일/매주/매월 반복" 배지를 추가해 목록에서 바로 반복 여부를 확인할 수 있게 했습니다 (frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-14-work-log-csv-export',
     timestamp: '2026-07-14T04:39:44+09:00',
     description: '오늘 화면의 업무 기록(오늘 한 일) 목록에 CSV 내보내기 버튼을 추가했습니다. Todo/업무/일정/감사 로그와 동일한 방식으로 날짜·내용·소요 시간·연결 업무·태그를 내려받을 수 있습니다 (frontend/src/csv.js, frontend/src/screens/Today.jsx).',
