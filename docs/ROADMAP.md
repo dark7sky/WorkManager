@@ -157,6 +157,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 
 - [x] Todo time-of-day notification: `todo_time` on 오늘 할 일 was previously display/sort-only, unlike calendar events which already fire a lead-time browser notification before `start_at`. Added `todosDueForAlert` (`frontend/src/todoAlerts.js`, mirroring `eventAlerts.js`) and a matching per-minute check effect in `frontend/src/App.jsx` so a todo with a set time now triggers the same browser notification as events, using the existing configurable alert lead-time setting, 2026-07-14.
 - [x] Today screen search covers memo/tags: the "할 일, 업무 기록 검색" box on the Today screen only matched a todo's title or a log's content, unlike the Tasks screen search which already matches title+description+tags+checklist text. Extended `filterTodosByQuery`/`filterLogsByQuery` (`frontend/src/todaySearch.js`) to also match a todo's memo/tags and a log's tags, 2026-07-14.
+- [x] Work log templates: tasks, todos, and calendar events all had a localStorage-backed "템플릿으로 저장"/템플릿 선택 flow, but work logs (오늘 한 일) were the last entity type without one, so a recurring log entry (daily standup, a repeated maintenance note) had to be retyped every time. Added the same pattern for work logs — content/tags/color/duration — with a template select, "템플릿으로 저장", and "템플릿 삭제" control on the quick-add form (`frontend/src/logTemplates.js`, tests in `frontend/src/logTemplates.test.js`, wired into `frontend/src/screens/Today.jsx`, 2026-07-14).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-worklog-templates',
+    timestamp: '2026-07-14T15:07:30+09:00',
+    description: '업무(task), 오늘 할 일(todo), 일정(event)에는 자주 쓰는 항목을 템플릿으로 저장해 재사용하는 기능이 있었지만 업무 기록(work log)에는 이 기능이 없어 반복되는 스탠드업·유지보수 기록을 매번 새로 입력해야 했습니다. 오늘 화면의 업무 기록 작성 폼에도 같은 패턴으로 "기록 템플릿" 선택/저장/삭제 기능을 추가했습니다(내용·태그·색상·소요시간 저장, localStorage 기반, frontend/src/logTemplates.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-today-search-memo-tags',
     timestamp: '2026-07-14T14:53:00+09:00',
     description: '오늘 화면의 "할 일, 업무 기록 검색"이 할 일은 제목만, 업무 기록은 내용만 검사해 메모나 태그에 있는 단어로는 검색이 되지 않았습니다. 업무(Task) 검색처럼 할 일의 메모·태그, 업무 기록의 태그까지 함께 검색하도록 확장했습니다(frontend/src/todaySearch.js).',

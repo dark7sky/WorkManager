@@ -11,6 +11,7 @@ import { todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
 import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
+import { addLogTemplate, applyLogTemplate, buildLogTemplate, loadLogTemplates, removeLogTemplate, saveLogTemplates } from '../logTemplates'
 
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', monthly: '매월' }
 
@@ -67,6 +68,7 @@ export default function Today(props) {
   const [logLinkUrlText, setLogLinkUrlText] = useState('')
   const [logLinkLabelText, setLogLinkLabelText] = useState('')
   const [logColor, setLogColor] = useState('')
+  const [logTemplates, setLogTemplates] = useState(() => loadLogTemplates())
   const [edit, setEdit] = useState(null)
   const [editText, setEditText] = useState('')
   const [editTags, setEditTags] = useState([])
@@ -167,6 +169,33 @@ export default function Today(props) {
     const next = removeTodoTemplate(todoTemplates, match.id)
     setTodoTemplates(next)
     saveTodoTemplates(next)
+  }
+  const applyLogTpl = id => {
+    const template = logTemplates.find(t => t.id === id)
+    if (!template) return
+    const filled = applyLogTemplate(template)
+    setLogDraft(filled.content)
+    setLogTags(filled.tags)
+    setLogColor(filled.color)
+    setLogMinutes(filled.duration_minutes)
+  }
+  const saveLogTpl = () => {
+    if (!logDraft.trim()) return
+    const name = window.prompt('템플릿 이름을 입력하세요.', logDraft.trim())
+    if (!name) return
+    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes })
+    const next = addLogTemplate(logTemplates, template)
+    setLogTemplates(next)
+    saveLogTemplates(next)
+  }
+  const deleteLogTpl = () => {
+    if (!logTemplates.length) return
+    const name = window.prompt('삭제할 템플릿 이름을 입력하세요.')
+    const match = logTemplates.find(t => t.name === name)
+    if (!match) return
+    const next = removeLogTemplate(logTemplates, match.id)
+    setLogTemplates(next)
+    saveLogTemplates(next)
   }
   const submitTodo = async event => {
     event.preventDefault()
@@ -272,6 +301,7 @@ export default function Today(props) {
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         <div className="worklog-timer">{timer ? <><span className="worklog-timer-display">{formatElapsed(timer.startedAt, timerNow)}</span><button type="button" className="text-button" onClick={stopTimer}><Square size={14}/> 타이머 중지</button></> : <button type="button" className="text-button" onClick={startTimer}><Play size={14}/> 타이머 시작</button>}</div>
+        <div className="task-template-bar"><label>기록 템플릿<select onChange={e => { applyLogTpl(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{logTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveLogTpl}>템플릿으로 저장</button>{logTemplates.length ? <button type="button" className="text-button" onClick={deleteLogTpl}>템플릿 삭제</button> : null}</div>
         <form className="quick-entry" onSubmit={submitLog}><div className="quick-add"><Plus/><input value={logDraft} onChange={event => setLogDraft(event.target.value)} aria-label="오늘 한 일"/><input className="log-minutes" type="number" min="0" max="1440" value={logMinutes} onChange={event => setLogMinutes(event.target.value)} aria-label="소요 시간(분)" placeholder="분"/><button disabled={saving === 'log'}>기록</button></div><select aria-label="연결 업무" value={logTaskId} onChange={e=>setLogTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><input className="link-input" type="url" value={logLink} onChange={event => setLogLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/><div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{logLinks.length ? ` (${logLinks.length})` : ''}</span>{logLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeLogLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={logLinkUrlText} placeholder="https://..." onChange={e => setLogLinkUrlText(e.target.value)}/><input type="text" value={logLinkLabelText} placeholder="이름 (선택)" onChange={e => setLogLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLogLink}>추가</button></div></div><select aria-label="색상" value={logColor} onChange={event => setLogColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><TagsInput label="업무 기록 태그" value={logTags} onChange={setLogTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('log-new', 'work_log', logDraft)}>AI 태그 추천</button>{recommendationButtons('log-new', logTags, setLogTags)}</div></form>
         <div className="done-notes">{shownLogs.map(log => <div key={log.id} style={eventColorHex(log.color) ? { borderLeft: `3px solid ${eventColorHex(log.color)}` } : undefined}><Check/><div>{editable('log', log) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><input className="log-minutes" type="number" min="0" max="1440" value={editMinutes} onChange={event => setEditMinutes(event.target.value)} aria-label="소요 시간(분)" placeholder="분"/><select aria-label="연결 업무" value={editTaskId} onChange={e=>setEditTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><input className="link-input" type="url" value={editLogLink} onChange={event => setEditLogLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/><div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{editLogLinks.length ? ` (${editLogLinks.length})` : ''}</span>{editLogLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeEditLogLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={editLogLinkUrlText} placeholder="https://..." onChange={e => setEditLogLinkUrlText(e.target.value)}/><input type="text" value={editLogLinkLabelText} placeholder="이름 (선택)" onChange={e => setEditLogLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addEditLogLink}>추가</button></div></div><select aria-label="색상" value={editLogColor} onChange={event => setEditLogColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`log-${log.id}`, 'work_log', editText)}>AI 태그 추천</button>{recommendationButtons(`log-${log.id}`, editTags, setEditTags)}</div></> : <><span>{log.content}</span>{pinnedLogIds.has(log.id) ? <Star className="task-pinned-icon" aria-hidden="true"/> : null}{log.task_id&&taskTitle.has(log.task_id)?<small className="log-task-link">#{log.task_id} {taskTitle.get(log.task_id)}</small>:null}{log.duration_minutes?<small className="log-task-link">{log.duration_minutes}분</small>:null}{log.link_url ? <a className="task-link" href={log.link_url} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()} aria-label={`${log.content} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{log.links?.length ? <small className="log-task-link"><ExternalLink aria-hidden="true"/>첨부 링크 {log.links.length}개</small> : null}<TagChips tags={log.tags}/></>}</div><span className="row-actions">{editable('log', log) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `log-${log.id}`} onClick={() => saveEdit(log)}><Check/></button></> : <><button aria-label={`${log.content} 수정`} onClick={() => beginEdit('log', log)}><Pencil/></button><button className={`task-pin${pinnedLogIds.has(log.id) ? ' pinned' : ''}`} aria-label={`${log.content} ${pinnedLogIds.has(log.id) ? '고정 해제' : '고정'}`} title={pinnedLogIds.has(log.id) ? '고정 해제' : '목록 상단 고정'} onClick={() => togglePinLog(log)}><Star/></button><button aria-label={`${log.content} 복제`} onClick={() => onDuplicateLog(log)}><Copy/></button></>}<button className="danger-icon" aria-label={`${log.content} 삭제`} onClick={() => onDeleteLog(log)}><Trash2/></button></span></div>)}</div>
       </section>
