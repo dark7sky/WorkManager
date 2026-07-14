@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-worklog-pin',
+    timestamp: '2026-07-14T14:35:32+09:00',
+    description: '업무(task)와 할 일(todo)은 목록 상단에 고정하는 기능이 있었지만 업무 기록(work log)에는 이 기능이 없었습니다. 업무 기록에도 고정 버튼을 추가해 중요한 기록을 목록 맨 위에 고정할 수 있도록 했습니다(frontend/src/logPins.js, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-calendar-task-due',
     timestamp: '2026-07-14T14:31:32+09:00',
     description: '일정(Calendar) 화면은 오직 events만 표시해 마감이 임박한 업무를 보려면 업무 화면을 따로 확인해야 했습니다. 월간/주간 달력 셀에 완료되지 않은 업무의 마감일을 별도 배지(체크 아이콘, 주황색)로 함께 표시하고, 클릭하면 해당 업무의 수정 폼이 바로 열리도록 했습니다(frontend/src/screens/Calendar.jsx, frontend/src/App.jsx, frontend/src/styles.css).',
