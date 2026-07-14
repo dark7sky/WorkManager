@@ -81,6 +81,31 @@ class RuleParserTests(unittest.TestCase):
         self.assertGreaterEqual(due, date.today())
         self.assertEqual((due.month, due.day), (1, 5))
 
+    def test_event_extracts_color_and_link(self):
+        result = ai.rule_parse("내일 오후 3시 고객 회의 빨간색으로 표시, 링크는 https://zoom.us/j/123")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["color"], "red")
+        self.assertEqual(result["data"]["link_url"], "https://zoom.us/j/123")
+        self.assertNotIn("https://", result["data"]["title"])
+        self.assertNotIn("빨간색", result["data"]["title"])
+
+    def test_todo_extracts_time_priority_and_color(self):
+        result = ai.rule_parse("오늘 오후 5시 긴급 보고서 초록색 해야함")
+        self.assertEqual(result["entity"], "todo")
+        self.assertEqual(result["data"]["todo_time"], "17:00")
+        self.assertEqual(result["data"]["priority"], "high")
+        self.assertEqual(result["data"]["color"], "green")
+
+    def test_task_without_color_or_link_omits_those_keys(self):
+        result = ai.rule_parse("분기 보고서 작성")
+        self.assertNotIn("color", result["data"])
+        self.assertNotIn("link_url", result["data"])
+
+    def test_work_log_extracts_link(self):
+        result = ai.rule_parse("오늘 한 일: 배포 완료 https://github.com/org/repo/pull/1")
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["link_url"], "https://github.com/org/repo/pull/1")
+
 
 class ValidationAndStatusTests(unittest.TestCase):
     def test_rejects_unknown_entity(self):

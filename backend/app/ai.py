@@ -301,9 +301,39 @@ def _time(text: str, default: int = 9) -> tuple[int, int]:
     return min(hour, 23), min(minute, 59)
 
 
+_COLOR_WORDS = {
+    "red": ("빨강", "빨간", "레드"), "orange": ("주황", "오렌지"), "yellow": ("노랑", "노란", "옐로"),
+    "green": ("초록", "그린"), "purple": ("보라", "퍼플"), "gray": ("회색", "그레이"),
+}
+_URL_RE = re.compile(r"https?://[^\s,]+")
+
+
+def _color(text: str) -> str | None:
+    for color, words in _COLOR_WORDS.items():
+        if any(word in text for word in words):
+            return color
+    return None
+
+
+def _link(text: str) -> str | None:
+    match = _URL_RE.search(text)
+    return match.group(0) if match else None
+
+
+def _explicit_time(text: str) -> tuple[int, int] | None:
+    match = re.search(r"(?:(오전|오후)\s*)?(\d{1,2})(?:\s*시|:)(?:\s*(\d{1,2})\s*분?)?", text)
+    if not match:
+        return None
+    return _time(text)
+
+
 def _title(text: str) -> str:
     value = re.sub(r"(?:오늘|내일|모레|\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}\s*월\s*\d{1,2}\s*일)", "", text)
     value = re.sub(r"(?:(?:오전|오후)\s*)?\d{1,2}(?:\s*시|:)(?:\s*\d{1,2}\s*분?)?", "", value)
+    value = _URL_RE.sub("", value)
+    for words in _COLOR_WORDS.values():
+        for word in words:
+            value = value.replace(word, "")
     value = re.sub(r"\s+", " ", value).strip(" ,.-")
     return value[:160] or text.strip()[:160]
 
@@ -331,6 +361,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     clean = text.strip()
     combined = f"{hint} {clean}".strip() if hint else clean
     day, title = _day(combined), _title(clean)
+    color, link = _color(combined), _link(combined)
     update = re.search(r"(?:태스크|업무|할\s*일)\s*#?(\d+).*?(?:진행(?:률)?\s*)?(\d{1,3})\s*%", clean)
     if update:
         progress = max(0, min(100, int(update.group(2))))
@@ -338,22 +369,38 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
                 "data": {"progress": progress, "status": "done" if progress == 100 else "doing"},
                 "confidence": 0.94, "source": "local-rules"}
     if any(word in combined for word in ("한 일", "완료 기록", "작업 기록", "처리함")):
-        return {"action": "create", "entity": "work_log", "data": {"content": title, "log_date": day},
+        data = {"content": title, "log_date": day}
+        if color: data["color"] = color
+        if link: data["link_url"] = link
+        return {"action": "create", "entity": "work_log", "data": data,
                 "confidence": 0.78, "source": "local-rules"}
     if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
         hour, minute = _time(combined)
         start = datetime.fromisoformat(day).replace(hour=hour, minute=minute)
-        return {"action": "create", "entity": "event", "data": {"title": title, "description": "",
-                "start_at": start.isoformat(timespec="minutes"),
-                "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""},
+        data = {"title": title, "description": "", "start_at": start.isoformat(timespec="minutes"),
+                "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""}
+        if color: data["color"] = color
+        if link: data["link_url"] = link
+        return {"action": "create", "entity": "event", "data": data,
                 "confidence": 0.8, "source": "local-rules"}
     if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
-        return {"action": "create", "entity": "todo",
-                "data": {"title": title, "todo_date": day, "completed": False, "tags": _match_tags(clean, context)},
+        data = {"title": title, "todo_date": day, "completed": False, "tags": _match_tags(clean, context)}
+        if color: data["color"] = color
+        if link: data["link_url"] = link
+        explicit_time = _explicit_time(combined)
+        if explicit_time:
+            data["todo_time"] = f"{explicit_time[0]:02d}:{explicit_time[1]:02d}"
+        if any(word in combined for word in ("긴급", "중요", "급함")):
+            data["priority"] = "high"
+        return {"action": "create", "entity": "todo", "data": data,
                 "confidence": 0.76, "source": "local-rules"}
-    return {"action": "create", "entity": "task", "data": {"title": title, "description": clean,
-            "status": "todo", "priority": "normal", "progress": 0,
-            "start_date": date.today().isoformat(), "due_date": day, "tags": _match_tags(clean, context)},
+    data = {"title": title, "description": clean, "status": "todo", "priority": "normal", "progress": 0,
+            "start_date": date.today().isoformat(), "due_date": day, "tags": _match_tags(clean, context)}
+    if color: data["color"] = color
+    if link: data["link_url"] = link
+    if any(word in combined for word in ("긴급", "급함")):
+        data["priority"] = "high"
+    return {"action": "create", "entity": "task", "data": data,
             "confidence": 0.58, "source": "local-rules"}
 
 
@@ -415,6 +462,11 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "Allowed actions: create, update. Allowed entities: task, event, todo, work_log. "
         'Return {"items": [...]} where each item has keys action, entity, optional integer id, data, confidence. '
         "Never invent an id. Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
+        "All entities may optionally set data.color to one of red|orange|yellow|green|purple|gray, and "
+        "data.link_url to a single http(s) URL, when the input mentions a color or contains a URL. "
+        "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
+        "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
+        "input lists multiple steps for one task. "
         "If the input contains several separate requests, one per line or a numbered list like "
         "'1. AAA 2. BBB 3. CCC', return one item per request, up to " + str(MAX_BATCH_ITEMS) + " items. "
         "recent_tasks lists the user's existing tasks with their tags; when a new item clearly relates to one "

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-ai-parse-color-link-todo-time',
+    timestamp: '2026-07-14T15:32:00+09:00',
+    description: 'AI 빠른 입력(자연어 파싱)이 색상·링크·할 일 시각·우선순위를 인식하지 못해, 수동 입력 폼에서는 지원되는 필드들이 AI로 만든 항목에는 채워지지 않았습니다. 로컬 규칙 파서와 원격 AI 프롬프트 모두 "빨간색으로 표시", "링크는 https://...", "오후 5시", "긴급" 같은 표현에서 color/link_url/todo_time/priority를 추출하도록 개선했습니다(backend/app/ai.py의 rule_parse, 원격 AI system 프롬프트).',
+  },
+  {
     id: '2026-07-14-worklog-templates',
     timestamp: '2026-07-14T15:07:30+09:00',
     description: '업무(task), 오늘 할 일(todo), 일정(event)에는 자주 쓰는 항목을 템플릿으로 저장해 재사용하는 기능이 있었지만 업무 기록(work log)에는 이 기능이 없어 반복되는 스탠드업·유지보수 기록을 매번 새로 입력해야 했습니다. 오늘 화면의 업무 기록 작성 폼에도 같은 패턴으로 "기록 템플릿" 선택/저장/삭제 기능을 추가했습니다(내용·태그·색상·소요시간 저장, localStorage 기반, frontend/src/logTemplates.js, frontend/src/screens/Today.jsx).',
