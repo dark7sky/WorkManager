@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-modal-scroll',
+    timestamp: '2026-07-14T19:44:46+09:00',
+    description: '새 업무/일정 등의 팝업창이 브라우저 창 높이보다 커지면 메모칸부터 저장 버튼까지 내용이 가려지는데, 팝업(.modal)에는 좁은 화면(680px 이하)에서만 높이 제한과 스크롤이 적용되어 있어 창 너비는 넓지만 높이가 낮은 경우 스크롤이 되지 않는 문제가 있었습니다. 모든 화면 크기에서 팝업에 max-height와 overflow:auto를 적용해, 창 높이가 부족해도 팝업 내부를 스크롤해 저장 버튼까지 볼 수 있도록 수정했습니다(frontend/src/styles.css .modal).',
+  },
+  {
     id: '2026-07-14-todo-csv-import',
     timestamp: '2026-07-14T15:41:00+09:00',
     description: '업무(Tasks) 화면에는 CSV 가져오기가 있었지만 오늘 할 일(Today) 화면은 CSV 내보내기만 가능하고 가져오기는 없어, 여러 할 일을 한 번에 등록하려면 하나씩 입력해야 했습니다. 업무 CSV 가져오기와 같은 패턴으로 "CSV 가져오기" 버튼을 추가해, 내보내기와 같은 열 형식(제목/우선순위/반복/날짜/태그)의 파일을 읽어 제목이 있는 행만 오늘 할 일로 일괄 생성합니다(parseTodosCsv in frontend/src/csv.js, wired into frontend/src/screens/Today.jsx / App.jsx).',
