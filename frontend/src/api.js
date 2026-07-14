@@ -85,5 +85,6 @@ export const api = {
   updateFeatureRequest: (id,status) => request(`/feature-requests/${id}`,json('PATCH',{status})),
   taskComments: id => request(`/tasks/${id}/comments`),
   addTaskComment: (id,body) => request(`/tasks/${id}/comments`,json('POST',{body})),
+  updateTaskComment: (id,commentId,body) => request(`/tasks/${id}/comments/${commentId}`,json('PATCH',{body})),
   deleteTaskComment: (id,commentId) => request(`/tasks/${id}/comments/${commentId}`,{method:'DELETE'}),
 }

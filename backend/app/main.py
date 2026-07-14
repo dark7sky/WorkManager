@@ -1110,6 +1110,23 @@ def task_comments_create(task_id: int, payload: dict = Body(...), user=Depends(r
     return item
 
 
+@app.patch("/api/tasks/{task_id}/comments/{comment_id}")
+def task_comments_update(task_id: int, comment_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        existing = c.execute("SELECT id FROM task_comments WHERE id=? AND task_id=? AND user_id=?", (comment_id, task_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("UPDATE task_comments SET body=?, edited_at=? WHERE id=? AND user_id=?", (body, now(), comment_id, user))
+        item = row_dict(c.execute("SELECT * FROM task_comments WHERE id=?", (comment_id,)).fetchone())
+    audit(user, "update", "task_comment", comment_id, {"task_id": task_id})
+    return item
+
+
 @app.delete("/api/tasks/{task_id}/comments/{comment_id}")
 def task_comments_delete(task_id: int, comment_id: int, user=Depends(require_user)):
     with connection() as c:

@@ -22,6 +22,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [comments, setComments] = useState([])
   const [commentText, setCommentText] = useState('')
   const [commentError, setCommentError] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingCommentText, setEditingCommentText] = useState('')
   const formRef = useRef(null)
   const progressRef = useRef(null)
   const applyChecklistProgress = () => {
@@ -106,6 +108,19 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     try {
       await api.deleteTaskComment(task.id, id)
       setComments(comments.filter(c => c.id !== id))
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
+  const beginEditComment = item => { setEditingCommentId(item.id); setEditingCommentText(item.body) }
+  const saveEditComment = async id => {
+    const body = editingCommentText.trim()
+    setEditingCommentId(null)
+    const original = comments.find(c => c.id === id)
+    if (!body || !original || body === original.body) return
+    try {
+      const updated = await api.updateTaskComment(task.id, id, body)
+      setComments(comments.map(c => c.id === id ? updated : c))
     } catch (e) {
       setCommentError(e.message)
     }
@@ -217,7 +232,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     </div>
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
       {comments.map(item => <div key={item.id} className="checklist-editor-item">
-        <span>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}</span></span>
+        {editingCommentId === item.id
+          ? <input type="text" className="inline-edit" autoFocus value={editingCommentText} onChange={e => setEditingCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditComment(item.id) } if (e.key === 'Escape') setEditingCommentId(null) }} onBlur={() => saveEditComment(item.id)}/>
+          : <span onClick={() => beginEditComment(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
         <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>

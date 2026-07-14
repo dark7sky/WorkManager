@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-15-task-comment-edit',
+    timestamp: '2026-07-15T02:32:00+09:00',
+    description: '업무의 댓글 기능은 작성과 삭제만 가능해 오타나 잘못 남긴 내용을 고치려면 지우고 새로 쓰는 수밖에 없었고, 이 경우 원래 작성 시각도 사라졌습니다. 댓글을 클릭해 바로 수정할 수 있게 했고, 수정된 댓글에는 "(수정됨)" 표시를 남깁니다(backend PATCH /api/tasks/{id}/comments/{comment_id}, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-15-command-palette-todo-memo-search',
     timestamp: '2026-07-15T02:11:50+09:00',
     description: 'Ctrl/⌘+K 빠른 검색은 업무는 설명·체크리스트까지, 일정은 설명까지 훑어 찾아줬지만 오늘 할 일(Todo)은 제목만 검색해 메모에 적어둔 내용으로는 찾을 수 없었습니다. 검색 대상에 Todo 메모 필드를 추가해 제목에 없는 단어로도 찾을 수 있게 했습니다(frontend/src/commandPalette.js).',

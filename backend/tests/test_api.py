@@ -339,6 +339,13 @@ class ApiTests(unittest.TestCase):
         listed = a.get(f"/api/tasks/{task['id']}/comments")
         self.assertEqual(len(listed.json()["items"]), 1)
         comment_id = created.json()["id"]
+        self.assertEqual(b.patch(f"/api/tasks/{task['id']}/comments/{comment_id}", json={"body": "몰래 수정"}).status_code, 404)
+        edited = a.patch(f"/api/tasks/{task['id']}/comments/{comment_id}", json={"body": "  수정된 내용입니다.  "})
+        self.assertEqual(edited.status_code, 200, edited.text)
+        self.assertEqual(edited.json()["body"], "수정된 내용입니다.")
+        self.assertIsNotNone(edited.json()["edited_at"])
+        blank_edit = a.patch(f"/api/tasks/{task['id']}/comments/{comment_id}", json={"body": "   "})
+        self.assertEqual(blank_edit.status_code, 422)
         self.assertEqual(b.delete(f"/api/tasks/{task['id']}/comments/{comment_id}").status_code, 404)
         deleted = a.delete(f"/api/tasks/{task['id']}/comments/{comment_id}")
         self.assertEqual(deleted.status_code, 200, deleted.text)
