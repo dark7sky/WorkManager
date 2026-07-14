@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-today-search-memo-tags',
+    timestamp: '2026-07-14T14:53:00+09:00',
+    description: '오늘 화면의 "할 일, 업무 기록 검색"이 할 일은 제목만, 업무 기록은 내용만 검사해 메모나 태그에 있는 단어로는 검색이 되지 않았습니다. 업무(Task) 검색처럼 할 일의 메모·태그, 업무 기록의 태그까지 함께 검색하도록 확장했습니다(frontend/src/todaySearch.js).',
+  },
+  {
     id: '2026-07-14-todo-time-alert',
     timestamp: '2026-07-14T14:51:40+09:00',
     description: '오늘 할 일(todo)에는 시간(todo_time)을 지정할 수 있었지만, 일정(event)과 달리 그 시간이 다가와도 알림이 오지 않아 단순히 표시/정렬용 정보에 그쳤습니다. 일정 알림과 같은 방식으로 설정된 알림 시점(리드타임) 전에 예정 시간이 도래한 할 일을 브라우저 알림으로 알려주도록 했습니다(frontend/src/todoAlerts.js, frontend/src/App.jsx).',

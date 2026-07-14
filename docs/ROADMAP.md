@@ -156,6 +156,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Event pinning: tasks, todos, and work logs all had a localStorage-backed "pin to top" star toggle (`taskPins.js`/`todoPins.js`/`logPins.js`), but calendar events had no equivalent, so an important upcoming event could get buried in the chronological mobile agenda list. Added `frontend/src/eventPins.js` (same pattern, `wm-pinned-events` key) and wired a pin star button into the Calendar screen's mobile agenda rows, ordering pinned events first (`frontend/src/screens/Calendar.jsx`, tests in `frontend/src/eventPins.test.js`, 2026-07-14).
 
 - [x] Todo time-of-day notification: `todo_time` on 오늘 할 일 was previously display/sort-only, unlike calendar events which already fire a lead-time browser notification before `start_at`. Added `todosDueForAlert` (`frontend/src/todoAlerts.js`, mirroring `eventAlerts.js`) and a matching per-minute check effect in `frontend/src/App.jsx` so a todo with a set time now triggers the same browser notification as events, using the existing configurable alert lead-time setting, 2026-07-14.
+- [x] Today screen search covers memo/tags: the "할 일, 업무 기록 검색" box on the Today screen only matched a todo's title or a log's content, unlike the Tasks screen search which already matches title+description+tags+checklist text. Extended `filterTodosByQuery`/`filterLogsByQuery` (`frontend/src/todaySearch.js`) to also match a todo's memo/tags and a log's tags, 2026-07-14.
 
 ## Removed (2026-07-10): Team/Assignee Features
 

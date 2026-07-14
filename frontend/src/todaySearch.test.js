@@ -4,13 +4,13 @@ import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from './
 
 const todos = [
   { id: 1, title: '보고서 작성', priority: 'high' },
-  { id: 2, title: '이메일 확인', priority: 'low' },
-  { id: 3, title: '팀 회의 준비' },
+  { id: 2, title: '이메일 확인', priority: 'low', memo: '결제 승인 필요' },
+  { id: 3, title: '팀 회의 준비', tags: ['urgent'] },
 ]
 
 const logs = [
   { id: 1, content: '주간 보고서 초안 작성' },
-  { id: 2, content: '고객 통화' },
+  { id: 2, content: '고객 통화', tags: ['sales'] },
 ]
 
 test('filterTodosByQuery returns all todos for an empty query', () => {
@@ -28,6 +28,18 @@ test('filterLogsByQuery returns all logs for an empty query', () => {
 
 test('filterLogsByQuery matches by content', () => {
   assert.deepEqual(filterLogsByQuery(logs, '보고서').map(l => l.id), [1])
+})
+
+test('filterTodosByQuery matches by memo text', () => {
+  assert.deepEqual(filterTodosByQuery(todos, '결제 승인').map(t => t.id), [2])
+})
+
+test('filterTodosByQuery matches by tags', () => {
+  assert.deepEqual(filterTodosByQuery(todos, 'urgent').map(t => t.id), [3])
+})
+
+test('filterLogsByQuery matches by tags', () => {
+  assert.deepEqual(filterLogsByQuery(logs, 'sales').map(l => l.id), [2])
 })
 
 test('filterTodosByPriority returns all todos when priority is all', () => {
