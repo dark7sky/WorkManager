@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-calendar-event-bulk-delete',
+    timestamp: '2026-07-14T20:04:00+09:00',
+    description: '업무·Todo는 체크박스로 여러 항목을 골라 한 번에 삭제할 수 있었지만, 일정 목록(모바일 아젠다)은 하나씩만 지울 수 있었습니다. 일정 목록에도 선택 체크박스와 일괄 작업 바(선택 삭제)를 추가했습니다(frontend/src/screens/Calendar.jsx, frontend/src/App.jsx onBulkDelete).',
+  },
+  {
     id: '2026-07-14-todo-bulk-actions',
     timestamp: '2026-07-14T19:59:00+09:00',
     description: '업무 관리 화면은 체크박스로 여러 업무를 골라 일괄 완료/삭제/태그 추가를 할 수 있었지만, 오늘 화면의 Todo 목록은 항목마다 하나씩만 처리할 수 있었습니다. 업무 관리와 동일한 방식으로 Todo 목록에 선택 체크박스와 일괄 작업 바(완료 처리, 태그 추가, 삭제)를 추가했습니다(frontend/src/screens/Today.jsx, frontend/src/App.jsx onBulkCompleteTodo/onBulkDeleteTodo/onBulkAddTagTodo).',
