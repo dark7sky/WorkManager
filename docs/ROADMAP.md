@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-14 (10:00 KST)
+Last updated: 2026-07-15 (00:53 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -182,6 +182,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Task checklist item reordering: the task form's checklist editor could add/edit/delete/toggle items but only ever displayed them in the order they were added, so fixing the order of steps meant deleting and retyping them. Added up/down move buttons per checklist row backed by a pure `moveChecklistItem` (`frontend/src/taskFormPayload.js`, tests in `frontend/src/taskFormPayload.test.js`), wired into `frontend/src/components/TaskForm.jsx`, 2026-07-14.
 - [x] Checklist-driven progress sync: task progress was a fully manual number disconnected from the checklist, so completing sub-items never moved it. Added a "체크리스트로 진행률 계산" button on the task edit form that fills the 진행률 field from the checklist's completion ratio (`checklistProgress` in `frontend/src/taskFormPayload.js`, tests in `frontend/src/taskFormPayload.test.js`, wired into `frontend/src/components/TaskForm.jsx`), 2026-07-14.
 - [x] Recurring todo skip: a daily/weekly/monthly recurring todo could only advance to its next occurrence by being marked completed, so a day that should be skipped entirely (e.g. a rest-day workout todo) had to be force-completed or left overdue. Added `POST /api/todos/{id}/skip-recurrence` (advances `todo_date` via the existing `next_recurrence_date` helper without touching `completed`, rejecting non-recurring todos or ones past their `recurrence_end_date`) and a "다음 회차로 건너뛰기" button on each recurring todo row (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/api.js`, regression tests in `backend/tests/test_api.py`), 2026-07-14.
+- [x] Add a work log directly from a task: the Gantt "기록 보기" (view logs) modal only ever showed a read-only list of a task's linked work logs, so logging new work against that task meant leaving the Tasks screen for Today and picking the task from a dropdown. Added a small inline add-log form (content + optional minutes) to the existing modal, reusing the same `api.createLog` payload shape as Today.jsx's quick-entry form (`taskLogDraft`/`addTaskLog` in `frontend/src/App.jsx`), 2026-07-15.
 
 ## Removed (2026-07-10): Team/Assignee Features
 
