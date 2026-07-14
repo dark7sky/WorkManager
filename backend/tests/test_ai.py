@@ -140,6 +140,25 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["data"]["link_url"], "https://docs.example.com/a")
         self.assertNotIn("links", result["data"])
 
+    def test_recurring_event_sets_recurrence_rule_and_end_date(self):
+        next_year = date.today().year + (date.today().month >= 8)
+        result = ai.rule_parse("매주 정기 회의 8월 30일까지")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["recurrence_rule"], "weekly")
+        self.assertEqual(result["data"]["recurrence_end_date"], date(next_year, 8, 30).isoformat())
+        self.assertNotIn("매주", result["data"]["title"])
+        self.assertNotIn("까지", result["data"]["title"])
+
+    def test_event_without_recurrence_keyword_omits_recurrence_fields(self):
+        result = ai.rule_parse("내일 오후 3시 고객 회의")
+        self.assertNotIn("recurrence_rule", result["data"])
+        self.assertNotIn("recurrence_end_date", result["data"])
+
+    def test_recurring_event_without_end_date_omits_recurrence_fields(self):
+        result = ai.rule_parse("매일 아침 스탠드업 회의")
+        self.assertNotIn("recurrence_rule", result["data"])
+        self.assertNotIn("recurrence_end_date", result["data"])
+
 
 class ValidationAndStatusTests(unittest.TestCase):
     def test_rejects_unknown_entity(self):

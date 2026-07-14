@@ -328,6 +328,29 @@ def _links(text: str) -> list[dict] | None:
     return [{"url": u, "label": ""} for u in urls]
 
 
+_RECURRENCE_WORDS = (("매일", "daily"), ("매주", "weekly"), ("매월", "monthly"), ("매달", "monthly"))
+_RECURRENCE_UNTIL_RE = re.compile(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}\s*월\s*\d{1,2}\s*일)\s*까지")
+
+
+def _event_recurrence(text: str, today: date | None = None) -> tuple[str, str] | None:
+    """Detect a recurring-event request like '매주 회의 8월 30일까지' -> (rule, end_date)."""
+    rule = next((r for word, r in _RECURRENCE_WORDS if word in text), None)
+    if not rule:
+        return None
+    match = _RECURRENCE_UNTIL_RE.search(text)
+    if not match:
+        return None
+    return rule, _day(match.group(1), today)
+
+
+def _strip_recurrence_phrase(title: str) -> str:
+    title = re.sub("|".join(word for word, _ in _RECURRENCE_WORDS), "", title)
+    title = _RECURRENCE_UNTIL_RE.sub("", title)
+    title = re.sub(r"(?:\d{1,2}\s*월\s*\d{1,2}\s*일)?\s*까지", "", title)
+    title = re.sub(r"\s+", " ", title).strip(" ,.-")
+    return title
+
+
 def _explicit_time(text: str) -> tuple[int, int] | None:
     match = re.search(r"(?:(오전|오후)\s*)?(\d{1,2})(?:\s*시|:)(?:\s*(\d{1,2})\s*분?)?", text)
     if not match:
@@ -386,11 +409,15 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
         hour, minute = _time(combined)
         start = datetime.fromisoformat(day).replace(hour=hour, minute=minute)
-        data = {"title": title, "description": "", "start_at": start.isoformat(timespec="minutes"),
+        recurrence = _event_recurrence(combined)
+        event_title = _strip_recurrence_phrase(title) if recurrence else title
+        data = {"title": event_title or title, "description": "", "start_at": start.isoformat(timespec="minutes"),
                 "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""}
         if color: data["color"] = color
         if link: data["link_url"] = link
         if links: data["links"] = links
+        if recurrence:
+            data["recurrence_rule"], data["recurrence_end_date"] = recurrence
         if any(word in combined for word in ("긴급", "중요", "급함")):
             data["priority"] = "high"
         return {"action": "create", "entity": "event", "data": data,
@@ -514,7 +541,9 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "{url, label} objects (label is a short description of what the link is, or empty string). "
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
         "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
-        "input lists multiple steps for one task. "
+        "input lists multiple steps for one task. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
+        "set data.recurrence_rule to daily|weekly|monthly and data.recurrence_end_date to the ISO end date; "
+        "omit both if no repeat or end date is stated. "
         "If the input contains several separate requests, one per line or a numbered list like "
         "'1. AAA 2. BBB 3. CCC', return one item per request, up to " + str(MAX_BATCH_ITEMS) + " items. "
         "recent_tasks lists the user's existing tasks with their tags; when a new item clearly relates to one "

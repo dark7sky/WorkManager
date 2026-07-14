@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-ai-event-recurrence',
+    timestamp: '2026-07-14T19:52:00+09:00',
+    description: '캘린더 일정 등록 폼에는 반복(매일/매주/매월) 옵션이 있었지만, AI 도우미로 "매주 정기 회의 8월 30일까지"처럼 입력하면 반복이 인식되지 않고 한 번짜리 일정만 만들어졌습니다. 로컬 규칙 기반 파서와 원격 AI 프롬프트 모두 반복 표현 + 종료일을 인식해 recurrence_rule/recurrence_end_date를 채우도록 하고, /api/ai/apply가 이 필드를 받으면 종료일까지의 개별 일정을 한 번에 생성하도록 백엔드에 반복 확장 로직을 추가했습니다(backend/app/ai.py _event_recurrence, backend/app/main.py expand_recurring_event).',
+  },
+  {
     id: '2026-07-14-modal-scroll',
     timestamp: '2026-07-14T19:44:46+09:00',
     description: '새 업무/일정 등의 팝업창이 브라우저 창 높이보다 커지면 메모칸부터 저장 버튼까지 내용이 가려지는데, 팝업(.modal)에는 좁은 화면(680px 이하)에서만 높이 제한과 스크롤이 적용되어 있어 창 너비는 넓지만 높이가 낮은 경우 스크롤이 되지 않는 문제가 있었습니다. 모든 화면 크기에서 팝업에 max-height와 overflow:auto를 적용해, 창 높이가 부족해도 팝업 내부를 스크롤해 저장 버튼까지 볼 수 있도록 수정했습니다(frontend/src/styles.css .modal).',

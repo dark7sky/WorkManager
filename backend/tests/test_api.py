@@ -679,6 +679,30 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_ai_apply_expands_recurring_event_into_one_row_per_occurrence(self, *_):
+        a = self.client(self.token_a)
+        result = a.post("/api/ai/apply", json={"action": "create", "entity": "event", "data": {
+            "title": "정기 회의", "start_at": "2026-07-06T10:00:00", "end_at": "2026-07-06T11:00:00",
+            "recurrence_rule": "weekly", "recurrence_end_date": "2026-07-20",
+        }})
+        self.assertEqual(result.status_code, 200, result.text)
+        items = result.json()
+        self.assertEqual([item["start_at"] for item in items],
+                          ["2026-07-06T10:00:00", "2026-07-13T10:00:00", "2026-07-20T10:00:00"])
+        self.assertTrue(all(item["title"] == "정기 회의" for item in items))
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_ai_apply_event_without_recurrence_end_date_creates_single_event(self, *_):
+        a = self.client(self.token_a)
+        result = a.post("/api/ai/apply", json={"action": "create", "entity": "event", "data": {
+            "title": "단발 회의", "start_at": "2026-07-06T10:00:00", "end_at": "2026-07-06T11:00:00",
+        }})
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual(result.json()["title"], "단발 회의")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_checklist_is_persisted_and_sanitized(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "with checklist", "checklist": [

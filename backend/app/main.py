@@ -725,6 +725,31 @@ def next_recurrence_date(value, rule, anchor_day=None, anchor_month_end=False):
     return date(year, month, day).isoformat()
 
 
+def _advance_event_datetime(value, rule):
+    if rule == "daily":
+        return value + timedelta(days=1)
+    if rule == "weekly":
+        return value + timedelta(days=7)
+    year, month = value.year + (value.month == 12), 1 if value.month == 12 else value.month + 1
+    day = min(value.day, month_calendar.monthrange(year, month)[1])
+    return value.replace(year=year, month=month, day=day)
+
+
+def expand_recurring_event(data, rule, until, limit=52):
+    """Mirror frontend/src/eventRecurrence.js so AI-created recurring events also fan out into one row per occurrence."""
+    start = datetime.fromisoformat(data["start_at"])
+    end = datetime.fromisoformat(data["end_at"])
+    duration = end - start
+    until_dt = datetime.combine(date.fromisoformat(until), datetime.max.time())
+    occurrences = []
+    cursor = start
+    while cursor <= until_dt and len(occurrences) < limit:
+        occurrences.append({**data, "start_at": cursor.isoformat(timespec="minutes"),
+                             "end_at": (cursor + duration).isoformat(timespec="minutes")})
+        cursor = _advance_event_datetime(cursor, rule)
+    return occurrences or [data]
+
+
 def spawn_recurring_task(task, user_id):
     rule = task.get("recurrence_rule")
     if not rule or task.get("recurrence_spawned_at"):
@@ -1583,7 +1608,12 @@ def ai_apply(payload: dict = Body(...), user=Depends(require_user)):
             raise HTTPException(422, "A numeric id is required")
         return update_item(table, item_id, payload.get("data") or {}, user)
     if payload.get("action") == "create":
-        return create_item(table, payload.get("data") or {}, user)
+        data = dict(payload.get("data") or {})
+        if table == "events":
+            rule, until = data.pop("recurrence_rule", None), data.pop("recurrence_end_date", None)
+            if rule and until and data.get("start_at") and data.get("end_at"):
+                return [create_item(table, occurrence, user) for occurrence in expand_recurring_event(data, rule, until)]
+        return create_item(table, data, user)
     raise HTTPException(422, "Unsupported action")
 
 
