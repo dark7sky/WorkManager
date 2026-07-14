@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-skip-recurrence',
+    timestamp: '2026-07-14T20:51:21+09:00',
+    description: '매일/매주/매월 반복되는 오늘 할 일은 완료해야만 다음 회차로 넘어갈 수 있어, 하루 건너뛰어야 하는 반복 항목(예: 휴무일의 운동 할 일)도 억지로 완료 처리하거나 그대로 지연 표시를 받아야 했습니다. 각 반복 할 일 행에 "다음 회차로 건너뛰기" 버튼을 추가해 완료 처리 없이 날짜만 다음 회차로 넘길 수 있게 했습니다(백엔드 POST /api/todos/{id}/skip-recurrence, frontend/src/screens/Today.jsx, frontend/src/App.jsx, 회귀 테스트 test_skip_todo_recurrence_advances_date_without_completing_or_spawning・test_skip_todo_recurrence_rejects_non_recurring_or_past_end_date in backend/tests/test_api.py).',
+  },
+  {
     id: '2026-07-14-checklist-progress-sync',
     timestamp: '2026-07-14T20:52:00+09:00',
     description: '업무 진행률은 체크리스트와 무관하게 직접 입력하는 숫자뿐이라, 세부 항목을 하나씩 완료해도 진행률이 저절로 따라오지 않아 매번 수동으로 계산해 입력해야 했습니다. 체크리스트가 있는 업무 편집 화면에 "체크리스트로 진행률 계산" 버튼을 추가해 완료 항목 비율로 진행률 입력값을 한 번에 채울 수 있도록 했습니다(frontend/src/taskFormPayload.js의 checklistProgress, frontend/src/components/TaskForm.jsx).',

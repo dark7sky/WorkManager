@@ -820,6 +820,31 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_skip_todo_recurrence_advances_date_without_completing_or_spawning(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "water ferns", "todo_date": "2026-07-06", "recurrence_rule": "daily"}).json()
+        skipped = a.post(f"/api/todos/{todo['id']}/skip-recurrence").json()
+        self.assertEqual(skipped["id"], todo["id"])
+        self.assertEqual(skipped["todo_date"], "2026-07-07")
+        self.assertFalse(skipped["completed"])
+        siblings = [t for t in a.get("/api/todos").json() if t["title"] == "water ferns"]
+        self.assertEqual(len(siblings), 1)
+        # Skipping again advances further, staying idempotent-safe (not a completion event).
+        skipped_again = a.post(f"/api/todos/{todo['id']}/skip-recurrence").json()
+        self.assertEqual(skipped_again["todo_date"], "2026-07-08")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_skip_todo_recurrence_rejects_non_recurring_or_past_end_date(self, *_):
+        a = self.client(self.token_a)
+        plain = a.post("/api/todos", json={"title": "one-off", "todo_date": "2026-07-06"}).json()
+        self.assertEqual(a.post(f"/api/todos/{plain['id']}/skip-recurrence").status_code, 422)
+        ending = a.post("/api/todos", json={"title": "ends soon", "todo_date": "2026-07-06",
+                                             "recurrence_rule": "daily", "recurrence_end_date": "2026-07-06"}).json()
+        self.assertEqual(a.post(f"/api/todos/{ending['id']}/skip-recurrence").status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         default_todo = a.post("/api/todos", json={"title": "default priority"}).json()

@@ -1121,6 +1121,22 @@ def task_comments_delete(task_id: int, comment_id: int, user=Depends(require_use
     return {"ok": True}
 
 
+@app.post("/api/todos/{item_id}/skip-recurrence")
+def skip_todo_recurrence(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT * FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+    if not existing:
+        raise HTTPException(404, "Item not found")
+    todo = row_dict(existing)
+    if not todo.get("recurrence_rule"):
+        raise HTTPException(422, "반복 설정이 없는 할 일입니다.")
+    next_date = next_recurrence_date(todo.get("todo_date"), todo["recurrence_rule"], todo.get("recurrence_anchor_day"), bool(todo.get("recurrence_anchor_month_end")))
+    end_date = todo.get("recurrence_end_date")
+    if not next_date or (end_date and next_date > end_date):
+        raise HTTPException(422, "다음 회차가 없습니다.")
+    return update_item("todos", item_id, {"todo_date": next_date}, user)
+
+
 @app.get("/api/trash")
 def trash(user=Depends(require_user)):
     result = {}
