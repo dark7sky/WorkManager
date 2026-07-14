@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-event-overlap-warning',
+    timestamp: '2026-07-14T20:06:30+09:00',
+    description: '캘린더 일정을 새로 만들거나 시간을 수정할 때 같은 시간대에 이미 등록된 다른 일정이 있어도 아무 안내 없이 저장되어, 일정이 겹치는 것을 모르고 지나치는 경우가 있었습니다. 시작/종료 시간이 기존 일정과 겹치면 저장 폼에 겹치는 일정 제목을 알려주는 경고 문구를 표시하도록 했습니다(막지는 않고 안내만 함, frontend/src/eventOverlap.js, frontend/src/screens/Calendar.jsx의 EventForm, 테스트 frontend/src/eventOverlap.test.js).',
+  },
+  {
     id: '2026-07-14-calendar-event-bulk-delete',
     timestamp: '2026-07-14T20:04:00+09:00',
     description: '업무·Todo는 체크박스로 여러 항목을 골라 한 번에 삭제할 수 있었지만, 일정 목록(모바일 아젠다)은 하나씩만 지울 수 있었습니다. 일정 목록에도 선택 체크박스와 일괄 작업 바(선택 삭제)를 추가했습니다(frontend/src/screens/Calendar.jsx, frontend/src/App.jsx onBulkDelete).',

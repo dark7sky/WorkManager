@@ -16,6 +16,7 @@ import { tasksDueByDay } from '../calendarTaskDue'
 import { holidayNameForDate } from '../holidays'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
+import { findOverlappingEvents } from '../eventOverlap'
 import { api } from '../api'
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토']
@@ -35,7 +36,7 @@ function overlapsDay(event, day) {
   return start < nextDay && end > dayStart
 }
 
-function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
+function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate, onCancel }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => event?.tags || [])
@@ -104,6 +105,7 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     if (!endTouchedRef.current) setEndValue(addHour(value))
   }
   const onEndChange = e => { endTouchedRef.current = true; setEndValue(e.target.value) }
+  const overlapping = useMemo(() => findOverlappingEvents(startValue, endValue, allEvents, event?.id ?? null), [startValue, endValue, allEvents, event])
   const submit = async formEvent => {
     formEvent.preventDefault()
     const data = Object.fromEntries(new FormData(formEvent.currentTarget))
@@ -140,6 +142,7 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     </div>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
+    {overlapping.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 시간대에 이미 일정이 있습니다: {overlapping.map(e => e.title).join(', ')}</p> : null}
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
     <div className="form-actions span-2">{event ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}{event && onDuplicate ? <button type="button" className="secondary" disabled={saving} onClick={() => onDuplicate(event)}><Copy aria-hidden="true"/>복제</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : event ? '변경사항 저장' : '일정 등록'}</button></div>
   </form>
@@ -219,7 +222,7 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
       {selectedEventIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 일정 일괄 작업"><span>{selectedEventIds.size}개 선택됨</span><button type="button" className="danger-button" onClick={bulkDeleteEvents}>삭제</button><button type="button" className="text-button" onClick={clearSelectedEvents}>선택 해제</button></div> : null}
       <section className="mobile-agenda">{agendaEvents.length ? agendaEvents.map(event => <div key={event.id} className={`agenda-row ${selectedEventIds.has(event.id) ? 'row-selected' : ''}`}><input type="checkbox" className="row-select" aria-label={`${event.title} 선택`} checked={selectedEventIds.has(event.id)} onChange={() => toggleEventSelected(event.id)}/><button onClick={() => setEditing(event)}><time>{parseDate(event.start_at || event.start).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}<b>{event.google_is_all_day ? '종일' : parseDate(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</b></time><span><strong>{event.title}</strong>{pinnedIds.has(event.id) ? <Star className="task-pinned-icon" aria-hidden="true"/> : null}<small>{event.location ? <><MapPin/> {event.location}</> : '장소 없음'}</small>{event.priority === 'high' ? <small className="log-task-link">우선순위 높음</small> : null}<TagChips tags={event.tags}/>{event.link_url ? <a className="task-link" href={event.link_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} aria-label={`${event.title} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{event.links?.length ? <small className="task-recurrence"><ExternalLink aria-hidden="true"/>첨부 링크 {event.links.length}개</small> : null}{event.sync_state === 'conflict' ? <em className="conflict-label">동기화 충돌</em> : null}</span><ChevronRight/></button><button className={`task-pin${pinnedIds.has(event.id) ? ' pinned' : ''}`} aria-label={`${event.title} ${pinnedIds.has(event.id) ? '고정 해제' : '고정'}`} title={pinnedIds.has(event.id) ? '고정 해제' : '목록 상단 고정'} onClick={() => togglePin(event)}><Star/></button></div>) : <p className="empty-state">등록된 일정이 없습니다.</p>}</section>
     </div>
-    {(editing || newDate) ? <Modal title={editing ? '일정 수정' : '새 일정'} onClose={close}>{editing?.sync_state === 'conflict' ? <ConflictPanel event={editing} notify={notify} onResolved={async () => { await onDataChanged(); close() }}/> : null}<EventForm event={editing} date={newDate || dateKey(cursor)} onCancel={close} onDelete={() => setDeleting(true)} onDuplicate={async e => { const ok = await onCreate(buildEventDuplicatePayload(e)); if (ok) close() }} onSave={async data => { const ok = await (editing ? onUpdate(editing, data) : onCreate(data)); if (ok) close(); return ok }}/></Modal> : null}
+    {(editing || newDate) ? <Modal title={editing ? '일정 수정' : '새 일정'} onClose={close}>{editing?.sync_state === 'conflict' ? <ConflictPanel event={editing} notify={notify} onResolved={async () => { await onDataChanged(); close() }}/> : null}<EventForm event={editing} date={newDate || dateKey(cursor)} allEvents={events} onCancel={close} onDelete={() => setDeleting(true)} onDuplicate={async e => { const ok = await onCreate(buildEventDuplicatePayload(e)); if (ok) close() }} onSave={async data => { const ok = await (editing ? onUpdate(editing, data) : onCreate(data)); if (ok) close(); return ok }}/></Modal> : null}
     {deleting ? <ConfirmDialog message={`‘${editing?.title}’ 일정을 삭제합니다.`} onClose={() => setDeleting(false)} onConfirm={async () => { const ok = await onDelete(editing); if (ok) { setDeleting(false); close() } }}/> : null}
   </>
 }
