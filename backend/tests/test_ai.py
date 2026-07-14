@@ -48,6 +48,22 @@ class RuleParserTests(unittest.TestCase):
         result = ai.rule_parse_multi("1. 보고서 작성")
         self.assertEqual(len(result), 1)
 
+    def test_rule_parse_extracts_task_checklist_from_numbered_steps(self):
+        result = ai.rule_parse("보고서 작성 단계: 1. 초안 작성 2. 검토 요청 3. 최종 제출")
+        self.assertEqual(result["entity"], "task")
+        self.assertEqual(result["data"]["title"], "보고서 작성")
+        self.assertEqual(result["data"]["checklist"], [
+            {"text": "초안 작성", "done": False},
+            {"text": "검토 요청", "done": False},
+            {"text": "최종 제출", "done": False},
+        ])
+
+    def test_rule_parse_multi_keeps_checklist_text_as_one_task(self):
+        result = ai.rule_parse_multi("보고서 작성 단계: 1. 초안 작성 2. 검토 요청")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["entity"], "task")
+        self.assertEqual(len(result[0]["data"]["checklist"]), 2)
+
     def test_parse_text_without_api_key_returns_items_list(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import init_db

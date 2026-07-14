@@ -412,28 +412,59 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     if links: data["links"] = links
     if any(word in combined for word in ("긴급", "급함")):
         data["priority"] = "high"
+    checklist = _checklist(combined)
+    if checklist:
+        prefix, items = checklist
+        if prefix:
+            data["title"] = prefix[:160]
+        data["checklist"] = [{"text": item, "done": False} for item in items]
     return {"action": "create", "entity": "task", "data": data,
             "confidence": 0.58, "source": "local-rules"}
 
 
 MAX_BATCH_ITEMS = 10
 _LIST_MARKER_RE = re.compile(r"(?<!\d)\d{1,2}[.\)]\s*(?=[^\d\s])")
+_CHECKLIST_TRIGGERS = ("단계", "체크리스트", "하위 항목", "세부 항목", "순서로")
+
+
+def _numbered_segments(text: str) -> list[str]:
+    matches = list(_LIST_MARKER_RE.finditer(text))
+    if len(matches) < 2:
+        return []
+    segments = []
+    for i, m in enumerate(matches):
+        start = m.end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        segment = text[start:end].strip(" ,.-")
+        if segment:
+            segments.append(segment)
+    return segments if len(segments) >= 2 else []
+
+
+def _checklist(text: str) -> tuple[str, list[str]] | None:
+    """Detect a task's numbered sub-steps, e.g. '보고서 작성 단계: 1. 초안 2. 검토'."""
+    if not any(trigger in text for trigger in _CHECKLIST_TRIGGERS):
+        return None
+    segments = _numbered_segments(text)
+    if not segments:
+        return None
+    prefix = text[:_LIST_MARKER_RE.search(text).start()]
+    for trigger in _CHECKLIST_TRIGGERS:
+        prefix = prefix.replace(trigger, "")
+    prefix = prefix.strip(" :,.-")
+    return prefix, segments
 
 
 def _split_numbered_line(line: str) -> list[tuple[str, str]]:
     """Split a single line like '오늘 할 일 1.AAA 2. BBB 3. CCC' into (segment, hint) pairs."""
+    if any(trigger in line for trigger in _CHECKLIST_TRIGGERS):
+        return [(line, "")]
     matches = list(_LIST_MARKER_RE.finditer(line))
     if len(matches) < 2:
         return [(line, "")]
     prefix = line[:matches[0].start()].strip()
-    segments = []
-    for i, m in enumerate(matches):
-        start = m.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(line)
-        segment = line[start:end].strip(" ,.-")
-        if segment:
-            segments.append((segment, prefix))
-    return segments if len(segments) >= 2 else [(line, "")]
+    segments = _numbered_segments(line)
+    return [(segment, prefix) for segment in segments] if segments else [(line, "")]
 
 
 def rule_parse_multi(text: str, context: list[dict] | None = None) -> list[dict[str, Any]]:
