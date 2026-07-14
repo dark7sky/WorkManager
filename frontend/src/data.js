@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-worklog-link-url',
+    timestamp: '2026-07-14T09:47:15+09:00',
+    description: '업무(Task)와 오늘 할 일(Todo)에는 관련 링크(PR, 문서, 티켓 등)를 붙일 수 있었지만 업무 기록(Work Log)에는 그 필드가 없어 작업 근거 링크를 남길 수 없었습니다. work_logs 테이블에 link_url 컬럼을 추가하고, 오늘 화면의 업무 기록 작성/수정 폼과 목록에 관련 링크 입력·표시를 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-gantt-window-navigation',
     timestamp: '2026-07-14T09:36:58+09:00',
     description: '업무 화면의 간트 목록은 항상 오늘부터 14일치만 보여줘서, 그 범위를 벗어난 일정은 막대가 아예 표시되지 않고 화면을 이동할 방법도 없었습니다. 간트 헤더에 "◀ / 오늘 / ▶" 버튼을 추가해 2주 단위로 이전·다음 구간을 탐색하고 "오늘" 버튼으로 즉시 복귀할 수 있게 했습니다(드래그 이동/기간조절도 이동한 구간 기준으로 정확히 동작, frontend/src/screens/Tasks.jsx).',
