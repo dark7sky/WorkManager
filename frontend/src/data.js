@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-event-templates',
+    timestamp: '2026-07-14T14:48:41+09:00',
+    description: '업무(task)와 오늘의 할 일(todo)에는 자주 만드는 항목을 템플릿으로 저장해 재사용하는 기능이 있었지만 일정(event)에는 이 기능이 없어 반복되는 회의·일정을 매번 다시 입력해야 했습니다. 일정 등록 폼에도 같은 패턴으로 "일정 템플릿" 선택/저장/삭제 기능을 추가했습니다(제목·장소·색상·태그 저장, localStorage 기반, frontend/src/eventTemplates.js, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-14-event-pin',
     timestamp: '2026-07-14T14:47:00+09:00',
     description: '업무(task), 할 일(todo), 업무 기록(work log)은 목록 상단에 고정하는 기능이 있었지만 일정(event)에는 이 기능이 없었습니다. 캘린더 화면의 모바일 일정 목록에도 고정 버튼을 추가해 중요한 일정을 목록 맨 위에 고정할 수 있도록 했습니다(frontend/src/eventPins.js, frontend/src/screens/Calendar.jsx).',

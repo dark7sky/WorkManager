@@ -61,6 +61,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Subtask completion summary ("하위 업무 n/m 완료") shown on parent rows in the task list (Wave 7 item 37).
 - [x] Gantt task list sorts sibling rows by start date (falling back to due date, then title) instead of alphabetically, so the visible order matches the actual schedule (Wave 8 item 38).
 - [x] Task dependency picker in the task form: `dependency_ids` had full backend cycle-prevention and blocker display, but no UI ever let a user set it — the form now includes a "선행 업무" multi-select (Wave 9 item 39).
+- [x] Event templates: tasks and today's quick todos already had localStorage-based save/apply/delete templates, but the calendar event form had no equivalent, so recurring meetings had to be retyped each time. Added the same pattern for events (title/location/color/tags, `frontend/src/eventTemplates.js`, wired into `Calendar.jsx`'s `EventForm`, 2026-07-14).
 
 ## Backlog (identified 2026-07-11, not yet implemented)
 

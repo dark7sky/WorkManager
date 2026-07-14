@@ -9,6 +9,7 @@ import { eventsToIcs, icsFilename, parseIcs } from '../ics'
 import { eventCsvFilename, eventsToCsv } from '../csv'
 import { filterEventsByQuery } from '../eventSearch'
 import { buildEventDuplicatePayload } from '../eventDuplicate'
+import { addEventTemplate, applyEventTemplate, buildEventTemplate, loadEventTemplates, removeEventTemplate, saveEventTemplates } from '../eventTemplates'
 import { loadPinnedEventIds, orderEventsByPin, savePinnedEventIds, togglePinnedEvent } from '../eventPins'
 import { expandRecurringEvent } from '../eventRecurrence'
 import { tasksDueByDay } from '../calendarTaskDue'
@@ -46,8 +47,33 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
   const [links, setLinks] = useState(() => event?.links || [])
   const [linkUrlText, setLinkUrlText] = useState('')
   const [linkLabelText, setLinkLabelText] = useState('')
+  const [templates, setTemplates] = useState(() => loadEventTemplates())
+  const [prefill, setPrefill] = useState(null)
+  const [prefillKey, setPrefillKey] = useState(0)
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
+  const applyTemplate = id => {
+    const template = templates.find(t => t.id === id)
+    if (!template) return
+    const filled = applyEventTemplate(template)
+    setPrefill(filled)
+    setPrefillKey(k => k + 1)
+    setTags(filled.tags)
+  }
+  const saveAsTemplate = () => {
+    const data = new FormData(formRef.current)
+    const name = window.prompt('템플릿 이름을 입력하세요.', data.get('title') || '')
+    if (!name) return
+    const template = buildEventTemplate({ name, title: data.get('title'), location: data.get('location'), color: data.get('color'), tags })
+    const next = addEventTemplate(templates, template)
+    setTemplates(next)
+    saveEventTemplates(next)
+  }
+  const deleteTemplate = id => {
+    const next = removeEventTemplate(templates, id)
+    setTemplates(next)
+    saveEventTemplates(next)
+  }
   const addLink = () => {
     const url = linkUrlText.trim()
     if (!/^https?:\/\//.test(url)) return
@@ -93,12 +119,16 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     setSaving(false)
   }
   return <form ref={formRef} className="form-grid" onSubmit={submit}>
-    <label className="span-2">일정 제목<input name="title" defaultValue={event?.title || ''} required autoFocus/></label>
+    {!event ? <div className="span-2 task-template-bar">
+      <label>일정 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+      {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
+    </div> : null}
+    <label className="span-2" key={`title-${prefillKey}`}>일정 제목<input name="title" defaultValue={prefill?.title ?? event?.title ?? ''} required autoFocus/></label>
     <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
     <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange}/></label>
-    <label className="span-2">장소<input name="location" defaultValue={event?.location || ''}/></label>
+    <label className="span-2" key={`location-${prefillKey}`}>장소<input name="location" defaultValue={prefill?.location ?? event?.location ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={event?.link_url ?? ''}/></label>
-    <label>색상<select name="color" defaultValue={event?.color || ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
+    <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? event?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>
       {links.map(item => <div key={item.id} className="checklist-editor-item">
@@ -110,7 +140,7 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
-    <div className="form-actions span-2">{event ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}{event && onDuplicate ? <button type="button" className="secondary" disabled={saving} onClick={() => onDuplicate(event)}><Copy aria-hidden="true"/>복제</button> : null}<span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : event ? '변경사항 저장' : '일정 등록'}</button></div>
+    <div className="form-actions span-2">{event ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}{event && onDuplicate ? <button type="button" className="secondary" disabled={saving} onClick={() => onDuplicate(event)}><Copy aria-hidden="true"/>복제</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : event ? '변경사항 저장' : '일정 등록'}</button></div>
   </form>
 }
 
