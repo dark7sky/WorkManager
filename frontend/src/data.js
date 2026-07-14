@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-work-log-time',
+    timestamp: '2026-07-14T15:33:00+09:00',
+    description: '오늘 할 일에는 하루 중 처리 시각(todo_time)을 남길 수 있었지만, 업무 기록(오늘 한 일)은 날짜만 있어 몇 시에 한 일인지 남길 방법이 없었습니다. work_logs에 nullable log_time(HH:MM) 컬럼을 추가하고(backend WorkLogPayload/CONFIG/db.py 마이그레이션), Today 화면의 기록 빠른 추가/수정 폼에 시간 입력을 추가했으며, 같은 날짜 안에서는 시간순으로 정렬되고 목록에 시각 배지가 표시됩니다. 기록 복제 시에도 시각이 함께 복사됩니다(backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/logDuplicate.js).',
+  },
+  {
     id: '2026-07-14-event-priority',
     timestamp: '2026-07-14T15:31:00+09:00',
     description: '업무와 오늘 할 일에는 낮음/보통/높음 우선순위가 있었지만 캘린더 일정에는 없어, 중요한 회의를 시각적으로 구분할 방법이 없었습니다. 일정에 nullable priority 컬럼을 추가하고(백엔드 EventPayload/CONFIG/db.py 마이그레이션), 일정 등록/수정 폼에 우선순위 선택을 추가했으며, 캘린더 칩에는 좌측 강조선을, 모바일 일정 목록에는 "우선순위 높음" 배지를 표시합니다. 빠른 입력/AI 도우미의 자연어 파싱도 "긴급/중요" 표현에서 일정 우선순위를 함께 인식합니다(backend/app/main.py, backend/app/db.py, backend/app/ai.py, frontend/src/screens/Calendar.jsx).',

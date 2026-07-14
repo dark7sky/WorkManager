@@ -578,6 +578,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_time_is_persisted_validated_and_orders_today_endpoint(self, *_):
+        from datetime import date
+        a = self.client(self.token_a)
+        today = date.today().isoformat()
+        log = a.post("/api/work_logs", json={"content": "timed log", "log_date": today, "log_time": "09:30"})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["log_time"], "09:30")
+        earlier = a.post("/api/work_logs", json={"content": "earlier log", "log_date": today, "log_time": "08:00"})
+        self.assertEqual(earlier.status_code, 200, earlier.text)
+        ordered = [x["content"] for x in a.get("/api/today").json()["work_logs"] if x["content"] in ("timed log", "earlier log")]
+        self.assertEqual(ordered, ["earlier log", "timed log"])
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"log_time": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["log_time"])
+        self.assertEqual(a.post("/api/work_logs", json={"content": "bad time", "log_date": today, "log_time": "25:99"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_estimated_minutes_is_persisted_and_summed_for_completed_tasks(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "estimate me", "estimated_minutes": 90})

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { buildLogDuplicatePayload } from './logDuplicate.js'
 
 test('buildLogDuplicatePayload copies fields and resets log_date to today', () => {
-  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green' }
+  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green', log_time: '09:30' }
   const result = buildLogDuplicatePayload(log)
   assert.equal(result.content, '스탠드업 참여 (사본)')
   assert.equal(result.log_date, new Date().toLocaleDateString('en-CA'))
@@ -13,6 +13,7 @@ test('buildLogDuplicatePayload copies fields and resets log_date to today', () =
   assert.equal(result.link_url, 'https://x.com')
   assert.deepEqual(result.links, [{ id: 1, url: 'https://a.com', label: 'A' }])
   assert.equal(result.color, 'green')
+  assert.equal(result.log_time, '09:30')
 })
 
 test('buildLogDuplicatePayload handles missing optional fields', () => {
@@ -24,4 +25,5 @@ test('buildLogDuplicatePayload handles missing optional fields', () => {
   assert.equal(result.link_url, null)
   assert.deepEqual(result.links, [])
   assert.equal(result.color, null)
+  assert.equal(result.log_time, null)
 })
