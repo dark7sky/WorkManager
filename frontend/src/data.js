@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-time-alert',
+    timestamp: '2026-07-14T14:51:40+09:00',
+    description: '오늘 할 일(todo)에는 시간(todo_time)을 지정할 수 있었지만, 일정(event)과 달리 그 시간이 다가와도 알림이 오지 않아 단순히 표시/정렬용 정보에 그쳤습니다. 일정 알림과 같은 방식으로 설정된 알림 시점(리드타임) 전에 예정 시간이 도래한 할 일을 브라우저 알림으로 알려주도록 했습니다(frontend/src/todoAlerts.js, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-14-event-templates',
     timestamp: '2026-07-14T14:48:41+09:00',
     description: '업무(task)와 오늘의 할 일(todo)에는 자주 만드는 항목을 템플릿으로 저장해 재사용하는 기능이 있었지만 일정(event)에는 이 기능이 없어 반복되는 회의·일정을 매번 다시 입력해야 했습니다. 일정 등록 폼에도 같은 패턴으로 "일정 템플릿" 선택/저장/삭제 기능을 추가했습니다(제목·장소·색상·태그 저장, localStorage 기반, frontend/src/eventTemplates.js, frontend/src/screens/Calendar.jsx).',
