@@ -7,7 +7,7 @@ import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, sta
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
-import { parseTodosCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
+import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
 import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
@@ -35,9 +35,10 @@ export default function Today(props) {
   const {
     tasks = [], allTasks = [], events = [], todos = [], overdueTodos = [], logs = [], loading,
     onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onPromoteTodo, onClearCompletedTodos, onCarryOverTodos, onImportTodos,
-    onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onToggleTask, goAI,
+    onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onImportLogs, onToggleTask, goAI,
   } = props
   const todoImportInputRef = useRef(null)
+  const logImportInputRef = useRef(null)
   const now = new Date()
   const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
   const [todoDraft, setTodoDraft] = useState('')
@@ -277,6 +278,13 @@ export default function Today(props) {
     const csv = `﻿${workLogsToCsv(shownLogs, taskTitle)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
+  const importLogsCsv = async event => {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file || !onImportLogs) return
+    const text = await file.text(), { logs: parsed, errors } = parseWorkLogsCsv(text)
+    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.'); return }
+    await onImportLogs(parsed, errors)
+  }
   return <>
     <Header title="오늘" subtitle={`${dateText} · 중요한 일에 집중해 보세요.`}/>
     <div className="content today-grid">
@@ -312,6 +320,7 @@ export default function Today(props) {
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
+        {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
         <div className="worklog-timer">{timer ? <><span className="worklog-timer-display">{formatElapsed(timer.startedAt, timerNow)}</span><button type="button" className="text-button" onClick={stopTimer}><Square size={14}/> 타이머 중지</button></> : <button type="button" className="text-button" onClick={startTimer}><Play size={14}/> 타이머 시작</button>}</div>
         <div className="task-template-bar"><label>기록 템플릿<select onChange={e => { applyLogTpl(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{logTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveLogTpl}>템플릿으로 저장</button>{logTemplates.length ? <button type="button" className="text-button" onClick={deleteLogTpl}>템플릿 삭제</button> : null}</div>
         <form className="quick-entry" onSubmit={submitLog}><div className="quick-add"><Plus/><input value={logDraft} onChange={event => setLogDraft(event.target.value)} aria-label="오늘 한 일"/><input className="log-minutes" type="number" min="0" max="1440" value={logMinutes} onChange={event => setLogMinutes(event.target.value)} aria-label="소요 시간(분)" placeholder="분"/><input type="time" aria-label="시각" value={logTime} onChange={event => setLogTime(event.target.value)}/><button disabled={saving === 'log'}>기록</button></div><select aria-label="연결 업무" value={logTaskId} onChange={e=>setLogTaskId(e.target.value)}><option value="">업무 연결 안 함</option>{linkableTasks.map(t=><option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}</select><input className="link-input" type="url" value={logLink} onChange={event => setLogLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/><div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{logLinks.length ? ` (${logLinks.length})` : ''}</span>{logLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeLogLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={logLinkUrlText} placeholder="https://..." onChange={e => setLogLinkUrlText(e.target.value)}/><input type="text" value={logLinkLabelText} placeholder="이름 (선택)" onChange={e => setLogLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLogLink}>추가</button></div></div><select aria-label="색상" value={logColor} onChange={event => setLogColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><TagsInput label="업무 기록 태그" value={logTags} onChange={setLogTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('log-new', 'work_log', logDraft)}>AI 태그 추천</button>{recommendationButtons('log-new', logTags, setLogTags)}</div></form>

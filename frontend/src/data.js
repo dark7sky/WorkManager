@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-worklog-csv-import',
+    timestamp: '2026-07-14T19:54:35+09:00',
+    description: '오늘 할 일(Todo)은 CSV 내보내기/가져오기를 모두 지원했지만, 오늘 한 일(업무 기록)은 CSV 내보내기만 있고 가져오기가 없어 여러 건을 한 번에 등록하려면 하나씩 입력해야 했습니다. Todo 가져오기와 동일한 방식으로 업무 기록 CSV 가져오기(제목 없이 "내용" 열 기준, 날짜/소요 시간/태그 파싱)를 추가했습니다(frontend/src/csv.js parseWorkLogsCsv, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-14-ai-event-recurrence',
     timestamp: '2026-07-14T19:52:00+09:00',
     description: '캘린더 일정 등록 폼에는 반복(매일/매주/매월) 옵션이 있었지만, AI 도우미로 "매주 정기 회의 8월 30일까지"처럼 입력하면 반복이 인식되지 않고 한 번짜리 일정만 만들어졌습니다. 로컬 규칙 기반 파서와 원격 AI 프롬프트 모두 반복 표현 + 종료일을 인식해 recurrence_rule/recurrence_end_date를 채우도록 하고, /api/ai/apply가 이 필드를 받으면 종료일까지의 개별 일정을 한 번에 생성하도록 백엔드에 반복 확장 로직을 추가했습니다(backend/app/ai.py _event_recurrence, backend/app/main.py expand_recurring_event).',

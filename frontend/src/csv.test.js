@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, parseTodosCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -187,4 +187,31 @@ test('workLogsToCsv exports work log rows with linked task title and escaping', 
 
 test('workLogCsvFilename uses the requested date', () => {
   assert.equal(workLogCsvFilename('2026-07-14'), 'workmanager-work-logs-2026-07-14.csv')
+})
+
+test('parseWorkLogsCsv reads back an exported work log row', () => {
+  const csv = [
+    '날짜,내용,소요 시간(분),연결 업무,태그',
+    '2026-07-14,"회의, 진행",30,#5 보고서 작성,분기; 고객',
+  ].join('\n')
+
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(logs, [{
+    content: '회의, 진행',
+    log_date: '2026-07-14',
+    duration_minutes: 30,
+    tags: ['분기', '고객'],
+  }])
+})
+
+test('parseWorkLogsCsv skips rows without content and reports the row number', () => {
+  const csv = '날짜,내용\n2026-07-14,\n2026-07-13,두 번째 기록\n'
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(logs, [{ content: '두 번째 기록', log_date: '2026-07-13' }])
+  assert.deepEqual(errors, ['2행: 내용이 없어 건너뜀'])
+})
+
+test('parseWorkLogsCsv returns nothing for empty input', () => {
+  assert.deepEqual(parseWorkLogsCsv(''), { logs: [], errors: [] })
 })

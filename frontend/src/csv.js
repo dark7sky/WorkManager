@@ -207,3 +207,22 @@ export const workLogsToCsv = (logs, taskTitleById) => {
 }
 
 export const workLogCsvFilename = date => `workmanager-work-logs-${date}.csv`
+
+export const parseWorkLogsCsv = text => {
+  const rows = parseCsvRows(text.replace(/^﻿/, ''))
+  if (!rows.length) return { logs: [], errors: [] }
+  const header = rows[0].map(h => h.trim())
+  const col = name => header.indexOf(name)
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iTags = col('태그')
+  const logs = [], errors = []
+  rows.slice(1).forEach((cells, idx) => {
+    const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
+    if (!content) { errors.push(`${idx + 2}행: 내용이 없어 건너뜀`); return }
+    const log = { content }
+    if (iDate >= 0 && cells[iDate]) log.log_date = cells[iDate].trim()
+    if (iDuration >= 0 && cells[iDuration] && !Number.isNaN(Number(cells[iDuration]))) log.duration_minutes = Number(cells[iDuration])
+    if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
+    logs.push(log)
+  })
+  return { logs, errors }
+}
