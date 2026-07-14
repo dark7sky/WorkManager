@@ -51,6 +51,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Approval queue filters for completed-work and schedule-change review.
 - [x] Repo-root backend regression coverage for task edit save flows.
 - [x] Basic reminder rules for upcoming and overdue work in the task management screen.
+- [x] Skip-recurrence for recurring tasks (parity with the existing todo skip-recurrence), so an occurrence that shouldn't be done (e.g. a holiday) can be advanced without a fake completion.
 - [x] Basic priority filtering in the task management screen.
 - [x] Basic CSV task export for customer and management reporting.
 - [x] PDF reporting exports for customer and management reporting.

@@ -852,6 +852,35 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_skip_task_recurrence_advances_dates_without_completing_or_spawning(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "water ferns", "start_date": "2026-07-06",
+                                           "due_date": "2026-07-06", "recurrence_rule": "daily"}).json()
+        skipped = a.post(f"/api/tasks/{task['id']}/skip-recurrence").json()
+        self.assertEqual(skipped["id"], task["id"])
+        self.assertEqual(skipped["start_date"], "2026-07-07")
+        self.assertEqual(skipped["due_date"], "2026-07-07")
+        self.assertNotEqual(skipped["status"], "done")
+        siblings = [t for t in a.get("/api/tasks").json() if t["title"] == "water ferns"]
+        self.assertEqual(len(siblings), 1)
+        skipped_again = a.post(f"/api/tasks/{task['id']}/skip-recurrence").json()
+        self.assertEqual(skipped_again["due_date"], "2026-07-08")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_skip_task_recurrence_rejects_non_recurring_done_or_past_end_date(self, *_):
+        a = self.client(self.token_a)
+        plain = a.post("/api/tasks", json={"title": "one-off", "due_date": "2026-07-06"}).json()
+        self.assertEqual(a.post(f"/api/tasks/{plain['id']}/skip-recurrence").status_code, 422)
+        ending = a.post("/api/tasks", json={"title": "ends soon", "due_date": "2026-07-06",
+                                             "recurrence_rule": "daily", "recurrence_end_date": "2026-07-06"}).json()
+        self.assertEqual(a.post(f"/api/tasks/{ending['id']}/skip-recurrence").status_code, 422)
+        done = a.post("/api/tasks", json={"title": "done task", "due_date": "2026-07-06",
+                                           "recurrence_rule": "daily", "status": "done", "progress": 100}).json()
+        self.assertEqual(a.post(f"/api/tasks/{done['id']}/skip-recurrence").status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         default_todo = a.post("/api/todos", json={"title": "default priority"}).json()

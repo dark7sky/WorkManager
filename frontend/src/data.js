@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-15-task-skip-recurrence',
+    timestamp: '2026-07-15T02:33:00+09:00',
+    description: '반복되는 오늘 할 일은 완료 없이 다음 회차로 건너뛸 수 있었지만, 반복 업무(Task)는 완료 처리해야만 다음 회차가 생성돼 하루 쉬어야 하는 반복 업무도 억지로 완료 처리하거나 지연 상태로 남겨야 했습니다. 업무 간트 화면에 반복 업무 전용 "건너뛰기" 버튼을 추가해, 완료 처리나 다음 회차 생성 없이 시작일/마감일만 다음 회차로 넘길 수 있게 했습니다(백엔드 POST /api/tasks/{id}/skip-recurrence, frontend/src/screens/Tasks.jsx, 회귀 테스트 test_skip_task_recurrence_advances_dates_without_completing_or_spawning・test_skip_task_recurrence_rejects_non_recurring_done_or_past_end_date in backend/tests/test_api.py).',
+  },
+  {
     id: '2026-07-15-task-comment-edit',
     timestamp: '2026-07-15T02:32:00+09:00',
     description: '업무의 댓글 기능은 작성과 삭제만 가능해 오타나 잘못 남긴 내용을 고치려면 지우고 새로 쓰는 수밖에 없었고, 이 경우 원래 작성 시각도 사라졌습니다. 댓글을 클릭해 바로 수정할 수 있게 했고, 수정된 댓글에는 "(수정됨)" 표시를 남깁니다(backend PATCH /api/tasks/{id}/comments/{comment_id}, frontend/src/components/TaskForm.jsx).',

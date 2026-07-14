@@ -51,6 +51,7 @@ export const api = {
   startDemo: () => request('/auth/demo', { method: 'POST', suppressAuthEvent: true }),
   tasks: () => request('/tasks'), events: () => request('/events'), today: () => request('/today'),
   createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),
+  skipTaskRecurrence: id => request(`/tasks/${id}/skip-recurrence`,{method:'POST'}),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
   createLog: data => request('/work_logs',json('POST',data)), updateLog: (id,data) => request(`/work_logs/${id}`,json('PATCH',data)), deleteLog: id => request(`/work_logs/${id}`,{method:'DELETE'}),
   workLogs: () => request('/work_logs'),

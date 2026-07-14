@@ -1154,6 +1154,31 @@ def skip_todo_recurrence(item_id: int, user=Depends(require_user)):
     return update_item("todos", item_id, {"todo_date": next_date}, user)
 
 
+@app.post("/api/tasks/{item_id}/skip-recurrence")
+def skip_task_recurrence(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT * FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+    if not existing:
+        raise HTTPException(404, "Item not found")
+    task = row_dict(existing)
+    if not task.get("recurrence_rule"):
+        raise HTTPException(422, "반복 설정이 없는 업무입니다.")
+    if task.get("status") == "done":
+        raise HTTPException(422, "완료된 업무는 건너뛸 수 없습니다.")
+    anchor_day, anchor_end = task.get("recurrence_anchor_day"), bool(task.get("recurrence_anchor_month_end"))
+    next_start = next_recurrence_date(task.get("start_date"), task["recurrence_rule"], anchor_day, anchor_end)
+    next_due = next_recurrence_date(task.get("due_date"), task["recurrence_rule"], anchor_day, anchor_end)
+    end_date = task.get("recurrence_end_date")
+    if not (next_start or next_due) or (end_date and (next_start or next_due) > end_date):
+        raise HTTPException(422, "다음 회차가 없습니다.")
+    patch = {}
+    if next_start:
+        patch["start_date"] = next_start
+    if next_due:
+        patch["due_date"] = next_due
+    return update_item("tasks", item_id, patch, user)
+
+
 @app.get("/api/trash")
 def trash(user=Depends(require_user)):
     result = {}
