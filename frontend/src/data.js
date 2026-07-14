@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-new-item-shortcut',
+    timestamp: '2026-07-14T20:38:00+09:00',
+    description: '업무/일정을 새로 만들려면 항상 마우스로 "새 업무"/"새 일정" 버튼을 클릭해야 했습니다(Cmd/Ctrl+K 빠른 입력은 AI 문장 분석 방식이라 바로 빈 입력 창을 여는 것과는 다름). N 단축키를 누르면 업무/일정 화면에서는 등록 창이 바로 열리고, 오늘 화면에서는 할 일 입력창에 포커스가 이동하도록 추가했습니다(frontend/src/App.jsx 전역 키보드 핸들러, 단축키 안내 frontend/src/components/KeyboardShortcuts.jsx).',
+  },
+  {
     id: '2026-07-14-performance-activity-trend-chart',
     timestamp: '2026-07-14T20:30:59+09:00',
     description: '성과 화면은 태그별 소요 시간 막대와 텍스트 통계만 보여줄 뿐, 조회 기간 동안 활동이 어떻게 분포됐는지(바쁜 날/한산한 날)를 한눈에 보여주는 그래프가 없었습니다. 활동 타임라인 데이터를 날짜별로 집계해 막대 그래프로 보여주는 "일별 활동 추이" 섹션을 추가했습니다(기간이 62일을 넘으면 일 단위 그래프의 의미가 옅어지므로 숨김, `dailyActivityTrend` in frontend/src/performanceReport.js, frontend/src/screens/Performance.jsx).',
