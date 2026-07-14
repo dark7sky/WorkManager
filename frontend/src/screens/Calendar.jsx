@@ -12,6 +12,7 @@ import { buildEventDuplicatePayload } from '../eventDuplicate'
 import { expandRecurringEvent } from '../eventRecurrence'
 import { holidayNameForDate } from '../holidays'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
+import { normalizedLinks } from '../taskFormPayload'
 import { api } from '../api'
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토']
@@ -40,8 +41,19 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
   const [endValue, setEndValue] = useState(() => localInput(event?.end_at || event?.end || `${date}T10:00:00`))
   const [repeatRule, setRepeatRule] = useState('')
   const [repeatUntil, setRepeatUntil] = useState('')
+  const [links, setLinks] = useState(() => event?.links || [])
+  const [linkUrlText, setLinkUrlText] = useState('')
+  const [linkLabelText, setLinkLabelText] = useState('')
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
+  const addLink = () => {
+    const url = linkUrlText.trim()
+    if (!/^https?:\/\//.test(url)) return
+    setLinks([...links, { id: `${Date.now()}`, url, label: linkLabelText.trim() }])
+    setLinkUrlText('')
+    setLinkLabelText('')
+  }
+  const removeLink = id => setLinks(links.filter(item => item.id !== id))
   const recommendTags = async () => {
     const data = new FormData(formRef.current)
     setSaving(true)
@@ -72,7 +84,7 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     setSaving(true)
     setError('')
     const linkUrl = data.link_url.trim()
-    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null }
+    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null, links: normalizedLinks(links) }
     const toSave = !event && repeatRule && repeatUntil ? expandRecurringEvent(payload, repeatRule, repeatUntil) : payload
     const ok = await onSave(toSave)
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 유지됩니다.')
@@ -86,6 +98,13 @@ function EventForm({ event, date, onSave, onDelete, onDuplicate, onCancel }) {
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={event?.link_url ?? ''}/></label>
     <label>색상<select name="color" defaultValue={event?.color || ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
+    <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>
+      {links.map(item => <div key={item.id} className="checklist-editor-item">
+        <a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a>
+        <button type="button" className="text-button" onClick={() => removeLink(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="url" value={linkUrlText} placeholder="https://..." onChange={e => setLinkUrlText(e.target.value)}/><input type="text" value={linkLabelText} placeholder="이름 (선택)" onChange={e => setLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLink}>추가</button></div>
+    </div>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
@@ -156,7 +175,7 @@ export default function Calendar({ events, onCreate, onUpdate, onDelete, onDataC
       <label className="search"><Search/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="제목, 장소, 메모 검색" aria-label="일정 검색"/></label>
       <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
       {view === 'month' ? <section className="calendar calendar-desktop"><div className="weekdays">{weekdays.map(day => <div key={day}>{day}</div>)}</div><div className="calendar-grid">{cells.map(cell => { const holidayName = holidayNameForDate(cell.date); return <div key={dateKey(cell.date)} role="button" tabIndex="0" aria-label={`${dateKey(cell.date)} 일정 추가${holidayName ? `, ${holidayName}` : ''}`} className={`${cell.current ? '' : 'outside'}${dateKey(cell.date) === dateKey(new Date()) ? ' today-cell' : ''}${holidayName ? ' holiday-cell' : ''}`} onKeyDown={event => (event.key === 'Enter' || event.key === ' ') && setNewDate(dateKey(cell.date))} onClick={() => setNewDate(dateKey(cell.date))} onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }} onDrop={e => { e.preventDefault(); const id = Number(e.dataTransfer.getData('text/wm-event')); const dragged = filtered.find(x => x.id === id); const patch = dragged && moveEventToDay(dragged, dateKey(cell.date)); if (patch) onUpdate(dragged, patch) }}><span>{cell.date.getDate()}</span>{holidayName ? <em className="holiday-label">{holidayName}</em> : null}{(eventsByDay.get(dateKey(cell.date)) || []).slice(0, 3).map(event => <button className={`cal-event ${event.sync_state === 'conflict' ? 'conflict' : ''}`} style={eventColorHex(event.color) ? { background: `color-mix(in srgb, ${eventColorHex(event.color)} 18%, var(--surface))`, color: eventColorHex(event.color) } : undefined} key={event.id} draggable onDragStart={e => { e.stopPropagation(); e.dataTransfer.setData('text/wm-event', String(event.id)); e.dataTransfer.effectAllowed = 'move' }} onClick={click => { click.stopPropagation(); setEditing(event) }}><b>{event.title}</b><small>{event.google_is_all_day ? '종일' : parseDate(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</small><TagChips tags={event.tags}/></button>)}<button className="cell-add" aria-label={`${dateKey(cell.date)} 일정 추가`}><Plus/></button></div> })}</div></section> : <section className="calendar calendar-week"><div className="weekdays">{weekdays.map(day => <div key={day}>{day}</div>)}</div><div className="week-grid">{cells.map(cell => { const holidayName = holidayNameForDate(cell.date); return <div key={dateKey(cell.date)} role="button" tabIndex="0" aria-label={`${dateKey(cell.date)} 일정 추가${holidayName ? `, ${holidayName}` : ''}`} className={`${dateKey(cell.date) === dateKey(new Date()) ? 'today-column' : ''}${holidayName ? ' holiday-cell' : ''}`} onKeyDown={event => (event.key === 'Enter' || event.key === ' ') && setNewDate(dateKey(cell.date))} onClick={() => setNewDate(dateKey(cell.date))} onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }} onDrop={e => { e.preventDefault(); const id = Number(e.dataTransfer.getData('text/wm-event')); const dragged = filtered.find(x => x.id === id); const patch = dragged && moveEventToDay(dragged, dateKey(cell.date)); if (patch) onUpdate(dragged, patch) }}><header><span>{cell.date.getDate()}</span>{holidayName ? <em className="holiday-label">{holidayName}</em> : null}</header>{(eventsByDay.get(dateKey(cell.date)) || []).map(event => <button className={`cal-event ${event.sync_state === 'conflict' ? 'conflict' : ''}`} style={eventColorHex(event.color) ? { background: `color-mix(in srgb, ${eventColorHex(event.color)} 18%, var(--surface))`, color: eventColorHex(event.color) } : undefined} key={event.id} draggable onDragStart={e => { e.stopPropagation(); e.dataTransfer.setData('text/wm-event', String(event.id)); e.dataTransfer.effectAllowed = 'move' }} onClick={click => { click.stopPropagation(); setEditing(event) }}><b>{event.title}</b><small>{event.google_is_all_day ? '종일' : parseDate(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</small><TagChips tags={event.tags}/></button>)}</div> })}</div></section>}
-      <section className="mobile-agenda">{sorted.length ? sorted.map(event => <button key={event.id} onClick={() => setEditing(event)}><time>{parseDate(event.start_at || event.start).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}<b>{event.google_is_all_day ? '종일' : parseDate(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</b></time><span><strong>{event.title}</strong><small>{event.location ? <><MapPin/> {event.location}</> : '장소 없음'}</small><TagChips tags={event.tags}/>{event.link_url ? <a className="task-link" href={event.link_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} aria-label={`${event.title} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{event.sync_state === 'conflict' ? <em className="conflict-label">동기화 충돌</em> : null}</span><ChevronRight/></button>) : <p className="empty-state">등록된 일정이 없습니다.</p>}</section>
+      <section className="mobile-agenda">{sorted.length ? sorted.map(event => <button key={event.id} onClick={() => setEditing(event)}><time>{parseDate(event.start_at || event.start).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', weekday: 'short' })}<b>{event.google_is_all_day ? '종일' : parseDate(event.start_at || event.start).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</b></time><span><strong>{event.title}</strong><small>{event.location ? <><MapPin/> {event.location}</> : '장소 없음'}</small><TagChips tags={event.tags}/>{event.link_url ? <a className="task-link" href={event.link_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} aria-label={`${event.title} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{event.links?.length ? <small className="task-recurrence"><ExternalLink aria-hidden="true"/>첨부 링크 {event.links.length}개</small> : null}{event.sync_state === 'conflict' ? <em className="conflict-label">동기화 충돌</em> : null}</span><ChevronRight/></button>) : <p className="empty-state">등록된 일정이 없습니다.</p>}</section>
     </div>
     {(editing || newDate) ? <Modal title={editing ? '일정 수정' : '새 일정'} onClose={close}>{editing?.sync_state === 'conflict' ? <ConflictPanel event={editing} notify={notify} onResolved={async () => { await onDataChanged(); close() }}/> : null}<EventForm event={editing} date={newDate || dateKey(cursor)} onCancel={close} onDelete={() => setDeleting(true)} onDuplicate={async e => { const ok = await onCreate(buildEventDuplicatePayload(e)); if (ok) close() }} onSave={async data => { const ok = await (editing ? onUpdate(editing, data) : onCreate(data)); if (ok) close(); return ok }}/></Modal> : null}
     {deleting ? <ConfirmDialog message={`‘${editing?.title}’ 일정을 삭제합니다.`} onClose={() => setDeleting(false)} onConfirm={async () => { const ok = await onDelete(editing); if (ok) { setDeleting(false); close() } }}/> : null}

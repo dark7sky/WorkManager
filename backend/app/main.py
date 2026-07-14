@@ -335,6 +335,7 @@ class EventPayload(StrictPayload):
     tags: list[str] | None = Field(None, max_length=50)
     link_url: str | None = Field(None, max_length=2000)
     color: str | None = None
+    links: list[dict] | None = Field(None, max_length=50)
 
     @field_validator("link_url", "color", mode="before")
     @classmethod
@@ -354,6 +355,20 @@ class EventPayload(StrictPayload):
         if value is not None and value not in VALID_EVENT_COLORS:
             raise ValueError(f"color must be one of {sorted(VALID_EVENT_COLORS)}")
         return value
+
+    @field_validator("links")
+    @classmethod
+    def links_well_formed(cls, value):
+        if value is None:
+            return value
+        cleaned = []
+        for item in value:
+            url = str(item.get("url", "")).strip()[:2000]
+            if not (url.startswith("http://") or url.startswith("https://")):
+                continue
+            label = str(item.get("label", "")).strip()[:200]
+            cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "url": url, "label": label})
+        return cleaned
 
     @model_validator(mode="after")
     def times_in_order(self):
@@ -435,7 +450,7 @@ class WorkflowSettingsPayload(StrictPayload):
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
-    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color"}, "updated_at"),
+    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url"}, None),
 }

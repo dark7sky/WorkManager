@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-event-attachment-links',
+    timestamp: '2026-07-14T09:50:40+09:00',
+    description: '업무(Task)에는 첨부 링크를 여러 개 붙일 수 있었지만 캘린더 일정(Event)은 관련 링크를 하나만 저장할 수 있어 회의 안건·자료·티켓 등 여러 참고 링크를 남길 곳이 부족했습니다. events 테이블에 links(JSON) 컬럼을 추가하고, 일정 등록/수정 폼에 업무와 동일한 첨부 링크 추가/삭제 UI를, 모바일 일정 목록에는 첨부 링크 개수 배지를 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Calendar.jsx, frontend/src/taskFormPayload.js).',
+  },
+  {
     id: '2026-07-14-lunar-holiday-markers',
     timestamp: '2026-07-14T09:48:12+09:00',
     description: '캘린더 화면의 공휴일 표시는 양력 고정일(신정, 삼일절 등)만 인식해서 설날, 추석, 부처님오신날처럼 매년 날짜가 바뀌는 음력 공휴일은 표시되지 않았습니다. 2024~2028년 음력 공휴일(연휴 포함)의 양력 날짜표를 holidays.js에 추가해 월/주 캘린더에서 함께 강조 표시되게 했습니다(frontend/src/holidays.js).',

@@ -50,7 +50,7 @@ const normalizedChecklist = items => {
   }
   return cleaned
 }
-const normalizedLinks = items => {
+export const normalizedLinks = items => {
   const cleaned = []
   for (const raw of Array.isArray(items) ? items : []) {
     const url = trimField(raw?.url).slice(0, 2000)
