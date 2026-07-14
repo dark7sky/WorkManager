@@ -22,3 +22,15 @@ test('isHoliday matches holidayNameForDate truthiness', () => {
   assert.equal(isHoliday(new Date(2026, 4, 5)), true)
   assert.equal(isHoliday(new Date(2026, 4, 6)), false)
 })
+
+test('holidayNameForDate recognizes lunar-calendar holidays', () => {
+  assert.equal(holidayNameForDate(new Date(2026, 1, 17)), '설날')
+  assert.equal(holidayNameForDate(new Date(2026, 1, 16)), '설날 연휴')
+  assert.equal(holidayNameForDate(new Date(2026, 8, 25)), '추석')
+  assert.equal(holidayNameForDate(new Date(2026, 4, 24)), '부처님오신날')
+})
+
+test('holidayNameForKey resolves a lunar holiday by date key', () => {
+  assert.equal(holidayNameForKey('2025-01-29'), '설날')
+  assert.equal(holidayNameForKey('2025-01-31'), null)
+})

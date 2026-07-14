@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-lunar-holiday-markers',
+    timestamp: '2026-07-14T09:48:12+09:00',
+    description: '캘린더 화면의 공휴일 표시는 양력 고정일(신정, 삼일절 등)만 인식해서 설날, 추석, 부처님오신날처럼 매년 날짜가 바뀌는 음력 공휴일은 표시되지 않았습니다. 2024~2028년 음력 공휴일(연휴 포함)의 양력 날짜표를 holidays.js에 추가해 월/주 캘린더에서 함께 강조 표시되게 했습니다(frontend/src/holidays.js).',
+  },
+  {
     id: '2026-07-14-worklog-link-url',
     timestamp: '2026-07-14T09:47:15+09:00',
     description: '업무(Task)와 오늘 할 일(Todo)에는 관련 링크(PR, 문서, 티켓 등)를 붙일 수 있었지만 업무 기록(Work Log)에는 그 필드가 없어 작업 근거 링크를 남길 수 없었습니다. work_logs 테이블에 link_url 컬럼을 추가하고, 오늘 화면의 업무 기록 작성/수정 폼과 목록에 관련 링크 입력·표시를 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx).',
