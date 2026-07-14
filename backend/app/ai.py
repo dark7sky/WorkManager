@@ -320,6 +320,14 @@ def _link(text: str) -> str | None:
     return match.group(0) if match else None
 
 
+def _links(text: str) -> list[dict] | None:
+    """Return a multi-link array when the text contains more than one URL, else None."""
+    urls = _URL_RE.findall(text)
+    if len(urls) < 2:
+        return None
+    return [{"url": u, "label": ""} for u in urls]
+
+
 def _explicit_time(text: str) -> tuple[int, int] | None:
     match = re.search(r"(?:(오전|오후)\s*)?(\d{1,2})(?:\s*시|:)(?:\s*(\d{1,2})\s*분?)?", text)
     if not match:
@@ -361,7 +369,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     clean = text.strip()
     combined = f"{hint} {clean}".strip() if hint else clean
     day, title = _day(combined), _title(clean)
-    color, link = _color(combined), _link(combined)
+    color, link, links = _color(combined), _link(combined), _links(combined)
     update = re.search(r"(?:태스크|업무|할\s*일)\s*#?(\d+).*?(?:진행(?:률)?\s*)?(\d{1,3})\s*%", clean)
     if update:
         progress = max(0, min(100, int(update.group(2))))
@@ -372,6 +380,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
         data = {"content": title, "log_date": day}
         if color: data["color"] = color
         if link: data["link_url"] = link
+        if links: data["links"] = links
         return {"action": "create", "entity": "work_log", "data": data,
                 "confidence": 0.78, "source": "local-rules"}
     if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
@@ -381,12 +390,14 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
                 "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""}
         if color: data["color"] = color
         if link: data["link_url"] = link
+        if links: data["links"] = links
         return {"action": "create", "entity": "event", "data": data,
                 "confidence": 0.8, "source": "local-rules"}
     if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
         data = {"title": title, "todo_date": day, "completed": False, "tags": _match_tags(clean, context)}
         if color: data["color"] = color
         if link: data["link_url"] = link
+        if links: data["links"] = links
         explicit_time = _explicit_time(combined)
         if explicit_time:
             data["todo_time"] = f"{explicit_time[0]:02d}:{explicit_time[1]:02d}"
@@ -398,6 +409,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             "start_date": date.today().isoformat(), "due_date": day, "tags": _match_tags(clean, context)}
     if color: data["color"] = color
     if link: data["link_url"] = link
+    if links: data["links"] = links
     if any(word in combined for word in ("긴급", "급함")):
         data["priority"] = "high"
     return {"action": "create", "entity": "task", "data": data,
@@ -463,7 +475,9 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         'Return {"items": [...]} where each item has keys action, entity, optional integer id, data, confidence. '
         "Never invent an id. Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
         "All entities may optionally set data.color to one of red|orange|yellow|green|purple|gray, and "
-        "data.link_url to a single http(s) URL, when the input mentions a color or contains a URL. "
+        "data.link_url to a single http(s) URL, when the input mentions a color or contains a URL. When the "
+        "input contains two or more distinguishable URLs for one item, also set data.links as a list of "
+        "{url, label} objects (label is a short description of what the link is, or empty string). "
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
         "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
         "input lists multiple steps for one task. "

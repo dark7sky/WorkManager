@@ -106,6 +106,19 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["entity"], "work_log")
         self.assertEqual(result["data"]["link_url"], "https://github.com/org/repo/pull/1")
 
+    def test_task_with_multiple_urls_sets_links_array(self):
+        result = ai.rule_parse("분기 보고서 작성 https://docs.example.com/a https://sheet.example.com/b")
+        self.assertEqual(result["data"]["link_url"], "https://docs.example.com/a")
+        self.assertEqual(result["data"]["links"], [
+            {"url": "https://docs.example.com/a", "label": ""},
+            {"url": "https://sheet.example.com/b", "label": ""},
+        ])
+
+    def test_task_with_single_url_omits_links_array(self):
+        result = ai.rule_parse("분기 보고서 작성 https://docs.example.com/a")
+        self.assertEqual(result["data"]["link_url"], "https://docs.example.com/a")
+        self.assertNotIn("links", result["data"])
+
 
 class ValidationAndStatusTests(unittest.TestCase):
     def test_rejects_unknown_entity(self):

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-ai-parse-multi-links',
+    timestamp: '2026-07-14T15:36:00+09:00',
+    description: '업무·일정·할 일·오늘 한 일에는 여러 개의 링크(links)를 저장할 수 있는데, AI 빠른 입력은 URL이 여러 개 포함된 문장에서도 첫 번째 링크(link_url)만 인식하고 나머지는 버렸습니다. 로컬 규칙 파서와 원격 AI 프롬프트 모두 URL이 2개 이상 감지되면 links 배열({url, label})도 함께 채우도록 개선했습니다(backend/app/ai.py).',
+  },
+  {
     id: '2026-07-14-ai-parse-color-link-todo-time',
     timestamp: '2026-07-14T15:32:00+09:00',
     description: 'AI 빠른 입력(자연어 파싱)이 색상·링크·할 일 시각·우선순위를 인식하지 못해, 수동 입력 폼에서는 지원되는 필드들이 AI로 만든 항목에는 채워지지 않았습니다. 로컬 규칙 파서와 원격 AI 프롬프트 모두 "빨간색으로 표시", "링크는 https://...", "오후 5시", "긴급" 같은 표현에서 color/link_url/todo_time/priority를 추출하도록 개선했습니다(backend/app/ai.py의 rule_parse, 원격 AI system 프롬프트).',
