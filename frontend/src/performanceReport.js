@@ -1,4 +1,5 @@
 const REPORT_PRESETS_KEY = 'workmanager.reportPresets'
+const PERFORMANCE_GOAL_KEY = 'workmanager.performanceGoal'
 
 const isoDay = date => date.toLocaleDateString('en-CA')
 
@@ -131,4 +132,32 @@ export const deleteReportPreset = (storage, presets, name) => {
   const newPresets = presets.filter(p => p.name !== name)
   storage.setItem(REPORT_PRESETS_KEY, JSON.stringify(newPresets))
   return newPresets
+}
+
+export const loadPerformanceGoal = storage => {
+  try {
+    const data = storage.getItem(PERFORMANCE_GOAL_KEY)
+    if (!data) return { taskGoal: null, minutesGoal: null }
+    const parsed = JSON.parse(data)
+    if (!parsed || typeof parsed !== 'object') return { taskGoal: null, minutesGoal: null }
+    const clean = n => (Number.isFinite(n) && n > 0 ? n : null)
+    return { taskGoal: clean(Number(parsed.taskGoal)), minutesGoal: clean(Number(parsed.minutesGoal)) }
+  } catch {
+    return { taskGoal: null, minutesGoal: null }
+  }
+}
+
+export const savePerformanceGoal = (storage, goal) => {
+  const clean = n => (Number.isFinite(n) && n > 0 ? n : null)
+  const saved = { taskGoal: clean(Number(goal?.taskGoal)), minutesGoal: clean(Number(goal?.minutesGoal)) }
+  storage.setItem(PERFORMANCE_GOAL_KEY, JSON.stringify(saved))
+  return saved
+}
+
+export const goalProgress = (stats, goal) => {
+  const pct = (value, target) => (target ? Math.min(100, Math.round((Number(value) || 0) / target * 100)) : null)
+  return {
+    taskPercent: pct(stats?.completed_tasks, goal?.taskGoal),
+    minutesPercent: pct(stats?.tracked_minutes, goal?.minutesGoal),
+  }
 }

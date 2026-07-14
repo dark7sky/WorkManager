@@ -3,7 +3,7 @@ import { CalendarRange, CheckCircle2, Clipboard, Clock3, Download, LoaderCircle,
 import Header from '../components/Header'
 import { api } from '../api'
 import { TagChips, TagFilter } from '../components/TagsInput'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend } from '../performanceReport'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, loadPerformanceGoal, savePerformanceGoal, goalProgress } from '../performanceReport'
 import { timelineToCsv, timelineCsvFilename } from '../csv'
 
 const getRange = presetRange
@@ -23,6 +23,8 @@ export default function Performance({ notify, onDataChanged }) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [savedPresets, setSavedPresets] = useState(() => loadReportPresets(localStorage))
   const [presetName, setPresetName] = useState('')
+  const [goal, setGoal] = useState(() => loadPerformanceGoal(localStorage))
+  const [goalDraft, setGoalDraft] = useState(() => ({ taskGoal: goal.taskGoal ?? '', minutesGoal: goal.minutesGoal ?? '' }))
   const invalidRange = !dates[0] || !dates[1] || dates[0] > dates[1]
   const selectedKey = selected.join('|')
 
@@ -121,12 +123,21 @@ export default function Performance({ notify, onDataChanged }) {
     notify('프리셋을 삭제했습니다.')
   }, [savedPresets, notify])
 
+  const saveGoal = useCallback(event => {
+    event.preventDefault()
+    const saved = savePerformanceGoal(localStorage, { taskGoal: goalDraft.taskGoal, minutesGoal: goalDraft.minutesGoal })
+    setGoal(saved)
+    setGoalDraft({ taskGoal: saved.taskGoal ?? '', minutesGoal: saved.minutesGoal ?? '' })
+    notify('기간 목표를 저장했습니다.')
+  }, [goalDraft, notify])
+
   const items = data?.timeline || [], stats = data?.summary || {}
   const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간'], [Clock3, formatDuration(stats.estimated_minutes), '완료 업무 예상 소요 시간'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
   const tagBreakdown = data?.tag_breakdown || []
   const maxTagMinutes = Math.max(1, ...tagBreakdown.map(t => t.tracked_minutes))
   const trend = useMemo(() => dailyActivityTrend(items, dates[0], dates[1]), [items, dates])
   const maxTrendCount = Math.max(1, ...trend.map(d => d.count))
+  const progress = useMemo(() => goalProgress(stats, goal), [stats, goal])
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
     <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button></section>
@@ -148,6 +159,16 @@ export default function Performance({ notify, onDataChanged }) {
     </div>
     {reportLoading && !data ? <div className="ai-empty"><LoaderCircle className="spin"/> 기록을 모으는 중입니다.</div> : <>
       <section className="performance-stats">{statItems.map(([Icon, value, label]) => <div key={label}><Icon/><strong>{value}</strong><span>{label}</span></div>)}</section>
+      <section className="performance-timeline goal-tracker"><h2>기간 목표</h2>
+        <form className="preset-form" onSubmit={saveGoal}>
+          <label>완료 업무 목표 <input type="number" min="1" placeholder="예: 20" value={goalDraft.taskGoal} onChange={e => setGoalDraft(d => ({ ...d, taskGoal: e.target.value }))}/></label>
+          <label>기록 시간 목표(분) <input type="number" min="1" placeholder="예: 1200" value={goalDraft.minutesGoal} onChange={e => setGoalDraft(d => ({ ...d, minutesGoal: e.target.value }))}/></label>
+          <button type="submit" className="secondary">목표 저장</button>
+        </form>
+        {goal.taskGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">완료 업무</span><span className="tag-breakdown-bar"><i style={{width: `${progress.taskPercent}%`}}/></span><span className="tag-breakdown-figures">{stats.completed_tasks || 0} / {goal.taskGoal} ({progress.taskPercent}%)</span></div> : null}
+        {goal.minutesGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">기록 시간</span><span className="tag-breakdown-bar"><i style={{width: `${progress.minutesPercent}%`}}/></span><span className="tag-breakdown-figures">{formatDuration(stats.tracked_minutes)} / {formatDuration(goal.minutesGoal)} ({progress.minutesPercent}%)</span></div> : null}
+        {!goal.taskGoal && !goal.minutesGoal ? <p className="empty-state">선택한 기간에 대한 목표를 설정하면 진행률을 볼 수 있습니다.</p> : null}
+      </section>
       {trend.length ? <section className="performance-timeline activity-trend"><h2>일별 활동 추이 <small>{trend.reduce((sum, d) => sum + d.count, 0)}건</small></h2><div className="activity-trend-chart">{trend.map(d => <div key={d.date} className="activity-trend-bar" title={`${d.date} · ${d.count}건`}><i style={{height: `${Math.round(d.count / maxTrendCount * 100)}%`}}/></div>)}</div></section> : null}
       <section className="performance-timeline tag-breakdown"><h2>태그별 소요 시간 <small>{tagBreakdown.length}개 태그</small></h2>{tagBreakdown.length ? tagBreakdown.map(t => <div className="tag-breakdown-row" key={t.tag}><span className="tag-breakdown-name">{t.tag}</span><span className="tag-breakdown-bar"><i style={{width: `${Math.round(t.tracked_minutes / maxTagMinutes * 100)}%`}}/></span><span className="tag-breakdown-figures">{formatDuration(t.tracked_minutes)} · 완료 {t.completed_tasks}건</span></div>) : <p className="empty-state">선택한 기간과 태그에 해당하는 기록이 없습니다.</p>}</section>
       <section className="performance-summary"><div><span><h2>AI 성과 요약</h2><small>선택한 기간과 태그만 사용하며 자동 저장하지 않습니다.</small></span><span className="performance-actions">{summary ? <button className="secondary" onClick={copySummary}><Clipboard/> 복사</button> : null}<button className="secondary" disabled={!!aiLoading || invalidRange} onClick={runSummary}>{aiLoading === 'summary' ? <LoaderCircle className="spin"/> : <Sparkles/>} 요약 만들기</button></span></div>{summary ? <div className="summary-result"><strong>{summary.headline}</strong><p className="summary-text">{summary.narrative}</p>{summary.highlights?.length ? <div className="summary-highlights"><small>근거 {summary.highlights.length}건</small><ul>{summary.highlights.map(item => <li key={`${item.type}-${item.id}`}><span className="summary-highlight-type">{item.type_label || item.type}</span><span>{item.title}</span>{item.date ? <time>{item.date}</time> : null}</li>)}</ul></div> : null}<small>{summary.source === 'remote-ai' ? 'AI API 분석' : '개인정보를 외부로 보내지 않는 규칙 기반 요약'}</small></div> : <p>회의나 평가 전에 바로 복사해 사용할 수 있는 기간 요약을 만들어 보세요.</p>}</section>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-15-performance-period-goal',
+    timestamp: '2026-07-15T02:26:49+09:00',
+    description: '성과 화면은 완료 업무/기록 시간 등의 실적만 보여줄 뿐, 목표 대비 진행 상황을 확인할 방법이 없었습니다. 성과 화면에 완료 업무 수와 기록 시간(분) 목표를 입력하는 "기간 목표" 폼을 추가했고(localStorage 저장, frontend/src/performanceGoals 로직은 performanceReport.js의 loadPerformanceGoal/savePerformanceGoal/goalProgress), 선택한 조회 기간의 실적을 목표와 비교한 진행률 막대를 표시합니다(frontend/src/screens/Performance.jsx, 테스트는 frontend/src/performanceReport.test.js).',
+  },
+  {
     id: '2026-07-15-task-skip-recurrence',
     timestamp: '2026-07-15T02:33:00+09:00',
     description: '반복되는 오늘 할 일은 완료 없이 다음 회차로 건너뛸 수 있었지만, 반복 업무(Task)는 완료 처리해야만 다음 회차가 생성돼 하루 쉬어야 하는 반복 업무도 억지로 완료 처리하거나 지연 상태로 남겨야 했습니다. 업무 간트 화면에 반복 업무 전용 "건너뛰기" 버튼을 추가해, 완료 처리나 다음 회차 생성 없이 시작일/마감일만 다음 회차로 넘길 수 있게 했습니다(백엔드 POST /api/tasks/{id}/skip-recurrence, frontend/src/screens/Tasks.jsx, 회귀 테스트 test_skip_task_recurrence_advances_dates_without_completing_or_spawning・test_skip_task_recurrence_rejects_non_recurring_done_or_past_end_date in backend/tests/test_api.py).',
