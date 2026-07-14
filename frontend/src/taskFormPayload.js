@@ -58,6 +58,11 @@ export const moveChecklistItem = (items, id, direction) => {
   ;[list[index], list[targetIndex]] = [list[targetIndex], list[index]]
   return list
 }
+export const checklistProgress = items => {
+  const list = Array.isArray(items) ? items : []
+  if (!list.length) return null
+  return Math.round((list.filter(item => item.done).length / list.length) * 100)
+}
 export const normalizedLinks = items => {
   const cleaned = []
   for (const raw of Array.isArray(items) ? items : []) {

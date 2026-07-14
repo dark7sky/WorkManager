@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskDuplicatePayload, buildTaskPayload, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -237,4 +237,15 @@ test('moveChecklistItem is a no-op at the boundaries or for an unknown id', () =
   assert.deepEqual(moveChecklistItem(items, 'a', 'up').map(i => i.id), ['a', 'b'])
   assert.deepEqual(moveChecklistItem(items, 'b', 'down').map(i => i.id), ['a', 'b'])
   assert.deepEqual(moveChecklistItem(items, 'z', 'up').map(i => i.id), ['a', 'b'])
+})
+
+test('checklistProgress computes the rounded completion percentage', () => {
+  assert.equal(checklistProgress([{ done: true }, { done: false }, { done: false }]), 33)
+  assert.equal(checklistProgress([{ done: true }, { done: true }]), 100)
+  assert.equal(checklistProgress([{ done: false }]), 0)
+})
+
+test('checklistProgress returns null for an empty or missing checklist', () => {
+  assert.equal(checklistProgress([]), null)
+  assert.equal(checklistProgress(undefined), null)
 })

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
-import { buildTaskPayload, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
+import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
 import { taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import TagsInput from './TagsInput'
@@ -23,6 +23,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [commentText, setCommentText] = useState('')
   const [commentError, setCommentError] = useState('')
   const formRef = useRef(null)
+  const progressRef = useRef(null)
+  const applyChecklistProgress = () => {
+    const value = checklistProgress(checklist)
+    if (value !== null && progressRef.current) progressRef.current.value = value
+  }
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
   const dependencyOptions = taskDependencyOptions(tasks, task?.id)
@@ -181,7 +186,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)}/></label>
     <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
-    <label>진행률<input name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
+    <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
@@ -201,6 +206,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
         <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
+      {checklist.length ? <button type="button" className="text-button" onClick={applyChecklistProgress}>체크리스트로 진행률 계산</button> : null}
     </div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>
       {links.map(item => <div key={item.id} className="checklist-editor-item">

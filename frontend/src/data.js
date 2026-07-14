@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-checklist-progress-sync',
+    timestamp: '2026-07-14T20:52:00+09:00',
+    description: '업무 진행률은 체크리스트와 무관하게 직접 입력하는 숫자뿐이라, 세부 항목을 하나씩 완료해도 진행률이 저절로 따라오지 않아 매번 수동으로 계산해 입력해야 했습니다. 체크리스트가 있는 업무 편집 화면에 "체크리스트로 진행률 계산" 버튼을 추가해 완료 항목 비율로 진행률 입력값을 한 번에 채울 수 있도록 했습니다(frontend/src/taskFormPayload.js의 checklistProgress, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-14-checklist-reorder',
     timestamp: '2026-07-14T20:41:20+09:00',
     description: '업무 체크리스트 항목은 추가한 순서 그대로만 표시되어, 나중에 순서를 바로잡으려면 항목을 지우고 다시 입력해야 했습니다. 각 체크리스트 항목에 위/아래 이동 버튼을 추가해 순서를 자유롭게 조정할 수 있도록 했습니다(frontend/src/taskFormPayload.js의 moveChecklistItem, frontend/src/components/TaskForm.jsx).',
