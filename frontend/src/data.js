@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-calendar-task-due',
+    timestamp: '2026-07-14T14:31:32+09:00',
+    description: '일정(Calendar) 화면은 오직 events만 표시해 마감이 임박한 업무를 보려면 업무 화면을 따로 확인해야 했습니다. 월간/주간 달력 셀에 완료되지 않은 업무의 마감일을 별도 배지(체크 아이콘, 주황색)로 함께 표시하고, 클릭하면 해당 업무의 수정 폼이 바로 열리도록 했습니다(frontend/src/screens/Calendar.jsx, frontend/src/App.jsx, frontend/src/styles.css).',
+  },
+  {
     id: '2026-07-14-todo-time',
     timestamp: '2026-07-14T10:28:59+09:00',
     description: '오늘 할 일(todo)은 날짜만 지정할 수 있어 하루 중 언제 처리할지 정확한 시각을 남길 수 없었습니다. todos 테이블에 todo_time(HH:MM) 컬럼을 추가하고, 오늘 화면의 할 일 추가/수정 폼에 시간 입력을 추가했으며, 같은 날짜 안에서는 시간순으로 정렬되고 목록에 시각 배지가 표시되도록 했습니다. 반복 할 일이 다음 회차로 이어질 때와 복제 시에도 시간이 함께 복사됩니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/todoDuplicate.js).',
