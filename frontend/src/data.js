@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-performance-activity-trend-chart',
+    timestamp: '2026-07-14T20:30:59+09:00',
+    description: '성과 화면은 태그별 소요 시간 막대와 텍스트 통계만 보여줄 뿐, 조회 기간 동안 활동이 어떻게 분포됐는지(바쁜 날/한산한 날)를 한눈에 보여주는 그래프가 없었습니다. 활동 타임라인 데이터를 날짜별로 집계해 막대 그래프로 보여주는 "일별 활동 추이" 섹션을 추가했습니다(기간이 62일을 넘으면 일 단위 그래프의 의미가 옅어지므로 숨김, `dailyActivityTrend` in frontend/src/performanceReport.js, frontend/src/screens/Performance.jsx).',
+  },
+  {
     id: '2026-07-14-modal-save-shortcut',
     timestamp: '2026-07-14T20:29:00+09:00',
     description: '업무/일정/할 일/오늘 한 일 등 모든 입력 창(모달)은 저장하려면 마우스로 "저장" 버튼을 눌러야만 했습니다. 상용 생산성 도구(Linear, Notion, Gmail 등)처럼 Cmd/Ctrl+Enter로 열려 있는 입력 창을 바로 저장하는 단축키를 추가했습니다. 모든 입력 창이 공용 Modal 컴포넌트를 쓰기 때문에 한 번의 수정으로 전체 입력 창에 적용됩니다(frontend/src/components/Modal.jsx, 단축키 안내 frontend/src/components/KeyboardShortcuts.jsx).',

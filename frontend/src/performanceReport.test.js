@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend } from './performanceReport.js'
 
 test('formatDuration: formats minutes as hours/minutes in Korean', () => {
   assert.strictEqual(formatDuration(0), '0분')
@@ -251,4 +251,24 @@ test('presetRange lastweek returns previous Monday through Sunday', () => {
   assert.deepEqual(presetRange('lastweek', new Date(2026, 6, 12)), ['2026-06-29', '2026-07-05'])
   // On a Monday (7/13), last week = 7/6 ~ 7/12
   assert.deepEqual(presetRange('lastweek', new Date(2026, 6, 13)), ['2026-07-06', '2026-07-12'])
+})
+
+test('dailyActivityTrend: buckets timeline items by date across the full range, including empty days', () => {
+  const timeline = [{ date: '2026-07-01' }, { date: '2026-07-01' }, { date: '2026-07-03' }]
+  const result = dailyActivityTrend(timeline, '2026-07-01', '2026-07-03')
+
+  assert.deepEqual(result, [
+    { date: '2026-07-01', count: 2 },
+    { date: '2026-07-02', count: 0 },
+    { date: '2026-07-03', count: 1 },
+  ])
+})
+
+test('dailyActivityTrend: returns empty array for invalid or missing range', () => {
+  assert.deepEqual(dailyActivityTrend([], '', ''), [])
+  assert.deepEqual(dailyActivityTrend([], '2026-07-03', '2026-07-01'), [])
+})
+
+test('dailyActivityTrend: returns empty array when the range spans more than 62 days', () => {
+  assert.deepEqual(dailyActivityTrend([], '2026-01-01', '2026-12-31'), [])
 })

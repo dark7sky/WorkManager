@@ -18,6 +18,23 @@ export const formatDuration = minutes => {
   return [h ? `${h}시간` : '', m ? `${m}분` : ''].filter(Boolean).join(' ')
 }
 
+export const dailyActivityTrend = (timeline, start, end) => {
+  if (!start || !end || start > end) return []
+  const cursor = new Date(`${start}T00:00:00`)
+  const last = new Date(`${end}T00:00:00`)
+  const dayCount = Math.round((last - cursor) / 86400000) + 1
+  if (dayCount > 62) return []
+  const counts = {}
+  ;(timeline || []).forEach(item => { if (item?.date) counts[item.date] = (counts[item.date] || 0) + 1 })
+  const days = []
+  while (cursor <= last) {
+    const date = isoDay(cursor)
+    days.push({ date, count: counts[date] || 0 })
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return days
+}
+
 export const performanceReportMarkdown = (data, { start, end, tags = [], summary = null, generatedAt }) => {
   const stats = data?.summary || {}
   const items = data?.timeline || []
