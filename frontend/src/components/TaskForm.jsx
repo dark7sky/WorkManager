@@ -19,6 +19,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [suggestions, setSuggestions] = useState([])
   const [templates, setTemplates] = useState(() => loadTaskTemplates())
   const [prefill, setPrefill] = useState(null)
+  const [comments, setComments] = useState([])
+  const [commentText, setCommentText] = useState('')
+  const [commentError, setCommentError] = useState('')
   const formRef = useRef(null)
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
@@ -71,6 +74,37 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setLinkLabelText('')
     setRecurrenceRule(task?.recurrence_rule || '')
   }, [task?.id, task?.tags, task?.checklist, task?.links, task?.recurrence_rule])
+
+  useEffect(() => {
+    setComments([])
+    setCommentText('')
+    setCommentError('')
+    if (!task?.id) return
+    let cancelled = false
+    api.taskComments(task.id).then(res => { if (!cancelled) setComments(res.items || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [task?.id])
+
+  const addComment = async () => {
+    const body = commentText.trim()
+    if (!body) return
+    setCommentError('')
+    try {
+      const comment = await api.addTaskComment(task.id, body)
+      setComments([...comments, comment])
+      setCommentText('')
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
+  const removeComment = async id => {
+    try {
+      await api.deleteTaskComment(task.id, id)
+      setComments(comments.filter(c => c.id !== id))
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
 
   const addChecklistItem = () => {
     const text = checklistText.trim()
@@ -172,6 +206,14 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       </div>)}
       <div className="checklist-editor-add"><input type="url" value={linkUrlText} placeholder="https://..." onChange={e => setLinkUrlText(e.target.value)}/><input type="text" value={linkLabelText} placeholder="이름 (선택)" onChange={e => setLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLink}>추가</button></div>
     </div>
+    {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
+      {comments.map(item => <div key={item.id} className="checklist-editor-item">
+        <span>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}</span></span>
+        <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+      {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
+    </div> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}

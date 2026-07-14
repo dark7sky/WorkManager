@@ -310,6 +310,31 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_comments_are_user_scoped_and_persisted(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        task = a.post("/api/tasks", json={"title": "task with comments"}).json()
+        empty = a.get(f"/api/tasks/{task['id']}/comments")
+        self.assertEqual(empty.status_code, 200, empty.text)
+        self.assertEqual(empty.json()["items"], [])
+        self.assertEqual(b.get(f"/api/tasks/{task['id']}/comments").status_code, 404)
+        created = a.post(f"/api/tasks/{task['id']}/comments", json={"body": "  진행 상황 공유합니다.  "})
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertEqual(created.json()["body"], "진행 상황 공유합니다.")
+        self.assertEqual(b.post(f"/api/tasks/{task['id']}/comments", json={"body": "몰래"}).status_code, 404)
+        blank = a.post(f"/api/tasks/{task['id']}/comments", json={"body": "   "})
+        self.assertEqual(blank.status_code, 422)
+        listed = a.get(f"/api/tasks/{task['id']}/comments")
+        self.assertEqual(len(listed.json()["items"]), 1)
+        comment_id = created.json()["id"]
+        self.assertEqual(b.delete(f"/api/tasks/{task['id']}/comments/{comment_id}").status_code, 404)
+        deleted = a.delete(f"/api/tasks/{task['id']}/comments/{comment_id}")
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}/comments").json()["items"], [])
+        logs = a.get("/api/audit-logs?limit=500").json()["items"]
+        self.assertTrue(any(x["entity_type"] == "task_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_feature_requests_are_user_scoped_and_status_managed(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         created = a.post("/api/feature-requests", json={"content": "  칸반 보드가 필요합니다.  ", "source": "customer"})

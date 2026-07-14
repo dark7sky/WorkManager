@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-comments',
+    timestamp: '2026-07-14T15:32:50+09:00',
+    description: '업무에는 메모(memo) 필드가 하나뿐이라 시간에 따라 달라지는 진행 상황 공유나 협업 메모를 남길 방법이 없었습니다. 업무 수정 화면에 타임스탬프가 찍히는 댓글 목록(등록/삭제)을 추가했습니다(백엔드 task_comments 테이블 및 /api/tasks/{id}/comments 엔드포인트, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-14-ai-parse-task-checklist',
     timestamp: '2026-07-14T15:44:00+09:00',
     description: '업무의 체크리스트(하위 단계) 항목은 원격 AI 프롬프트에서는 이미 인식했지만, API 키가 없을 때 쓰이는 로컬 규칙 파서(rule_parse)는 "단계"·"체크리스트" 같은 표현이 붙은 번호 목록을 항상 별도 업무 여러 개로 쪼개 버려 체크리스트를 채우지 못했습니다. "단계/체크리스트/하위 항목/세부 항목/순서로" 같은 표현이 있는 문장은 하나의 업무로 유지하고, 번호가 매겨진 하위 단계를 checklist 필드로 채우도록 개선했습니다(backend/app/ai.py).',

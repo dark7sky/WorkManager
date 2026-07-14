@@ -80,4 +80,7 @@ export const api = {
   publicChangelog: () => request('/public/changelog', { suppressAuthEvent: true }),
   createFeatureRequest: content => request('/feature-requests',json('POST',{content,source:'changelog'})),
   updateFeatureRequest: (id,status) => request(`/feature-requests/${id}`,json('PATCH',{status})),
+  taskComments: id => request(`/tasks/${id}/comments`),
+  addTaskComment: (id,body) => request(`/tasks/${id}/comments`,json('POST',{body})),
+  deleteTaskComment: (id,commentId) => request(`/tasks/${id}/comments/${commentId}`,{method:'DELETE'}),
 }

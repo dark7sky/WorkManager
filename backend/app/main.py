@@ -1017,6 +1017,45 @@ for _table in CONFIG:
     app.add_api_route(f"/api/{_table}/{{item_id}}", delete_endpoint, methods=["DELETE"], name=f"delete_{_table}")
 
 
+@app.get("/api/tasks/{task_id}/comments")
+def task_comments_list(task_id: int, user=Depends(require_user)):
+    with connection() as c:
+        task = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (task_id, user)).fetchone()
+        if not task:
+            raise HTTPException(404, "Task not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT * FROM task_comments WHERE task_id=? AND user_id=? ORDER BY created_at", (task_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/tasks/{task_id}/comments")
+def task_comments_create(task_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        task = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (task_id, user)).fetchone()
+        if not task:
+            raise HTTPException(404, "Task not found")
+        cur = c.execute("INSERT INTO task_comments(user_id,task_id,body,created_at) VALUES(?,?,?,?)", (user, task_id, body, now()))
+        item = row_dict(c.execute("SELECT * FROM task_comments WHERE id=?", (cur.lastrowid,)).fetchone())
+    audit(user, "create", "task_comment", item["id"], {"task_id": task_id})
+    return item
+
+
+@app.delete("/api/tasks/{task_id}/comments/{comment_id}")
+def task_comments_delete(task_id: int, comment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT id FROM task_comments WHERE id=? AND task_id=? AND user_id=?", (comment_id, task_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("DELETE FROM task_comments WHERE id=? AND user_id=?", (comment_id, user))
+    audit(user, "delete", "task_comment", comment_id, {"task_id": task_id})
+    return {"ok": True}
+
+
 @app.get("/api/trash")
 def trash(user=Depends(require_user)):
     result = {}
