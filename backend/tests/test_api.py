@@ -745,6 +745,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_links_are_persisted_and_invalid_urls_dropped(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "with links", "todo_date": "2026-07-06", "links": [
+            {"id": "1", "url": "https://example.com/doc", "label": " 참고 문서 "},
+            {"id": "2", "url": "not-a-url", "label": "bad"},
+        ]})
+        self.assertEqual(todo.status_code, 200, todo.text)
+        links = todo.json()["links"]
+        self.assertEqual(len(links), 1)
+        self.assertEqual(links[0]["url"], "https://example.com/doc")
+        self.assertEqual(links[0]["label"], "참고 문서")
+        todo_id = todo.json()["id"]
+        updated = a.patch(f"/api/todos/{todo_id}", json={"links": []})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["links"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_completing_monthly_todo_spawns_next_month_occurrence(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "monthly report", "todo_date": "2026-07-15", "recurrence_rule": "monthly"}).json()

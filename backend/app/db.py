@@ -169,7 +169,7 @@ def init_db():
         for name, definition in {"lease_owner": "TEXT", "lease_until": "TEXT"}.items():
             _add_column(c, "google_sync_state", name, definition)
         for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT", "priority": "TEXT NOT NULL DEFAULT 'normal'", "link_url": "TEXT", "recurrence_end_date": "TEXT", "memo": "TEXT",
-                                  "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT"}.items():
+                                  "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'"}.items():
             _add_column(c, "todos", name, definition)
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-attachment-links',
+    timestamp: '2026-07-14T10:10:21+09:00',
+    description: '업무·캘린더 일정·업무 기록은 첨부 링크를 여러 개 붙일 수 있었지만, 오늘 할 일(todo)은 관련 링크를 하나만 저장할 수 있었습니다. todos 테이블에 links(JSON) 컬럼을 추가하고 기존 _clean_links 검증 헬퍼를 재사용했으며, 오늘 화면의 할 일 수정 폼에 첨부 링크 추가/삭제 UI와 첨부 링크 개수 배지를 추가하고 할 일 복제 시에도 첨부 링크가 함께 복사되도록 했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/todoDuplicate.js).',
+  },
+  {
     id: '2026-07-14-work-log-attachment-links',
     timestamp: '2026-07-14T10:00:03+09:00',
     description: '업무와 캘린더 일정에는 첨부 링크를 여러 개 붙일 수 있었지만, 업무 기록(work log)은 관련 링크를 하나만 저장할 수 있어 PR·문서·티켓 등 여러 참고 링크를 남길 곳이 부족했습니다. work_logs 테이블에 links(JSON) 컬럼을 추가하고, 검증 로직을 tasks/events/work_logs가 공유하는 _clean_links 헬퍼로 통합했으며, 오늘 화면의 업무 기록 추가/수정 폼에 동일한 첨부 링크 추가/삭제 UI와 첨부 링크 개수 배지를 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',

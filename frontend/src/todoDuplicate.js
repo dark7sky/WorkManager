@@ -7,6 +7,7 @@ export const buildTodoDuplicatePayload = todo => ({
   recurrence_end_date: todo?.recurrence_rule ? todo?.recurrence_end_date || null : null,
   priority: todo?.priority || 'normal',
   link_url: todo?.link_url || null,
+  links: Array.isArray(todo?.links) ? todo.links : [],
   memo: todo?.memo || null,
   color: todo?.color || null,
 })

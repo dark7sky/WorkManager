@@ -383,6 +383,7 @@ class TodoPayload(StrictPayload):
     link_url: str | None = Field(None, max_length=2000)
     memo: str | None = Field(None, max_length=5000)
     color: str | None = None
+    links: list[dict] | None = Field(None, max_length=50)
 
     @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", mode="before")
     @classmethod
@@ -402,6 +403,11 @@ class TodoPayload(StrictPayload):
         if value is not None and value not in VALID_EVENT_COLORS:
             raise ValueError(f"color must be one of {sorted(VALID_EVENT_COLORS)}")
         return value
+
+    @field_validator("links")
+    @classmethod
+    def links_well_formed(cls, value):
+        return _clean_links(value)
 
 
 class WorkLogPayload(StrictPayload):
@@ -460,7 +466,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color"}, None),
+    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links"}, None),
 }
 
