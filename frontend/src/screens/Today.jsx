@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight, CalendarClock, Check, ChevronRight, Circle, Clock3, Copy, Download, ExternalLink, Pencil, Play, Plus, Sparkles, Square, Star, Trash2, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowUpRight, CalendarClock, Check, ChevronRight, Circle, Clock3, Copy, Download, ExternalLink, Pencil, Play, Plus, Sparkles, Square, Star, Trash2, Upload, X } from 'lucide-react'
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
@@ -7,7 +7,7 @@ import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, sta
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
-import { todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
+import { parseTodosCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
 import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
@@ -34,9 +34,10 @@ function overlapsDay(event, day) {
 export default function Today(props) {
   const {
     tasks = [], allTasks = [], events = [], todos = [], overdueTodos = [], logs = [], loading,
-    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onPromoteTodo, onClearCompletedTodos, onCarryOverTodos,
+    onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onPromoteTodo, onClearCompletedTodos, onCarryOverTodos, onImportTodos,
     onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onToggleTask, goAI,
   } = props
+  const todoImportInputRef = useRef(null)
   const now = new Date()
   const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
   const [todoDraft, setTodoDraft] = useState('')
@@ -265,6 +266,13 @@ export default function Today(props) {
     const csv = `﻿${todosToCsv(shownTodos)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
+  const importTodosCsv = async event => {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file || !onImportTodos) return
+    const text = await file.text(), { todos: parsed, errors } = parseTodosCsv(text)
+    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.'); return }
+    await onImportTodos(parsed, errors)
+  }
   const exportLogs = () => {
     const csv = `﻿${workLogsToCsv(shownLogs, taskTitle)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
@@ -287,6 +295,7 @@ export default function Today(props) {
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
+        {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''} ${todo.priority === 'high' ? 'priority-high' : ''}`} style={eventColorHex(todo.color) ? { borderLeft: `3px solid ${eventColorHex(todo.color)}` } : undefined} key={todo.id}>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, parseTodosCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -142,6 +142,34 @@ test('todosToCsv exports todo rows with labels and escaping', () => {
 
 test('todoCsvFilename uses the requested date', () => {
   assert.equal(todoCsvFilename('2026-07-13'), 'workmanager-todos-2026-07-13.csv')
+})
+
+test('parseTodosCsv reads back an exported todo row', () => {
+  const csv = [
+    '제목,완료 여부,우선순위,반복,날짜,태그',
+    '"보고서, 검토",Y,high,매일,2026-07-13,분기; 고객',
+  ].join('\n')
+
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(todos, [{
+    title: '보고서, 검토',
+    priority: 'high',
+    recurrence_rule: 'daily',
+    todo_date: '2026-07-13',
+    tags: ['분기', '고객'],
+  }])
+})
+
+test('parseTodosCsv skips rows without a title and reports the row number', () => {
+  const csv = '제목,우선순위\n,high\n두 번째 할 일,normal\n'
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(todos, [{ title: '두 번째 할 일', priority: 'normal' }])
+  assert.deepEqual(errors, ['2행: 제목이 없어 건너뜀'])
+})
+
+test('parseTodosCsv returns nothing for empty input', () => {
+  assert.deepEqual(parseTodosCsv(''), { todos: [], errors: [] })
 })
 
 test('workLogsToCsv exports work log rows with linked task title and escaping', () => {

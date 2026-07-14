@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-csv-import',
+    timestamp: '2026-07-14T15:41:00+09:00',
+    description: '업무(Tasks) 화면에는 CSV 가져오기가 있었지만 오늘 할 일(Today) 화면은 CSV 내보내기만 가능하고 가져오기는 없어, 여러 할 일을 한 번에 등록하려면 하나씩 입력해야 했습니다. 업무 CSV 가져오기와 같은 패턴으로 "CSV 가져오기" 버튼을 추가해, 내보내기와 같은 열 형식(제목/우선순위/반복/날짜/태그)의 파일을 읽어 제목이 있는 행만 오늘 할 일로 일괄 생성합니다(parseTodosCsv in frontend/src/csv.js, wired into frontend/src/screens/Today.jsx / App.jsx).',
+  },
+  {
     id: '2026-07-14-work-log-time',
     timestamp: '2026-07-14T15:33:00+09:00',
     description: '오늘 할 일에는 하루 중 처리 시각(todo_time)을 남길 수 있었지만, 업무 기록(오늘 한 일)은 날짜만 있어 몇 시에 한 일인지 남길 방법이 없었습니다. work_logs에 nullable log_time(HH:MM) 컬럼을 추가하고(backend WorkLogPayload/CONFIG/db.py 마이그레이션), Today 화면의 기록 빠른 추가/수정 폼에 시간 입력을 추가했으며, 같은 날짜 안에서는 시간순으로 정렬되고 목록에 시각 배지가 표시됩니다. 기록 복제 시에도 시각이 함께 복사됩니다(backend/app/main.py, backend/app/db.py, frontend/src/screens/Today.jsx, frontend/src/logDuplicate.js).',

@@ -171,6 +171,28 @@ export const todosToCsv = todos => {
 
 export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
 
+const todoRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', daily: 'daily', weekly: 'weekly' }
+
+export const parseTodosCsv = text => {
+  const rows = parseCsvRows(text.replace(/^﻿/, ''))
+  if (!rows.length) return { todos: [], errors: [] }
+  const header = rows[0].map(h => h.trim())
+  const col = name => header.indexOf(name)
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTags = col('태그')
+  const todos = [], errors = []
+  rows.slice(1).forEach((cells, idx) => {
+    const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
+    if (!title) { errors.push(`${idx + 2}행: 제목이 없어 건너뜀`); return }
+    const todo = { title }
+    if (iPriority >= 0 && cells[iPriority]) todo.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
+    if (iRecurrence >= 0 && cells[iRecurrence]) todo.recurrence_rule = todoRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
+    if (iDate >= 0 && cells[iDate]) todo.todo_date = cells[iDate].trim()
+    if (iTags >= 0 && cells[iTags]) todo.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
+    todos.push(todo)
+  })
+  return { todos, errors }
+}
+
 const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그']
 
 export const workLogsToCsv = (logs, taskTitleById) => {
