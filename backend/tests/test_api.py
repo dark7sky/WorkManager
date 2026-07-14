@@ -541,6 +541,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_color_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "shipped PR", "log_date": "2026-07-06", "color": "purple"})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["color"], "purple")
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"color": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["color"])
+        self.assertEqual(a.post("/api/work_logs", json={"content": "bad color", "log_date": "2026-07-06", "color": "not-a-color"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_estimated_minutes_is_persisted_and_summed_for_completed_tasks(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "estimate me", "estimated_minutes": 90})

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-work-log-color',
+    timestamp: '2026-07-14T10:19:12+09:00',
+    description: '업무·캘린더 일정·오늘 할 일은 모두 색상 코딩을 지원했지만, 업무 기록(work log)만 색상 구분이 없어 로그 목록에서 종류별로 한눈에 구분하기 어려웠습니다. work_logs 테이블에 color 컬럼을 추가해 기존과 동일한 색상 팔레트로 검증하고, 오늘 화면의 업무 기록 작성/수정 폼에 색상 선택과 로그 행 좌측 색상 강조 표시를 추가했으며, 기록 복제 시에도 색상이 함께 복사되도록 했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/logDuplicate.js).',
+  },
+  {
     id: '2026-07-14-work-log-duplicate',
     timestamp: '2026-07-14T10:11:12+09:00',
     description: '업무·캘린더 일정·오늘 할 일은 항목을 복제할 수 있었지만, 업무 기록(work log)은 복제 기능이 없어 반복되는 스탠드업/유지보수 기록을 매번 새로 입력해야 했습니다. logDuplicate.js를 추가해 내용·태그·연결 업무·소요 시간·첨부 링크를 그대로 복사하고 기록 날짜만 오늘로 재설정하는 복제 버튼을 오늘 화면의 업무 기록 목록에 추가했습니다(frontend/src/logDuplicate.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
