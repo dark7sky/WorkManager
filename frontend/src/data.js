@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-time',
+    timestamp: '2026-07-14T10:28:59+09:00',
+    description: '오늘 할 일(todo)은 날짜만 지정할 수 있어 하루 중 언제 처리할지 정확한 시각을 남길 수 없었습니다. todos 테이블에 todo_time(HH:MM) 컬럼을 추가하고, 오늘 화면의 할 일 추가/수정 폼에 시간 입력을 추가했으며, 같은 날짜 안에서는 시간순으로 정렬되고 목록에 시각 배지가 표시되도록 했습니다. 반복 할 일이 다음 회차로 이어질 때와 복제 시에도 시간이 함께 복사됩니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/todoDuplicate.js).',
+  },
+  {
     id: '2026-07-14-substitute-holidays',
     timestamp: '2026-07-14T10:20:22+09:00',
     description: '캘린더 화면은 고정일 공휴일과 음력 공휴일(설날/추석/부처님오신날)은 표시했지만, 대체공휴일은 표시하지 않아 삼일절·광복절·개천절·한글날·성탄절이 일요일과 겹치거나 어린이날이 주말과 겹칠 때 실제 휴일 여부를 알 수 없었습니다. holidays.js에 규칙 기반 대체공휴일 계산(연도별 공휴일 목록을 만들고 일요일/주말 충돌 시 다음 비공휴일로 대체)을 추가해 holidayNameForDate가 대체공휴일도 인식하도록 했습니다(frontend/src/holidays.js, 테스트 추가 frontend/src/holidays.test.js).',

@@ -822,6 +822,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_time_is_persisted_validated_and_carries_to_recurrence_spawn(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "timed todo", "todo_date": "2026-07-06", "recurrence_rule": "daily", "todo_time": "14:30"})
+        self.assertEqual(todo.status_code, 200, todo.text)
+        self.assertEqual(todo.json()["todo_time"], "14:30")
+        completed = a.patch(f"/api/todos/{todo.json()['id']}", json={"completed": True}).json()
+        spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["todo_time"], "14:30")
+        cleared = a.patch(f"/api/todos/{todo.json()['id']}", json={"todo_time": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["todo_time"])
+        self.assertEqual(a.post("/api/todos", json={"title": "bad time", "todo_date": "2026-07-06", "todo_time": "25:99"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()

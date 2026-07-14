@@ -1,6 +1,7 @@
 export const buildTodoDuplicatePayload = todo => ({
   title: `${(todo?.title || '').trim()} (사본)`,
   todo_date: new Date().toLocaleDateString('en-CA'),
+  todo_time: todo?.todo_time || null,
   completed: false,
   tags: Array.isArray(todo?.tags) ? todo.tags : [],
   recurrence_rule: todo?.recurrence_rule || null,

@@ -384,8 +384,9 @@ class TodoPayload(StrictPayload):
     memo: str | None = Field(None, max_length=5000)
     color: str | None = None
     links: list[dict] | None = Field(None, max_length=50)
+    todo_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
 
-    @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", mode="before")
+    @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -474,7 +475,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links"}, None),
+    "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color"}, None),
 }
 
@@ -595,7 +596,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
-                "events": {"link_url", "color"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color"}}[table]
+                "events": {"link_url", "color"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -771,9 +772,9 @@ def spawn_recurring_todo(todo, user_id):
         if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,created_at)
-          VALUES(?,?,?,0,?,?,?,?,?,?,?,?,?)""",
-          (user_id, todo["title"], next_date, json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), timestamp))
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,todo_time,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,created_at)
+          VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?)""",
+          (user_id, todo["title"], next_date, todo.get("todo_time"), json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id
@@ -1371,7 +1372,7 @@ def today(tags: str | None = None, user=Depends(require_user)):
     return {"date": day,
             "tasks": rows("tasks", user, "WHERE (start_date IS NULL OR start_date<=?) AND (due_date IS NULL OR due_date>=?) AND status!='done' ORDER BY priority,due_date", (day, day), wanted),
             "events": rows("events", user, "WHERE start_at<? AND end_at>? ORDER BY start_at", (tomorrow + "T00:00:00", day + "T00:00:00"), wanted),
-            "todos": rows("todos", user, "WHERE todo_date=? ORDER BY completed,id", (day,), wanted),
+            "todos": rows("todos", user, "WHERE todo_date=? ORDER BY completed,(todo_time IS NULL),todo_time,id", (day,), wanted),
             "work_logs": rows("work_logs", user, "WHERE log_date=? ORDER BY created_at DESC", (day,), wanted)}
 
 

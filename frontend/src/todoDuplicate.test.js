@@ -66,3 +66,9 @@ test('buildTodoDuplicatePayload carries color', () => {
   assert.equal(buildTodoDuplicatePayload(todo).color, 'purple')
   assert.equal(buildTodoDuplicatePayload({ title: '무제' }).color, null)
 })
+
+test('buildTodoDuplicatePayload carries todo_time', () => {
+  const todo = { title: '회의 준비', todo_time: '14:30' }
+  assert.equal(buildTodoDuplicatePayload(todo).todo_time, '14:30')
+  assert.equal(buildTodoDuplicatePayload({ title: '무제' }).todo_time, null)
+})
