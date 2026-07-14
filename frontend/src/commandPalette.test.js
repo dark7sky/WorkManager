@@ -45,3 +45,10 @@ test('searchItems handles empty query and missing tables', () => {
   assert.deepEqual(searchItems('', data), [])
   assert.deepEqual(searchItems('보고서', {}), [])
 })
+
+test('searchItems matches task checklist item text', () => {
+  const withChecklist = { tasks: [{ id: 9, title: '출시 준비', tags: [], checklist: [{ text: '스테이징 배포 확인', done: false }] }] }
+  const results = searchItems('스테이징', withChecklist)
+  assert.equal(results.length, 1)
+  assert.equal(results[0].id, 9)
+})

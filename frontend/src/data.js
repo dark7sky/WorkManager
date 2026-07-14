@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-palette-checklist-search',
+    timestamp: '2026-07-14T09:32:00+09:00',
+    description: 'Tasks 화면 검색창은 최근 체크리스트 항목 텍스트까지 검색하도록 고쳤지만, Ctrl/⌘+K 커맨드 팔레트의 통합 검색은 여전히 제목·메모·태그만 훑어 체크리스트 안에만 있는 단어로는 업무를 찾을 수 없었습니다. commandPalette.js의 업무 검색 대상에 체크리스트 항목 텍스트를 추가해 두 검색 경로가 같은 범위를 훑도록 맞췄습니다 (frontend/src/commandPalette.js, 테스트 frontend/src/commandPalette.test.js).',
+  },
+  {
     id: '2026-07-14-task-color',
     timestamp: '2026-07-14T09:27:00+09:00',
     description: '업무 Gantt 막대는 모두 순번 기준의 고정 색으로만 표시되어, 프로젝트/유형별로 업무를 색으로 구분할 방법이 없었습니다. 업무 등록/수정 폼에 캘린더 일정과 동일한 "색상" 선택을 추가해 Gantt 막대와 진행률 바에 선택한 색이 반영되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/screens/Tasks.jsx, frontend/src/taskFormPayload.js).',

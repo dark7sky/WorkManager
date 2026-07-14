@@ -19,7 +19,8 @@ export function searchScreens(query) {
 }
 
 const ITEM_SOURCES = [
-  ['task', 'tasks', item => item.title, item => item.due_date ? `마감 ${item.due_date}` : item.status, 'tasks', item => item.description],
+  ['task', 'tasks', item => item.title, item => item.due_date ? `마감 ${item.due_date}` : item.status, 'tasks',
+    item => `${item.description || ''} ${(item.checklist || []).map(c => c?.text || '').join(' ')}`],
   ['event', 'events', item => item.title, item => (item.start_at || '').slice(0, 16).replace('T', ' '), 'calendar', item => item.description],
   ['todo', 'todos', item => item.title, item => item.todo_date, 'today', null],
   ['log', 'work_logs', item => item.content, item => item.log_date, 'today', null],
