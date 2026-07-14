@@ -631,6 +631,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_priority_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        event = a.post("/api/events", json={"title": "urgent meeting", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "priority": "high"})
+        self.assertEqual(event.status_code, 200, event.text)
+        self.assertEqual(event.json()["priority"], "high")
+        cleared = a.patch(f"/api/events/{event.json()['id']}", json={"priority": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["priority"])
+        self.assertEqual(a.post("/api/events", json={"title": "bad priority", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "priority": "urgent"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_links_are_persisted_and_invalid_urls_dropped(self, *_):
         a = self.client(self.token_a)
         event = a.post("/api/events", json={"title": "with links", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "links": [

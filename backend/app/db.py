@@ -164,7 +164,7 @@ def init_db():
             "recurrence": "TEXT NOT NULL DEFAULT '[]'",
             "local_uid": "TEXT", "google_is_series_master": "INTEGER NOT NULL DEFAULT 0",
             "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT", "color": "TEXT",
-            "links": "TEXT NOT NULL DEFAULT '[]'",
+            "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")

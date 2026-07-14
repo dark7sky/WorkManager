@@ -105,6 +105,11 @@ class RuleParserTests(unittest.TestCase):
         self.assertNotIn("https://", result["data"]["title"])
         self.assertNotIn("빨간색", result["data"]["title"])
 
+    def test_event_extracts_priority(self):
+        result = ai.rule_parse("내일 오후 3시 긴급 고객 회의")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["priority"], "high")
+
     def test_todo_extracts_time_priority_and_color(self):
         result = ai.rule_parse("오늘 오후 5시 긴급 보고서 초록색 해야함")
         self.assertEqual(result["entity"], "todo")

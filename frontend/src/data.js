@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-event-priority',
+    timestamp: '2026-07-14T15:31:00+09:00',
+    description: '업무와 오늘 할 일에는 낮음/보통/높음 우선순위가 있었지만 캘린더 일정에는 없어, 중요한 회의를 시각적으로 구분할 방법이 없었습니다. 일정에 nullable priority 컬럼을 추가하고(백엔드 EventPayload/CONFIG/db.py 마이그레이션), 일정 등록/수정 폼에 우선순위 선택을 추가했으며, 캘린더 칩에는 좌측 강조선을, 모바일 일정 목록에는 "우선순위 높음" 배지를 표시합니다. 빠른 입력/AI 도우미의 자연어 파싱도 "긴급/중요" 표현에서 일정 우선순위를 함께 인식합니다(backend/app/main.py, backend/app/db.py, backend/app/ai.py, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-14-task-comments',
     timestamp: '2026-07-14T15:32:50+09:00',
     description: '업무에는 메모(memo) 필드가 하나뿐이라 시간에 따라 달라지는 진행 상황 공유나 협업 메모를 남길 방법이 없었습니다. 업무 수정 화면에 타임스탬프가 찍히는 댓글 목록(등록/삭제)을 추가했습니다(백엔드 task_comments 테이블 및 /api/tasks/{id}/comments 엔드포인트, frontend/src/components/TaskForm.jsx).',

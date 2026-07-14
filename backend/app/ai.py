@@ -391,6 +391,8 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
         if color: data["color"] = color
         if link: data["link_url"] = link
         if links: data["links"] = links
+        if any(word in combined for word in ("긴급", "중요", "급함")):
+            data["priority"] = "high"
         return {"action": "create", "entity": "event", "data": data,
                 "confidence": 0.8, "source": "local-rules"}
     if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
@@ -505,6 +507,7 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "Allowed actions: create, update. Allowed entities: task, event, todo, work_log. "
         'Return {"items": [...]} where each item has keys action, entity, optional integer id, data, confidence. '
         "Never invent an id. Use ISO 8601 dates. Task status is todo|doing|done and priority is low|normal|high. "
+        "Events may also set data.priority to low|normal|high when the input marks the event as urgent/important. "
         "All entities may optionally set data.color to one of red|orange|yellow|green|purple|gray, and "
         "data.link_url to a single http(s) URL, when the input mentions a color or contains a URL. When the "
         "input contains two or more distinguishable URLs for one item, also set data.links as a list of "
