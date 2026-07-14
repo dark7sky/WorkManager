@@ -46,6 +46,14 @@ test('searchItems handles empty query and missing tables', () => {
   assert.deepEqual(searchItems('보고서', {}), [])
 })
 
+test('searchItems matches todo memo text', () => {
+  const withMemo = { todos: [{ id: 10, title: '병원 예약', todo_date: '2026-07-16', tags: [], memo: '치과 정기 검진 예약 확인' }] }
+  const results = searchItems('치과', withMemo)
+  assert.equal(results.length, 1)
+  assert.equal(results[0].id, 10)
+  assert.equal(results[0].type, 'todo')
+})
+
 test('searchItems matches task checklist item text', () => {
   const withChecklist = { tasks: [{ id: 9, title: '출시 준비', tags: [], checklist: [{ text: '스테이징 배포 확인', done: false }] }] }
   const results = searchItems('스테이징', withChecklist)

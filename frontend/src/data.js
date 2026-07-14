@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-15-command-palette-todo-memo-search',
+    timestamp: '2026-07-15T02:11:50+09:00',
+    description: 'Ctrl/⌘+K 빠른 검색은 업무는 설명·체크리스트까지, 일정은 설명까지 훑어 찾아줬지만 오늘 할 일(Todo)은 제목만 검색해 메모에 적어둔 내용으로는 찾을 수 없었습니다. 검색 대상에 Todo 메모 필드를 추가해 제목에 없는 단어로도 찾을 수 있게 했습니다(frontend/src/commandPalette.js).',
+  },
+  {
     id: '2026-07-15-calendar-priority-filter',
     timestamp: '2026-07-15T01:52:00+09:00',
     description: '업무 관리 화면에는 우선순위 필터가 있었지만 일정(캘린더) 화면에는 없어, 우선순위 높음 일정만 모아보려면 목록을 눈으로 훑어야 했습니다. 캘린더 화면에도 태그 필터 옆에 우선순위 필터(전체/높음/보통/낮음)를 추가해 월간/주간 보기와 모바일 일정 목록 모두에서 바로 걸러볼 수 있게 했습니다(frontend/src/screens/Calendar.jsx, frontend/src/eventSearch.js의 filterEventsByPriority).',
