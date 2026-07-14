@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-ai-task-priority-important-keyword',
+    timestamp: '2026-07-14T20:22:52+09:00',
+    description: 'AI 도우미(또는 빠른 입력)에서 API 키 없이 로컬 규칙으로 문장을 분석할 때, "긴급/중요/급함" 표현이 있으면 일정·오늘 할 일은 우선순위를 자동으로 "높음"으로 올려줬지만 같은 표현이 들어간 업무(Task) 생성 문장에서는 "중요"만 인식되지 않고 "긴급/급함"만 반영되는 불일치가 있었습니다. 업무 생성 규칙도 일정·할 일과 동일하게 "중요" 키워드를 인식하도록 맞췄습니다(backend/app/ai.py rule_parse, 테스트 backend/tests/test_ai.py::test_task_extracts_priority_for_important_keyword).',
+  },
+  {
     id: '2026-07-14-calendar-feed-subscription',
     timestamp: '2026-07-14T20:12:37+09:00',
     description: '업무 마감일과 일정을 Google/Apple/Outlook 캘린더에 반영하려면 ICS 파일을 내보내 매번 다시 올려야 했습니다(수정 시 자동 반영 안 됨). 설정 화면에 "캘린더 구독 피드" 카드를 추가해, 구독 주소(webcal용 ICS URL)를 발급하면 외부 캘린더 앱이 주기적으로 다시 불러와 항상 최신 상태를 유지하도록 했습니다. 토큰은 세션 토큰과 같은 방식으로 해시 저장하고, 재발급 시 이전 주소는 즉시 무효화됩니다(백엔드 GET/POST/DELETE /api/settings/calendar-feed, GET /api/calendar-feed/{token}.ics, frontend/src/screens/Settings.jsx, 테스트 backend/tests/test_api.py::test_calendar_feed_rotate_serves_ics_and_old_token_is_invalidated).',

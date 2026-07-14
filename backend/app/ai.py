@@ -439,7 +439,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     if color: data["color"] = color
     if link: data["link_url"] = link
     if links: data["links"] = links
-    if any(word in combined for word in ("긴급", "급함")):
+    if any(word in combined for word in ("긴급", "중요", "급함")):
         data["priority"] = "high"
     checklist = _checklist(combined)
     if checklist:

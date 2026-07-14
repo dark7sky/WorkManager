@@ -122,6 +122,11 @@ class RuleParserTests(unittest.TestCase):
         self.assertNotIn("color", result["data"])
         self.assertNotIn("link_url", result["data"])
 
+    def test_task_extracts_priority_for_important_keyword(self):
+        result = ai.rule_parse("중요 분기 보고서 작성")
+        self.assertEqual(result["entity"], "task")
+        self.assertEqual(result["data"]["priority"], "high")
+
     def test_work_log_extracts_link(self):
         result = ai.rule_parse("오늘 한 일: 배포 완료 https://github.com/org/repo/pull/1")
         self.assertEqual(result["entity"], "work_log")
