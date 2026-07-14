@@ -10,6 +10,7 @@ import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '..
 import { todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
+import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
 
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', monthly: '매월' }
 
@@ -46,6 +47,7 @@ export default function Today(props) {
   const [todoMemo, setTodoMemo] = useState('')
   const [todoColor, setTodoColor] = useState('')
   const [todoTime, setTodoTime] = useState('')
+  const [todoTemplates, setTodoTemplates] = useState(() => loadTodoTemplates())
   const [editRecurrence, setEditRecurrence] = useState('')
   const [editRecurrenceEnd, setEditRecurrenceEnd] = useState('')
   const [editPriority, setEditPriority] = useState('normal')
@@ -139,6 +141,33 @@ export default function Today(props) {
   const completedTodos = shownTodos.filter(todo => todo.completed)
   const shownLogs = orderLogsByPin(filterLogsByQuery(logs.filter(matches), query), pinnedLogIds)
 
+  const applyTemplate = id => {
+    const template = todoTemplates.find(t => t.id === id)
+    if (!template) return
+    const filled = applyTodoTemplate(template)
+    setTodoDraft(filled.title)
+    setTodoPriority(filled.priority)
+    setTodoRecurrence(filled.recurrence_rule)
+    setTodoTags(filled.tags)
+  }
+  const saveTodoTemplate = () => {
+    if (!todoDraft.trim()) return
+    const name = window.prompt('템플릿 이름을 입력하세요.', todoDraft.trim())
+    if (!name) return
+    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags })
+    const next = addTodoTemplate(todoTemplates, template)
+    setTodoTemplates(next)
+    saveTodoTemplates(next)
+  }
+  const deleteTodoTemplate = () => {
+    if (!todoTemplates.length) return
+    const name = window.prompt('삭제할 템플릿 이름을 입력하세요.')
+    const match = todoTemplates.find(t => t.name === name)
+    if (!match) return
+    const next = removeTodoTemplate(todoTemplates, match.id)
+    setTodoTemplates(next)
+    saveTodoTemplates(next)
+  }
   const submitTodo = async event => {
     event.preventDefault()
     if (!todoDraft.trim()) return
@@ -217,6 +246,7 @@ export default function Today(props) {
         <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
         <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
         <form className="quick-entry" onSubmit={submitTodo}>
+          <div className="task-template-bar"><label>Todo 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{todoTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveTodoTemplate}>템플릿으로 저장</button>{todoTemplates.length ? <button type="button" className="text-button" onClick={deleteTodoTemplate}>템플릿 삭제</button> : null}</div>
           <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><select aria-label="우선순위" value={todoPriority} onChange={event => setTodoPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={todoRecurrence} onChange={event => setTodoRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select>{todoRecurrence ? <input type="date" aria-label="반복 종료일" value={todoRecurrenceEnd} onChange={event => setTodoRecurrenceEnd(event.target.value)}/> : null}<input type="time" aria-label="시간" value={todoTime} onChange={event => setTodoTime(event.target.value)}/><button disabled={saving === 'todo'}>추가</button></div>
           <input className="link-input" type="url" value={todoLink} onChange={event => setTodoLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/>
           <input className="link-input" value={todoMemo} onChange={event => setTodoMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/>
