@@ -60,3 +60,9 @@ test('buildTodoDuplicatePayload and buildTaskFromTodoPayload carry memo', () => 
   assert.equal(buildTaskFromTodoPayload(todo).description, '참고: 3층 회의실')
   assert.equal(buildTaskFromTodoPayload({ title: '무제' }).description, null)
 })
+
+test('buildTodoDuplicatePayload carries color', () => {
+  const todo = { title: '자료 확인', color: 'purple' }
+  assert.equal(buildTodoDuplicatePayload(todo).color, 'purple')
+  assert.equal(buildTodoDuplicatePayload({ title: '무제' }).color, null)
+})

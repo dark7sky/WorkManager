@@ -387,8 +387,9 @@ class TodoPayload(StrictPayload):
     priority: Literal["low", "normal", "high"] | None = None
     link_url: str | None = Field(None, max_length=2000)
     memo: str | None = Field(None, max_length=5000)
+    color: str | None = None
 
-    @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", mode="before")
+    @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -398,6 +399,13 @@ class TodoPayload(StrictPayload):
     def link_url_must_be_http(cls, value):
         if value is not None and not (value.startswith("http://") or value.startswith("https://")):
             raise ValueError("link_url must start with http:// or https://")
+        return value
+
+    @field_validator("color")
+    @classmethod
+    def color_must_be_known(cls, value):
+        if value is not None and value not in VALID_EVENT_COLORS:
+            raise ValueError(f"color must be one of {sorted(VALID_EVENT_COLORS)}")
         return value
 
 
@@ -451,7 +459,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links"}, "updated_at"),
-    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo"}, None),
+    "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url"}, None),
 }
 
@@ -572,7 +580,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
-                "events": {"link_url", "color"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo"}, "work_logs": {"task_id", "duration_minutes", "link_url"}}[table]
+                "events": {"link_url", "color"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color"}, "work_logs": {"task_id", "duration_minutes", "link_url"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")

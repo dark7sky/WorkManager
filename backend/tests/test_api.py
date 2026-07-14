@@ -762,6 +762,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_color_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "colored todo", "todo_date": "2026-07-06", "color": "purple"})
+        self.assertEqual(todo.status_code, 200, todo.text)
+        self.assertEqual(todo.json()["color"], "purple")
+        cleared = a.patch(f"/api/todos/{todo.json()['id']}", json={"color": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["color"])
+        self.assertEqual(a.post("/api/todos", json={"title": "bad color", "todo_date": "2026-07-06", "color": "not-a-color"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_approval_workflow_defaults_off_and_can_be_enabled_per_user(self, *_):
         a = self.client(self.token_a)
         personal_task = a.post("/api/tasks", json={"title": "personal mode task", "status": "done"}).json()

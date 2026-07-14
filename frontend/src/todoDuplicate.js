@@ -8,6 +8,7 @@ export const buildTodoDuplicatePayload = todo => ({
   priority: todo?.priority || 'normal',
   link_url: todo?.link_url || null,
   memo: todo?.memo || null,
+  color: todo?.color || null,
 })
 
 const TODO_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }
