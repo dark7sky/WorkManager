@@ -523,6 +523,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_links_are_persisted_and_invalid_urls_dropped(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "shipped PR", "log_date": "2026-07-06", "links": [
+            {"id": "1", "url": "https://example.com/pr/1", "label": " 리뷰 링크 "},
+            {"id": "2", "url": "not-a-url", "label": "bad"},
+        ]})
+        self.assertEqual(log.status_code, 200, log.text)
+        links = log.json()["links"]
+        self.assertEqual(len(links), 1)
+        self.assertEqual(links[0]["url"], "https://example.com/pr/1")
+        self.assertEqual(links[0]["label"], "리뷰 링크")
+        log_id = log.json()["id"]
+        updated = a.patch(f"/api/work_logs/{log_id}", json={"links": []})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["links"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_estimated_minutes_is_persisted_and_summed_for_completed_tasks(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "estimate me", "estimated_minutes": 90})

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-work-log-attachment-links',
+    timestamp: '2026-07-14T10:00:03+09:00',
+    description: '업무와 캘린더 일정에는 첨부 링크를 여러 개 붙일 수 있었지만, 업무 기록(work log)은 관련 링크를 하나만 저장할 수 있어 PR·문서·티켓 등 여러 참고 링크를 남길 곳이 부족했습니다. work_logs 테이블에 links(JSON) 컬럼을 추가하고, 검증 로직을 tasks/events/work_logs가 공유하는 _clean_links 헬퍼로 통합했으며, 오늘 화면의 업무 기록 추가/수정 폼에 동일한 첨부 링크 추가/삭제 UI와 첨부 링크 개수 배지를 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-14-todo-color-coding',
     timestamp: '2026-07-14T09:55:25+09:00',
     description: '업무와 캘린더 일정은 색상을 지정해 시각적으로 구분할 수 있었지만, 오늘 화면의 할 일(Todo)에는 색상 지정 기능이 없어 항목이 많아질수록 종류를 한눈에 구분하기 어려웠습니다. todos 테이블에 color 컬럼을 추가하고(업무/일정과 동일한 검증된 색상 팔레트 재사용), 할 일 추가/수정 폼에 색상 선택 드롭다운을, 할 일 목록 행에는 선택한 색상의 좌측 강조선을 추가했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/todoDuplicate.js).',
