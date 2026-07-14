@@ -50,6 +50,14 @@ const normalizedChecklist = items => {
   }
   return cleaned
 }
+export const moveChecklistItem = (items, id, direction) => {
+  const list = Array.isArray(items) ? [...items] : []
+  const index = list.findIndex(item => item.id === id)
+  const targetIndex = index + (direction === 'up' ? -1 : 1)
+  if (index === -1 || targetIndex < 0 || targetIndex >= list.length) return list
+  ;[list[index], list[targetIndex]] = [list[targetIndex], list[index]]
+  return list
+}
 export const normalizedLinks = items => {
   const cleaned = []
   for (const raw of Array.isArray(items) ? items : []) {

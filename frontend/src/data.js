@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-checklist-reorder',
+    timestamp: '2026-07-14T20:41:20+09:00',
+    description: '업무 체크리스트 항목은 추가한 순서 그대로만 표시되어, 나중에 순서를 바로잡으려면 항목을 지우고 다시 입력해야 했습니다. 각 체크리스트 항목에 위/아래 이동 버튼을 추가해 순서를 자유롭게 조정할 수 있도록 했습니다(frontend/src/taskFormPayload.js의 moveChecklistItem, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-14-task-estimate-overrun',
     timestamp: '2026-07-14T20:40:00+09:00',
     description: '업무의 "관련 업무 기록" 창은 실제 기록된 총 소요 시간만 보여줄 뿐, 업무 등록 시 입력한 예상 소요 시간과 비교해 주지 않아 예산 초과 여부를 한눈에 알 수 없었습니다. 예상 소요 시간이 설정된 업무라면 실제 기록된 시간과 비교해 초과/여유 시간을 함께 표시하도록 추가했습니다(frontend/src/taskLogs.js의 taskEstimateOverrun, frontend/src/App.jsx 관련 업무 기록 모달).',

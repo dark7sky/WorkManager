@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
-import { buildTaskPayload, initialTaskDateValue } from '../taskFormPayload'
+import { buildTaskPayload, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
 import { taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import TagsInput from './TagsInput'
@@ -114,6 +114,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   }
   const toggleChecklistItem = id => setChecklist(checklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const removeChecklistItem = id => setChecklist(checklist.filter(item => item.id !== id))
+  const shiftChecklistItem = (id, direction) => setChecklist(list => moveChecklistItem(list, id, direction))
   const [editingChecklistId, setEditingChecklistId] = useState(null)
   const [editingChecklistText, setEditingChecklistText] = useState('')
   const beginEditChecklistItem = item => { setEditingChecklistId(item.id); setEditingChecklistText(item.text) }
@@ -190,11 +191,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item"><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
-      {checklist.map(item => <div key={item.id} className="checklist-editor-item">
+      {checklist.map((item, index) => <div key={item.id} className="checklist-editor-item">
         <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>
         {editingChecklistId === item.id
           ? <input type="text" className="inline-edit" autoFocus value={editingChecklistText} onChange={e => setEditingChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditChecklistItem(item.id) } if (e.key === 'Escape') setEditingChecklistId(null) }} onBlur={() => saveEditChecklistItem(item.id)}/>
           : <span className={item.done ? 'checklist-done-text' : ''} onClick={() => beginEditChecklistItem(item)}>{item.text}</span>}
+        <button type="button" className="text-button" disabled={index === 0} onClick={() => shiftChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button>
+        <button type="button" className="text-button" disabled={index === checklist.length - 1} onClick={() => shiftChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button>
         <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>

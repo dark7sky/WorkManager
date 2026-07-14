@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskDuplicatePayload, buildTaskPayload, initialTaskDateValue } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -222,4 +222,19 @@ test('buildTaskDuplicatePayload copies attachment links', () => {
 
   assert.equal(payload.links[0].url, 'https://example.com/spec')
   assert.equal(payload.links[0].label, '기획서')
+})
+
+test('moveChecklistItem swaps a checklist item with its neighbor', () => {
+  const items = [{ id: 'a', text: '첫번째' }, { id: 'b', text: '두번째' }, { id: 'c', text: '세번째' }]
+
+  assert.deepEqual(moveChecklistItem(items, 'b', 'up').map(i => i.id), ['b', 'a', 'c'])
+  assert.deepEqual(moveChecklistItem(items, 'b', 'down').map(i => i.id), ['a', 'c', 'b'])
+})
+
+test('moveChecklistItem is a no-op at the boundaries or for an unknown id', () => {
+  const items = [{ id: 'a', text: '첫번째' }, { id: 'b', text: '두번째' }]
+
+  assert.deepEqual(moveChecklistItem(items, 'a', 'up').map(i => i.id), ['a', 'b'])
+  assert.deepEqual(moveChecklistItem(items, 'b', 'down').map(i => i.id), ['a', 'b'])
+  assert.deepEqual(moveChecklistItem(items, 'z', 'up').map(i => i.id), ['a', 'b'])
 })
