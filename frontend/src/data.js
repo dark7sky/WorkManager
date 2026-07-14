@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-modal-save-shortcut',
+    timestamp: '2026-07-14T20:29:00+09:00',
+    description: '업무/일정/할 일/오늘 한 일 등 모든 입력 창(모달)은 저장하려면 마우스로 "저장" 버튼을 눌러야만 했습니다. 상용 생산성 도구(Linear, Notion, Gmail 등)처럼 Cmd/Ctrl+Enter로 열려 있는 입력 창을 바로 저장하는 단축키를 추가했습니다. 모든 입력 창이 공용 Modal 컴포넌트를 쓰기 때문에 한 번의 수정으로 전체 입력 창에 적용됩니다(frontend/src/components/Modal.jsx, 단축키 안내 frontend/src/components/KeyboardShortcuts.jsx).',
+  },
+  {
     id: '2026-07-14-ai-task-priority-important-keyword',
     timestamp: '2026-07-14T20:22:52+09:00',
     description: 'AI 도우미(또는 빠른 입력)에서 API 키 없이 로컬 규칙으로 문장을 분석할 때, "긴급/중요/급함" 표현이 있으면 일정·오늘 할 일은 우선순위를 자동으로 "높음"으로 올려줬지만 같은 표현이 들어간 업무(Task) 생성 문장에서는 "중요"만 인식되지 않고 "긴급/급함"만 반영되는 불일치가 있었습니다. 업무 생성 규칙도 일정·할 일과 동일하게 "중요" 키워드를 인식하도록 맞췄습니다(backend/app/ai.py rule_parse, 테스트 backend/tests/test_ai.py::test_task_extracts_priority_for_important_keyword).',
