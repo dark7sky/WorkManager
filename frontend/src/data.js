@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-color',
+    timestamp: '2026-07-14T09:27:00+09:00',
+    description: '업무 Gantt 막대는 모두 순번 기준의 고정 색으로만 표시되어, 프로젝트/유형별로 업무를 색으로 구분할 방법이 없었습니다. 업무 등록/수정 폼에 캘린더 일정과 동일한 "색상" 선택을 추가해 Gantt 막대와 진행률 바에 선택한 색이 반영되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/components/TaskForm.jsx, frontend/src/screens/Tasks.jsx, frontend/src/taskFormPayload.js).',
+  },
+  {
     id: '2026-07-14-event-color',
     timestamp: '2026-07-14T05:40:00+09:00',
     description: '캘린더 일정은 모두 같은 파란색으로만 표시되어, 회의/개인 일정/마감 등 종류가 다른 일정을 색으로 구분할 방법이 없었습니다. 일정 등록/수정 폼에 "색상" 선택(빨강/주황/노랑/초록/보라/회색/기본)을 추가해 월간·주간 캘린더 칩에 선택한 색이 반영되도록 했고, 일정 복제 시 색상도 함께 복사되도록 했습니다 (backend/app/main.py, backend/app/db.py, frontend/src/eventColors.js, frontend/src/screens/Calendar.jsx, frontend/src/eventDuplicate.js).',

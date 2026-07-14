@@ -256,6 +256,7 @@ class TaskPayload(StrictPayload):
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
     link_url: str | None = Field(None, max_length=2000)
     checklist: list[dict] | None = Field(None, max_length=200)
+    color: str | None = None
 
     @field_validator("checklist")
     @classmethod
@@ -270,7 +271,7 @@ class TaskPayload(StrictPayload):
             cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "text": text, "done": bool(item.get("done"))})
         return cleaned
 
-    @field_validator("start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", mode="before")
+    @field_validator("start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -280,6 +281,13 @@ class TaskPayload(StrictPayload):
     def link_url_must_be_http(cls, value):
         if value is not None and not (value.startswith("http://") or value.startswith("https://")):
             raise ValueError("link_url must start with http:// or https://")
+        return value
+
+    @field_validator("color")
+    @classmethod
+    def color_must_be_known(cls, value):
+        if value is not None and value not in VALID_EVENT_COLORS:
+            raise ValueError(f"color must be one of {sorted(VALID_EVENT_COLORS)}")
         return value
 
     @field_validator("status", mode="before")
@@ -398,7 +406,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color"}, "updated_at"),
     "todos": ({"title", "todo_date", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes"}, None),
@@ -520,7 +528,7 @@ def normalize(table, data):
     for key in text_fields:
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
-    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url"},
+    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
                 "events": {"link_url", "color"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo"}, "work_logs": {"task_id", "duration_minutes"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:

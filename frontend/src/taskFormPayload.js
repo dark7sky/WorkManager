@@ -82,6 +82,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes),
     link_url: normalizedLinkUrl(data.link_url),
     checklist: normalizedChecklist(data.checklist),
+    color: data.color || null,
     tags: normalizedTaskTags(tags),
   }
 
@@ -115,6 +116,7 @@ export const buildTaskDuplicatePayload = task => {
     estimated_minutes: normalizedEstimatedMinutes(task?.estimated_minutes),
     link_url: normalizedLinkUrl(task?.link_url),
     checklist: normalizedChecklist(task?.checklist).map(item => ({ ...item, done: false })),
+    color: task?.color || null,
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),
     dependency_ids: normalizedDependencyIds(task?.dependency_ids, sourceId),

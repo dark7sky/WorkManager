@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
+import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, initialTaskDateValue } from '../taskFormPayload'
 import { taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
@@ -133,6 +134,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
+    <label>색상<select name="color" defaultValue={task?.color || ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
     {recurrenceRule ? <label key={`recurrence-end-${prefillKey}`}>반복 종료일<input name="recurrence_end_date" type="date" defaultValue={task?.recurrence_end_date ?? ''}/></label> : null}
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
