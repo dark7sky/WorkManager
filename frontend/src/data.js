@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-trash-permanent-delete',
+    timestamp: '2026-07-14T20:11:27+09:00',
+    description: '휴지통은 항목을 복원하거나 7일/30일 경과 기준으로 일괄 정리만 할 수 있어, 다시 쓸 일이 없는 특정 항목을 바로 영구 삭제할 방법이 없었습니다. 각 항목에 "영구 삭제" 버튼을 추가하고, 여러 항목을 선택했을 때도 "선택 영구 삭제"로 한 번에 지울 수 있게 했습니다(백엔드 DELETE /api/trash/{table}/{id}, frontend/src/components/TrashSection.jsx, 테스트 backend/tests/test_api.py::test_purge_single_trash_item_is_immediate_and_user_scoped).',
+  },
+  {
     id: '2026-07-14-event-overlap-warning',
     timestamp: '2026-07-14T20:06:30+09:00',
     description: '캘린더 일정을 새로 만들거나 시간을 수정할 때 같은 시간대에 이미 등록된 다른 일정이 있어도 아무 안내 없이 저장되어, 일정이 겹치는 것을 모르고 지나치는 경우가 있었습니다. 시작/종료 시간이 기존 일정과 겹치면 저장 폼에 겹치는 일정 제목을 알려주는 경고 문구를 표시하도록 했습니다(막지는 않고 안내만 함, frontend/src/eventOverlap.js, frontend/src/screens/Calendar.jsx의 EventForm, 테스트 frontend/src/eventOverlap.test.js).',

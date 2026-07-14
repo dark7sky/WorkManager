@@ -14,6 +14,8 @@ export default function TrashSection({ notify, onDataChanged }) {
   const [query, setQuery] = useState('')
   const [table, setTable] = useState('all')
   const [selected, setSelected] = useState(() => new Set())
+  const [purgeTarget, setPurgeTarget] = useState(null)
+  const [bulkPurge, setBulkPurge] = useState(false)
   const load = async () => {
     setLoading(true)
     try {
@@ -50,6 +52,28 @@ export default function TrashSection({ notify, onDataChanged }) {
     } catch (error) { notify(error.message, 'error') }
     finally { setBusy('') }
   }
+  const purgeOne = async () => {
+    const item = purgeTarget
+    setBusy(`${item.table}-${item.id}`)
+    try {
+      await api.purgeTrashItem(item.table, item.id)
+      setItems(current => current.filter(value => value !== item))
+      setSelected(current => { const next = new Set(current); next.delete(`${item.table}-${item.id}`); return next })
+      notify('항목을 영구 삭제했습니다.')
+    } catch (error) { notify(error.message, 'error') }
+    finally { setBusy(''); setPurgeTarget(null) }
+  }
+  const purgeSelected = async () => {
+    setBusy('bulk')
+    const targets = shown.filter(item => selected.has(`${item.table}-${item.id}`))
+    try {
+      await Promise.all(targets.map(item => api.purgeTrashItem(item.table, item.id)))
+      setItems(current => current.filter(item => !selected.has(`${item.table}-${item.id}`)))
+      notify(`${targets.length}개 항목을 영구 삭제했습니다.`)
+      clearSelected()
+    } catch (error) { notify(error.message, 'error') }
+    finally { setBusy(''); setBulkPurge(false) }
+  }
   const purge = async () => {
     setBusy('cleanup')
     try {
@@ -67,8 +91,10 @@ export default function TrashSection({ notify, onDataChanged }) {
   return <section className="settings-card">
     <div className="settings-heading"><span><Trash2/></span><div><h2>휴지통</h2><p>삭제한 항목을 복원합니다. 7일 또는 30일이 지난 항목을 영구 정리할 수 있습니다.</p></div><button className="icon-button" aria-label="휴지통 새로고침" onClick={load}><RefreshCw/></button></div>
     {!loading && items.length ? <div className="trash-filters"><label className="search"><Search/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="제목, 내용 검색" aria-label="휴지통 검색"/></label><label className="filter-select"><span>유형</span><select value={table} onChange={e => setTable(e.target.value)}><option value="all">전체</option>{availableTables.map(t => <option key={t} value={t}>{labels[t] || t}</option>)}</select></label></div> : null}
-    {selected.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 항목 일괄 작업"><span>{selected.size}개 선택됨</span><button type="button" className="secondary" disabled={busy === 'bulk'} onClick={bulkRestore}><RotateCcw size={16}/> 선택 복원</button><button type="button" className="text-button" onClick={clearSelected}>선택 해제</button></div> : null}
-    {loading ? <div className="trash-loading"><LoaderCircle className="spin"/> 불러오는 중…</div> : items.length ? shown.length ? <><div className="trash-list">{shown.map(item => { const key = `${item.table}-${item.id}`; return <div key={key}><input type="checkbox" className="row-select" aria-label={`${item.title || item.content || '항목'} 선택`} checked={selected.has(key)} onChange={() => toggleSelected(key)}/><span><small>{labels[item.table] || item.table}</small><strong>{item.title || item.content || '제목 없는 항목'}</strong><time>{item.deleted_at ? new Date(item.deleted_at).toLocaleString('ko-KR') : ''}</time></span><div><button className="secondary" disabled={busy === key} onClick={() => restore(item)}><RotateCcw/> 복원</button></div></div> })}</div><div className="trash-footer"><button className="secondary" onClick={() => setCleanup(7)}><Trash2/> 7일 지난 항목 정리</button><button className="danger-button" onClick={() => setCleanup(30)}><Trash2/> 30일 지난 항목 정리</button></div></> : <p className="empty-state">검색 조건에 맞는 항목이 없습니다.</p> : <p className="empty-state">휴지통이 비어 있습니다.</p>}
+    {selected.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 항목 일괄 작업"><span>{selected.size}개 선택됨</span><button type="button" className="secondary" disabled={busy === 'bulk'} onClick={bulkRestore}><RotateCcw size={16}/> 선택 복원</button><button type="button" className="danger-button" disabled={busy === 'bulk'} onClick={() => setBulkPurge(true)}><Trash2 size={16}/> 선택 영구 삭제</button><button type="button" className="text-button" onClick={clearSelected}>선택 해제</button></div> : null}
+    {loading ? <div className="trash-loading"><LoaderCircle className="spin"/> 불러오는 중…</div> : items.length ? shown.length ? <><div className="trash-list">{shown.map(item => { const key = `${item.table}-${item.id}`; return <div key={key}><input type="checkbox" className="row-select" aria-label={`${item.title || item.content || '항목'} 선택`} checked={selected.has(key)} onChange={() => toggleSelected(key)}/><span><small>{labels[item.table] || item.table}</small><strong>{item.title || item.content || '제목 없는 항목'}</strong><time>{item.deleted_at ? new Date(item.deleted_at).toLocaleString('ko-KR') : ''}</time></span><div><button className="secondary" disabled={busy === key} onClick={() => restore(item)}><RotateCcw/> 복원</button><button className="danger-button" disabled={busy === key} onClick={() => setPurgeTarget(item)}><Trash2/> 영구 삭제</button></div></div> })}</div><div className="trash-footer"><button className="secondary" onClick={() => setCleanup(7)}><Trash2/> 7일 지난 항목 정리</button><button className="danger-button" onClick={() => setCleanup(30)}><Trash2/> 30일 지난 항목 정리</button></div></> : <p className="empty-state">검색 조건에 맞는 항목이 없습니다.</p> : <p className="empty-state">휴지통이 비어 있습니다.</p>}
     {cleanup ? <ConfirmDialog title="오래된 항목을 정리할까요?" message={`삭제된 지 ${cleanup}일이 지난 항목을 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.`} confirmLabel="영구 정리" busy={busy === 'cleanup'} onClose={() => setCleanup(0)} onConfirm={purge}/> : null}
+    {purgeTarget ? <ConfirmDialog title="항목을 영구 삭제할까요?" message="이 항목을 즉시 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다." confirmLabel="영구 삭제" busy={busy === `${purgeTarget.table}-${purgeTarget.id}`} onClose={() => setPurgeTarget(null)} onConfirm={purgeOne}/> : null}
+    {bulkPurge ? <ConfirmDialog title={`선택한 ${selected.size}개 항목을 영구 삭제할까요?`} message="선택한 항목을 즉시 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다." confirmLabel="영구 삭제" busy={busy === 'bulk'} onClose={() => setBulkPurge(false)} onConfirm={purgeSelected}/> : null}
   </section>
 }

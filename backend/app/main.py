@@ -1110,6 +1110,19 @@ def restore_item(table: str, item_id: int, user=Depends(require_user)):
     return rows(table, user, "WHERE id=?", (item_id,))[0]
 
 
+@app.delete("/api/trash/{table}/{item_id}")
+def purge_trash_item(table: str, item_id: int, user=Depends(require_user)):
+    if table not in CONFIG:
+        raise HTTPException(404, "Resource not found")
+    with connection() as c:
+        item = c.execute(f"SELECT id FROM {table} WHERE id=? AND user_id=? AND deleted_at IS NOT NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Deleted item not found")
+        c.execute(f"DELETE FROM {table} WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "purge", table, item_id)
+    return {"ok": True}
+
+
 @app.delete("/api/trash")
 def purge_trash(older_than_days: int = 30, user=Depends(require_user)):
     if older_than_days < 1 or older_than_days > 3650:

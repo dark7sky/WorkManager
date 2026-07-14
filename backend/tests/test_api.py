@@ -188,6 +188,19 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_purge_single_trash_item_is_immediate_and_user_scoped(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        item = a.post("/api/todos", json={"title": "purge me", "todo_date": "2026-07-06"}).json()
+        self.assertEqual(a.delete(f"/api/todos/{item['id']}").status_code, 200)
+        self.assertEqual(b.delete(f"/api/trash/todos/{item['id']}").status_code, 404)
+        result = a.delete(f"/api/trash/todos/{item['id']}")
+        self.assertEqual(result.status_code, 200, result.text)
+        trash_ids = [x["id"] for x in a.get("/api/trash").json()["todos"]]
+        self.assertNotIn(item["id"], trash_ids)
+        self.assertEqual(a.delete(f"/api/trash/todos/{item['id']}").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_completion_spawns_once(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-06",
