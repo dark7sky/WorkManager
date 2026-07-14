@@ -101,6 +101,44 @@ def load_approval_workflow_setting(user_id):
     return row["value"] == "on" if row else False
 
 
+def _ics_escape(value):
+    return str(value or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+
+def _ics_fold(line):
+    if len(line) <= 75: return line
+    chunks, rest = [], line
+    while len(rest) > 75:
+        chunks.append(rest[:75]); rest = " " + rest[75:]
+    chunks.append(rest)
+    return "\r\n".join(chunks)
+
+
+def _ics_datetime(value):
+    return datetime.fromisoformat(value).strftime("%Y%m%dT%H%M%S")
+
+
+def build_calendar_feed(user_id):
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//WorkManager//Calendar Feed//KO", "CALSCALE:GREGORIAN"]
+    for e in rows("events", user_id):
+        if not e.get("start_at") or not e.get("end_at"): continue
+        lines += ["BEGIN:VEVENT", f"UID:event-{e['id']}@workmanager", f"DTSTAMP:{_ics_datetime(now())}",
+                  f"DTSTART:{_ics_datetime(e['start_at'])}", f"DTEND:{_ics_datetime(e['end_at'])}",
+                  f"SUMMARY:{_ics_escape(e['title'])}"]
+        if e.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(e['description'])}")
+        if e.get("location"): lines.append(f"LOCATION:{_ics_escape(e['location'])}")
+        lines.append("END:VEVENT")
+    for t in rows("tasks", user_id):
+        if not t.get("due_date"): continue
+        lines += ["BEGIN:VEVENT", f"UID:task-{t['id']}@workmanager", f"DTSTAMP:{_ics_datetime(now())}",
+                  f"DTSTART;VALUE=DATE:{t['due_date'].replace('-', '')}",
+                  f"SUMMARY:{_ics_escape('[업무] ' + t['title'])}"]
+        if t.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(t['description'])}")
+        lines.append("END:VEVENT")
+    lines.append("END:VCALENDAR")
+    return "\r\n".join(_ics_fold(line) for line in lines)
+
+
 _rate_buckets = {}
 _rate_last_cleanup = 0.0
 def enforce_rate(user_id, bucket, limit, window_seconds):
@@ -1569,6 +1607,43 @@ def workflow_settings_update(payload: dict = Body(...), user=Depends(require_use
                       (user, "approval_workflow", stored_value, now()))
         audit(user, "update", "settings", "approval_workflow", {"approval_workflow": approval_workflow_on})
     return {"approval_workflow": load_approval_workflow_setting(user)}
+
+
+@app.get("/api/settings/calendar-feed")
+def calendar_feed_status(user=Depends(require_user)):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user, "calendar_feed_token_hash")).fetchone()
+    return {"enabled": row is not None}
+
+
+@app.post("/api/settings/calendar-feed/rotate")
+def calendar_feed_rotate(request: Request, user=Depends(require_user)):
+    token = secrets.token_urlsafe(24)
+    with connection() as c:
+        c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+          ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                  (user, "calendar_feed_token_hash", _hash(token), now()))
+    audit(user, "update", "settings", "calendar_feed_token", {})
+    feed_url = f"{str(request.base_url).rstrip('/')}/api/calendar-feed/{token}.ics"
+    return {"enabled": True, "feed_url": feed_url}
+
+
+@app.delete("/api/settings/calendar-feed")
+def calendar_feed_disable(user=Depends(require_user)):
+    with connection() as c:
+        c.execute("DELETE FROM app_settings WHERE user_id=? AND key=?", (user, "calendar_feed_token_hash"))
+    audit(user, "delete", "settings", "calendar_feed_token", {})
+    return {"enabled": False}
+
+
+@app.get("/api/calendar-feed/{token}.ics")
+def calendar_feed(token: str):
+    with connection() as c:
+        row = c.execute("SELECT user_id FROM app_settings WHERE key=? AND value=?",
+                        ("calendar_feed_token_hash", _hash(token))).fetchone()
+    if not row:
+        raise HTTPException(404, "Not found")
+    return Response(content=build_calendar_feed(row["user_id"]), media_type="text/calendar; charset=utf-8")
 
 
 @app.post("/api/ai/tag-recommendations")

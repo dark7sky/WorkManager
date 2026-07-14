@@ -1033,6 +1033,34 @@ class ApiTests(unittest.TestCase):
         bad = a.post("/api/import", json={"mode": "merge", "data": {"version": 1, "tasks": [{"title": ""}]}})
         self.assertEqual(bad.status_code, 422)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_calendar_feed_rotate_serves_ics_and_old_token_is_invalidated(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        self.assertEqual(a.get("/api/settings/calendar-feed").json(), {"enabled": False})
+        a.post("/api/tasks", json={"title": "feed task", "due_date": "2026-07-20"})
+        a.post("/api/events", json={"title": "feed event", "start_at": "2026-07-21T10:00:00",
+                                    "end_at": "2026-07-21T11:00:00"})
+        first = a.post("/api/settings/calendar-feed/rotate")
+        self.assertEqual(first.status_code, 200, first.text)
+        first_url = first.json()["feed_url"]
+        self.assertTrue(first_url.startswith("http"))
+        self.assertEqual(a.get("/api/settings/calendar-feed").json(), {"enabled": True})
+        path = "/" + first_url.split("/", 3)[3]
+        feed = TestClient(self.app).get(path)
+        self.assertEqual(feed.status_code, 200, feed.text)
+        self.assertIn("text/calendar", feed.headers["content-type"])
+        self.assertIn("SUMMARY:feed event", feed.text)
+        self.assertIn("SUMMARY:[업무] feed task", feed.text)
+        self.assertEqual(TestClient(self.app).get("/api/calendar-feed/not-a-real-token.ics").status_code, 404)
+        second = a.post("/api/settings/calendar-feed/rotate").json()
+        self.assertNotEqual(second["feed_url"], first_url)
+        self.assertEqual(TestClient(self.app).get(path).status_code, 404)
+        self.assertEqual(b.get("/api/settings/calendar-feed").json(), {"enabled": False})
+        self.assertEqual(a.delete("/api/settings/calendar-feed").json(), {"enabled": False})
+        second_path = "/" + second["feed_url"].split("/", 3)[3]
+        self.assertEqual(TestClient(self.app).get(second_path).status_code, 404)
+
 
 if __name__ == "__main__":
     unittest.main()

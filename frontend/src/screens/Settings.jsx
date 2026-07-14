@@ -17,6 +17,8 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [workflowSettings, setWorkflowSettings] = useState(null)
+  const [calendarFeed, setCalendarFeed] = useState(null)
+  const [calendarFeedUrl, setCalendarFeedUrl] = useState('')
   const [sessions, setSessions] = useState(null)
   const [serverErrors, setServerErrors] = useState(null)
   const [aiConfigs, setAiConfigs] = useState({})
@@ -42,16 +44,18 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const load = async () => {
     setError('')
     try {
-      const [integrations, ai, workflow, errors, sessionList] = await Promise.all([
+      const [integrations, ai, workflow, errors, sessionList, feed] = await Promise.all([
         api.googleStatus(),
         api.aiSettings().catch(() => api.aiStatus()),
         api.workflowSettings().catch(() => ({ approval_workflow: false })),
         api.diagnosticsErrors(5).catch(() => ({ items: [] })),
         api.sessions().catch(() => ({ sessions: [] })),
+        api.calendarFeedStatus().catch(() => ({ enabled: false })),
       ])
       setData(integrations)
       applyAiConfig(ai)
       setWorkflowSettings(workflow)
+      setCalendarFeed(feed)
       setServerErrors(errors.items || [])
       setSessions(sessionList.sessions || [])
       if (integrations.connected || integrations.google_connected || integrations.google?.connected) {
@@ -231,6 +235,43 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const rotateCalendarFeed = async () => {
+    setBusy('feed-rotate')
+    try {
+      const result = await api.rotateCalendarFeed()
+      setCalendarFeed({ enabled: result.enabled })
+      setCalendarFeedUrl(result.feed_url)
+      notify('구독 주소를 새로 만들었습니다. 지금 복사해 두세요.')
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const disableCalendarFeed = async () => {
+    setBusy('feed-disable')
+    try {
+      await api.disableCalendarFeed()
+      setCalendarFeed({ enabled: false })
+      setCalendarFeedUrl('')
+      notify('캘린더 구독을 껐습니다.')
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const copyCalendarFeedUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(calendarFeedUrl)
+      notify('구독 주소를 복사했습니다.')
+    } catch {
+      notify('복사에 실패했습니다. 주소를 직접 선택해 복사해 주세요.', 'error')
+    }
+  }
+
   const connected = data?.connected ?? data?.google_connected ?? data?.google?.connected
   const selected = data?.selected_calendar_id ?? data?.google?.selected_calendar_id
   const aiConfig = aiConfigs[aiProvider] || null
@@ -284,6 +325,17 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <section className="settings-card">
         <div className="settings-heading"><span><Bot /></span><div><h2>승인 워크플로</h2><p>완료 업무와 일정 변경에 승인 단계를 요구합니다. 혼자 사용할 때는 꺼 두세요.</p></div></div>
         {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.approval_workflow ?? false} disabled={busy === "workflow-save"} onChange={toggleWorkflowSettings} /> <span>{workflowSettings.approval_workflow ? "승인 워크플로 켜짐" : "승인 워크플로 꺼짐"}</span></label><small>{workflowSettings.approval_workflow ? "새 완료 업무가 승인을 기다립니다." : "새 완료 업무가 바로 확정됩니다."}</small></div> : <div className="skeleton lines" />}
+      </section>
+      <section className="settings-card">
+        <div className="settings-heading"><span><CalendarSync /></span><div><h2>캘린더 구독 피드</h2><p>Google·Apple·Outlook 캘린더에 구독 주소를 등록하면 업무 마감일과 일정이 자동으로 최신 상태를 유지합니다.</p></div><em className={`status-pill ${calendarFeed?.enabled ? 'online' : ''}`}>{calendarFeed?.enabled ? '켜짐' : '꺼짐'}</em></div>
+        {!calendarFeed ? <div className="skeleton lines" /> : <div className="integration-body">
+          {calendarFeedUrl ? <div className="import-plan"><small>주소는 다시 보여주지 않으니 지금 복사해 두세요.</small><input className="feed-url-input" readOnly value={calendarFeedUrl} onFocus={e => e.target.select()} /></div> : null}
+          <div className="import-plan-actions">
+            {calendarFeedUrl ? <button className="secondary" onClick={copyCalendarFeedUrl}>주소 복사</button> : null}
+            <button className="secondary" disabled={!!busy} onClick={rotateCalendarFeed}>{busy === 'feed-rotate' ? <LoaderCircle className="spin" /> : <RefreshCw />} {calendarFeed.enabled ? '주소 재발급' : '구독 주소 만들기'}</button>
+            {calendarFeed.enabled ? <button className="secondary" disabled={!!busy} onClick={disableCalendarFeed}>구독 끄기</button> : null}
+          </div>
+        </div>}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><Smartphone /></span><div><h2>활성 세션</h2><p>현재 로그인된 세션 목록입니다. 낯선 세션은 로그아웃할 수 있습니다.</p></div></div>

@@ -60,6 +60,7 @@ export const api = {
   aiSettings: provider => request(`/settings/ai${provider ? `?provider=${encodeURIComponent(provider)}` : ''}`), saveAiSettings: data => request('/settings/ai',json('PUT',data)),
   testAiSettings: () => request('/settings/ai/test',json('POST',{})),
   workflowSettings: () => request('/settings/workflow'), saveWorkflowSettings: data => request('/settings/workflow',json('PUT',data)),
+  calendarFeedStatus: () => request('/settings/calendar-feed'), rotateCalendarFeed: () => request('/settings/calendar-feed/rotate',{method:'POST'}), disableCalendarFeed: () => request('/settings/calendar-feed',{method:'DELETE'}),
   integrations: () => request('/settings/integrations'), googleStatus: () => request('/google/status'), googleCalendars: () => request('/google/calendars'), selectGoogleCalendar: calendar_id => request('/google/select',json('POST',{calendar_id})), syncGoogleCalendar: () => request('/google/sync',{method:'POST'}),
   exportData: () => request('/export'),
   importPreview: data => request('/import/preview',json('POST',data)),

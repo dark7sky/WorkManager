@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-calendar-feed-subscription',
+    timestamp: '2026-07-14T20:12:37+09:00',
+    description: '업무 마감일과 일정을 Google/Apple/Outlook 캘린더에 반영하려면 ICS 파일을 내보내 매번 다시 올려야 했습니다(수정 시 자동 반영 안 됨). 설정 화면에 "캘린더 구독 피드" 카드를 추가해, 구독 주소(webcal용 ICS URL)를 발급하면 외부 캘린더 앱이 주기적으로 다시 불러와 항상 최신 상태를 유지하도록 했습니다. 토큰은 세션 토큰과 같은 방식으로 해시 저장하고, 재발급 시 이전 주소는 즉시 무효화됩니다(백엔드 GET/POST/DELETE /api/settings/calendar-feed, GET /api/calendar-feed/{token}.ics, frontend/src/screens/Settings.jsx, 테스트 backend/tests/test_api.py::test_calendar_feed_rotate_serves_ics_and_old_token_is_invalidated).',
+  },
+  {
     id: '2026-07-14-trash-permanent-delete',
     timestamp: '2026-07-14T20:11:27+09:00',
     description: '휴지통은 항목을 복원하거나 7일/30일 경과 기준으로 일괄 정리만 할 수 있어, 다시 쓸 일이 없는 특정 항목을 바로 영구 삭제할 방법이 없었습니다. 각 항목에 "영구 삭제" 버튼을 추가하고, 여러 항목을 선택했을 때도 "선택 영구 삭제"로 한 번에 지울 수 있게 했습니다(백엔드 DELETE /api/trash/{table}/{id}, frontend/src/components/TrashSection.jsx, 테스트 backend/tests/test_api.py::test_purge_single_trash_item_is_immediate_and_user_scoped).',
