@@ -205,3 +205,21 @@ test('buildTaskDuplicatePayload copies checklist items but resets done state', (
   assert.equal(payload.checklist[0].text, '초안 작성')
   assert.equal(payload.checklist[0].done, false)
 })
+
+test('buildTaskPayload normalizes attachment links, dropping non-http entries', () => {
+  const payload = buildTaskPayload({
+    ...baseData,
+    links: [{ id: '1', url: 'https://example.com/spec', label: ' 기획서 ' }, { id: '2', url: 'not-a-url', label: 'bad' }],
+  }, { task: { id: 1 } })
+
+  assert.deepEqual(payload.links, [{ id: '1', url: 'https://example.com/spec', label: '기획서' }])
+})
+
+test('buildTaskDuplicatePayload copies attachment links', () => {
+  const payload = buildTaskDuplicatePayload({
+    id: 1, title: '업무', links: [{ id: '1', url: 'https://example.com/spec', label: '기획서' }],
+  })
+
+  assert.equal(payload.links[0].url, 'https://example.com/spec')
+  assert.equal(payload.links[0].label, '기획서')
+})

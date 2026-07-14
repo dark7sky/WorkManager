@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-attachment-links',
+    timestamp: '2026-07-14T09:36:00+09:00',
+    description: '업무는 "관련 링크" 필드 하나만 지원해 자료를 여러 개 첨부할 수 없었습니다. 업무 편집 폼에 URL과 이름을 함께 저장하는 "첨부 링크" 목록을 추가했습니다(체크리스트와 같은 패턴, backend links 컬럼/검증, frontend/src/components/TaskForm.jsx, Gantt 목록에 첨부 개수 배지 표시).',
+  },
+  {
     id: '2026-07-14-palette-checklist-search',
     timestamp: '2026-07-14T09:32:00+09:00',
     description: 'Tasks 화면 검색창은 최근 체크리스트 항목 텍스트까지 검색하도록 고쳤지만, Ctrl/⌘+K 커맨드 팔레트의 통합 검색은 여전히 제목·메모·태그만 훑어 체크리스트 안에만 있는 단어로는 업무를 찾을 수 없었습니다. commandPalette.js의 업무 검색 대상에 체크리스트 항목 텍스트를 추가해 두 검색 경로가 같은 범위를 훑도록 맞췄습니다 (frontend/src/commandPalette.js, 테스트 frontend/src/commandPalette.test.js).',

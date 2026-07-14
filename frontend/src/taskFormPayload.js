@@ -50,6 +50,17 @@ const normalizedChecklist = items => {
   }
   return cleaned
 }
+const normalizedLinks = items => {
+  const cleaned = []
+  for (const raw of Array.isArray(items) ? items : []) {
+    const url = trimField(raw?.url).slice(0, 2000)
+    if (!/^https?:\/\//.test(url)) continue
+    const label = trimField(raw?.label).slice(0, 200)
+    cleaned.push({ id: String(raw?.id || `${Date.now()}-${cleaned.length}`), url, label })
+    if (cleaned.length >= 50) break
+  }
+  return cleaned
+}
 const normalizedDependencyIds = (ids, excludeId) => {
   const cleaned = []
   const seen = new Set()
@@ -82,6 +93,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes),
     link_url: normalizedLinkUrl(data.link_url),
     checklist: normalizedChecklist(data.checklist),
+    links: normalizedLinks(data.links),
     color: data.color || null,
     tags: normalizedTaskTags(tags),
   }
@@ -116,6 +128,7 @@ export const buildTaskDuplicatePayload = task => {
     estimated_minutes: normalizedEstimatedMinutes(task?.estimated_minutes),
     link_url: normalizedLinkUrl(task?.link_url),
     checklist: normalizedChecklist(task?.checklist).map(item => ({ ...item, done: false })),
+    links: normalizedLinks(task?.links),
     color: task?.color || null,
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),

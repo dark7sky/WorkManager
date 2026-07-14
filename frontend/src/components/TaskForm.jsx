@@ -11,8 +11,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [error, setError] = useState('')
   const [tags, setTags] = useState(() => task?.tags || [])
   const [checklist, setChecklist] = useState(() => task?.checklist || [])
+  const [links, setLinks] = useState(() => task?.links || [])
   const [recurrenceRule, setRecurrenceRule] = useState(() => task?.recurrence_rule || '')
   const [checklistText, setChecklistText] = useState('')
+  const [linkUrlText, setLinkUrlText] = useState('')
+  const [linkLabelText, setLinkLabelText] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [templates, setTemplates] = useState(() => loadTaskTemplates())
   const [prefill, setPrefill] = useState(null)
@@ -63,8 +66,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setChecklist(task?.checklist || [])
     setChecklistText('')
     setEditingChecklistId(null)
+    setLinks(task?.links || [])
+    setLinkUrlText('')
+    setLinkLabelText('')
     setRecurrenceRule(task?.recurrence_rule || '')
-  }, [task?.id, task?.tags, task?.checklist, task?.recurrence_rule])
+  }, [task?.id, task?.tags, task?.checklist, task?.links, task?.recurrence_rule])
 
   const addChecklistItem = () => {
     const text = checklistText.trim()
@@ -82,6 +88,15 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     if (text) setChecklist(checklist.map(item => item.id === id ? { ...item, text } : item))
     setEditingChecklistId(null)
   }
+
+  const addLink = () => {
+    const url = linkUrlText.trim()
+    if (!/^https?:\/\//.test(url)) return
+    setLinks([...links, { id: `${Date.now()}`, url, label: linkLabelText.trim() }])
+    setLinkUrlText('')
+    setLinkLabelText('')
+  }
+  const removeLink = id => setLinks(links.filter(item => item.id !== id))
 
   const recommend = async () => {
     const data = new FormData(formRef.current)
@@ -107,6 +122,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     const data = Object.fromEntries(formData)
     data.dependency_ids = formData.getAll('dependency_ids')
     data.checklist = checklist
+    data.links = links
     const startChanged = data.start_date !== (task?.start_date || '')
     const dueChanged = data.due_date !== (task?.due_date || '')
     if (data.start_date && data.due_date && data.due_date < data.start_date && (startChanged || dueChanged)) {
@@ -148,6 +164,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
         <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
+    </div>
+    <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>
+      {links.map(item => <div key={item.id} className="checklist-editor-item">
+        <a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a>
+        <button type="button" className="text-button" onClick={() => removeLink(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="url" value={linkUrlText} placeholder="https://..." onChange={e => setLinkUrlText(e.target.value)}/><input type="text" value={linkLabelText} placeholder="이름 (선택)" onChange={e => setLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLink}>추가</button></div>
     </div>
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>

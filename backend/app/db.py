@@ -50,6 +50,8 @@ def row_dict(row):
         item["recurrence"] = decode_json_array(item["recurrence"])
     if "checklist" in item:
         item["checklist"] = decode_json_array(item["checklist"])
+    if "links" in item:
+        item["links"] = decode_json_array(item["links"])
     if "completed" in item:
         item["completed"] = bool(item["completed"])
     return item
@@ -147,7 +149,7 @@ def init_db():
             "assignee_name": "TEXT NOT NULL DEFAULT ''", "approval_status": "TEXT NOT NULL DEFAULT 'none'",
             "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'", "estimated_minutes": "INTEGER",
             "link_url": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "recurrence_end_date": "TEXT",
-            "color": "TEXT",
+            "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
         }.items():
             _add_column(c, "tasks", name, definition)
         for name, definition in {

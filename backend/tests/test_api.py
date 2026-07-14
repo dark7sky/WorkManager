@@ -582,6 +582,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_links_are_persisted_and_invalid_urls_dropped(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "with links", "links": [
+            {"id": "1", "url": "https://example.com/spec", "label": " 기획서 "},
+            {"id": "2", "url": "not-a-url", "label": "bad"},
+        ]})
+        self.assertEqual(task.status_code, 200, task.text)
+        links = task.json()["links"]
+        self.assertEqual(len(links), 1)
+        self.assertEqual(links[0]["url"], "https://example.com/spec")
+        self.assertEqual(links[0]["label"], "기획서")
+        task_id = task.json()["id"]
+        updated = a.patch(f"/api/tasks/{task_id}", json={"links": []})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["links"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_color_is_persisted_and_validated(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "colored task", "color": "green"})
