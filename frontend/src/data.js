@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-gantt-window-navigation',
+    timestamp: '2026-07-14T09:36:58+09:00',
+    description: '업무 화면의 간트 목록은 항상 오늘부터 14일치만 보여줘서, 그 범위를 벗어난 일정은 막대가 아예 표시되지 않고 화면을 이동할 방법도 없었습니다. 간트 헤더에 "◀ / 오늘 / ▶" 버튼을 추가해 2주 단위로 이전·다음 구간을 탐색하고 "오늘" 버튼으로 즉시 복귀할 수 있게 했습니다(드래그 이동/기간조절도 이동한 구간 기준으로 정확히 동작, frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-14-task-attachment-links',
     timestamp: '2026-07-14T09:36:00+09:00',
     description: '업무는 "관련 링크" 필드 하나만 지원해 자료를 여러 개 첨부할 수 없었습니다. 업무 편집 폼에 URL과 이름을 함께 저장하는 "첨부 링크" 목록을 추가했습니다(체크리스트와 같은 패턴, backend links 컬럼/검증, frontend/src/components/TaskForm.jsx, Gantt 목록에 첨부 개수 배지 표시).',
