@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-todo-bulk-actions',
+    timestamp: '2026-07-14T19:59:00+09:00',
+    description: '업무 관리 화면은 체크박스로 여러 업무를 골라 일괄 완료/삭제/태그 추가를 할 수 있었지만, 오늘 화면의 Todo 목록은 항목마다 하나씩만 처리할 수 있었습니다. 업무 관리와 동일한 방식으로 Todo 목록에 선택 체크박스와 일괄 작업 바(완료 처리, 태그 추가, 삭제)를 추가했습니다(frontend/src/screens/Today.jsx, frontend/src/App.jsx onBulkCompleteTodo/onBulkDeleteTodo/onBulkAddTagTodo).',
+  },
+  {
     id: '2026-07-14-worklog-csv-import',
     timestamp: '2026-07-14T19:54:35+09:00',
     description: '오늘 할 일(Todo)은 CSV 내보내기/가져오기를 모두 지원했지만, 오늘 한 일(업무 기록)은 CSV 내보내기만 있고 가져오기가 없어 여러 건을 한 번에 등록하려면 하나씩 입력해야 했습니다. Todo 가져오기와 동일한 방식으로 업무 기록 CSV 가져오기(제목 없이 "내용" 열 기준, 날짜/소요 시간/태그 파싱)를 추가했습니다(frontend/src/csv.js parseWorkLogsCsv, frontend/src/screens/Today.jsx).',
