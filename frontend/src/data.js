@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-15-calendar-priority-filter',
+    timestamp: '2026-07-15T01:52:00+09:00',
+    description: '업무 관리 화면에는 우선순위 필터가 있었지만 일정(캘린더) 화면에는 없어, 우선순위 높음 일정만 모아보려면 목록을 눈으로 훑어야 했습니다. 캘린더 화면에도 태그 필터 옆에 우선순위 필터(전체/높음/보통/낮음)를 추가해 월간/주간 보기와 모바일 일정 목록 모두에서 바로 걸러볼 수 있게 했습니다(frontend/src/screens/Calendar.jsx, frontend/src/eventSearch.js의 filterEventsByPriority).',
+  },
+  {
     id: '2026-07-15-task-log-modal-add',
     timestamp: '2026-07-15T00:53:35+09:00',
     description: '업무 화면에서 "기록 보기"로 열리는 업무 기록 모달은 연결된 기록을 읽기 전용으로만 보여줘서, 해당 업무에 새 기록을 남기려면 오늘 화면으로 이동해 목록에서 업무를 다시 찾아 연결해야 했습니다. 모달에 내용/소요 시간(분) 입력과 "기록" 버튼을 추가해, 업무 화면을 벗어나지 않고 바로 해당 업무에 기록을 추가할 수 있게 했습니다(frontend/src/App.jsx의 taskLogsModal, addTaskLog).',
