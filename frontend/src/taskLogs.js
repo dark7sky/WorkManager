@@ -5,3 +5,6 @@ export const taskWorkLogs = (logs, taskId) =>
 
 export const taskWorkLogsTotalMinutes = logs =>
   logs.reduce((sum, log) => sum + (log.duration_minutes || 0), 0)
+
+export const taskEstimateOverrun = (estimatedMinutes, actualMinutes) =>
+  estimatedMinutes ? { overMinutes: actualMinutes - estimatedMinutes, isOver: actualMinutes > estimatedMinutes } : null

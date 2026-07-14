@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-task-estimate-overrun',
+    timestamp: '2026-07-14T20:40:00+09:00',
+    description: '업무의 "관련 업무 기록" 창은 실제 기록된 총 소요 시간만 보여줄 뿐, 업무 등록 시 입력한 예상 소요 시간과 비교해 주지 않아 예산 초과 여부를 한눈에 알 수 없었습니다. 예상 소요 시간이 설정된 업무라면 실제 기록된 시간과 비교해 초과/여유 시간을 함께 표시하도록 추가했습니다(frontend/src/taskLogs.js의 taskEstimateOverrun, frontend/src/App.jsx 관련 업무 기록 모달).',
+  },
+  {
     id: '2026-07-14-new-item-shortcut',
     timestamp: '2026-07-14T20:38:00+09:00',
     description: '업무/일정을 새로 만들려면 항상 마우스로 "새 업무"/"새 일정" 버튼을 클릭해야 했습니다(Cmd/Ctrl+K 빠른 입력은 AI 문장 분석 방식이라 바로 빈 입력 창을 여는 것과는 다름). N 단축키를 누르면 업무/일정 화면에서는 등록 창이 바로 열리고, 오늘 화면에서는 할 일 입력창에 포커스가 이동하도록 추가했습니다(frontend/src/App.jsx 전역 키보드 핸들러, 단축키 안내 frontend/src/components/KeyboardShortcuts.jsx).',
