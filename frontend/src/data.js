@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-work-log-duplicate',
+    timestamp: '2026-07-14T10:11:12+09:00',
+    description: '업무·캘린더 일정·오늘 할 일은 항목을 복제할 수 있었지만, 업무 기록(work log)은 복제 기능이 없어 반복되는 스탠드업/유지보수 기록을 매번 새로 입력해야 했습니다. logDuplicate.js를 추가해 내용·태그·연결 업무·소요 시간·첨부 링크를 그대로 복사하고 기록 날짜만 오늘로 재설정하는 복제 버튼을 오늘 화면의 업무 기록 목록에 추가했습니다(frontend/src/logDuplicate.js, frontend/src/screens/Today.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-14-todo-attachment-links',
     timestamp: '2026-07-14T10:10:21+09:00',
     description: '업무·캘린더 일정·업무 기록은 첨부 링크를 여러 개 붙일 수 있었지만, 오늘 할 일(todo)은 관련 링크를 하나만 저장할 수 있었습니다. todos 테이블에 links(JSON) 컬럼을 추가하고 기존 _clean_links 검증 헬퍼를 재사용했으며, 오늘 화면의 할 일 수정 폼에 첨부 링크 추가/삭제 UI와 첨부 링크 개수 배지를 추가하고 할 일 복제 시에도 첨부 링크가 함께 복사되도록 했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/todoDuplicate.js).',
