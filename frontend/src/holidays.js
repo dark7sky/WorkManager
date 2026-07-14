@@ -31,11 +31,63 @@ function dateKeyOf(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
+// 대체공휴일 (substitute holiday) rule: 어린이날 substitutes when it falls on Sat/Sun; 설날/추석
+// 연휴 and the other named single-day holidays (삼일절/광복절/개천절/한글날/성탄절/부처님오신날)
+// substitute only when they land on a Sunday. The substitute is the first following day that
+// isn't itself already a holiday. Computed rather than hardcoded so it covers any year we have
+// lunar-holiday data for.
+const WEEKEND_TRIGGER_HOLIDAYS = new Set(['어린이날'])
+const SUNDAY_TRIGGER_HOLIDAYS = new Set(['삼일절', '광복절', '개천절', '한글날', '성탄절', '부처님오신날'])
+
+const substituteCache = new Map()
+
+function substituteHolidaysForYear(year) {
+  if (substituteCache.has(year)) return substituteCache.get(year)
+
+  const fixed = FIXED_HOLIDAYS.map(h => ({ date: new Date(year, h.month - 1, h.day), name: h.name }))
+  const lunar = Object.keys(LUNAR_HOLIDAY_DATES)
+    .filter(k => k.startsWith(`${year}-`))
+    .map(k => {
+      const [y, m, d] = k.split('-').map(Number)
+      return { date: new Date(y, m - 1, d), name: LUNAR_HOLIDAY_DATES[k] }
+    })
+  const holidayKeys = new Set([...fixed, ...lunar].map(e => dateKeyOf(e.date)))
+
+  const groups = []
+  const lunarByBase = {}
+  for (const e of lunar) {
+    const base = e.name.includes('설날') ? '설날' : e.name.includes('추석') ? '추석' : e.name
+    ;(lunarByBase[base] ||= []).push(e.date)
+  }
+  for (const base in lunarByBase) groups.push({ dates: lunarByBase[base], weekendTrigger: false })
+  for (const e of fixed) {
+    if (WEEKEND_TRIGGER_HOLIDAYS.has(e.name)) groups.push({ dates: [e.date], weekendTrigger: true })
+    else if (SUNDAY_TRIGGER_HOLIDAYS.has(e.name)) groups.push({ dates: [e.date], weekendTrigger: false })
+  }
+
+  const substitutes = {}
+  for (const g of groups) {
+    const triggered = g.weekendTrigger
+      ? g.dates.some(d => d.getDay() === 0 || d.getDay() === 6)
+      : g.dates.some(d => d.getDay() === 0)
+    if (!triggered) continue
+    const maxDate = new Date(Math.max(...g.dates.map(d => d.getTime())))
+    const candidate = new Date(maxDate)
+    do { candidate.setDate(candidate.getDate() + 1) } while (holidayKeys.has(dateKeyOf(candidate)))
+    substitutes[dateKeyOf(candidate)] = '대체공휴일'
+  }
+
+  substituteCache.set(year, substitutes)
+  return substitutes
+}
+
 export function holidayNameForDate(date) {
-  const lunar = LUNAR_HOLIDAY_DATES[dateKeyOf(date)]
+  const key = dateKeyOf(date)
+  const lunar = LUNAR_HOLIDAY_DATES[key]
   if (lunar) return lunar
   const found = FIXED_HOLIDAYS.find(h => h.month === date.getMonth() + 1 && h.day === date.getDate())
-  return found ? found.name : null
+  if (found) return found.name
+  return substituteHolidaysForYear(date.getFullYear())[key] || null
 }
 
 export function holidayNameForKey(dateKey) {

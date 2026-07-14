@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-14-substitute-holidays',
+    timestamp: '2026-07-14T10:20:22+09:00',
+    description: '캘린더 화면은 고정일 공휴일과 음력 공휴일(설날/추석/부처님오신날)은 표시했지만, 대체공휴일은 표시하지 않아 삼일절·광복절·개천절·한글날·성탄절이 일요일과 겹치거나 어린이날이 주말과 겹칠 때 실제 휴일 여부를 알 수 없었습니다. holidays.js에 규칙 기반 대체공휴일 계산(연도별 공휴일 목록을 만들고 일요일/주말 충돌 시 다음 비공휴일로 대체)을 추가해 holidayNameForDate가 대체공휴일도 인식하도록 했습니다(frontend/src/holidays.js, 테스트 추가 frontend/src/holidays.test.js).',
+  },
+  {
     id: '2026-07-14-work-log-color',
     timestamp: '2026-07-14T10:19:12+09:00',
     description: '업무·캘린더 일정·오늘 할 일은 모두 색상 코딩을 지원했지만, 업무 기록(work log)만 색상 구분이 없어 로그 목록에서 종류별로 한눈에 구분하기 어려웠습니다. work_logs 테이블에 color 컬럼을 추가해 기존과 동일한 색상 팔레트로 검증하고, 오늘 화면의 업무 기록 작성/수정 폼에 색상 선택과 로그 행 좌측 색상 강조 표시를 추가했으며, 기록 복제 시에도 색상이 함께 복사되도록 했습니다(backend/app/db.py, backend/app/main.py, frontend/src/screens/Today.jsx, frontend/src/App.jsx, frontend/src/logDuplicate.js).',

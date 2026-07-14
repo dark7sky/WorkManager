@@ -34,3 +34,21 @@ test('holidayNameForKey resolves a lunar holiday by date key', () => {
   assert.equal(holidayNameForKey('2025-01-29'), '설날')
   assert.equal(holidayNameForKey('2025-01-31'), null)
 })
+
+test('holidayNameForDate substitutes a Sunday-falling fixed holiday to the next weekday', () => {
+  // 2026-03-01 (삼일절) is a Sunday, so 2026-03-02 (Monday) becomes 대체공휴일.
+  assert.equal(holidayNameForDate(new Date(2026, 2, 1)), '삼일절')
+  assert.equal(holidayNameForDate(new Date(2026, 2, 2)), '대체공휴일')
+})
+
+test('holidayNameForDate substitutes 어린이날 when it falls on a weekend', () => {
+  // 2024-05-05 (어린이날) is a Sunday, so 2024-05-06 (Monday) becomes 대체공휴일.
+  assert.equal(holidayNameForDate(new Date(2024, 4, 5)), '어린이날')
+  assert.equal(holidayNameForDate(new Date(2024, 4, 6)), '대체공휴일')
+})
+
+test('holidayNameForDate does not add a substitute when a fixed holiday falls on a weekday', () => {
+  // 2026-08-15 (광복절) is a Saturday, which does not trigger a substitute for this category.
+  assert.equal(holidayNameForDate(new Date(2026, 7, 15)), '광복절')
+  assert.equal(holidayNameForDate(new Date(2026, 7, 17)), null)
+})
