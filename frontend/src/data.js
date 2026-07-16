@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-mobile-month-calendar-weekdays-only',
+    timestamp: '2026-07-17T00:18:31+09:00',
+    description: '모바일 월간 캘린더가 토·일을 포함한 7개 요일을 억지로 좁게 눌러 담아 글씨가 작고 요일 헤더와 날짜 칸의 너비가 어긋나 보였습니다. 모바일 월간 보기에서는 토·일을 숨기고 월~금 5개 열만 균등한 너비로 보여주며, 일정 글씨 크기를 줄여 한 화면에서 평일 전체가 보이도록 개선했습니다(frontend/src/styles.css).',
+  },
+  {
     id: '2026-07-17-task-form-inline-validation',
     timestamp: '2026-07-17T00:15:38+09:00',
     description: '업무 등록/수정 폼에서 제목을 비워두거나 완료 예정일을 시작일보다 이르게 입력해도 브라우저 기본 안내만 뜰 뿐, 정확히 어느 항목이 문제인지 화면에서 바로 알기 어려웠습니다. 문제가 된 입력칸 테두리를 빨간색으로 표시하고 바로 아래에 구체적인 안내 문구를 함께 보여주도록 개선했습니다(frontend/src/formValidation.js, frontend/src/components/TaskForm.jsx).',
