@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-api-request-timeout',
+    timestamp: '2026-07-17T00:29:48+09:00',
+    description: 'API 요청에 20초 타임아웃을 추가했습니다. 이전에는 서버가 응답하지 않으면 저장/불러오기 버튼이 "처리 중" 상태로 영원히 멈춰 있었는데, 이제 20초가 지나면 자동으로 요청을 취소하고 "요청 시간이 초과되었습니다. 다시 시도해 주세요."라는 안내와 함께 다시 시도할 수 있습니다(frontend/src/api.js의 request()).',
+  },
+  {
     id: '2026-07-17-event-comments',
     timestamp: '2026-07-17T00:25:48+09:00',
     description: '업무(Task)에만 있던 댓글 스레드 기능을 일정(Event)에도 추가했습니다. 일정 수정 화면에서 날짜별로 메모를 남기고(예: "고객사에 확인 요청, 금요일 회신 예정") 수정·삭제할 수 있어, 하나의 메모 필드를 덮어쓰는 대신 시간순 기록을 남길 수 있습니다(backend/app/db.py의 event_comments 테이블, backend/app/main.py의 /api/events/{id}/comments 엔드포인트, frontend/src/screens/Calendar.jsx).',

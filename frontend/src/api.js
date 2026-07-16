@@ -25,14 +25,24 @@ export const apiErrorMessage = (body, status) => {
   return `요청을 처리하지 못했습니다 (${status})`
 }
 
+const REQUEST_TIMEOUT_MS = 20000
+
 export async function request(path, options = {}) {
-  const { suppressAuthEvent, ...fetchOptions } = options
+  const { suppressAuthEvent, signal: callerSignal, ...fetchOptions } = options
+  const timeoutController = new AbortController()
+  const timer = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS)
+  const signal = callerSignal
+    ? (typeof AbortSignal.any === 'function' ? AbortSignal.any([callerSignal, timeoutController.signal]) : callerSignal)
+    : timeoutController.signal
   let response
   try {
-    response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', headers: { 'Content-Type': 'application/json', ...fetchOptions.headers } })
+    response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', signal, headers: { 'Content-Type': 'application/json', ...fetchOptions.headers } })
   } catch (error) {
-    if (error?.name === 'AbortError') throw error
+    if (callerSignal?.aborted) throw error
+    if (error?.name === 'AbortError') throw new ApiError('요청 시간이 초과되었습니다. 다시 시도해 주세요.', 0)
     throw new ApiError('서버에 연결할 수 없습니다. 네트워크 상태를 확인해 주세요.', 0)
+  } finally {
+    clearTimeout(timer)
   }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
