@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-bulk-task-action-undo',
+    timestamp: '2026-07-16T19:10:00+09:00',
+    description: '업무 목록에서 여러 건을 선택해 일괄 완료 처리하거나 우선순위를 변경하면, 잘못 눌러도 되돌릴 방법이 없었습니다(휴지통에도 남지 않아 복구 불가). 일괄 삭제와 동일하게 "실행 취소" 토스트 버튼을 추가해, 완료 처리/우선순위 변경 전 값을 기억했다가 클릭 한 번으로 되돌릴 수 있도록 했습니다(frontend/src/App.jsx의 onBulkComplete/onBulkPriority, 기존 mutate()의 undo 콜백/Toast.jsx의 실행 취소 버튼 재사용).',
+  },
+  {
     id: '2026-07-16-task-row-estimate-overrun-badge',
     timestamp: '2026-07-16T19:05:00+09:00',
     description: '업무의 예상 소요 시간 대비 실제 기록 시간 초과 여부는 "관련 업무 기록" 모달을 열어야만 확인할 수 있었습니다. 업무 목록(간트) 행에도 실제 기록 시간이 예상 시간을 초과한 경우 "N시간 초과" 배지를 바로 표시해, 모달을 열지 않고도 한눈에 확인할 수 있도록 했습니다(frontend/src/screens/Tasks.jsx, frontend/src/taskLogs.js의 기존 taskWorkLogs/taskWorkLogsTotalMinutes/taskEstimateOverrun 재사용, frontend/src/App.jsx가 logs를 Tasks 화면에 전달).',
