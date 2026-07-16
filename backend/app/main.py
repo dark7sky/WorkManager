@@ -1155,6 +1155,63 @@ def task_comments_delete(task_id: int, comment_id: int, user=Depends(require_use
     return {"ok": True}
 
 
+@app.get("/api/events/{event_id}/comments")
+def event_comments_list(event_id: int, user=Depends(require_user)):
+    with connection() as c:
+        event = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (event_id, user)).fetchone()
+        if not event:
+            raise HTTPException(404, "Event not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT * FROM event_comments WHERE event_id=? AND user_id=? ORDER BY created_at", (event_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/events/{event_id}/comments")
+def event_comments_create(event_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        event = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (event_id, user)).fetchone()
+        if not event:
+            raise HTTPException(404, "Event not found")
+        cur = c.execute("INSERT INTO event_comments(user_id,event_id,body,created_at) VALUES(?,?,?,?)", (user, event_id, body, now()))
+        item = row_dict(c.execute("SELECT * FROM event_comments WHERE id=?", (cur.lastrowid,)).fetchone())
+    audit(user, "create", "event_comment", item["id"], {"event_id": event_id})
+    return item
+
+
+@app.patch("/api/events/{event_id}/comments/{comment_id}")
+def event_comments_update(event_id: int, comment_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        existing = c.execute("SELECT id FROM event_comments WHERE id=? AND event_id=? AND user_id=?", (comment_id, event_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("UPDATE event_comments SET body=?, edited_at=? WHERE id=? AND user_id=?", (body, now(), comment_id, user))
+        item = row_dict(c.execute("SELECT * FROM event_comments WHERE id=?", (comment_id,)).fetchone())
+    audit(user, "update", "event_comment", comment_id, {"event_id": event_id})
+    return item
+
+
+@app.delete("/api/events/{event_id}/comments/{comment_id}")
+def event_comments_delete(event_id: int, comment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT id FROM event_comments WHERE id=? AND event_id=? AND user_id=?", (comment_id, event_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("DELETE FROM event_comments WHERE id=? AND user_id=?", (comment_id, user))
+    audit(user, "delete", "event_comment", comment_id, {"event_id": event_id})
+    return {"ok": True}
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/skip-recurrence")
 def skip_todo_recurrence(item_id: int, user=Depends(require_user)):
     with connection() as c:

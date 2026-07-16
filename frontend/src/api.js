@@ -89,4 +89,8 @@ export const api = {
   addTaskComment: (id,body) => request(`/tasks/${id}/comments`,json('POST',{body})),
   updateTaskComment: (id,commentId,body) => request(`/tasks/${id}/comments/${commentId}`,json('PATCH',{body})),
   deleteTaskComment: (id,commentId) => request(`/tasks/${id}/comments/${commentId}`,{method:'DELETE'}),
+  eventComments: id => request(`/events/${id}/comments`),
+  addEventComment: (id,body) => request(`/events/${id}/comments`,json('POST',{body})),
+  updateEventComment: (id,commentId,body) => request(`/events/${id}/comments/${commentId}`,json('PATCH',{body})),
+  deleteEventComment: (id,commentId) => request(`/events/${id}/comments/${commentId}`,{method:'DELETE'}),
 }

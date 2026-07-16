@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, CheckSquare, ChevronLeft, ChevronRight, Copy, Download, ExternalLink, Flag, MapPin, Plus, Search, Star, Upload } from 'lucide-react'
 import Header from '../components/Header'
 import Modal from '../components/Modal'
@@ -51,6 +51,11 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [templates, setTemplates] = useState(() => loadEventTemplates())
   const [prefill, setPrefill] = useState(null)
   const [prefillKey, setPrefillKey] = useState(0)
+  const [comments, setComments] = useState([])
+  const [commentText, setCommentText] = useState('')
+  const [commentError, setCommentError] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingCommentText, setEditingCommentText] = useState('')
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
   const applyTemplate = id => {
@@ -83,6 +88,48 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setLinkLabelText('')
   }
   const removeLink = id => setLinks(links.filter(item => item.id !== id))
+  useEffect(() => {
+    setComments([])
+    setCommentText('')
+    setCommentError('')
+    if (!event?.id) return
+    let cancelled = false
+    api.eventComments(event.id).then(res => { if (!cancelled) setComments(res.items || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [event?.id])
+  const addComment = async () => {
+    const body = commentText.trim()
+    if (!body) return
+    setCommentError('')
+    try {
+      const comment = await api.addEventComment(event.id, body)
+      setComments([...comments, comment])
+      setCommentText('')
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
+  const removeComment = async id => {
+    try {
+      await api.deleteEventComment(event.id, id)
+      setComments(comments.filter(c => c.id !== id))
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
+  const beginEditComment = item => { setEditingCommentId(item.id); setEditingCommentText(item.body) }
+  const saveEditComment = async id => {
+    const body = editingCommentText.trim()
+    setEditingCommentId(null)
+    const original = comments.find(c => c.id === id)
+    if (!body || !original || body === original.body) return
+    try {
+      const updated = await api.updateEventComment(event.id, id, body)
+      setComments(comments.map(c => c.id === id ? updated : c))
+    } catch (e) {
+      setCommentError(e.message)
+    }
+  }
   const recommendTags = async () => {
     const data = new FormData(formRef.current)
     setSaving(true)
@@ -140,6 +187,16 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       </div>)}
       <div className="checklist-editor-add"><input type="url" value={linkUrlText} placeholder="https://..." onChange={e => setLinkUrlText(e.target.value)}/><input type="text" value={linkLabelText} placeholder="이름 (선택)" onChange={e => setLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLink}>추가</button></div>
     </div>
+    {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
+      {comments.map(item => <div key={item.id} className="checklist-editor-item">
+        {editingCommentId === item.id
+          ? <input type="text" className="inline-edit" autoFocus value={editingCommentText} onChange={e => setEditingCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditComment(item.id) } if (e.key === 'Escape') setEditingCommentId(null) }} onBlur={() => saveEditComment(item.id)}/>
+          : <span onClick={() => beginEditComment(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
+        <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+      {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
+    </div> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
     {overlapping.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 시간대에 이미 일정이 있습니다: {overlapping.map(e => e.title).join(', ')}</p> : null}

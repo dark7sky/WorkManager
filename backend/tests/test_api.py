@@ -370,6 +370,38 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_comments_are_user_scoped_and_persisted(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        event = a.post("/api/events", json={"title": "event with comments", "start_at": "2026-08-01T09:00:00", "end_at": "2026-08-01T10:00:00"}).json()
+        empty = a.get(f"/api/events/{event['id']}/comments")
+        self.assertEqual(empty.status_code, 200, empty.text)
+        self.assertEqual(empty.json()["items"], [])
+        self.assertEqual(b.get(f"/api/events/{event['id']}/comments").status_code, 404)
+        created = a.post(f"/api/events/{event['id']}/comments", json={"body": "  회의 준비물 확인.  "})
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertEqual(created.json()["body"], "회의 준비물 확인.")
+        self.assertEqual(b.post(f"/api/events/{event['id']}/comments", json={"body": "몰래"}).status_code, 404)
+        blank = a.post(f"/api/events/{event['id']}/comments", json={"body": "   "})
+        self.assertEqual(blank.status_code, 422)
+        listed = a.get(f"/api/events/{event['id']}/comments")
+        self.assertEqual(len(listed.json()["items"]), 1)
+        comment_id = created.json()["id"]
+        self.assertEqual(b.patch(f"/api/events/{event['id']}/comments/{comment_id}", json={"body": "몰래 수정"}).status_code, 404)
+        edited = a.patch(f"/api/events/{event['id']}/comments/{comment_id}", json={"body": "  수정된 내용입니다.  "})
+        self.assertEqual(edited.status_code, 200, edited.text)
+        self.assertEqual(edited.json()["body"], "수정된 내용입니다.")
+        self.assertIsNotNone(edited.json()["edited_at"])
+        blank_edit = a.patch(f"/api/events/{event['id']}/comments/{comment_id}", json={"body": "   "})
+        self.assertEqual(blank_edit.status_code, 422)
+        self.assertEqual(b.delete(f"/api/events/{event['id']}/comments/{comment_id}").status_code, 404)
+        deleted = a.delete(f"/api/events/{event['id']}/comments/{comment_id}")
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+        self.assertEqual(a.get(f"/api/events/{event['id']}/comments").json()["items"], [])
+        logs = a.get("/api/audit-logs?limit=500").json()["items"]
+        self.assertTrue(any(x["entity_type"] == "event_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_feature_requests_are_user_scoped_and_status_managed(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         created = a.post("/api/feature-requests", json={"content": "  칸반 보드가 필요합니다.  ", "source": "customer"})
