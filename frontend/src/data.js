@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-google-calendar-last-sync',
+    timestamp: '2026-07-16T19:15:18+09:00',
+    description: 'Google 캘린더 연동 카드에는 동기화 버튼과 그때그때 사라지는 토스트만 있어, 마지막으로 언제 정상 동기화됐는지 나중에 확인할 방법이 없었습니다. 서버가 이미 저장하던 캘린더별 동기화 시각(google_sync_state.updated_at)을 /api/google/status 응답에 포함시키고, 설정 화면의 Google 캘린더 카드에 "마지막 동기화: …" 문구로 표시했습니다(backend/app/google_calendar.py의 last_sync_at, backend/app/main.py의 google_status, frontend/src/screens/Settings.jsx).',
+  },
+  {
     id: '2026-07-16-tag-manager-goto-tasks',
     timestamp: '2026-07-16T19:10:51+09:00',
     description: '설정 화면의 태그 관리 목록은 이름 변경/제거만 가능하고, 특정 태그가 달린 업무를 보려면 업무 화면으로 이동해 직접 태그 필터를 다시 선택해야 했습니다. 각 태그 칩에 바로가기 버튼을 추가해, 클릭 한 번으로 업무 화면이 해당 태그로 필터링된 상태(전체 상태 포함)로 이동하도록 했습니다(frontend/src/components/TagManager.jsx, App.jsx의 taskTagFocus, screens/Tasks.jsx의 focusTag prop).',

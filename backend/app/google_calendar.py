@@ -132,6 +132,14 @@ def selected_calendar(user_id):
     return row["value"] if row else None
 
 
+def last_sync_at(user_id, calendar_id):
+    if not calendar_id:
+        return None
+    with connection() as c:
+        row = c.execute("SELECT updated_at FROM google_sync_state WHERE user_id=? AND calendar_id=?", (user_id, calendar_id)).fetchone()
+    return row["updated_at"] if row else None
+
+
 def select_calendar(user_id, calendar_id, policy="keep"):
     """Select destination for *new* events. Existing mappings stay on their calendar.
 

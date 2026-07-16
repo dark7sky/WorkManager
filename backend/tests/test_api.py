@@ -1143,6 +1143,17 @@ class ApiTests(unittest.TestCase):
         second_path = "/" + second["feed_url"].split("/", 3)[3]
         self.assertEqual(TestClient(self.app).get(second_path).status_code, 404)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value="cal-1")
+    @patch("app.main.google_calendar.token_status", return_value={"connected": True})
+    def test_google_status_reports_last_sync_at(self, *_):
+        from app.db import connection
+        a = self.client(self.token_a)
+        self.assertIsNone(a.get("/api/google/status").json()["last_sync_at"])
+        with connection() as c:
+            c.execute("INSERT INTO google_sync_state(user_id,calendar_id,sync_token,updated_at) VALUES(?,?,?,?)",
+                      ("sub-a", "cal-1", "token-x", "2026-07-16T12:00:00+00:00"))
+        self.assertEqual(a.get("/api/google/status").json()["last_sync_at"], "2026-07-16T12:00:00+00:00")
+
 
 if __name__ == "__main__":
     unittest.main()

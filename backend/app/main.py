@@ -1236,7 +1236,9 @@ def purge_trash(older_than_days: int = 30, user=Depends(require_user)):
 
 @app.get("/api/google/status")
 def google_status(user=Depends(require_user)):
-    return {**google_calendar.token_status(user), "selected_calendar_id": google_calendar.selected_calendar(user)}
+    calendar_id = google_calendar.selected_calendar(user)
+    return {**google_calendar.token_status(user), "selected_calendar_id": calendar_id,
+            "last_sync_at": google_calendar.last_sync_at(user, calendar_id)}
 
 
 @app.get("/api/google/calendars")
