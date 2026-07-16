@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-year-view',
+    timestamp: '2026-07-17T06:12:00+09:00',
+    description: '캘린더 화면은 월간/주간 보기만 지원해, 올해 남은 일정이나 특정 달의 위치를 확인하려면 매번 월을 하나씩 넘겨야 했습니다. "년" 보기를 추가해 12개월을 한 화면에 미니 달력으로 보여주고, 일정이 있는 날짜에 표시를 남기며, 달을 클릭하면 해당 월의 월간 보기로 바로 이동합니다 (`frontend/src/calendarYear.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-17-event-form-inline-validation',
     timestamp: '2026-07-17T06:05:00+09:00',
     description: '업무(Task) 편집 폼은 제목/완료 예정일 오류를 해당 입력 칸에 빨간 테두리와 문구로 바로 보여주는 인라인 검증이 있었지만, 캘린더 일정 폼은 "종료 시간이 시작 시간보다 빠름" 같은 같은 종류의 오류를 화면 하단 배너 문구 하나로만 보여줘 어느 입력칸이 문제인지 알기 어려웠습니다. `formValidation.js`에 `validateEventForm`을 추가하고, 업무 폼과 같은 패턴으로 일정 제목/종료 시간 입력에 인라인 오류 표시를 적용했습니다 (`frontend/src/formValidation.js`, `frontend/src/screens/Calendar.jsx`).',
