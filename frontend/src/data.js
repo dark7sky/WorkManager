@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-audit-log-comment-attachment-labels',
+    timestamp: '2026-07-17T05:56:00+09:00',
+    description: '감사 로그 화면은 업무·일정·Todo·업무 기록과 일부 시스템 이벤트만 한글 라벨로 보여주고, 최근 추가된 댓글/첨부파일 관련 감사 기록(예: task_comment, event_attachment, session, settings 등)은 원본 영문 식별자 그대로 노출되어 "대상" 필터와 목록에서 읽기 어려웠습니다. `frontend/src/screens/AuditLog.jsx`의 `actionLabels`/`entityLabels`에 댓글·첨부파일 4종 및 세션/설정/기능요청/태그/백업 항목과 `import`/`rename` 동작 라벨을 추가했습니다.',
+  },
+  {
     id: '2026-07-17-comment-count-badges-todo-log-event',
     timestamp: '2026-07-17T05:52:00+09:00',
     description: '업무 목록에는 댓글 개수 배지가 있었지만 할 일·업무 기록·일정 목록에는 같은 기능이 없어, 세 항목 모두 댓글이 달려 있어도 수정 폼을 열어보기 전까지는 알 수 없었습니다. 목록 API(GET /api/todos, /api/work_logs, /api/events)가 업무와 동일한 방식으로 댓글 개수를 함께 내려주도록 확장하고(backend/app/main.py의 list_endpoint), 오늘 화면의 할 일·업무 기록 행과 캘린더 화면의 일정 행에 "댓글 N개" 배지를 추가했습니다(frontend/src/screens/Today.jsx, frontend/src/screens/Calendar.jsx). 테스트는 backend/tests/test_api.py의 test_todo_and_work_log_and_event_list_include_comment_count.',
