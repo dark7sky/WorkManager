@@ -88,6 +88,8 @@ export const taskDependencyOptions = (tasks, currentTaskId) => {
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
 }
 
+export const matchesDependencyFilter = (option, query) => !query.trim() || option.label.toLowerCase().includes(query.trim().toLowerCase())
+
 export const subtaskCompletionSummary = (tasks, taskId) => {
   const children = tasks.filter(task => task.parent_id === taskId)
   if (!children.length) return null

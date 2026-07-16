@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-16 (19:10 KST)
+Last updated: 2026-07-16 (19:24 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -17,6 +17,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Mobile form polish (42): the shared `.form-actions` button row (task/event forms, delete confirm dialogs) let flexbox shrink buttons below their content width on narrow viewports, wrapping Korean labels mid-word (e.g. "휴지통으 로 이동"). Verified with a 390px headless-browser screenshot of the task edit form; fixed by wrapping the row and giving buttons a fixed content-based size (2026-07-12).
 - [x] Skeleton loading (41): Tasks/Gantt list shows shimmering skeleton rows (reusing the existing `.skeleton` pattern from Settings) instead of the empty-state message while `dataLoading` is true and no tasks have arrived yet.
 - [x] Task templates (44): save the current new-task form as a named template (title/priority/recurrence/tags/duration) and prefill a new task from a saved template; localStorage-only (`frontend/src/taskTemplates.js`).
+- [x] Dependency picker search (2026-07-16): the "선행 업무" checkbox list in the task edit form had no way to filter a long task list — added a search box (shown once there are more than 5 options) that filters by title while keeping already-checked-but-filtered-out items in the DOM so their state survives form submission (`frontend/src/taskHierarchy.js`'s `matchesDependencyFilter`, `frontend/src/components/TaskForm.jsx`).
 
 ## Real-Use Readiness (2026-07-10)
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
-import { taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
+import { matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import TagsInput from './TagsInput'
 
@@ -33,6 +33,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const today = new Date().toLocaleDateString('en-CA')
   const parentOptions = taskParentOptions(tasks, task?.id)
   const dependencyOptions = taskDependencyOptions(tasks, task?.id)
+  const [dependencyFilter, setDependencyFilter] = useState('')
 
   const [prefillKey, setPrefillKey] = useState(0)
   const applyTemplate = id => {
@@ -209,7 +210,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select></label>
     {recurrenceRule ? <label key={`recurrence-end-${prefillKey}`}>반복 종료일<input name="recurrence_end_date" type="date" defaultValue={task?.recurrence_end_date ?? ''}/></label> : null}
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
-    <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item"><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
+    <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length > 5 ? <input className="dependency-picker-filter" type="text" value={dependencyFilter} onChange={e => setDependencyFilter(e.target.value)} placeholder="업무 검색" aria-label="선행 업무 검색"/> : null}{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item" style={matchesDependencyFilter(option, dependencyFilter) ? undefined : { display: 'none' }}><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
       {checklist.map((item, index) => <div key={item.id} className="checklist-editor-item">
         <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>

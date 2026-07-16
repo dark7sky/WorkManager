@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { DEFAULT_TASK_SORT, loadTaskSort, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+import { DEFAULT_TASK_SORT, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -82,6 +82,19 @@ test('taskDependencyOptions includes all tasks when creating a new task', () => 
     { id: 2, title: 'Bravo', dependency_ids: [1] },
   ]
   assert.deepEqual(taskDependencyOptions(linked).map(option => option.id), [1, 2])
+})
+
+test('matchesDependencyFilter matches case-insensitively on the option label', () => {
+  const option = { id: 1, label: '-- 분기 업무 보고서 작성' }
+  assert.equal(matchesDependencyFilter(option, '보고서'), true)
+  assert.equal(matchesDependencyFilter(option, 'BOGOSEO'), false)
+  assert.equal(matchesDependencyFilter(option, '없는업무'), false)
+})
+
+test('matchesDependencyFilter matches everything when the query is blank', () => {
+  const option = { id: 1, label: '분기 업무 보고서 작성' }
+  assert.equal(matchesDependencyFilter(option, ''), true)
+  assert.equal(matchesDependencyFilter(option, '   '), true)
 })
 
 test('orderTasksHierarchically sorts sibling tasks by start date instead of title', () => {

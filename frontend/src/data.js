@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-task-dependency-search',
+    timestamp: '2026-07-16T19:24:13+09:00',
+    description: '업무 수정 화면의 "선행 업무" 선택 목록은 높이 160px짜리 고정 스크롤 상자라, 업무 수가 많아지면 원하는 선행 업무를 찾으려면 계속 스크롤해야 했습니다. 선택지가 6개 이상일 때 검색창을 추가해 제목으로 바로 필터링할 수 있게 했고, 필터로 가려진 항목도 체크 상태는 그대로 유지되도록(DOM에서 제거하지 않고 숨김 처리) 했습니다(frontend/src/taskHierarchy.js의 matchesDependencyFilter, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-16-worklog-timer-time-fix',
     timestamp: '2026-07-16T19:22:00+09:00',
     description: '오늘 한 일 화면에서 타이머로 기록을 남기면 소요 시간(분)만 채워지고 시각 입력란은 비어 있어, 타이머로 언제 작업했는지가 기록에서 사라지는 문제가 있었습니다. 타이머 중지 시 시작 시각을 "시각" 입력란에도 자동으로 채우도록 고쳤습니다(frontend/src/workLogTimer.js의 startTimeString, frontend/src/screens/Today.jsx의 stopTimer).',
