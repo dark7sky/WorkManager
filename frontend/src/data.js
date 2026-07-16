@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-log-link-done-tasks',
+    timestamp: '2026-07-16T13:07:17+09:00',
+    description: '오늘 화면에서 "한 일" 기록을 업무와 연결할 때 완료 처리된 업무는 선택 목록에서 아예 빠져 있어 지난 완료 업무를 나중에 연결할 수 없었습니다. 연결 업무 선택창(신규 기록/기존 기록 수정)에서 완료된 업무를 "완료된 업무" 그룹으로 목록 하단에 추가해 선택할 수 있게 했습니다(frontend/src/screens/Today.jsx의 linkableDoneTasks).',
+  },
+  {
     id: '2026-07-15-performance-period-goal',
     timestamp: '2026-07-15T02:26:49+09:00',
     description: '성과 화면은 완료 업무/기록 시간 등의 실적만 보여줄 뿐, 목표 대비 진행 상황을 확인할 방법이 없었습니다. 성과 화면에 완료 업무 수와 기록 시간(분) 목표를 입력하는 "기간 목표" 폼을 추가했고(localStorage 저장, frontend/src/performanceGoals 로직은 performanceReport.js의 loadPerformanceGoal/savePerformanceGoal/goalProgress), 선택한 조회 기간의 실적을 목표와 비교한 진행률 막대를 표시합니다(frontend/src/screens/Performance.jsx, 테스트는 frontend/src/performanceReport.test.js).',

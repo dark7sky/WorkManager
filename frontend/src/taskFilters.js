@@ -84,6 +84,17 @@ export const reminderDigestTasks = (tasks, todayIso, scope = 'today') => {
   return tasks.filter(task => task.status !== 'done' && task.due_date === todayIso)
 }
 
+export const BOARD_STATUSES = ['todo', 'doing', 'done']
+
+export const groupTasksByStatus = tasks => {
+  const groups = { todo: [], doing: [], done: [] }
+  for (const task of tasks) {
+    const status = task.status === 'in_progress' ? 'doing' : task.status
+    ;(groups[status] || groups.todo).push(task)
+  }
+  return groups
+}
+
 export const summarizeBlockedTasks = tasks => {
   const blocked = tasks
     .filter(task => taskBlockingDependencies(task, tasks).length)

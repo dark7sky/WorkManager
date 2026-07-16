@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { DEFAULT_TASK_FILTERS, filterTasks, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
+import { DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -143,6 +143,13 @@ test('withAddedTag appends a new tag to an existing list', () => {
 test('withAddedTag skips duplicates case-insensitively and trims whitespace', () => {
   const tags = ['기획', 'Urgent']
   assert.equal(withAddedTag(tags, 'urgent '), tags)
+})
+
+test('groupTasksByStatus buckets tasks into todo/doing/done, folding legacy in_progress into doing', () => {
+  const groups = groupTasksByStatus(tasks)
+  assert.deepEqual(groups.todo.map(t => t.id), [1, 4])
+  assert.deepEqual(groups.doing.map(t => t.id), [2])
+  assert.deepEqual(groups.done.map(t => t.id), [3])
 })
 
 test('withAddedTag ignores a blank tag and handles a missing tag list', () => {
