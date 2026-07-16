@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-worklog-timer-time-fix',
+    timestamp: '2026-07-16T19:22:00+09:00',
+    description: '오늘 한 일 화면에서 타이머로 기록을 남기면 소요 시간(분)만 채워지고 시각 입력란은 비어 있어, 타이머로 언제 작업했는지가 기록에서 사라지는 문제가 있었습니다. 타이머 중지 시 시작 시각을 "시각" 입력란에도 자동으로 채우도록 고쳤습니다(frontend/src/workLogTimer.js의 startTimeString, frontend/src/screens/Today.jsx의 stopTimer).',
+  },
+  {
     id: '2026-07-16-google-calendar-last-sync',
     timestamp: '2026-07-16T19:15:18+09:00',
     description: 'Google 캘린더 연동 카드에는 동기화 버튼과 그때그때 사라지는 토스트만 있어, 마지막으로 언제 정상 동기화됐는지 나중에 확인할 방법이 없었습니다. 서버가 이미 저장하던 캘린더별 동기화 시각(google_sync_state.updated_at)을 /api/google/status 응답에 포함시키고, 설정 화면의 Google 캘린더 카드에 "마지막 동기화: …" 문구로 표시했습니다(backend/app/google_calendar.py의 last_sync_at, backend/app/main.py의 google_status, frontend/src/screens/Settings.jsx).',

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startWorkLogTimer } from './workLogTimer.js'
+import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from './workLogTimer.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -49,4 +49,15 @@ test('formatElapsed renders HH:MM:SS', () => {
   const start = '2026-07-13T10:00:00+09:00'
   assert.equal(formatElapsed(start, new Date('2026-07-13T10:00:00+09:00')), '00:00:00')
   assert.equal(formatElapsed(start, new Date('2026-07-13T11:02:09+09:00')), '01:02:09')
+})
+
+test('startTimeString renders local HH:MM for the timer start', () => {
+  const start = new Date()
+  start.setHours(9, 5, 30, 0)
+  const expected = `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`
+  assert.equal(startTimeString(start.toISOString()), expected)
+})
+
+test('startTimeString returns empty string for an invalid start time', () => {
+  assert.equal(startTimeString('not-a-date'), '')
 })

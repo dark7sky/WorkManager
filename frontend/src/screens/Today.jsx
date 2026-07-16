@@ -3,7 +3,7 @@ import { ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle,
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
-import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startWorkLogTimer } from '../workLogTimer'
+import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
@@ -108,6 +108,7 @@ export default function Today(props) {
   const stopTimer = () => {
     if (!timer) return
     setLogMinutes(String(elapsedMinutes(timer.startedAt, new Date())))
+    setLogTime(startTimeString(timer.startedAt))
     if (timer.taskId) setLogTaskId(String(timer.taskId))
     clearWorkLogTimer()
     setTimer(null)

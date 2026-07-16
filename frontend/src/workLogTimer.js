@@ -26,6 +26,14 @@ export const elapsedMinutes = (startedAt, now = new Date()) => {
   return Math.max(0, Math.round(diffMs / 60000))
 }
 
+export const startTimeString = (startedAt) => {
+  const start = new Date(startedAt)
+  if (Number.isNaN(start.getTime())) return ''
+  const h = String(start.getHours()).padStart(2, '0')
+  const m = String(start.getMinutes()).padStart(2, '0')
+  return `${h}:${m}`
+}
+
 export const formatElapsed = (startedAt, now = new Date()) => {
   const start = new Date(startedAt)
   if (Number.isNaN(start.getTime())) return '00:00:00'
