@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { eventsDueForAlert, DEFAULT_EVENT_ALERT_LEAD_MINUTES } from './eventAlerts.js'
+import { eventsDueForAlert, DEFAULT_EVENT_ALERT_LEAD_MINUTES, isWithinQuietHours } from './eventAlerts.js'
 
 const at = minutesFromNow => new Date(Date.UTC(2026, 0, 1, 0, minutesFromNow)).toISOString()
 const now = new Date(Date.UTC(2026, 0, 1, 0, 0)).getTime()
@@ -28,4 +28,22 @@ test('eventsDueForAlert respects a wider configured lead time', () => {
   const events = [{ id: 1, start_at: at(25) }]
   const due = eventsDueForAlert(events, now, 30)
   assert.deepEqual(due.map(e => e.id), [1])
+})
+
+test('isWithinQuietHours is always false when disabled', () => {
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 23, 0), { enabled: false, start: '22:00', end: '08:00' }), false)
+})
+
+test('isWithinQuietHours handles an overnight window', () => {
+  const quiet = { enabled: true, start: '22:00', end: '08:00' }
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 23, 0), quiet), true)
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 2, 3, 0), quiet), true)
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 12, 0), quiet), false)
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 8, 0), quiet), false)
+})
+
+test('isWithinQuietHours handles a same-day window', () => {
+  const quiet = { enabled: true, start: '13:00', end: '14:00' }
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 13, 30), quiet), true)
+  assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 15, 0), quiet), false)
 })

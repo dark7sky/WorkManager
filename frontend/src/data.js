@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-quiet-hours',
+    timestamp: '2026-07-16T19:42:43+09:00',
+    description: '기기 알림(오늘 업무 다이제스트, 일정·할 일 임박 알림)이 시간대와 무관하게 항상 울려 앱을 켜 둔 채 자면 밤중에도 알림이 울릴 수 있었습니다. 설정 화면에 "무음 시간대" 토글과 시작/종료 시각을 추가해, 지정한 시간대에는 알림을 보내지 않도록 했습니다(frontend/src/eventAlerts.js의 isWithinQuietHours, frontend/src/screens/Settings.jsx, frontend/src/App.jsx).',
+  },
+  {
     id: '2026-07-16-audit-log-date-range',
     timestamp: '2026-07-16T19:37:05+09:00',
     description: '감사 로그 화면은 최신 200건만 보여줄 뿐 기간을 좁혀볼 방법이 없어, 보존 기간(180일) 동안 쌓인 오래된 변경 이력을 확인하기 어려웠습니다. `/api/audit-logs`에 `start`/`end` 날짜 필터를 추가하고, 감사 로그 화면 툴바에 기간 선택 입력을 붙여 선택한 기간의 변경 이력만 조회·CSV로 내보낼 수 있도록 했습니다(backend/app/main.py의 audit_log_list, frontend/src/api.js, frontend/src/screens/AuditLog.jsx).',
