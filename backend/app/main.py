@@ -1286,6 +1286,69 @@ def event_attachments_delete(event_id: int, attachment_id: int, user=Depends(req
     return {"ok": True}
 
 
+@app.get("/api/todos/{todo_id}/attachments")
+def todo_attachments_list(todo_id: int, user=Depends(require_user)):
+    with connection() as c:
+        todo = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (todo_id, user)).fetchone()
+        if not todo:
+            raise HTTPException(404, "Todo not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT id,user_id,todo_id,filename,content_type,size_bytes,created_at FROM todo_attachments WHERE todo_id=? AND user_id=? ORDER BY created_at",
+            (todo_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/todos/{todo_id}/attachments")
+async def todo_attachments_create(todo_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    data = await file.read()
+    if not data:
+        raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
+    if len(data) > MAX_ATTACHMENT_BYTES:
+        raise HTTPException(422, "파일 크기는 5MB 이하만 첨부할 수 있습니다.")
+    with connection() as c:
+        todo = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (todo_id, user)).fetchone()
+        if not todo:
+            raise HTTPException(404, "Todo not found")
+        count = c.execute("SELECT COUNT(*) n FROM todo_attachments WHERE todo_id=? AND user_id=?", (todo_id, user)).fetchone()["n"]
+        if count >= MAX_ATTACHMENTS_PER_TASK:
+            raise HTTPException(422, f"첨부파일은 최대 {MAX_ATTACHMENTS_PER_TASK}개까지 등록할 수 있습니다.")
+        filename = (file.filename or "attachment")[:255]
+        content_type = file.content_type or "application/octet-stream"
+        cur = c.execute(
+            "INSERT INTO todo_attachments(user_id,todo_id,filename,content_type,size_bytes,data_base64,created_at) VALUES(?,?,?,?,?,?,?)",
+            (user, todo_id, filename, content_type, len(data), base64.b64encode(data).decode("ascii"), now()))
+        item = row_dict(c.execute(
+            "SELECT id,user_id,todo_id,filename,content_type,size_bytes,created_at FROM todo_attachments WHERE id=?",
+            (cur.lastrowid,)).fetchone())
+    audit(user, "create", "todo_attachment", item["id"], {"todo_id": todo_id, "filename": filename})
+    return item
+
+
+@app.get("/api/todos/{todo_id}/attachments/{attachment_id}/download")
+def todo_attachments_download(todo_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        row = c.execute(
+            "SELECT * FROM todo_attachments WHERE id=? AND todo_id=? AND user_id=?", (attachment_id, todo_id, user)).fetchone()
+        if not row:
+            raise HTTPException(404, "Attachment not found")
+        item = row_dict(row)
+    data = base64.b64decode(item["data_base64"])
+    return Response(content=data, media_type=item["content_type"], headers={
+        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+
+
+@app.delete("/api/todos/{todo_id}/attachments/{attachment_id}")
+def todo_attachments_delete(todo_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute(
+            "SELECT id FROM todo_attachments WHERE id=? AND todo_id=? AND user_id=?", (attachment_id, todo_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Attachment not found")
+        c.execute("DELETE FROM todo_attachments WHERE id=? AND user_id=?", (attachment_id, user))
+    audit(user, "delete", "todo_attachment", attachment_id, {"todo_id": todo_id})
+    return {"ok": True}
+
+
 @app.get("/api/events/{event_id}/comments")
 def event_comments_list(event_id: int, user=Depends(require_user)):
     with connection() as c:

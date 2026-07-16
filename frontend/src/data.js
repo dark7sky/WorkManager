@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-attachments',
+    timestamp: '2026-07-17T05:35:00+09:00',
+    description: '업무·일정에는 파일 첨부 기능이 있었지만 할 일에는 없어 관련 문서를 링크로만 남길 수 있었습니다. 할 일에도 파일 첨부(업로드/다운로드/삭제, 5MB·20개 제한)를 추가했습니다. `backend/app/main.py`의 `/api/todos/{id}/attachments` 엔드포인트, `todo_attachments` 테이블(`backend/app/db.py`), `frontend/src/api.js`의 첨부 헬퍼, 오늘 화면 할 일 수정 폼의 첨부파일 섹션. 테스트는 `backend/tests/test_api.py`의 `test_todo_attachments_upload_download_delete_and_size_limit`.',
+  },
+  {
     id: '2026-07-17-approval-nav-badge',
     timestamp: '2026-07-17T05:31:00+09:00',
     description: '완료 업무 승인 대기·일정 변경 승인 대기 항목은 업무 화면을 직접 열어야만 보였고, 다른 화면에 있을 때는 존재조차 알 수 없었습니다. 사이드바/하단 메뉴의 "업무" 항목 배지에 지연 업무 수와 함께 승인 대기 건수를 합산 표시하도록 했습니다(지연 업무가 없으면 배지 라벨이 "승인 대기"로 바뀝니다). `frontend/src/taskFilters.js`의 `pendingApprovalCount`, `frontend/src/App.jsx`의 `navBadges` 계산, 테스트는 `frontend/src/taskFilters.test.js`.',
