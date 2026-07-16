@@ -11,7 +11,7 @@ import { clearNotificationHistory, loadNotificationHistory } from '../notificati
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
 
-export default function Settings({ theme, setTheme, notify, onDataChanged, canInstall, onInstall, notificationPermission, onEnableNotifications, onOpenAudit }) {
+export default function Settings({ theme, setTheme, notify, onDataChanged, canInstall, onInstall, notificationPermission, onEnableNotifications, onOpenAudit, onNavigateToTag }) {
   const [data, setData] = useState(null)
   const [calendars, setCalendars] = useState([])
   const [busy, setBusy] = useState('')
@@ -363,7 +363,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         {aiTestResult ? <p className={`ai-test-result ${aiTestResult.ok ? 'ok' : 'error'}`}>{aiTestResult.ok ? <Check /> : null} {aiTestResult.message}</p> : null}
         {aiConfig ? <dl className="diagnostics"><div><dt>제공자</dt><dd>{aiConfig.binding?.provider_name || aiConfig.provider_name || aiConfig.provider}</dd></div><div><dt>모델</dt><dd>{aiConfig.binding?.model || aiConfig.model || 'API 키 필요'}</dd></div><div><dt>매칭</dt><dd>{aiConfig.binding?.label || aiConfig.binding_label || aiConfig.message || '정보 없음'}</dd></div><div><dt>상태</dt><dd>{aiConfig.message || '정보 없음'}</dd></div><div><dt>설정 출처</dt><dd>{aiConfig.source_label || aiConfig.source || '알 수 없음'}</dd></div><div><dt>저장된 키</dt><dd>{aiConfig.binding?.api_key_set || aiConfig.saved_api_key ? '있음' : '없음'}</dd></div></dl> : null}
       </section>
-      <TagManager notify={notify} onDataChanged={onDataChanged} />
+      <TagManager notify={notify} onDataChanged={onDataChanged} onTagClick={onNavigateToTag} />
       <TrashSection notify={notify} onDataChanged={onDataChanged} />
       {error ? <p className="inline-error">{error} <button onClick={load}>다시 시도</button></p> : null}
       <p className="muted app-version">WorkManager v{__APP_VERSION__}</p>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-tag-manager-goto-tasks',
+    timestamp: '2026-07-16T19:10:51+09:00',
+    description: '설정 화면의 태그 관리 목록은 이름 변경/제거만 가능하고, 특정 태그가 달린 업무를 보려면 업무 화면으로 이동해 직접 태그 필터를 다시 선택해야 했습니다. 각 태그 칩에 바로가기 버튼을 추가해, 클릭 한 번으로 업무 화면이 해당 태그로 필터링된 상태(전체 상태 포함)로 이동하도록 했습니다(frontend/src/components/TagManager.jsx, App.jsx의 taskTagFocus, screens/Tasks.jsx의 focusTag prop).',
+  },
+  {
     id: '2026-07-16-bulk-task-action-undo',
     timestamp: '2026-07-16T19:10:00+09:00',
     description: '업무 목록에서 여러 건을 선택해 일괄 완료 처리하거나 우선순위를 변경하면, 잘못 눌러도 되돌릴 방법이 없었습니다(휴지통에도 남지 않아 복구 불가). 일괄 삭제와 동일하게 "실행 취소" 토스트 버튼을 추가해, 완료 처리/우선순위 변경 전 값을 기억했다가 클릭 한 번으로 되돌릴 수 있도록 했습니다(frontend/src/App.jsx의 onBulkComplete/onBulkPriority, 기존 mutate()의 undo 콜백/Toast.jsx의 실행 취소 버튼 재사용).',

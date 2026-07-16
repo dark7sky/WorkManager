@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { BellRing, CalendarClock, CalendarRange, CheckCircle2, Clock, Copy, Download, ExternalLink, FileText, Flag, GitPullRequestArrow, History, Repeat, RotateCcw, Search, ShieldCheck, SkipForward, SlidersHorizontal, Star, Tag, Upload } from 'lucide-react'
 import Header from '../components/Header'
 import { TagChips,TagFilter } from '../components/TagsInput'
@@ -21,9 +21,10 @@ const scheduleApprovalLabels={none:'일정 검토 없음',pending:'일정 승인
 const iso=d=>d.toLocaleDateString('en-CA')
 const dayMs=86400000
 
-export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onApprove,onBulkComplete,onBulkDelete,onBulkAddTag,onBulkPostpone,onBulkPriority,onReschedule,onDuplicate,onSkipRecurrence,onImport,onViewHistory,onViewLogs,onStatusChange}){
+export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onApprove,onBulkComplete,onBulkDelete,onBulkAddTag,onBulkPostpone,onBulkPriority,onReschedule,onDuplicate,onSkipRecurrence,onImport,onViewHistory,onViewLogs,onStatusChange,focusTag}){
   const [query,setQuery]=useState(''),[status,setStatus]=useState('active'),[selectedTags,setSelectedTags]=useState([]),[priority,setPriority]=useState('all'),[sortBy,setSortByState]=useState(()=>loadTaskSort()),[draft,setDraft]=useState({}),[selected,setSelected]=useState(()=>new Set()),[bulkTag,setBulkTag]=useState(''),[bulkPostponeDays,setBulkPostponeDays]=useState(1),[bulkPriority,setBulkPriority]=useState('normal'),[view,setView]=useState('gantt'),[dragOverColumn,setDragOverColumn]=useState(null)
   const importInputRef=useRef(null)
+  useEffect(()=>{if(!focusTag)return;setSelectedTags([focusTag.tag]);setStatus('all')},[focusTag])
   const setSortBy=value=>{setSortByState(value);saveTaskSort(value)}
   const toggleSelected=id=>setSelected(s=>{const n=new Set(s);n.has(id)?n.delete(id):n.add(id);return n})
   const clearSelected=()=>setSelected(new Set())

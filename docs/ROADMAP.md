@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-16 (19:05 KST)
+Last updated: 2026-07-16 (19:10 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -10,7 +10,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Ctrl/⌘+K command palette: unified search over tasks/events/todos/logs plus screen navigation, on top of the existing AI capture.
 - [x] Weekly review preset (지난주 리뷰) on the Performance screen reusing summary + Markdown export.
 - [x] Event-start notifications 15 minutes ahead while the app is open.
-- [x] Tag management in Settings: usage counts, bulk rename/merge/remove across all four tables.
+- [x] Tag management in Settings: usage counts, bulk rename/merge/remove across all four tables; each tag chip now has a shortcut button that jumps to the Tasks screen pre-filtered by that tag (2026-07-16).
 - [x] Compose healthcheck for the api container; audit-log retention (180d default); scheduled backup container with verify (33/35/36, partly via the Codex loop).
 - [x] Server error visibility panel (37): Settings shows the last 5 unhandled server errors with a manual 새로고침 button to reload without a full page refresh.
 - [x] Gantt bar drag (39), calendar event drag (40, now covers both month and week views — 2026-07-12).

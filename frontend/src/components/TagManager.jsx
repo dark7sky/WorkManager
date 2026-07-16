@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { LoaderCircle, Pencil, Tags, Trash2 } from 'lucide-react'
+import { ExternalLink, LoaderCircle, Pencil, Tags, Trash2 } from 'lucide-react'
 import { api } from '../api'
 
-export default function TagManager({ notify, onDataChanged }) {
+export default function TagManager({ notify, onDataChanged, onTagClick }) {
   const [items, setItems] = useState(null)
   const [editing, setEditing] = useState(null)
   const [draft, setDraft] = useState('')
@@ -35,7 +35,10 @@ export default function TagManager({ notify, onDataChanged }) {
             <button type="button" className="secondary" disabled={busy} onClick={() => { if (confirm(`'${item.tag}' 태그를 모든 항목에서 제거할까요? (${item.total}건)`)) rename(item.tag, '') }}><Trash2 size={15} /> 제거</button>
             <button type="button" className="text-button" disabled={busy} onClick={() => setEditing(null)}>취소</button>
           </form>
-        : <button key={item.tag} type="button" className="tag-manager-chip" title={`업무 ${item.tables.tasks} · 일정 ${item.tables.events} · 할 일 ${item.tables.todos} · 기록 ${item.tables.work_logs}`} onClick={() => { setEditing(item.tag); setDraft(item.tag) }}>#{item.tag}<b>{item.total}</b><Pencil size={12} aria-hidden="true" /></button>)}
+        : <span key={item.tag} className="tag-manager-chip">
+            <button type="button" title={`업무 ${item.tables.tasks} · 일정 ${item.tables.events} · 할 일 ${item.tables.todos} · 기록 ${item.tables.work_logs}`} onClick={() => { setEditing(item.tag); setDraft(item.tag) }}>#{item.tag}<b>{item.total}</b><Pencil size={12} aria-hidden="true" /></button>
+            {onTagClick ? <button type="button" title="이 태그로 업무 화면 이동" onClick={() => onTagClick(item.tag)}><ExternalLink size={12} aria-hidden="true" /></button> : null}
+          </span>)}
     </div>}
   </section>
 }
