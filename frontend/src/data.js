@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-comment-thread',
+    timestamp: '2026-07-17T00:34:43+09:00',
+    description: '업무 기록(work log)에도 업무/일정/Todo와 동일한 댓글 스레드를 추가했습니다. 이전에는 업무 기록을 남긴 뒤에는 내용을 통째로 덮어쓰는 것 외에는 시간순으로 후속 메모를 남길 방법이 없었는데, 이제 오늘 화면에서 업무 기록을 수정 모드로 열면 댓글을 추가/수정/삭제할 수 있습니다(backend/app/db.py의 work_log_comments 테이블, backend/app/main.py의 /api/work_logs/{id}/comments 엔드포인트, frontend/src/screens/Today.jsx의 WorkLogComments).',
+  },
+  {
     id: '2026-07-17-todo-comment-thread',
     timestamp: '2026-07-17T00:30:45+09:00',
     description: '오늘 화면의 Todo에도 일정(이벤트)과 동일한 댓글 스레드를 추가했습니다. 이전에는 Todo에 남길 수 있는 텍스트가 단일 메모 필드뿐이라 진행 상황을 시간순으로 기록할 수 없었는데, 이제 Todo를 수정 모드로 열면 댓글을 추가/수정/삭제할 수 있습니다(backend/app/db.py의 todo_comments 테이블, backend/app/main.py의 /api/todos/{id}/comments 엔드포인트, frontend/src/screens/Today.jsx의 TodoComments).',

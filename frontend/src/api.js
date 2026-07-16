@@ -107,4 +107,8 @@ export const api = {
   addTodoComment: (id,body) => request(`/todos/${id}/comments`,json('POST',{body})),
   updateTodoComment: (id,commentId,body) => request(`/todos/${id}/comments/${commentId}`,json('PATCH',{body})),
   deleteTodoComment: (id,commentId) => request(`/todos/${id}/comments/${commentId}`,{method:'DELETE'}),
+  workLogComments: id => request(`/work_logs/${id}/comments`),
+  addWorkLogComment: (id,body) => request(`/work_logs/${id}/comments`,json('POST',{body})),
+  updateWorkLogComment: (id,commentId,body) => request(`/work_logs/${id}/comments/${commentId}`,json('PATCH',{body})),
+  deleteWorkLogComment: (id,commentId) => request(`/work_logs/${id}/comments/${commentId}`,{method:'DELETE'}),
 }

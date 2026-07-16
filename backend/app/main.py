@@ -1267,6 +1267,62 @@ def todo_comments_delete(todo_id: int, comment_id: int, user=Depends(require_use
     return {"ok": True}
 
 
+@app.get("/api/work_logs/{log_id}/comments")
+def work_log_comments_list(log_id: int, user=Depends(require_user)):
+    with connection() as c:
+        log = c.execute("SELECT id FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (log_id, user)).fetchone()
+        if not log:
+            raise HTTPException(404, "Work log not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT * FROM work_log_comments WHERE work_log_id=? AND user_id=? ORDER BY created_at", (log_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/work_logs/{log_id}/comments")
+def work_log_comments_create(log_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        log = c.execute("SELECT id FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (log_id, user)).fetchone()
+        if not log:
+            raise HTTPException(404, "Work log not found")
+        cur = c.execute("INSERT INTO work_log_comments(user_id,work_log_id,body,created_at) VALUES(?,?,?,?)", (user, log_id, body, now()))
+        item = row_dict(c.execute("SELECT * FROM work_log_comments WHERE id=?", (cur.lastrowid,)).fetchone())
+    audit(user, "create", "work_log_comment", item["id"], {"work_log_id": log_id})
+    return item
+
+
+@app.patch("/api/work_logs/{log_id}/comments/{comment_id}")
+def work_log_comments_update(log_id: int, comment_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        existing = c.execute("SELECT id FROM work_log_comments WHERE id=? AND work_log_id=? AND user_id=?", (comment_id, log_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("UPDATE work_log_comments SET body=?, edited_at=? WHERE id=? AND user_id=?", (body, now(), comment_id, user))
+        item = row_dict(c.execute("SELECT * FROM work_log_comments WHERE id=?", (comment_id,)).fetchone())
+    audit(user, "update", "work_log_comment", comment_id, {"work_log_id": log_id})
+    return item
+
+
+@app.delete("/api/work_logs/{log_id}/comments/{comment_id}")
+def work_log_comments_delete(log_id: int, comment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT id FROM work_log_comments WHERE id=? AND work_log_id=? AND user_id=?", (comment_id, log_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("DELETE FROM work_log_comments WHERE id=? AND user_id=?", (comment_id, user))
+    audit(user, "delete", "work_log_comment", comment_id, {"work_log_id": log_id})
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/skip-recurrence")
 def skip_todo_recurrence(item_id: int, user=Depends(require_user)):
     with connection() as c:
