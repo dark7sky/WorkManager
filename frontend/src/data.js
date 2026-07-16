@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-select-all',
+    timestamp: '2026-07-17T00:41:00+09:00',
+    description: '업무 관리(간트) 화면 일괄 작업이 항목을 하나씩 선택해야만 했습니다. 목록 헤더에 "전체 선택" 체크박스를 추가해 현재 필터에 표시된 업무를 한 번에 선택/해제할 수 있게 했습니다(frontend/src/taskFilters.js의 allIdsSelected/toggleSelectAllIds, frontend/src/screens/Tasks.jsx).',
+  },
+  {
     id: '2026-07-17-worklog-comment-thread',
     timestamp: '2026-07-17T00:34:43+09:00',
     description: '업무 기록(work log)에도 업무/일정/Todo와 동일한 댓글 스레드를 추가했습니다. 이전에는 업무 기록을 남긴 뒤에는 내용을 통째로 덮어쓰는 것 외에는 시간순으로 후속 메모를 남길 방법이 없었는데, 이제 오늘 화면에서 업무 기록을 수정 모드로 열면 댓글을 추가/수정/삭제할 수 있습니다(backend/app/db.py의 work_log_comments 테이블, backend/app/main.py의 /api/work_logs/{id}/comments 엔드포인트, frontend/src/screens/Today.jsx의 WorkLogComments).',

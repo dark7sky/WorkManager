@@ -84,6 +84,11 @@ export const reminderDigestTasks = (tasks, todayIso, scope = 'today') => {
   return tasks.filter(task => task.status !== 'done' && task.due_date === todayIso)
 }
 
+export const allIdsSelected = (ids, selected) => ids.length > 0 && ids.every(id => selected.has(id))
+
+export const toggleSelectAllIds = (ids, selected) =>
+  allIdsSelected(ids, selected) ? new Set() : new Set(ids)
+
 export const BOARD_STATUSES = ['todo', 'doing', 'done']
 
 export const groupTasksByStatus = tasks => {

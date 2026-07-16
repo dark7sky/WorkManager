@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -155,4 +155,17 @@ test('groupTasksByStatus buckets tasks into todo/doing/done, folding legacy in_p
 test('withAddedTag ignores a blank tag and handles a missing tag list', () => {
   assert.deepEqual(withAddedTag(undefined, '  '), [])
   assert.deepEqual(withAddedTag(undefined, '긴급'), ['긴급'])
+})
+
+test('allIdsSelected is false for an empty id list and true only when every id is in the selection', () => {
+  assert.equal(allIdsSelected([], new Set()), false)
+  assert.equal(allIdsSelected([1, 2], new Set([1])), false)
+  assert.equal(allIdsSelected([1, 2], new Set([1, 2, 3])), true)
+})
+
+test('toggleSelectAllIds selects every id when not all selected, and clears when all are selected', () => {
+  const selected = toggleSelectAllIds([1, 2, 3], new Set([1]))
+  assert.deepEqual([...selected], [1, 2, 3])
+  const cleared = toggleSelectAllIds([1, 2, 3], new Set([1, 2, 3]))
+  assert.deepEqual([...cleared], [])
 })
