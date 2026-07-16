@@ -132,7 +132,7 @@ export default function Performance({ notify, onDataChanged }) {
   }, [goalDraft, notify])
 
   const items = data?.timeline || [], stats = data?.summary || {}
-  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간'], [Clock3, formatDuration(stats.estimated_minutes), '완료 업무 예상 소요 시간'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
+  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간'], [Clock3, formatDuration(stats.billable_minutes), '청구 가능 시간'], [Clock3, formatDuration(stats.estimated_minutes), '완료 업무 예상 소요 시간'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
   const tagBreakdown = data?.tag_breakdown || []
   const maxTagMinutes = Math.max(1, ...tagBreakdown.map(t => t.tracked_minutes))
   const trend = useMemo(() => dailyActivityTrend(items, dates[0], dates[1]), [items, dates])

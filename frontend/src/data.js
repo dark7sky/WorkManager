@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-work-log-billable',
+    timestamp: '2026-07-16T19:43:37+09:00',
+    description: '업무 기록(오늘 한 일)에 클라이언트 청구 대상 여부를 표시할 방법이 없어, 청구 가능한 작업 시간을 집계하려면 태그나 메모를 수동으로 뒤져야 했습니다. work_logs에 nullable billable 컬럼을 추가하고(backend/app/main.py, backend/app/db.py), Today 화면의 기록 추가/수정 폼에 "청구 가능" 체크박스와 목록 배지를 추가했으며, 성과 화면 통계와 Markdown 보고서·CSV 내보내기에 "청구 가능 시간" 합계를 반영했습니다(GET /api/achievements의 billable_minutes, frontend/src/screens/Today.jsx, frontend/src/screens/Performance.jsx, frontend/src/performanceReport.js, frontend/src/csv.js).',
+  },
+  {
     id: '2026-07-16-quiet-hours',
     timestamp: '2026-07-16T19:42:43+09:00',
     description: '기기 알림(오늘 업무 다이제스트, 일정·할 일 임박 알림)이 시간대와 무관하게 항상 울려 앱을 켜 둔 채 자면 밤중에도 알림이 울릴 수 있었습니다. 설정 화면에 "무음 시간대" 토글과 시작/종료 시각을 추가해, 지정한 시간대에는 알림을 보내지 않도록 했습니다(frontend/src/eventAlerts.js의 isWithinQuietHours, frontend/src/screens/Settings.jsx, frontend/src/App.jsx).',

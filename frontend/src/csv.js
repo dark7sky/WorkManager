@@ -215,7 +215,7 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그']
+const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그', '청구 가능']
 
 export const workLogsToCsv = (logs, taskTitleById) => {
   const rows = logs.map(log => [
@@ -224,6 +224,7 @@ export const workLogsToCsv = (logs, taskTitleById) => {
     log.duration_minutes ?? '',
     log.task_id ? (taskTitleById?.get(log.task_id) ? `#${log.task_id} ${taskTitleById.get(log.task_id)}` : `#${log.task_id}`) : '',
     (log.tags || []).join('; '),
+    log.billable ? 'Y' : '',
   ])
   return [workLogHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }

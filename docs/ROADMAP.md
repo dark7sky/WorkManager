@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-16 (19:42 KST)
+Last updated: 2026-07-16 (19:43 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -201,6 +201,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Work log timer start-time fix: the Today screen's work-log timer (`frontend/src/workLogTimer.js`) filled in `duration_minutes` when stopped, but never populated the "시각" (log_time) input, so a log created via the timer silently lost the actual clock time work started at, unlike a manually typed log. Added `startTimeString(startedAt)` and wired it into `stopTimer` in `frontend/src/screens/Today.jsx` so stopping the timer also fills the time field, tests in `frontend/src/workLogTimer.test.js`, 2026-07-16.
 - [x] Bulk-action undo coverage completed: the prior bulk-undo entry above only covered Tasks' `onBulkComplete`/`onBulkPriority` — Tasks' `onBulkPostpone` and Today's `onBulkCompleteTodo`/`onBulkAddTagTodo`/`onCarryOverTodos` still had no recovery path for an accidental multi-select action. All four now snapshot prior field values (task start/due dates; todo completed/tags/todo_date) and pass an `undo` callback into the same `mutate(...)` plumbing (`frontend/src/App.jsx`), 2026-07-16.
 - [x] Calendar CSV import: Tasks/Todos/Work logs already had CSV import to round-trip a bulk-edited export back into the app, but the Calendar screen only had CSV export and ICS import — a spreadsheet-edited event list had no way back in except manual re-entry. Added a "CSV 가져오기" button next to the existing ICS import that reads the same column format as the existing CSV export (제목/시작/종료/종일 여부/장소/태그/메모) and bulk-creates events via the existing `onCreate` batch path (`parseEventsCsv` in `frontend/src/csv.js`, wired into `Calendar.jsx`, 2026-07-16).
+- [x] Work log billable flag: WorkManager tracked logged time (`duration_minutes`) but had no way to mark which of it was client-billable, so pulling billable hours for an invoice meant re-reading every log's tags/memo by hand — a gap for a commercial work-tracking product. Added a nullable `billable` column on work logs (backend `WorkLogPayload`/`CONFIG`/`db.py` migration), a "청구 가능" checkbox on the Today screen's log add/edit forms plus a row badge, a `billable_minutes` total in `GET /api/achievements`, and a matching stat tile/Markdown line/CSV column on the Performance screen (`backend/app/main.py`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Performance.jsx`, `frontend/src/performanceReport.js`, `frontend/src/csv.js`, regression test `test_work_log_billable_is_persisted_and_included_in_achievements_summary` in `backend/tests/test_api.py`, 2026-07-16).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

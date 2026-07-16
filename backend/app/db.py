@@ -147,6 +147,7 @@ def init_db():
         _add_column(c, "work_logs", "links", "TEXT NOT NULL DEFAULT '[]'")
         _add_column(c, "work_logs", "color", "TEXT")
         _add_column(c, "work_logs", "log_time", "TEXT")
+        _add_column(c, "work_logs", "billable", "INTEGER")
         _add_column(c, "task_comments", "edited_at", "TEXT")
         for name, definition in {
             "recurrence_rule": "TEXT", "parent_id": "INTEGER", "dependency_ids": "TEXT NOT NULL DEFAULT '[]'",

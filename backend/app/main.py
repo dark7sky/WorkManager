@@ -460,6 +460,7 @@ class WorkLogPayload(StrictPayload):
     links: list[dict] | None = Field(None, max_length=50)
     color: str | None = None
     log_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    billable: bool | None = None
 
     @field_validator("link_url", "color", "log_time", mode="before")
     @classmethod
@@ -516,7 +517,7 @@ CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links"}, None),
-    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time"}, None),
+    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable"}, None),
 }
 
 VALID_EVENT_COLORS = {"red", "orange", "yellow", "green", "purple", "gray"}
@@ -636,7 +637,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
-                "events": {"link_url", "color", "priority"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time"}}[table]
+                "events": {"link_url", "color", "priority"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -672,6 +673,8 @@ def normalize(table, data):
         result["links"] = json.dumps(result["links"], ensure_ascii=False)
     if "completed" in result:
         result["completed"] = int(result["completed"])
+    if "billable" in result:
+        result["billable"] = int(bool(result["billable"]))
     if "google_is_all_day" in result:
         result["google_is_all_day"] = int(result["google_is_all_day"])
     return result
@@ -1624,6 +1627,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
                         "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
+                        "billable_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs if x.get("billable")),
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
             "tags": available_tags, "tag_breakdown": tag_breakdown, "timeline": timeline,

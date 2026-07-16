@@ -634,6 +634,25 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_billable_is_persisted_and_included_in_achievements_summary(self, *_):
+        a = self.client(self.token_a)
+        billable = a.post("/api/work_logs", json={"content": "client work", "log_date": "2026-07-06", "duration_minutes": 90, "billable": True})
+        self.assertEqual(billable.status_code, 200, billable.text)
+        self.assertTrue(billable.json()["billable"])
+        non_billable = a.post("/api/work_logs", json={"content": "internal work", "log_date": "2026-07-06", "duration_minutes": 30})
+        self.assertEqual(non_billable.status_code, 200, non_billable.text)
+        self.assertFalse(non_billable.json()["billable"])
+        cleared = a.patch(f"/api/work_logs/{billable.json()['id']}", json={"billable": False})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertFalse(cleared.json()["billable"])
+        recreated = a.post("/api/work_logs", json={"content": "client work again", "log_date": "2026-07-06", "duration_minutes": 45, "billable": True})
+        self.assertEqual(recreated.status_code, 200, recreated.text)
+        summary = a.get("/api/achievements", params={"start_date": "2026-07-06", "end_date": "2026-07-06"})
+        self.assertEqual(summary.status_code, 200, summary.text)
+        self.assertEqual(summary.json()["summary"]["billable_minutes"], 45)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_time_is_persisted_validated_and_orders_today_endpoint(self, *_):
         from datetime import date
         a = self.client(self.token_a)

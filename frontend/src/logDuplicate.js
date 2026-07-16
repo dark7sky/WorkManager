@@ -8,4 +8,5 @@ export const buildLogDuplicatePayload = log => ({
   links: Array.isArray(log?.links) ? log.links : [],
   color: log?.color || null,
   log_time: log?.log_time || null,
+  billable: !!log?.billable,
 })
