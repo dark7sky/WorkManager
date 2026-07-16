@@ -228,6 +228,25 @@ class ValidationAndStatusTests(unittest.TestCase):
         self.assertEqual(result[0]["id"], 7)
         self.assertEqual(result[0]["data"]["progress"], 30)
 
+    def test_changelog_period_summary_joins_descriptions_and_counts_extras(self):
+        entries = [{"description": f"업데이트 {i}"} for i in range(8)]
+        result = ai.changelog_period_summary("2026-06", entries)
+        self.assertEqual(result["period"], "2026-06")
+        self.assertEqual(result["count"], 8)
+        self.assertEqual(result["source"], "private-rules")
+        self.assertIn("업데이트 0", result["summary"])
+        self.assertIn("외 2건", result["summary"])
+
+    def test_changelog_period_summary_handles_empty_entries(self):
+        result = ai.changelog_period_summary("2026-06", [])
+        self.assertEqual(result["summary"], "2026-06 업데이트 0건")
+
+    def test_smart_changelog_summary_falls_back_to_local_rules_without_ai_key(self):
+        entries = [{"description": "칸반 보드 추가"}]
+        result = asyncio.run(ai.smart_changelog_summary("2026-06", entries, user_id="no-such-user"))
+        self.assertEqual(result["source"], "private-rules")
+        self.assertIn("칸반 보드 추가", result["summary"])
+
 
 if __name__ == "__main__":
     unittest.main()

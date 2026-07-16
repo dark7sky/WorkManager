@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Clock3, History, LoaderCircle, Send, Lightbulb, ListTodo } from 'lucide-react'
+import { Clock3, History, LoaderCircle, Send, Lightbulb, ListTodo, Sparkles } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import { changelogUpdates } from '../data'
 import { countPendingFeatureRequests, featureRequestStatusLabel } from '../featureRequests'
+import { changelogSummaryCacheKey, groupChangelogByMonth, splitChangelogByAge } from '../changelogSummary'
+
+const SUMMARY_CACHE_KEY = 'workmanager:changelog-summary-cache'
+const loadSummaryCache = () => { try { return JSON.parse(localStorage.getItem(SUMMARY_CACHE_KEY) || '{}') } catch { return {} } }
 
 const formatTimestamp = value => {
   const parsed = value ? new Date(value) : null
@@ -29,6 +33,8 @@ export default function Changelog({ notify, publicMode = false }) {
   const [serverUpdates, setServerUpdates] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [periodSummaries, setPeriodSummaries] = useState(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
   const load = useCallback(async () => {
     setLoading(true)
     try {
@@ -49,6 +55,25 @@ export default function Changelog({ notify, publicMode = false }) {
     })),
     ...changelogUpdates,
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)), [serverUpdates])
+  const { recent, older } = useMemo(() => splitChangelogByAge(updates), [updates])
+  const olderGroups = useMemo(() => groupChangelogByMonth(older), [older])
+  useEffect(() => {
+    if (!olderGroups.length) { setPeriodSummaries(null); return }
+    const cacheKey = changelogSummaryCacheKey(olderGroups)
+    const cache = loadSummaryCache()
+    if (cache.key === cacheKey) { setPeriodSummaries(cache.periods); return }
+    let cancelled = false
+    setSummaryLoading(true)
+    api.publicChangelogSummary(olderGroups.map(g => ({ period: g.period, entries: g.entries.map(e => ({ description: e.description })) })))
+      .then(result => {
+        if (cancelled) return
+        setPeriodSummaries(result.periods)
+        localStorage.setItem(SUMMARY_CACHE_KEY, JSON.stringify({ key: cacheKey, periods: result.periods }))
+      })
+      .catch(() => { if (!cancelled) setPeriodSummaries(null) })
+      .finally(() => { if (!cancelled) setSummaryLoading(false) })
+    return () => { cancelled = true }
+  }, [olderGroups])
   const submit = async event => {
     event.preventDefault()
     const content = text.trim()
@@ -78,13 +103,19 @@ export default function Changelog({ notify, publicMode = false }) {
       </div>
     </section>
     <section className="changelog-panel" aria-labelledby="changelog-title">
-      <div className="section-title"><div><h2 id="changelog-title">변경 이력</h2><p>완료 요청만 기록. 요청일, 원문 보존.</p></div><History aria-hidden="true"/></div>
+      <div className="section-title"><div><h2 id="changelog-title">변경 이력</h2><p>완료 요청만 기록. 요청일, 원문 보존. 7일 지난 항목은 월별로 AI 요약.</p></div><History aria-hidden="true"/></div>
       <ol className="changelog-list">
-        {updates.map(update => <li key={update.id}>
+        {recent.map(update => <li key={update.id}>
           <time dateTime={update.timestamp}><Clock3 aria-hidden="true"/>{formatTimestamp(update.timestamp)}</time>
           <div>{update.requestContent ? <p className="changelog-request"><b>요청</b> {ultraTone(update.requestContent)}{update.requestedAt ? <small>요청일 {formatTimestamp(update.requestedAt)}</small> : null}</p> : null}<p>{ultraTone(update.description)}</p></div>
         </li>)}
       </ol>
+      {olderGroups.length ? <ol className="changelog-list changelog-summary-list" aria-label="7일 지난 변경 이력 요약">
+        {summaryLoading && !periodSummaries ? <li className="empty-state"><LoaderCircle className="spin"/> 지난 변경 이력 요약 중.</li> : (periodSummaries || olderGroups.map(g => ({ ...g, summary: `${g.period} 업데이트 ${g.entries.length}건`, source: 'private-rules' }))).map(item => <li key={item.period}>
+          <time><Sparkles aria-hidden="true"/>{item.period} · {item.count ?? olderGroups.find(g => g.period === item.period)?.entries.length}건</time>
+          <div><p>{item.summary}</p></div>
+        </li>)}
+      </ol> : null}
     </section>
   </div>
   if (!publicMode) return <><Header title="변경 이력" subtitle="업데이트, 요청, 끝난 것만 본다."/>{content}</>

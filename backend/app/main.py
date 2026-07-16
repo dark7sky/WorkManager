@@ -1460,6 +1460,25 @@ def public_changelog():
     return {"requests": requests, "entries": entries}
 
 
+@app.post("/api/public/changelog-summary")
+async def public_changelog_summary(request: Request, payload: dict = Body(...)):
+    """Public: AI-assisted (with local-rules fallback) monthly summary for changelog entries older than a week."""
+    enforce_rate(request.client.host if request.client else "unknown", "changelog-summary", 20, 60)
+    groups = payload.get("groups")
+    if not isinstance(groups, list) or not groups or len(groups) > 36:
+        raise HTTPException(422, "groups must be a non-empty list of at most 36 items")
+    periods = []
+    for group in groups:
+        if not isinstance(group, dict): raise HTTPException(422, "each group must be an object")
+        period = str(group.get("period") or "").strip()
+        entries = group.get("entries")
+        if not period or len(period) > 20 or not isinstance(entries, list) or not entries or len(entries) > 200:
+            raise HTTPException(422, "each group needs a period and 1-200 entries")
+        clean_entries = [{"description": str(item.get("description") or "")[:500]} for item in entries if isinstance(item, dict)]
+        periods.append(await ai.smart_changelog_summary(period, clean_entries))
+    return {"periods": periods}
+
+
 def require_codex_admin(request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "codex-admin", 30, 60)
     configured = os.getenv("CODEX_ADMIN_TOKEN", "").strip()

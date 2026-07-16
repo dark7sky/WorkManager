@@ -734,6 +734,33 @@ async def smart_period_summary(report, user_id: str | None = None):
         return fallback
 
 
+def changelog_period_summary(period: str, entries: list[dict]) -> dict:
+    """Private deterministic summary for one month's worth of aged changelog entries."""
+    descriptions = [str(item.get("description") or "").strip() for item in entries]
+    descriptions = [text for text in descriptions if text]
+    joined = " · ".join(descriptions[:6])
+    if len(descriptions) > 6: joined += f" 외 {len(descriptions) - 6}건"
+    return {"period": period, "count": len(entries),
+            "summary": joined or f"{period} 업데이트 {len(entries)}건", "source": "private-rules"}
+
+
+async def smart_changelog_summary(period: str, entries: list[dict], user_id: str | None = None):
+    fallback = changelog_period_summary(period, entries)
+    try:
+        result = await _remote_json(
+            "Summarize this month's Korean product changelog entries into one short paragraph. "
+            "Return JSON {summary: string} only, no other keys.",
+            {"period": period,
+             "entries": [str(item.get("description") or "")[:300] for item in entries][:50]},
+            user_id)
+        summary = result.get("summary")
+        if not isinstance(summary, str) or not summary.strip() or len(summary) > 1000:
+            raise ValueError
+        return {**fallback, "summary": summary.strip(), "source": "remote-ai"}
+    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError, RuntimeError):
+        return fallback
+
+
 async def smart_project_suggestions(tasks, logs, limit=5, user_id: str | None = None):
     fallback = project_progress_suggestions(tasks, logs, limit)
     allowed = {int(x["id"]) for x in tasks}

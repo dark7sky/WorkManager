@@ -422,6 +422,27 @@ class ApiTests(unittest.TestCase):
         entry = next(item for item in after["entries"] if item["feature_request_id"] == first["id"])
         self.assertEqual(entry["request_content"], "계층형 보드를 개선해 주세요")
 
+    def test_public_changelog_summary_groups_aged_entries_with_local_rules_fallback(self):
+        anonymous = TestClient(self.app)
+        response = anonymous.post("/api/public/changelog-summary", json={"groups": [
+            {"period": "2026-06", "entries": [{"description": "칸반 보드 추가"}, {"description": "모바일 성능 개선"}]},
+        ]})
+        self.assertEqual(response.status_code, 200, response.text)
+        periods = response.json()["periods"]
+        self.assertEqual(len(periods), 1)
+        self.assertEqual(periods[0]["period"], "2026-06")
+        self.assertEqual(periods[0]["count"], 2)
+        self.assertEqual(periods[0]["source"], "private-rules")
+        self.assertIn("칸반 보드 추가", periods[0]["summary"])
+
+    def test_public_changelog_summary_rejects_empty_or_oversized_groups(self):
+        anonymous = TestClient(self.app)
+        self.assertEqual(anonymous.post("/api/public/changelog-summary", json={"groups": []}).status_code, 422)
+        self.assertEqual(anonymous.post("/api/public/changelog-summary",
+                         json={"groups": [{"period": "2026-06", "entries": []}]}).status_code, 422)
+        self.assertEqual(anonymous.post("/api/public/changelog-summary",
+                         json={"groups": [{"period": "", "entries": [{"description": "x"}]}]}).status_code, 422)
+
     def test_ai_settings_are_user_specific_and_support_gemini(self):
         from app import ai
 

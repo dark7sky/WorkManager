@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-changelog-ai-summary',
+    timestamp: '2026-07-16T18:52:21+09:00',
+    description: '변경 이력이 계속 길어져 지난 항목을 찾기 어렵다는 요청이 있었습니다. 등록된 지 7일이 지난 항목은 월별로 묶어 AI(설정 안 되어 있으면 규칙 기반) 요약으로 압축해 보여주고, 최근 7일 항목은 그대로 표시하도록 변경했습니다(frontend/src/changelogSummary.js, frontend/src/screens/Changelog.jsx, backend/app/ai.py의 smart_changelog_summary, POST /api/public/changelog-summary).',
+  },
+  {
     id: '2026-07-16-mobile-calendar-month-grid',
     timestamp: '2026-07-16T18:50:25+09:00',
     description: '모바일 화면에서는 일정 화면에서 "월"을 선택해도 달력이 아니라 목록으로만 표시돼 월간 일정을 한눈에 보기 어려웠습니다. 모바일에서도 월간 보기에서는 달력 그리드를(가로 스크롤 지원), 주간 보기에서는 기존 목록을 보여주도록 CSS를 view 상태에 맞춰 분기했습니다(frontend/src/screens/Calendar.jsx의 cal-view-${view} 클래스, frontend/src/styles.css).',
