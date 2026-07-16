@@ -154,6 +154,28 @@ export const eventsToCsv = events => {
 
 export const eventCsvFilename = date => `workmanager-events-${date}.csv`
 
+export const parseEventsCsv = text => {
+  const rows = parseCsvRows(text.replace(/^﻿/, ''))
+  if (!rows.length) return { events: [], errors: [] }
+  const header = rows[0].map(h => h.trim())
+  const col = name => header.indexOf(name)
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모')
+  const events = [], errors = []
+  rows.slice(1).forEach((cells, idx) => {
+    const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
+    if (!title) { errors.push(`${idx + 2}행: 제목이 없어 건너뜀`); return }
+    const start = (iStart >= 0 ? cells[iStart] : '')?.trim()
+    if (!start) { errors.push(`${idx + 2}행: 시작 일시가 없어 건너뜀`); return }
+    const event = { title, start_at: start, end_at: (iEnd >= 0 && cells[iEnd]?.trim()) || start }
+    if (iAllDay >= 0 && cells[iAllDay]) event.google_is_all_day = cells[iAllDay].trim().toUpperCase() === 'Y'
+    if (iLocation >= 0 && cells[iLocation]) event.location = cells[iLocation].trim()
+    if (iTags >= 0 && cells[iTags]) event.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
+    if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]
+    events.push(event)
+  })
+  return { events, errors }
+}
+
 const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '태그']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주' }
 

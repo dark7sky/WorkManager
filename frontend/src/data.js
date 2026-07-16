@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-event-csv-import',
+    timestamp: '2026-07-16T19:32:07+09:00',
+    description: '업무/오늘 할 일/업무 기록은 CSV로 내보낸 뒤 다시 가져올 수 있었지만, 일정은 CSV 내보내기만 있고 가져오기가 없어 스프레드시트에서 일괄 편집한 일정을 다시 앱에 반영할 방법이 ICS 변환뿐이었습니다. 캘린더 화면에 "CSV 가져오기" 버튼을 추가해 기존 CSV 내보내기와 같은 열 형식(제목/시작/종료/종일 여부/장소/태그/메모)을 읽어 일괄 등록하도록 했습니다(frontend/src/csv.js의 parseEventsCsv, frontend/src/screens/Calendar.jsx).',
+  },
+  {
     id: '2026-07-16-bulk-action-undo-coverage',
     timestamp: '2026-07-16T19:33:00+09:00',
     description: '업무 화면의 "일괄 완료 처리"/"우선순위 변경" 일괄 작업에는 실행 취소 버튼이 있었지만, 같은 화면의 "일괄 연기"와 오늘 화면의 할 일 "일괄 완료"/"일괄 태그 추가"/"이월"에는 실행 취소가 없어 잘못 눌러도 되돌릴 방법이 없었습니다. 네 가지 일괄 작업 모두 변경 전 상태를 스냅샷으로 저장했다가 "실행 취소" 토스트로 복원하도록 맞췄습니다(frontend/src/App.jsx의 onBulkPostpone, onBulkCompleteTodo, onBulkAddTagTodo, onCarryOverTodos).',

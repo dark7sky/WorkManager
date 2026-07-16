@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-16 (19:24 KST)
+Last updated: 2026-07-16 (19:32 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -197,6 +197,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Google Calendar last-sync visibility: the backend already tracked a per-calendar sync timestamp in `google_sync_state.updated_at` (updated on every push/pull), but nothing surfaced it — after a sync toast disappeared there was no way to tell whether/when the calendar last synced successfully, even though sync is manual, not scheduled. `google_calendar.last_sync_at(user_id, calendar_id)` now reads that column and `GET /api/google/status` includes it; the Settings screen's Google 캘린더 card shows "마지막 동기화: …" (or "아직 동기화한 적이 없습니다") next to the sync button (`backend/app/google_calendar.py`, `backend/app/main.py`, `frontend/src/screens/Settings.jsx`, regression test `test_google_status_reports_last_sync_at` in `backend/tests/test_api.py`), 2026-07-16.
 - [x] Work log timer start-time fix: the Today screen's work-log timer (`frontend/src/workLogTimer.js`) filled in `duration_minutes` when stopped, but never populated the "시각" (log_time) input, so a log created via the timer silently lost the actual clock time work started at, unlike a manually typed log. Added `startTimeString(startedAt)` and wired it into `stopTimer` in `frontend/src/screens/Today.jsx` so stopping the timer also fills the time field, tests in `frontend/src/workLogTimer.test.js`, 2026-07-16.
 - [x] Bulk-action undo coverage completed: the prior bulk-undo entry above only covered Tasks' `onBulkComplete`/`onBulkPriority` — Tasks' `onBulkPostpone` and Today's `onBulkCompleteTodo`/`onBulkAddTagTodo`/`onCarryOverTodos` still had no recovery path for an accidental multi-select action. All four now snapshot prior field values (task start/due dates; todo completed/tags/todo_date) and pass an `undo` callback into the same `mutate(...)` plumbing (`frontend/src/App.jsx`), 2026-07-16.
+- [x] Calendar CSV import: Tasks/Todos/Work logs already had CSV import to round-trip a bulk-edited export back into the app, but the Calendar screen only had CSV export and ICS import — a spreadsheet-edited event list had no way back in except manual re-entry. Added a "CSV 가져오기" button next to the existing ICS import that reads the same column format as the existing CSV export (제목/시작/종료/종일 여부/장소/태그/메모) and bulk-creates events via the existing `onCreate` batch path (`parseEventsCsv` in `frontend/src/csv.js`, wired into `Calendar.jsx`, 2026-07-16).
 
 ## Removed (2026-07-10): Team/Assignee Features
 

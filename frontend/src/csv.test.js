@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -90,6 +90,36 @@ test('eventsToCsv exports event rows with labels and escaping', () => {
 
 test('eventCsvFilename uses the requested date', () => {
   assert.equal(eventCsvFilename('2026-07-13'), 'workmanager-events-2026-07-13.csv')
+})
+
+test('parseEventsCsv reads back an exported event row', () => {
+  const csv = [
+    '제목,시작,종료,종일 여부,장소,태그,메모',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,3층 회의실,내부,"분기 계획\n검토"',
+  ].join('\n')
+
+  const { events, errors } = parseEventsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(events, [{
+    title: '회의, 기획',
+    start_at: '2026-07-13T10:00:00',
+    end_at: '2026-07-13T11:00:00',
+    google_is_all_day: false,
+    location: '3층 회의실',
+    tags: ['내부'],
+    description: '분기 계획\n검토',
+  }])
+})
+
+test('parseEventsCsv defaults end to start and skips rows missing title or start', () => {
+  const csv = '제목,시작,종료\n,2026-07-14T09:00:00,\n종일 행사,2026-07-14T00:00:00,\n누락된 일정,,\n'
+  const { events, errors } = parseEventsCsv(csv)
+  assert.deepEqual(events, [{ title: '종일 행사', start_at: '2026-07-14T00:00:00', end_at: '2026-07-14T00:00:00' }])
+  assert.deepEqual(errors, ['2행: 제목이 없어 건너뜀', '4행: 시작 일시가 없어 건너뜀'])
+})
+
+test('parseEventsCsv returns nothing for empty input', () => {
+  assert.deepEqual(parseEventsCsv(''), { events: [], errors: [] })
 })
 
 test('parseTasksCsv reads back an exported task row', () => {

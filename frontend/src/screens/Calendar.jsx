@@ -6,7 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { moveEventToDay } from '../calendarDrag'
 import { eventsToIcs, icsFilename, parseIcs } from '../ics'
-import { eventCsvFilename, eventsToCsv } from '../csv'
+import { eventCsvFilename, eventsToCsv, parseEventsCsv } from '../csv'
 import { filterEventsByPriority, filterEventsByQuery } from '../eventSearch'
 import { buildEventDuplicatePayload } from '../eventDuplicate'
 import { addEventTemplate, applyEventTemplate, buildEventTemplate, loadEventTemplates, removeEventTemplate, saveEventTemplates } from '../eventTemplates'
@@ -177,6 +177,7 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
   const [pinnedIds, setPinnedIds] = useState(() => loadPinnedEventIds())
   const togglePin = event => setPinnedIds(ids => { const next = togglePinnedEvent(ids, event.id); savePinnedEventIds(next); return next })
   const importInputRef = useRef(null)
+  const csvImportInputRef = useRef(null)
   const allTags = useMemo(() => [...new Set(events.flatMap(event => event.tags || []))].sort(), [events])
   const filtered = useMemo(() => {
     const byTag = selectedTags.length ? events.filter(event => selectedTags.every(tag => (event.tags || []).includes(tag))) : events
@@ -213,10 +214,18 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
     if (!parsed.length) { window.alert('가져올 일정이 없습니다.'); return }
     await onCreate(parsed.map(({ title, description, location, start_at, end_at }) => ({ title, description: description || '', location: location || '', start_at, end_at, tags: [] })))
   }
+  const importCsv = async e => {
+    const file = e.target.files?.[0]; e.target.value = ''
+    if (!file) return
+    const text = await file.text(), { events: parsed, errors } = parseEventsCsv(text)
+    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 일정이 없습니다.'); return }
+    await onCreate(parsed)
+    if (errors.length) window.alert(errors.join('\n'))
+  }
   return <>
     <Header title="일정" subtitle="월간 달력과 모바일 일정 목록을 한눈에 확인하세요." action="새 일정" onAction={() => setNewDate(dateKey(cursor))}/>
     <div className={`content cal-view-${view}`}>
-      <div className="calendar-tools"><div className="month-switch"><button className="secondary" onClick={() => setCursor(new Date())}>오늘</button><button className="icon-button" aria-label={view === 'week' ? '이전 주' : '이전 달'} onClick={() => setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7) : new Date(date.getFullYear(), date.getMonth() - 1, 1))}><ChevronLeft/></button><h2>{view === 'month' ? `${cursor.getFullYear()}년 ${cursor.getMonth() + 1}월` : (() => { const weekStart = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - cursor.getDay()), weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6); return `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 – ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일` })()}</h2><button className="icon-button" aria-label={view === 'week' ? '다음 주' : '다음 달'} onClick={() => setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7) : new Date(date.getFullYear(), date.getMonth() + 1, 1))}><ChevronRight/></button></div><div className="view-switch"><button className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>월</button><button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>주</button></div><button className="secondary" onClick={exportIcs} disabled={!sorted.length}><Download size={17}/>ICS</button><button className="secondary" onClick={exportCsv} disabled={!sorted.length}><Download size={17}/>CSV</button><button className="secondary" onClick={() => importInputRef.current?.click()}><Upload size={17}/>ICS 가져오기</button><input ref={importInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importIcs}/></div>
+      <div className="calendar-tools"><div className="month-switch"><button className="secondary" onClick={() => setCursor(new Date())}>오늘</button><button className="icon-button" aria-label={view === 'week' ? '이전 주' : '이전 달'} onClick={() => setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7) : new Date(date.getFullYear(), date.getMonth() - 1, 1))}><ChevronLeft/></button><h2>{view === 'month' ? `${cursor.getFullYear()}년 ${cursor.getMonth() + 1}월` : (() => { const weekStart = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - cursor.getDay()), weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6); return `${weekStart.getFullYear()}년 ${weekStart.getMonth() + 1}월 ${weekStart.getDate()}일 – ${weekEnd.getMonth() + 1}월 ${weekEnd.getDate()}일` })()}</h2><button className="icon-button" aria-label={view === 'week' ? '다음 주' : '다음 달'} onClick={() => setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7) : new Date(date.getFullYear(), date.getMonth() + 1, 1))}><ChevronRight/></button></div><div className="view-switch"><button className={view === 'month' ? 'active' : ''} onClick={() => setView('month')}>월</button><button className={view === 'week' ? 'active' : ''} onClick={() => setView('week')}>주</button></div><button className="secondary" onClick={exportIcs} disabled={!sorted.length}><Download size={17}/>ICS</button><button className="secondary" onClick={exportCsv} disabled={!sorted.length}><Download size={17}/>CSV</button><button className="secondary" onClick={() => importInputRef.current?.click()}><Upload size={17}/>ICS 가져오기</button><input ref={importInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importIcs}/><button className="secondary" onClick={() => csvImportInputRef.current?.click()}><Upload size={17}/>CSV 가져오기</button><input ref={csvImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importCsv}/></div>
       <label className="search"><Search/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="제목, 장소, 메모 검색" aria-label="일정 검색"/></label>
       <label className="filter-select"><Flag/><span>우선순위</span><select value={priority} onChange={e => setPriority(e.target.value)}><option value="all">전체</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select></label>
       <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
