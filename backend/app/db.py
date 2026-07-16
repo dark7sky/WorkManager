@@ -140,6 +140,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS todo_comments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,todo_id INTEGER NOT NULL,body TEXT NOT NULL,created_at TEXT NOT NULL,edited_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(todo_id) REFERENCES todos(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS work_log_comments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,work_log_id INTEGER NOT NULL,body TEXT NOT NULL,created_at TEXT NOT NULL,edited_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(work_log_id) REFERENCES work_logs(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS task_attachments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,task_id INTEGER NOT NULL,filename TEXT NOT NULL,content_type TEXT NOT NULL,size_bytes INTEGER NOT NULL,data_base64 TEXT NOT NULL,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS event_attachments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,event_id INTEGER NOT NULL,filename TEXT NOT NULL,content_type TEXT NOT NULL,size_bytes INTEGER NOT NULL,data_base64 TEXT NOT NULL,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(event_id) REFERENCES events(id) ON DELETE CASCADE);
         """)
         for table in ("tasks", "events", "todos", "work_logs"):
             _add_column(c, table, "user_id", "TEXT")
@@ -197,6 +198,7 @@ def init_db():
         c.execute("CREATE INDEX IF NOT EXISTS idx_todo_comments_todo ON todo_comments(user_id,todo_id,created_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_work_log_comments_log ON work_log_comments(user_id,work_log_id,created_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_task_attachments_task ON task_attachments(user_id,task_id,created_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_event_attachments_event ON event_attachments(user_id,event_id,created_at)")
         c.execute("DROP INDEX IF EXISTS idx_events_google")
         duplicate_google = c.execute("""SELECT user_id,google_calendar_id,google_event_id,COUNT(*) n FROM events
           WHERE google_event_id IS NOT NULL GROUP BY user_id,google_calendar_id,google_event_id HAVING COUNT(*)>1 LIMIT 1""").fetchone()

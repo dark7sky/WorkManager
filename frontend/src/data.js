@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-event-attachments',
+    timestamp: '2026-07-17T05:25:08+09:00',
+    description: '업무에는 파일 첨부가 있었지만 일정(캘린더 이벤트)에는 관련 링크만 추가할 수 있어 회의 자료나 스크린샷을 공유하려면 여전히 외부 클라우드 링크가 필요했습니다. 이미 검증된 업무 첨부파일 패턴을 그대로 재사용해 일정 편집 화면에도 파일 업로드/다운로드/삭제 기능을 추가했습니다(backend/app/db.py의 event_attachments 테이블, backend/app/main.py의 /api/events/{id}/attachments 엔드포인트, frontend/src/screens/Calendar.jsx의 EventForm, backend/tests/test_api.py 회귀 테스트).',
+  },
+  {
     id: '2026-07-17-task-attachments',
     timestamp: '2026-07-17T05:26:00+09:00',
     description: '업무에는 URL 링크만 첨부할 수 있어 문서나 이미지 파일을 공유하려면 별도 클라우드 링크가 필요했습니다. 업무 편집 화면에 파일 첨부 기능을 추가해 파일당 5MB, 업무당 20개까지 직접 업로드/다운로드/삭제할 수 있게 했습니다(backend/app/db.py의 task_attachments 테이블, backend/app/main.py의 /api/tasks/{id}/attachments 엔드포인트, frontend/src/components/TaskForm.jsx).',

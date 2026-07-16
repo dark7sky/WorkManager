@@ -1223,6 +1223,69 @@ def task_attachments_delete(task_id: int, attachment_id: int, user=Depends(requi
     return {"ok": True}
 
 
+@app.get("/api/events/{event_id}/attachments")
+def event_attachments_list(event_id: int, user=Depends(require_user)):
+    with connection() as c:
+        event = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (event_id, user)).fetchone()
+        if not event:
+            raise HTTPException(404, "Event not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT id,user_id,event_id,filename,content_type,size_bytes,created_at FROM event_attachments WHERE event_id=? AND user_id=? ORDER BY created_at",
+            (event_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/events/{event_id}/attachments")
+async def event_attachments_create(event_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    data = await file.read()
+    if not data:
+        raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
+    if len(data) > MAX_ATTACHMENT_BYTES:
+        raise HTTPException(422, "파일 크기는 5MB 이하만 첨부할 수 있습니다.")
+    with connection() as c:
+        event = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (event_id, user)).fetchone()
+        if not event:
+            raise HTTPException(404, "Event not found")
+        count = c.execute("SELECT COUNT(*) n FROM event_attachments WHERE event_id=? AND user_id=?", (event_id, user)).fetchone()["n"]
+        if count >= MAX_ATTACHMENTS_PER_TASK:
+            raise HTTPException(422, f"첨부파일은 최대 {MAX_ATTACHMENTS_PER_TASK}개까지 등록할 수 있습니다.")
+        filename = (file.filename or "attachment")[:255]
+        content_type = file.content_type or "application/octet-stream"
+        cur = c.execute(
+            "INSERT INTO event_attachments(user_id,event_id,filename,content_type,size_bytes,data_base64,created_at) VALUES(?,?,?,?,?,?,?)",
+            (user, event_id, filename, content_type, len(data), base64.b64encode(data).decode("ascii"), now()))
+        item = row_dict(c.execute(
+            "SELECT id,user_id,event_id,filename,content_type,size_bytes,created_at FROM event_attachments WHERE id=?",
+            (cur.lastrowid,)).fetchone())
+    audit(user, "create", "event_attachment", item["id"], {"event_id": event_id, "filename": filename})
+    return item
+
+
+@app.get("/api/events/{event_id}/attachments/{attachment_id}/download")
+def event_attachments_download(event_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        row = c.execute(
+            "SELECT * FROM event_attachments WHERE id=? AND event_id=? AND user_id=?", (attachment_id, event_id, user)).fetchone()
+        if not row:
+            raise HTTPException(404, "Attachment not found")
+        item = row_dict(row)
+    data = base64.b64decode(item["data_base64"])
+    return Response(content=data, media_type=item["content_type"], headers={
+        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+
+
+@app.delete("/api/events/{event_id}/attachments/{attachment_id}")
+def event_attachments_delete(event_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute(
+            "SELECT id FROM event_attachments WHERE id=? AND event_id=? AND user_id=?", (attachment_id, event_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Attachment not found")
+        c.execute("DELETE FROM event_attachments WHERE id=? AND user_id=?", (attachment_id, user))
+    audit(user, "delete", "event_attachment", attachment_id, {"event_id": event_id})
+    return {"ok": True}
+
+
 @app.get("/api/events/{event_id}/comments")
 def event_comments_list(event_id: int, user=Depends(require_user)):
     with connection() as c:

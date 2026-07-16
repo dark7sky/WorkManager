@@ -56,6 +56,10 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [commentError, setCommentError] = useState('')
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingCommentText, setEditingCommentText] = useState('')
+  const [attachments, setAttachments] = useState([])
+  const [attachmentError, setAttachmentError] = useState('')
+  const [uploadingAttachment, setUploadingAttachment] = useState(false)
+  const attachmentInputRef = useRef(null)
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
   const applyTemplate = id => {
@@ -117,6 +121,38 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       setCommentError(e.message)
     }
   }
+  useEffect(() => {
+    setAttachments([])
+    setAttachmentError('')
+    if (!event?.id) return
+    let cancelled = false
+    api.eventAttachments(event.id).then(res => { if (!cancelled) setAttachments(res.items || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [event?.id])
+  const uploadAttachment = async e => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setAttachmentError('')
+    setUploadingAttachment(true)
+    try {
+      const item = await api.uploadEventAttachment(event.id, file)
+      setAttachments([...attachments, item])
+    } catch (err) {
+      setAttachmentError(err.message)
+    } finally {
+      setUploadingAttachment(false)
+    }
+  }
+  const removeAttachment = async id => {
+    try {
+      await api.deleteEventAttachment(event.id, id)
+      setAttachments(attachments.filter(a => a.id !== id))
+    } catch (err) {
+      setAttachmentError(err.message)
+    }
+  }
+  const formatAttachmentSize = bytes => bytes < 1024 ? `${bytes}B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)}KB` : `${(bytes / (1024 * 1024)).toFixed(1)}MB`
   const beginEditComment = item => { setEditingCommentId(item.id); setEditingCommentText(item.body) }
   const saveEditComment = async id => {
     const body = editingCommentText.trim()
@@ -196,6 +232,15 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
       {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
+    </div> : null}
+    {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
+      {attachments.map(item => <div key={item.id} className="checklist-editor-item">
+        <a href={api.eventAttachmentDownloadUrl(event.id, item.id)} target="_blank" rel="noopener noreferrer">{item.filename}</a>
+        <span className="muted"> {formatAttachmentSize(item.size_bytes)}</span>
+        <button type="button" className="text-button" onClick={() => removeAttachment(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : null}</div>
+      {attachmentError ? <p className="form-error" role="alert">{attachmentError}</p> : null}
     </div> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
