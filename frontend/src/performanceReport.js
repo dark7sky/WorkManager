@@ -50,6 +50,7 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
     `- 업무 기록: ${stats.work_logs || 0}`,
     `- 기록된 소요 시간: ${formatDuration(stats.tracked_minutes)}`,
     `- 청구 가능 시간: ${formatDuration(stats.billable_minutes)}`,
+    ...(stats.billable_amount != null ? [`- 청구 예상 금액: ${Math.round(stats.billable_amount).toLocaleString('ko-KR')}원`] : []),
     `- 완료 업무 예상 소요 시간: ${formatDuration(stats.estimated_minutes)}`,
     `- 일정: ${stats.events || 0}`,
     `- 진행 중 업무: ${stats.active_tasks || 0}`,

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-performance-report-billable-amount',
+    timestamp: '2026-07-17T00:04:08+09:00',
+    description: '성과 화면과 업무 기록 CSV에는 "청구 예상 금액"이 표시되지만, 같은 통계를 담는 Markdown 성과 보고서(내보내기)에는 청구 가능 시간만 있고 금액이 빠져 있었습니다. 청구 시급이 설정된 경우 보고서 요약에도 "청구 예상 금액" 줄을 추가했습니다(frontend/src/performanceReport.js).',
+  },
+  {
     id: '2026-07-17-worklog-csv-billable-amount',
     timestamp: '2026-07-17T00:01:47+09:00',
     description: '업무 기록 CSV 내보내기에는 "청구 가능" 여부만 있어 실제 청구 금액은 시급을 곱해 직접 계산해야 했습니다. 설정에 저장된 청구 시급을 불러와 청구 가능한 기록마다 "청구 금액(원)" 열을 계산해 함께 내보내도록 했습니다(frontend/src/csv.js workLogsToCsv, frontend/src/screens/Today.jsx).',

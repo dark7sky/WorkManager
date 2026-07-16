@@ -17,6 +17,21 @@ test('performanceReportMarkdown: includes tracked duration in summary', () => {
   assert(md.includes('기록된 소요 시간: 2시간 5분'))
 })
 
+test('performanceReportMarkdown: includes billable amount when present', () => {
+  const data = { summary: { billable_minutes: 120, billable_amount: 40000 }, timeline: [] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(md.includes('청구 가능 시간: 2시간'))
+  assert(md.includes('청구 예상 금액: 40,000원'))
+})
+
+test('performanceReportMarkdown: omits billable amount when hourly rate is not set', () => {
+  const data = { summary: { billable_minutes: 120, billable_amount: null }, timeline: [] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(!md.includes('청구 예상 금액'))
+})
+
 test('performanceReportMarkdown: generates basic structure', () => {
   const data = { summary: { completed_tasks: 5, work_logs: 10, events: 3, active_tasks: 2, completed_todos: 8 }, timeline: [] }
   const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
