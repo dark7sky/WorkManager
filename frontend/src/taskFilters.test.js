@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -86,6 +86,11 @@ test('filterTasks can isolate completion and schedule approval queues', () => {
 
   assert.deepEqual(filterTasks(approvalTasks, { status: 'approval_pending' }).map(task => task.id), [5])
   assert.deepEqual(filterTasks(approvalTasks, { status: 'schedule_pending' }).map(task => task.id), [6])
+  assert.equal(pendingApprovalCount(approvalTasks), 2)
+})
+
+test('pendingApprovalCount is 0 when nothing awaits completion or schedule approval', () => {
+  assert.equal(pendingApprovalCount(tasks), 0)
 })
 
 test('summarizeDueReminders counts overdue today and upcoming unfinished tasks', () => {

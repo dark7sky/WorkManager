@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-approval-nav-badge',
+    timestamp: '2026-07-17T05:31:00+09:00',
+    description: '완료 업무 승인 대기·일정 변경 승인 대기 항목은 업무 화면을 직접 열어야만 보였고, 다른 화면에 있을 때는 존재조차 알 수 없었습니다. 사이드바/하단 메뉴의 "업무" 항목 배지에 지연 업무 수와 함께 승인 대기 건수를 합산 표시하도록 했습니다(지연 업무가 없으면 배지 라벨이 "승인 대기"로 바뀝니다). `frontend/src/taskFilters.js`의 `pendingApprovalCount`, `frontend/src/App.jsx`의 `navBadges` 계산, 테스트는 `frontend/src/taskFilters.test.js`.',
+  },
+  {
     id: '2026-07-17-event-attachments',
     timestamp: '2026-07-17T05:25:08+09:00',
     description: '업무에는 파일 첨부가 있었지만 일정(캘린더 이벤트)에는 관련 링크만 추가할 수 있어 회의 자료나 스크린샷을 공유하려면 여전히 외부 클라우드 링크가 필요했습니다. 이미 검증된 업무 첨부파일 패턴을 그대로 재사용해 일정 편집 화면에도 파일 업로드/다운로드/삭제 기능을 추가했습니다(backend/app/db.py의 event_attachments 테이블, backend/app/main.py의 /api/events/{id}/attachments 엔드포인트, frontend/src/screens/Calendar.jsx의 EventForm, backend/tests/test_api.py 회귀 테스트).',

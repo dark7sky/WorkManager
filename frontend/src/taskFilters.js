@@ -8,6 +8,8 @@ export const withAddedTag = (tags, tag) => {
   return [...existing, trimmed]
 }
 
+export const pendingApprovalCount = tasks => tasks.filter(task => (task.status === 'done' && task.approval_status === 'pending') || task.schedule_approval_status === 'pending').length
+
 export const taskBlockingDependencies = (task, tasks) => {
   const ids = new Set((task.dependency_ids || []).map(Number))
   if (!ids.size || task.status === 'done') return []
