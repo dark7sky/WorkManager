@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-bulk-actions',
+    timestamp: '2026-07-17T05:58:00+09:00',
+    description: '업무(Tasks), 오늘 할 일(Todo), 캘린더 일정 목록은 모두 여러 항목을 한 번에 선택해 삭제/태그 추가 등을 하는 일괄 작업 기능이 있었지만, 오늘 화면의 "오늘 한 일"(업무 기록) 목록만 항목별로 하나씩 삭제/태그를 추가해야 했습니다. 업무 기록 목록에도 같은 선택 체크박스 + 일괄 작업 바 패턴을 추가해 여러 기록을 한 번에 삭제하거나 태그를 추가할 수 있도록 했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-17-task-blocked-status-filter',
     timestamp: '2026-07-17T05:52:46+09:00',
     description: '업무 화면은 선행 업무가 끝나지 않아 대기 중인 업무를 알려주는 배너와 각 업무 행의 배지는 있었지만, 목록을 그 업무들만 걸러 보는 방법은 없었습니다. 상태 필터에 "선행 업무 대기" 항목을 추가해 `taskBlockingDependencies`로 미완료 선행 업무가 남은 업무만 바로 걸러볼 수 있도록 했습니다 (`frontend/src/taskFilters.js`, `frontend/src/screens/Tasks.jsx`).',
