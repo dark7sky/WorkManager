@@ -76,6 +76,17 @@ test('filterTasks status=no_due_date keeps only unfinished tasks with no due dat
   assert.deepEqual(shown.map(task => task.id), [5])
 })
 
+test('filterTasks status=blocked keeps only unfinished tasks with an unfinished dependency', () => {
+  const blockedTasks = [
+    ...tasks,
+    { id: 5, title: '출시', status: 'todo', due_date: '2026-07-10', dependency_ids: [1, 3] },
+    { id: 6, title: '완료된 후속', status: 'done', due_date: '2026-07-09', dependency_ids: [1] },
+    { id: 7, title: '선행 완료된 업무', status: 'todo', due_date: '2026-07-11', dependency_ids: [3] },
+  ]
+  const shown = filterTasks(blockedTasks, { status: 'blocked', todayIso: '2026-07-07' })
+  assert.deepEqual(shown.map(task => task.id), [5])
+})
+
 test('filterTasks can isolate completion and schedule approval queues', () => {
   const approvalTasks = [
     ...tasks,

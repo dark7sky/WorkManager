@@ -39,6 +39,8 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
           ? task.status !== 'done' && task.due_date && todayIso && task.due_date >= todayIso && task.due_date <= addDays(todayIso, 6)
           : status === 'no_due_date'
             ? task.status !== 'done' && !task.due_date
+            : status === 'blocked'
+              ? task.status !== 'done' && taskBlockingDependencies(task, tasks).length > 0
             : status === 'active'
             ? task.status !== 'done'
             : status === 'in_progress'

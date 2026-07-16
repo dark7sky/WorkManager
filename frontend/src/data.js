@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-blocked-status-filter',
+    timestamp: '2026-07-17T05:52:46+09:00',
+    description: '업무 화면은 선행 업무가 끝나지 않아 대기 중인 업무를 알려주는 배너와 각 업무 행의 배지는 있었지만, 목록을 그 업무들만 걸러 보는 방법은 없었습니다. 상태 필터에 "선행 업무 대기" 항목을 추가해 `taskBlockingDependencies`로 미완료 선행 업무가 남은 업무만 바로 걸러볼 수 있도록 했습니다 (`frontend/src/taskFilters.js`, `frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-17-audit-log-comment-attachment-labels',
     timestamp: '2026-07-17T05:56:00+09:00',
     description: '감사 로그 화면은 업무·일정·Todo·업무 기록과 일부 시스템 이벤트만 한글 라벨로 보여주고, 최근 추가된 댓글/첨부파일 관련 감사 기록(예: task_comment, event_attachment, session, settings 등)은 원본 영문 식별자 그대로 노출되어 "대상" 필터와 목록에서 읽기 어려웠습니다. `frontend/src/screens/AuditLog.jsx`의 `actionLabels`/`entityLabels`에 댓글·첨부파일 4종 및 세션/설정/기능요청/태그/백업 항목과 `import`/`rename` 동작 라벨을 추가했습니다.',
