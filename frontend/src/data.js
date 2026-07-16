@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-form-inline-validation',
+    timestamp: '2026-07-17T00:15:38+09:00',
+    description: '업무 등록/수정 폼에서 제목을 비워두거나 완료 예정일을 시작일보다 이르게 입력해도 브라우저 기본 안내만 뜰 뿐, 정확히 어느 항목이 문제인지 화면에서 바로 알기 어려웠습니다. 문제가 된 입력칸 테두리를 빨간색으로 표시하고 바로 아래에 구체적인 안내 문구를 함께 보여주도록 개선했습니다(frontend/src/formValidation.js, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-17-invoice-client-name',
     timestamp: '2026-07-17T00:08:36+09:00',
     description: '청구서 PDF에는 청구 가능 시간과 금액만 있을 뿐, 실제로 누구 앞으로 보내는 청구서인지 표시할 곳이 없어 매번 인쇄물에 손으로 고객사명을 적어 넣어야 했습니다. 설정 화면에 "청구 대상 이름"을 저장하는 필드를 추가하고, 청구서 PDF 상단에 "청구 대상: OOO"으로 표시되게 했습니다(백엔드 `billing_client_name` 설정, `frontend/src/screens/Settings.jsx`, `frontend/src/invoiceReport.js`, `frontend/src/screens/Performance.jsx`).',

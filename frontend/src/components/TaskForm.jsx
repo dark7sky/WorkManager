@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
+import { validateTaskForm } from '../formValidation'
 import { matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import TagsInput from './TagsInput'
@@ -9,6 +10,7 @@ import TagsInput from './TagsInput'
 export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [tags, setTags] = useState(() => task?.tags || [])
   const [checklist, setChecklist] = useState(() => task?.checklist || [])
   const [links, setLinks] = useState(() => task?.links || [])
@@ -72,6 +74,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   useEffect(() => {
     setSaving(false)
     setError('')
+    setFieldErrors({})
     setSuggestions([])
     setTags(task?.tags || [])
     setChecklist(task?.checklist || [])
@@ -181,10 +184,14 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     data.links = links
     const startChanged = data.start_date !== (task?.start_date || '')
     const dueChanged = data.due_date !== (task?.due_date || '')
-    if (data.start_date && data.due_date && data.due_date < data.start_date && (startChanged || dueChanged)) {
-      setError('완료 예정일은 시작일보다 빠를 수 없습니다.')
+    const errors = validateTaskForm(data)
+    if (errors.due_date && !startChanged && !dueChanged) delete errors.due_date
+    if (Object.keys(errors).length) {
+      setFieldErrors(errors)
+      setError(Object.values(errors)[0])
       return
     }
+    setFieldErrors({})
     setSaving(true)
     setError('')
     const result = await onSave(buildTaskPayload(data, { tags, task }))
@@ -198,9 +205,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       <label>업무 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
     </div> : null}
-    <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus defaultValue={prefill?.title ?? task?.title ?? ''}/></label>
+    <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'} defaultValue={prefill?.title ?? task?.title ?? ''}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
     <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)}/></label>
-    <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/></label>
+    <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" className={fieldErrors.due_date ? 'invalid' : ''} aria-invalid={fieldErrors.due_date ? 'true' : 'false'} defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/>{fieldErrors.due_date ? <small className="field-error" role="alert">{fieldErrors.due_date}</small> : null}</label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
