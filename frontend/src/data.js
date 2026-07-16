@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-attachments',
+    timestamp: '2026-07-17T05:48:00+09:00',
+    description: '업무·일정·할 일에는 파일 첨부 기능이 있었지만 오늘 한 일(업무 기록)에는 없어 네 개 항목 중 유일하게 파일을 남길 수 없었습니다. 업무 기록에도 파일 첨부(업로드/다운로드/삭제, 5MB·20개 제한)를 추가했습니다. `backend/app/main.py`의 `/api/work_logs/{id}/attachments` 엔드포인트, `work_log_attachments` 테이블(`backend/app/db.py`), `frontend/src/api.js`의 첨부 헬퍼, 오늘 화면 업무 기록 수정 폼의 첨부파일 섹션. 테스트는 `backend/tests/test_api.py`의 `test_work_log_attachments_upload_download_delete_and_size_limit`.',
+  },
+  {
     id: '2026-07-17-task-comment-count-badge',
     timestamp: '2026-07-17T05:36:15+09:00',
     description: '업무에 댓글 스레드 기능이 있었지만, 업무 목록(간트 행)에는 어떤 업무에 댓글이 달려 있는지 알 수 있는 표시가 전혀 없어 편집 폼을 열어보기 전까지는 댓글 존재 여부를 알 수 없었습니다. 업무 목록 API(GET /api/tasks)가 각 업무의 댓글 개수를 함께 내려주도록 하고(backend/app/main.py의 list_endpoint, task_comments를 한 번의 집계 쿼리로 조회), 간트 행에 체크리스트·첨부 링크 배지와 같은 위치에 "댓글 N개" 배지를 추가했습니다(frontend/src/screens/Tasks.jsx). 회귀 테스트는 backend/tests/test_api.py의 test_task_list_includes_comment_count.',
