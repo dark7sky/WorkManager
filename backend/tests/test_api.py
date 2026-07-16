@@ -323,6 +323,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_audit_logs_filter_by_date_range(self, *_):
+        from app.db import connection
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "date filtered audit"}).json()
+        with connection() as c:
+            c.execute("UPDATE audit_logs SET created_at=? WHERE user_id='sub-a' AND entity_type='tasks' AND entity_id=?",
+                      ("2020-01-01T10:00:00", str(task["id"])))
+        in_range = a.get("/api/audit-logs?limit=50&start=2019-12-31&end=2020-01-02")
+        self.assertEqual(in_range.status_code, 200, in_range.text)
+        self.assertTrue(any(x["entity_id"] == str(task["id"]) for x in in_range.json()["items"]))
+        out_of_range = a.get("/api/audit-logs?limit=50&start=2021-01-01")
+        self.assertFalse(any(x["entity_id"] == str(task["id"]) for x in out_of_range.json()["items"]))
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_comments_are_user_scoped_and_persisted(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "task with comments"}).json()

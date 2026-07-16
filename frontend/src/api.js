@@ -69,7 +69,7 @@ export const api = {
   importData: (mode,data) => request('/import',json('POST',{mode,data})),
   tags: () => request('/tags'),
   renameTag: (from,to) => request('/tags/rename',json('POST',{from,to})),
-  auditLogs: (limit=100) => request(`/audit-logs?limit=${limit}`),
+  auditLogs: (limit=100, start='', end='') => request(`/audit-logs?limit=${limit}${start?`&start=${start}`:''}${end?`&end=${end}`:''}`),
   diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),
   restoreTrash: (table,id) => request(`/${encodeURIComponent(table)}/${id}/restore`,{method:'POST'}),

@@ -43,10 +43,13 @@ const metadataText = metadata => {
 export default function AuditLog({ focus }) {
   const [logs,setLogs] = useState([]), [loading,setLoading] = useState(true), [error,setError] = useState('')
   const [query,setQuery] = useState(()=>focus?.query||''), [entity,setEntity] = useState(()=>focus?.entity||'all')
+  const [dateStart,setDateStart] = useState(''), [dateEnd,setDateEnd] = useState('')
+  const invalidRange = dateStart && dateEnd && dateStart > dateEnd
   const load = async () => {
+    if (invalidRange) return
     setLoading(true); setError('')
     try {
-      const result = await api.auditLogs(200)
+      const result = await api.auditLogs(200, dateStart, dateEnd)
       setLogs(result.items || [])
     } catch(e) {
       setError(e.message)
@@ -54,7 +57,7 @@ export default function AuditLog({ focus }) {
       setLoading(false)
     }
   }
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{ load() },[dateStart,dateEnd])
   const entities = useMemo(()=>[...new Set(logs.map(log=>log.entity_type).filter(Boolean))].sort(),[logs])
   const shown = logs.filter(log => {
     const haystack = `${log.action} ${actionLabels[log.action] || ''} ${log.entity_type} ${entityLabels[log.entity_type] || ''} ${log.entity_id || ''} ${metadataText(log.metadata)}`.toLowerCase()
@@ -68,10 +71,12 @@ export default function AuditLog({ focus }) {
     <div className="toolbar audit-toolbar">
       <div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="작업, 대상, 변경 내용 검색" /></div>
       <label className="filter-select"><Filter/><span>대상</span><select value={entity} onChange={e=>setEntity(e.target.value)}><option value="all">전체</option>{entities.map(value=><option key={value} value={value}>{entityLabels[value] || value}</option>)}</select></label>
+      <div className="date-range"><input aria-label="시작일" type="date" value={dateStart} onChange={e=>setDateStart(e.target.value)}/><span>–</span><input aria-label="종료일" type="date" value={dateEnd} onChange={e=>setDateEnd(e.target.value)}/>{(dateStart||dateEnd)?<button type="button" className="text-button" onClick={()=>{setDateStart('');setDateEnd('')}}>초기화</button>:null}</div>
       <button type="button" className="text-button" onClick={exportShown} disabled={!shown.length}><Download/> CSV 내보내기</button>
     </div>
     <section className="audit-panel" aria-labelledby="audit-title">
-      <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>최대 200개의 최신 변경을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>
+      <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>{dateStart||dateEnd?'선택한 기간의 ':''}최대 200개의 최신 변경을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>
+      {invalidRange?<p className="inline-error">종료일은 시작일 이후여야 합니다.</p>:null}
       {loading?<div className="audit-state"><LoaderCircle className="spin"/> 불러오는 중…</div>:error?<div className="audit-state error" role="alert">{error} <button onClick={load}>다시 시도</button></div>:shown.length?<ol className="audit-list">
         {shown.map(log=><li key={log.id}>
           <time dateTime={log.created_at}>{formatTimestamp(log.created_at)}</time>

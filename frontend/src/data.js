@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-audit-log-date-range',
+    timestamp: '2026-07-16T19:37:05+09:00',
+    description: '감사 로그 화면은 최신 200건만 보여줄 뿐 기간을 좁혀볼 방법이 없어, 보존 기간(180일) 동안 쌓인 오래된 변경 이력을 확인하기 어려웠습니다. `/api/audit-logs`에 `start`/`end` 날짜 필터를 추가하고, 감사 로그 화면 툴바에 기간 선택 입력을 붙여 선택한 기간의 변경 이력만 조회·CSV로 내보낼 수 있도록 했습니다(backend/app/main.py의 audit_log_list, frontend/src/api.js, frontend/src/screens/AuditLog.jsx).',
+  },
+  {
     id: '2026-07-16-event-csv-import',
     timestamp: '2026-07-16T19:32:07+09:00',
     description: '업무/오늘 할 일/업무 기록은 CSV로 내보낸 뒤 다시 가져올 수 있었지만, 일정은 CSV 내보내기만 있고 가져오기가 없어 스프레드시트에서 일괄 편집한 일정을 다시 앱에 반영할 방법이 ICS 변환뿐이었습니다. 캘린더 화면에 "CSV 가져오기" 버튼을 추가해 기존 CSV 내보내기와 같은 열 형식(제목/시작/종료/종일 여부/장소/태그/메모)을 읽어 일괄 등록하도록 했습니다(frontend/src/csv.js의 parseEventsCsv, frontend/src/screens/Calendar.jsx).',

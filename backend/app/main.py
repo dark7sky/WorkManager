@@ -1425,8 +1425,14 @@ def tag_rename(payload: dict = Body(...), user=Depends(require_user)):
 
 
 @app.get("/api/audit-logs")
-def audit_log_list(limit: int = 100, user=Depends(require_user)):
-    items = rows("audit_logs", user, "ORDER BY created_at DESC LIMIT ?", (max(1, min(limit, 500)),))
+def audit_log_list(limit: int = 100, start: str = None, end: str = None, user=Depends(require_user)):
+    clauses, args = [], []
+    if start:
+        clauses.append("created_at>=?"); args.append(start)
+    if end:
+        clauses.append("created_at<=?"); args.append(end + "T23:59:59")
+    where = ("WHERE " + " AND ".join(clauses) + " ") if clauses else ""
+    items = rows("audit_logs", user, f"{where}ORDER BY created_at DESC LIMIT ?", (*args, max(1, min(limit, 500))))
     for item in items:
         item["metadata"] = json.loads(item.get("metadata") or "{}")
     return {"items": items}
