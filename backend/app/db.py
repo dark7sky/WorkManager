@@ -137,6 +137,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS error_logs(id INTEGER PRIMARY KEY AUTOINCREMENT,method TEXT NOT NULL,path TEXT NOT NULL,summary TEXT NOT NULL,created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS task_comments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,task_id INTEGER NOT NULL,body TEXT NOT NULL,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE);
         CREATE TABLE IF NOT EXISTS event_comments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,event_id INTEGER NOT NULL,body TEXT NOT NULL,created_at TEXT NOT NULL,edited_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(event_id) REFERENCES events(id) ON DELETE CASCADE);
+        CREATE TABLE IF NOT EXISTS todo_comments(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id TEXT NOT NULL,todo_id INTEGER NOT NULL,body TEXT NOT NULL,created_at TEXT NOT NULL,edited_at TEXT,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(todo_id) REFERENCES todos(id) ON DELETE CASCADE);
         """)
         for table in ("tasks", "events", "todos", "work_logs"):
             _add_column(c, table, "user_id", "TEXT")
@@ -191,6 +192,7 @@ def init_db():
         c.execute("CREATE INDEX IF NOT EXISTS idx_error_logs_created ON error_logs(created_at DESC)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_task_comments_task ON task_comments(user_id,task_id,created_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_event_comments_event ON event_comments(user_id,event_id,created_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_todo_comments_todo ON todo_comments(user_id,todo_id,created_at)")
         c.execute("DROP INDEX IF EXISTS idx_events_google")
         duplicate_google = c.execute("""SELECT user_id,google_calendar_id,google_event_id,COUNT(*) n FROM events
           WHERE google_event_id IS NOT NULL GROUP BY user_id,google_calendar_id,google_event_id HAVING COUNT(*)>1 LIMIT 1""").fetchone()

@@ -1209,6 +1209,61 @@ def event_comments_delete(event_id: int, comment_id: int, user=Depends(require_u
         c.execute("DELETE FROM event_comments WHERE id=? AND user_id=?", (comment_id, user))
     audit(user, "delete", "event_comment", comment_id, {"event_id": event_id})
     return {"ok": True}
+
+
+@app.get("/api/todos/{todo_id}/comments")
+def todo_comments_list(todo_id: int, user=Depends(require_user)):
+    with connection() as c:
+        todo = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (todo_id, user)).fetchone()
+        if not todo:
+            raise HTTPException(404, "Todo not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT * FROM todo_comments WHERE todo_id=? AND user_id=? ORDER BY created_at", (todo_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/todos/{todo_id}/comments")
+def todo_comments_create(todo_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        todo = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (todo_id, user)).fetchone()
+        if not todo:
+            raise HTTPException(404, "Todo not found")
+        cur = c.execute("INSERT INTO todo_comments(user_id,todo_id,body,created_at) VALUES(?,?,?,?)", (user, todo_id, body, now()))
+        item = row_dict(c.execute("SELECT * FROM todo_comments WHERE id=?", (cur.lastrowid,)).fetchone())
+    audit(user, "create", "todo_comment", item["id"], {"todo_id": todo_id})
+    return item
+
+
+@app.patch("/api/todos/{todo_id}/comments/{comment_id}")
+def todo_comments_update(todo_id: int, comment_id: int, payload: dict = Body(...), user=Depends(require_user)):
+    body = str(payload.get("body", "")).strip()
+    if not body:
+        raise HTTPException(422, "댓글 내용을 입력하세요.")
+    if len(body) > 2000:
+        raise HTTPException(422, "댓글은 2000자 이하로 입력하세요.")
+    with connection() as c:
+        existing = c.execute("SELECT id FROM todo_comments WHERE id=? AND todo_id=? AND user_id=?", (comment_id, todo_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("UPDATE todo_comments SET body=?, edited_at=? WHERE id=? AND user_id=?", (body, now(), comment_id, user))
+        item = row_dict(c.execute("SELECT * FROM todo_comments WHERE id=?", (comment_id,)).fetchone())
+    audit(user, "update", "todo_comment", comment_id, {"todo_id": todo_id})
+    return item
+
+
+@app.delete("/api/todos/{todo_id}/comments/{comment_id}")
+def todo_comments_delete(todo_id: int, comment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT id FROM todo_comments WHERE id=? AND todo_id=? AND user_id=?", (comment_id, todo_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Comment not found")
+        c.execute("DELETE FROM todo_comments WHERE id=? AND user_id=?", (comment_id, user))
+    audit(user, "delete", "todo_comment", comment_id, {"todo_id": todo_id})
     return {"ok": True}
 
 

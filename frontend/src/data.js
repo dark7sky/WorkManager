@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-comment-thread',
+    timestamp: '2026-07-17T00:30:45+09:00',
+    description: '오늘 화면의 Todo에도 일정(이벤트)과 동일한 댓글 스레드를 추가했습니다. 이전에는 Todo에 남길 수 있는 텍스트가 단일 메모 필드뿐이라 진행 상황을 시간순으로 기록할 수 없었는데, 이제 Todo를 수정 모드로 열면 댓글을 추가/수정/삭제할 수 있습니다(backend/app/db.py의 todo_comments 테이블, backend/app/main.py의 /api/todos/{id}/comments 엔드포인트, frontend/src/screens/Today.jsx의 TodoComments).',
+  },
+  {
     id: '2026-07-17-api-request-timeout',
     timestamp: '2026-07-17T00:29:48+09:00',
     description: 'API 요청에 20초 타임아웃을 추가했습니다. 이전에는 서버가 응답하지 않으면 저장/불러오기 버튼이 "처리 중" 상태로 영원히 멈춰 있었는데, 이제 20초가 지나면 자동으로 요청을 취소하고 "요청 시간이 초과되었습니다. 다시 시도해 주세요."라는 안내와 함께 다시 시도할 수 있습니다(frontend/src/api.js의 request()).',

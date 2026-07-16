@@ -400,6 +400,36 @@ class ApiTests(unittest.TestCase):
         logs = a.get("/api/audit-logs?limit=500").json()["items"]
         self.assertTrue(any(x["entity_type"] == "event_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
 
+    def test_todo_comments_are_user_scoped_and_persisted(self):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        todo = a.post("/api/todos", json={"title": "todo with comments", "todo_date": "2026-08-01"}).json()
+        empty = a.get(f"/api/todos/{todo['id']}/comments")
+        self.assertEqual(empty.status_code, 200, empty.text)
+        self.assertEqual(empty.json()["items"], [])
+        self.assertEqual(b.get(f"/api/todos/{todo['id']}/comments").status_code, 404)
+        created = a.post(f"/api/todos/{todo['id']}/comments", json={"body": "  담당자에게 확인 요청.  "})
+        self.assertEqual(created.status_code, 200, created.text)
+        self.assertEqual(created.json()["body"], "담당자에게 확인 요청.")
+        self.assertEqual(b.post(f"/api/todos/{todo['id']}/comments", json={"body": "몰래"}).status_code, 404)
+        blank = a.post(f"/api/todos/{todo['id']}/comments", json={"body": "   "})
+        self.assertEqual(blank.status_code, 422)
+        listed = a.get(f"/api/todos/{todo['id']}/comments")
+        self.assertEqual(len(listed.json()["items"]), 1)
+        comment_id = created.json()["id"]
+        self.assertEqual(b.patch(f"/api/todos/{todo['id']}/comments/{comment_id}", json={"body": "몰래 수정"}).status_code, 404)
+        edited = a.patch(f"/api/todos/{todo['id']}/comments/{comment_id}", json={"body": "  수정된 내용입니다.  "})
+        self.assertEqual(edited.status_code, 200, edited.text)
+        self.assertEqual(edited.json()["body"], "수정된 내용입니다.")
+        self.assertIsNotNone(edited.json()["edited_at"])
+        blank_edit = a.patch(f"/api/todos/{todo['id']}/comments/{comment_id}", json={"body": "   "})
+        self.assertEqual(blank_edit.status_code, 422)
+        self.assertEqual(b.delete(f"/api/todos/{todo['id']}/comments/{comment_id}").status_code, 404)
+        deleted = a.delete(f"/api/todos/{todo['id']}/comments/{comment_id}")
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+        self.assertEqual(a.get(f"/api/todos/{todo['id']}/comments").json()["items"], [])
+        logs = a.get("/api/audit-logs?limit=500").json()["items"]
+        self.assertTrue(any(x["entity_type"] == "todo_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_feature_requests_are_user_scoped_and_status_managed(self, *_):

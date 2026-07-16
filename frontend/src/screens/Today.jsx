@@ -20,6 +20,57 @@ function localDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T00:00:00`) : new Date(value)
 }
 
+function TodoComments({ todoId }) {
+  const [comments, setComments] = useState([])
+  const [text, setText] = useState('')
+  const [error, setError] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [editingText, setEditingText] = useState('')
+  useEffect(() => {
+    let cancelled = false
+    api.todoComments(todoId).then(res => { if (!cancelled) setComments(res.items || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [todoId])
+  const addComment = async () => {
+    const body = text.trim()
+    if (!body) return
+    setError('')
+    try {
+      const comment = await api.addTodoComment(todoId, body)
+      setComments(current => [...current, comment])
+      setText('')
+    } catch (e) { setError(e.message) }
+  }
+  const removeComment = async id => {
+    try {
+      await api.deleteTodoComment(todoId, id)
+      setComments(current => current.filter(c => c.id !== id))
+    } catch (e) { setError(e.message) }
+  }
+  const beginEdit = item => { setEditingId(item.id); setEditingText(item.body) }
+  const saveEdit = async id => {
+    const body = editingText.trim()
+    setEditingId(null)
+    const original = comments.find(c => c.id === id)
+    if (!body || !original || body === original.body) return
+    try {
+      const updated = await api.updateTodoComment(todoId, id, body)
+      setComments(current => current.map(c => c.id === id ? updated : c))
+    } catch (e) { setError(e.message) }
+  }
+  return <div className="checklist-editor" onClick={event => event.stopPropagation()}>
+    <span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
+    {comments.map(item => <div key={item.id} className="checklist-editor-item">
+      {editingId === item.id
+        ? <input type="text" className="inline-edit" autoFocus value={editingText} onChange={e => setEditingText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(item.id) } if (e.key === 'Escape') setEditingId(null) }} onBlur={() => saveEdit(item.id)}/>
+        : <span onClick={() => beginEdit(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
+      <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
+    </div>)}
+    <div className="checklist-editor-add"><input type="text" value={text} placeholder="댓글을 입력하세요" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+    {error ? <p className="form-error" role="alert">{error}</p> : null}
+  </div>
+}
+
 function overlapsDay(event, day) {
   const dayStart = new Date(day)
   dayStart.setHours(0, 0, 0, 0)
@@ -325,7 +376,7 @@ export default function Today(props) {
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''} ${todo.priority === 'high' ? 'priority-high' : ''} ${selectedTodoIds.has(todo.id) ? 'row-selected' : ''}`} style={eventColorHex(todo.color) ? { borderLeft: `3px solid ${eventColorHex(todo.color)}` } : undefined} key={todo.id}>
           <input type="checkbox" className="row-select" aria-label={`${todo.title} 선택`} checked={selectedTodoIds.has(todo.id)} onChange={() => toggleTodoSelected(todo.id)}/>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>
-          <div>{editable('todo', todo) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><select aria-label="우선순위" value={editPriority} onChange={event => setEditPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={editRecurrence} onChange={event => setEditRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select>{editRecurrence ? <input type="date" aria-label="반복 종료일" value={editRecurrenceEnd} onChange={event => setEditRecurrenceEnd(event.target.value)}/> : null}<input type="time" aria-label="시간" value={editTodoTime} onChange={event => setEditTodoTime(event.target.value)}/><input className="link-input" type="url" value={editLink} onChange={event => setEditLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/><div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{editTodoLinks.length ? ` (${editTodoLinks.length})` : ''}</span>{editTodoLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeEditTodoLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={editTodoLinkUrlText} placeholder="https://..." onChange={e => setEditTodoLinkUrlText(e.target.value)}/><input type="text" value={editTodoLinkLabelText} placeholder="이름 (선택)" onChange={e => setEditTodoLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addEditTodoLink}>추가</button></div></div><input className="link-input" value={editMemo} onChange={event => setEditMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/><select aria-label="색상" value={editColor} onChange={event => setEditColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`todo-${todo.id}`, 'todo', editText)}>AI 태그 추천</button>{recommendationButtons(`todo-${todo.id}`, editTags, setEditTags)}</div></> : <><span>{todo.title}</span>{pinnedTodoIds.has(todo.id) ? <Star className="task-pinned-icon" aria-hidden="true"/> : null}{todo.todo_time ? <small className="log-task-link"><Clock3 aria-hidden="true"/>{todo.todo_time}</small> : null}{todo.priority === 'high' ? <small className="log-task-link">우선순위 높음</small> : null}{todo.recurrence_rule ? <small className="log-task-link">{todoRecurrenceLabels[todo.recurrence_rule]} 반복{todo.recurrence_end_date ? ` (${todo.recurrence_end_date}까지)` : ''}</small> : null}{todo.link_url ? <a className="task-link" href={todo.link_url} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()} aria-label={`${todo.title} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{todo.links?.length ? <small className="log-task-link"><ExternalLink aria-hidden="true"/>첨부 링크 {todo.links.length}개</small> : null}{todo.memo ? <small className="log-task-link" title={todo.memo}>{todo.memo}</small> : null}<TagChips tags={todo.tags}/></>}</div>
+          <div>{editable('todo', todo) ? <><input className="inline-edit" value={editText} onChange={event => setEditText(event.target.value)}/><select aria-label="우선순위" value={editPriority} onChange={event => setEditPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={editRecurrence} onChange={event => setEditRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select>{editRecurrence ? <input type="date" aria-label="반복 종료일" value={editRecurrenceEnd} onChange={event => setEditRecurrenceEnd(event.target.value)}/> : null}<input type="time" aria-label="시간" value={editTodoTime} onChange={event => setEditTodoTime(event.target.value)}/><input className="link-input" type="url" value={editLink} onChange={event => setEditLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/><div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{editTodoLinks.length ? ` (${editTodoLinks.length})` : ''}</span>{editTodoLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeEditTodoLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={editTodoLinkUrlText} placeholder="https://..." onChange={e => setEditTodoLinkUrlText(e.target.value)}/><input type="text" value={editTodoLinkLabelText} placeholder="이름 (선택)" onChange={e => setEditTodoLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addEditTodoLink}>추가</button></div></div><input className="link-input" value={editMemo} onChange={event => setEditMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/><select aria-label="색상" value={editColor} onChange={event => setEditColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><TagsInput value={editTags} onChange={setEditTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags(`todo-${todo.id}`, 'todo', editText)}>AI 태그 추천</button>{recommendationButtons(`todo-${todo.id}`, editTags, setEditTags)}</div><TodoComments todoId={todo.id}/></> : <><span>{todo.title}</span>{pinnedTodoIds.has(todo.id) ? <Star className="task-pinned-icon" aria-hidden="true"/> : null}{todo.todo_time ? <small className="log-task-link"><Clock3 aria-hidden="true"/>{todo.todo_time}</small> : null}{todo.priority === 'high' ? <small className="log-task-link">우선순위 높음</small> : null}{todo.recurrence_rule ? <small className="log-task-link">{todoRecurrenceLabels[todo.recurrence_rule]} 반복{todo.recurrence_end_date ? ` (${todo.recurrence_end_date}까지)` : ''}</small> : null}{todo.link_url ? <a className="task-link" href={todo.link_url} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()} aria-label={`${todo.title} 관련 링크 열기`}><ExternalLink aria-hidden="true"/>관련 링크</a> : null}{todo.links?.length ? <small className="log-task-link"><ExternalLink aria-hidden="true"/>첨부 링크 {todo.links.length}개</small> : null}{todo.memo ? <small className="log-task-link" title={todo.memo}>{todo.memo}</small> : null}<TagChips tags={todo.tags}/></>}</div>
           <span className="row-actions">{editable('todo', todo) ? <><button aria-label="수정 취소" onClick={() => setEdit(null)}><X/></button><button aria-label="수정 저장" disabled={saving === `todo-${todo.id}`} onClick={() => saveEdit(todo)}><Check/></button></> : <><button aria-label={`${todo.title} 수정`} onClick={() => beginEdit('todo', todo)}><Pencil/></button><button className={`task-pin${pinnedTodoIds.has(todo.id) ? ' pinned' : ''}`} aria-label={`${todo.title} ${pinnedTodoIds.has(todo.id) ? '고정 해제' : '고정'}`} title={pinnedTodoIds.has(todo.id) ? '고정 해제' : '목록 상단 고정'} onClick={() => togglePin(todo)}><Star/></button><button aria-label={`${todo.title} 복제`} onClick={() => onDuplicateTodo(todo)}><Copy/></button><button aria-label={`${todo.title} 업무로 전환`} title="업무로 전환" onClick={() => onPromoteTodo(todo)}><ArrowUpRight/></button>{todo.recurrence_rule && !todo.completed ? <button aria-label={`${todo.title} 다음 회차로 건너뛰기`} title="다음 회차로 건너뛰기" onClick={() => onSkipTodoRecurrence(todo)}><SkipForward/></button> : null}</>}<button className="danger-icon" aria-label={`${todo.title} 삭제`} onClick={() => onDeleteTodo(todo)}><Trash2/></button></span>
         </div>)}</div> : null}
         <div className="section-divider"><span>오늘 예정 업무</span><b>{active.length}</b></div>

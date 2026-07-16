@@ -103,4 +103,8 @@ export const api = {
   addEventComment: (id,body) => request(`/events/${id}/comments`,json('POST',{body})),
   updateEventComment: (id,commentId,body) => request(`/events/${id}/comments/${commentId}`,json('PATCH',{body})),
   deleteEventComment: (id,commentId) => request(`/events/${id}/comments/${commentId}`,{method:'DELETE'}),
+  todoComments: id => request(`/todos/${id}/comments`),
+  addTodoComment: (id,body) => request(`/todos/${id}/comments`,json('POST',{body})),
+  updateTodoComment: (id,commentId,body) => request(`/todos/${id}/comments/${commentId}`,json('PATCH',{body})),
+  deleteTodoComment: (id,commentId) => request(`/todos/${id}/comments/${commentId}`,{method:'DELETE'}),
 }
