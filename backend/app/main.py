@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import secrets
@@ -9,7 +10,7 @@ from typing import Literal
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import Body, Cookie, Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Body, Cookie, Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
@@ -1152,6 +1153,73 @@ def task_comments_delete(task_id: int, comment_id: int, user=Depends(require_use
             raise HTTPException(404, "Comment not found")
         c.execute("DELETE FROM task_comments WHERE id=? AND user_id=?", (comment_id, user))
     audit(user, "delete", "task_comment", comment_id, {"task_id": task_id})
+    return {"ok": True}
+
+
+MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
+MAX_ATTACHMENTS_PER_TASK = 20
+
+
+@app.get("/api/tasks/{task_id}/attachments")
+def task_attachments_list(task_id: int, user=Depends(require_user)):
+    with connection() as c:
+        task = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (task_id, user)).fetchone()
+        if not task:
+            raise HTTPException(404, "Task not found")
+        items = [row_dict(r) for r in c.execute(
+            "SELECT id,user_id,task_id,filename,content_type,size_bytes,created_at FROM task_attachments WHERE task_id=? AND user_id=? ORDER BY created_at",
+            (task_id, user)).fetchall()]
+    return {"items": items}
+
+
+@app.post("/api/tasks/{task_id}/attachments")
+async def task_attachments_create(task_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    data = await file.read()
+    if not data:
+        raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
+    if len(data) > MAX_ATTACHMENT_BYTES:
+        raise HTTPException(422, "파일 크기는 5MB 이하만 첨부할 수 있습니다.")
+    with connection() as c:
+        task = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (task_id, user)).fetchone()
+        if not task:
+            raise HTTPException(404, "Task not found")
+        count = c.execute("SELECT COUNT(*) n FROM task_attachments WHERE task_id=? AND user_id=?", (task_id, user)).fetchone()["n"]
+        if count >= MAX_ATTACHMENTS_PER_TASK:
+            raise HTTPException(422, f"첨부파일은 최대 {MAX_ATTACHMENTS_PER_TASK}개까지 등록할 수 있습니다.")
+        filename = (file.filename or "attachment")[:255]
+        content_type = file.content_type or "application/octet-stream"
+        cur = c.execute(
+            "INSERT INTO task_attachments(user_id,task_id,filename,content_type,size_bytes,data_base64,created_at) VALUES(?,?,?,?,?,?,?)",
+            (user, task_id, filename, content_type, len(data), base64.b64encode(data).decode("ascii"), now()))
+        item = row_dict(c.execute(
+            "SELECT id,user_id,task_id,filename,content_type,size_bytes,created_at FROM task_attachments WHERE id=?",
+            (cur.lastrowid,)).fetchone())
+    audit(user, "create", "task_attachment", item["id"], {"task_id": task_id, "filename": filename})
+    return item
+
+
+@app.get("/api/tasks/{task_id}/attachments/{attachment_id}/download")
+def task_attachments_download(task_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        row = c.execute(
+            "SELECT * FROM task_attachments WHERE id=? AND task_id=? AND user_id=?", (attachment_id, task_id, user)).fetchone()
+        if not row:
+            raise HTTPException(404, "Attachment not found")
+        item = row_dict(row)
+    data = base64.b64decode(item["data_base64"])
+    return Response(content=data, media_type=item["content_type"], headers={
+        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+
+
+@app.delete("/api/tasks/{task_id}/attachments/{attachment_id}")
+def task_attachments_delete(task_id: int, attachment_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute(
+            "SELECT id FROM task_attachments WHERE id=? AND task_id=? AND user_id=?", (attachment_id, task_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Attachment not found")
+        c.execute("DELETE FROM task_attachments WHERE id=? AND user_id=?", (attachment_id, user))
+    audit(user, "delete", "task_attachment", attachment_id, {"task_id": task_id})
     return {"ok": True}
 
 

@@ -36,7 +36,8 @@ export async function request(path, options = {}) {
     : timeoutController.signal
   let response
   try {
-    response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', signal, headers: { 'Content-Type': 'application/json', ...fetchOptions.headers } })
+    const isFormData = fetchOptions.body instanceof FormData
+    response = await fetch(`${API}${path}`, { ...fetchOptions, credentials: 'include', signal, headers: { ...(isFormData ? {} : { 'Content-Type': 'application/json' }), ...fetchOptions.headers } })
   } catch (error) {
     if (callerSignal?.aborted) throw error
     if (error?.name === 'AbortError') throw new ApiError('요청 시간이 초과되었습니다. 다시 시도해 주세요.', 0)
@@ -99,6 +100,10 @@ export const api = {
   addTaskComment: (id,body) => request(`/tasks/${id}/comments`,json('POST',{body})),
   updateTaskComment: (id,commentId,body) => request(`/tasks/${id}/comments/${commentId}`,json('PATCH',{body})),
   deleteTaskComment: (id,commentId) => request(`/tasks/${id}/comments/${commentId}`,{method:'DELETE'}),
+  taskAttachments: id => request(`/tasks/${id}/attachments`),
+  uploadTaskAttachment: (id,file) => { const body = new FormData(); body.append('file', file); return request(`/tasks/${id}/attachments`,{method:'POST',body}) },
+  deleteTaskAttachment: (id,attachmentId) => request(`/tasks/${id}/attachments/${attachmentId}`,{method:'DELETE'}),
+  taskAttachmentDownloadUrl: (id,attachmentId) => `${API}/tasks/${id}/attachments/${attachmentId}/download`,
   eventComments: id => request(`/events/${id}/comments`),
   addEventComment: (id,body) => request(`/events/${id}/comments`,json('POST',{body})),
   updateEventComment: (id,commentId,body) => request(`/events/${id}/comments/${commentId}`,json('PATCH',{body})),

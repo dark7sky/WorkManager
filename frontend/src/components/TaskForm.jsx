@@ -26,6 +26,10 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [commentError, setCommentError] = useState('')
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingCommentText, setEditingCommentText] = useState('')
+  const [attachments, setAttachments] = useState([])
+  const [attachmentError, setAttachmentError] = useState('')
+  const [uploadingAttachment, setUploadingAttachment] = useState(false)
+  const attachmentInputRef = useRef(null)
   const formRef = useRef(null)
   const progressRef = useRef(null)
   const applyChecklistProgress = () => {
@@ -95,6 +99,40 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     api.taskComments(task.id).then(res => { if (!cancelled) setComments(res.items || []) }).catch(() => {})
     return () => { cancelled = true }
   }, [task?.id])
+
+  useEffect(() => {
+    setAttachments([])
+    setAttachmentError('')
+    if (!task?.id) return
+    let cancelled = false
+    api.taskAttachments(task.id).then(res => { if (!cancelled) setAttachments(res.items || []) }).catch(() => {})
+    return () => { cancelled = true }
+  }, [task?.id])
+
+  const uploadAttachment = async e => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setAttachmentError('')
+    setUploadingAttachment(true)
+    try {
+      const item = await api.uploadTaskAttachment(task.id, file)
+      setAttachments([...attachments, item])
+    } catch (err) {
+      setAttachmentError(err.message)
+    } finally {
+      setUploadingAttachment(false)
+    }
+  }
+  const removeAttachment = async id => {
+    try {
+      await api.deleteTaskAttachment(task.id, id)
+      setAttachments(attachments.filter(a => a.id !== id))
+    } catch (err) {
+      setAttachmentError(err.message)
+    }
+  }
+  const formatAttachmentSize = bytes => bytes < 1024 ? `${bytes}B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)}KB` : `${(bytes / (1024 * 1024)).toFixed(1)}MB`
 
   const addComment = async () => {
     const body = commentText.trim()
@@ -247,6 +285,16 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       </div>)}
       <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
       {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
+    </div> : null}
+    {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
+      {attachments.map(item => <div key={item.id} className="checklist-editor-item">
+        <a href={api.taskAttachmentDownloadUrl(task.id, item.id)} target="_blank" rel="noopener noreferrer">{item.filename}</a>
+        <span className="muted"> {formatAttachmentSize(item.size_bytes)}</span>
+        <button type="button" className="text-button" onClick={() => removeAttachment(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : null}</div>
+      <p className="muted">파일당 최대 5MB, 업무당 최대 20개까지 첨부할 수 있습니다.</p>
+      {attachmentError ? <p className="form-error" role="alert">{attachmentError}</p> : null}
     </div> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>

@@ -368,6 +368,48 @@ class ApiTests(unittest.TestCase):
         logs = a.get("/api/audit-logs?limit=500").json()["items"]
         self.assertTrue(any(x["entity_type"] == "task_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
 
+    def test_task_attachments_upload_download_delete_and_size_limit(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        task = a.post("/api/tasks", json={"title": "task with attachments"}).json()
+        empty = a.get(f"/api/tasks/{task['id']}/attachments")
+        self.assertEqual(empty.status_code, 200, empty.text)
+        self.assertEqual(empty.json()["items"], [])
+        self.assertEqual(b.get(f"/api/tasks/{task['id']}/attachments").status_code, 404)
+
+        uploaded = a.post(f"/api/tasks/{task['id']}/attachments",
+                           files={"file": ("notes.txt", b"hello world", "text/plain")})
+        self.assertEqual(uploaded.status_code, 200, uploaded.text)
+        item = uploaded.json()
+        self.assertEqual(item["filename"], "notes.txt")
+        self.assertEqual(item["size_bytes"], 11)
+        self.assertNotIn("data_base64", item)
+
+        self.assertEqual(b.post(f"/api/tasks/{task['id']}/attachments",
+                                 files={"file": ("sneaky.txt", b"x", "text/plain")}).status_code, 404)
+
+        listed = a.get(f"/api/tasks/{task['id']}/attachments")
+        self.assertEqual(len(listed.json()["items"]), 1)
+
+        attachment_id = item["id"]
+        self.assertEqual(b.get(f"/api/tasks/{task['id']}/attachments/{attachment_id}/download").status_code, 404)
+        downloaded = a.get(f"/api/tasks/{task['id']}/attachments/{attachment_id}/download")
+        self.assertEqual(downloaded.status_code, 200, downloaded.text)
+        self.assertEqual(downloaded.content, b"hello world")
+
+        too_big = a.post(f"/api/tasks/{task['id']}/attachments",
+                          files={"file": ("big.bin", b"0" * (5 * 1024 * 1024 + 1), "application/octet-stream")})
+        self.assertEqual(too_big.status_code, 422)
+
+        empty_file = a.post(f"/api/tasks/{task['id']}/attachments", files={"file": ("empty.txt", b"", "text/plain")})
+        self.assertEqual(empty_file.status_code, 422)
+
+        self.assertEqual(b.delete(f"/api/tasks/{task['id']}/attachments/{attachment_id}").status_code, 404)
+        deleted = a.delete(f"/api/tasks/{task['id']}/attachments/{attachment_id}")
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}/attachments").json()["items"], [])
+        logs = a.get("/api/audit-logs?limit=500").json()["items"]
+        self.assertTrue(any(x["entity_type"] == "task_attachment" and x["action"] == "delete" and x["entity_id"] == str(attachment_id) for x in logs))
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_comments_are_user_scoped_and_persisted(self, *_):

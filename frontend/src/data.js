@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-attachments',
+    timestamp: '2026-07-17T05:26:00+09:00',
+    description: '업무에는 URL 링크만 첨부할 수 있어 문서나 이미지 파일을 공유하려면 별도 클라우드 링크가 필요했습니다. 업무 편집 화면에 파일 첨부 기능을 추가해 파일당 5MB, 업무당 20개까지 직접 업로드/다운로드/삭제할 수 있게 했습니다(backend/app/db.py의 task_attachments 테이블, backend/app/main.py의 /api/tasks/{id}/attachments 엔드포인트, frontend/src/components/TaskForm.jsx).',
+  },
+  {
     id: '2026-07-17-task-select-all',
     timestamp: '2026-07-17T00:41:00+09:00',
     description: '업무 관리(간트) 화면 일괄 작업이 항목을 하나씩 선택해야만 했습니다. 목록 헤더에 "전체 선택" 체크박스를 추가해 현재 필터에 표시된 업무를 한 번에 선택/해제할 수 있게 했습니다(frontend/src/taskFilters.js의 allIdsSelected/toggleSelectAllIds, frontend/src/screens/Tasks.jsx).',
