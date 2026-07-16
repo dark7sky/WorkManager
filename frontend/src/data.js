@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-mobile-calendar-month-grid',
+    timestamp: '2026-07-16T18:50:25+09:00',
+    description: '모바일 화면에서는 일정 화면에서 "월"을 선택해도 달력이 아니라 목록으로만 표시돼 월간 일정을 한눈에 보기 어려웠습니다. 모바일에서도 월간 보기에서는 달력 그리드를(가로 스크롤 지원), 주간 보기에서는 기존 목록을 보여주도록 CSS를 view 상태에 맞춰 분기했습니다(frontend/src/screens/Calendar.jsx의 cal-view-${view} 클래스, frontend/src/styles.css).',
+  },
+  {
     id: '2026-07-16-log-link-done-tasks',
     timestamp: '2026-07-16T13:07:17+09:00',
     description: '오늘 화면에서 "한 일" 기록을 업무와 연결할 때 완료 처리된 업무는 선택 목록에서 아예 빠져 있어 지난 완료 업무를 나중에 연결할 수 없었습니다. 연결 업무 선택창(신규 기록/기존 기록 수정)에서 완료된 업무를 "완료된 업무" 그룹으로 목록 하단에 추가해 선택할 수 있게 했습니다(frontend/src/screens/Today.jsx의 linkableDoneTasks).',
