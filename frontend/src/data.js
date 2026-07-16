@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-invoice-client-name',
+    timestamp: '2026-07-17T00:08:36+09:00',
+    description: '청구서 PDF에는 청구 가능 시간과 금액만 있을 뿐, 실제로 누구 앞으로 보내는 청구서인지 표시할 곳이 없어 매번 인쇄물에 손으로 고객사명을 적어 넣어야 했습니다. 설정 화면에 "청구 대상 이름"을 저장하는 필드를 추가하고, 청구서 PDF 상단에 "청구 대상: OOO"으로 표시되게 했습니다(백엔드 `billing_client_name` 설정, `frontend/src/screens/Settings.jsx`, `frontend/src/invoiceReport.js`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-17-invoice-pdf-export',
     timestamp: '2026-07-17T00:07:39+09:00',
     description: '청구 가능 시간과 청구 시급, 청구 예상 금액까지 다 계산해 놓고도, 실제 고객에게 보낼 청구서 형태의 문서로 뽑을 방법은 없어 표를 다시 만들어야 했습니다. 성과 화면에 "청구서 PDF" 버튼을 추가해, 선택한 기간의 청구 가능한 업무 기록만 날짜·내용·시간과 함께 나열하고 시급을 곱한 합계 금액을 담은 인쇄용 문서를 새 창으로 열어 인쇄/PDF 저장할 수 있게 했습니다(frontend/src/invoiceReport.js, frontend/src/screens/Performance.jsx).',

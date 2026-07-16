@@ -16,7 +16,7 @@ export const invoiceTotals = (logs, hourlyRate) => {
   return { minutes, amount: rate ? Math.round(minutes / 60 * rate) : 0 }
 }
 
-export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
+export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
   const billable = billableWorkLogs(logs)
   const { minutes, amount } = invoiceTotals(logs, hourlyRate)
   const rows = billable.map(log => `<tr>
@@ -47,6 +47,7 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, gener
 <body>
   <header>
     <h1>${escapeHtml(title)}</h1>
+    ${clientName ? `<p>청구 대상: ${escapeHtml(clientName)}</p>` : ''}
     <p>청구 기간: ${escapeHtml(start || '-')} ~ ${escapeHtml(end || '-')}</p>
     <p>생성 시각: ${escapeHtml(generatedAt)}</p>
   </header>

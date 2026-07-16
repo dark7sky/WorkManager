@@ -34,6 +34,16 @@ test('workLogsToPrintableInvoice renders escaped billable rows and totals', () =
   assert.match(html, /120,000원/)
 })
 
+test('workLogsToPrintableInvoice shows escaped client name when provided', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', clientName: '<Acme> Corp' })
+  assert.match(html, /청구 대상: &lt;Acme&gt; Corp/)
+})
+
+test('workLogsToPrintableInvoice omits client line when not provided', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03' })
+  assert.doesNotMatch(html, /청구 대상:/)
+})
+
 test('workLogsToPrintableInvoice handles no billable logs', () => {
   const html = workLogsToPrintableInvoice([], { start: '2026-07-01', end: '2026-07-03' })
   assert.match(html, /청구 가능한 업무 기록이 없습니다/)

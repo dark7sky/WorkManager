@@ -107,6 +107,12 @@ def load_billing_hourly_rate_setting(user_id):
     return float(row["value"]) if row else None
 
 
+def load_billing_client_name_setting(user_id):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, "billing_client_name")).fetchone()
+    return row["value"] if row else None
+
+
 def _ics_escape(value):
     return str(value or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
@@ -517,6 +523,7 @@ class AISettingsPayload(StrictPayload):
 class WorkflowSettingsPayload(StrictPayload):
     approval_workflow: bool | None = None
     billing_hourly_rate: float | None = Field(None, ge=0, le=1000000)
+    billing_client_name: str | None = Field(None, max_length=200)
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -1638,6 +1645,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
                         "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
                         "billable_minutes": billable_minutes,
                         "billing_hourly_rate": hourly_rate,
+                        "billing_client_name": load_billing_client_name_setting(user),
                         "billable_amount": round(billable_minutes / 60 * hourly_rate, 2) if hourly_rate is not None else None,
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
@@ -1688,7 +1696,7 @@ async def ai_settings_test(user=Depends(require_user)):
 @app.get("/api/settings/workflow")
 def workflow_settings(user=Depends(require_user)):
     approval_workflow_on = load_approval_workflow_setting(user)
-    return {"approval_workflow": approval_workflow_on, "billing_hourly_rate": load_billing_hourly_rate_setting(user)}
+    return {"approval_workflow": approval_workflow_on, "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user)}
 
 
 @app.put("/api/settings/workflow")
@@ -1716,7 +1724,17 @@ def workflow_settings_update(payload: dict = Body(...), user=Depends(require_use
                   ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
                           (user, "billing_hourly_rate", str(rate), now()))
         audit(user, "update", "settings", "billing_hourly_rate", {"billing_hourly_rate": rate})
-    return {"approval_workflow": load_approval_workflow_setting(user), "billing_hourly_rate": load_billing_hourly_rate_setting(user)}
+    if "billing_client_name" in value:
+        client_name = (value["billing_client_name"] or "").strip() or None
+        with connection() as c:
+            if client_name is None:
+                c.execute("DELETE FROM app_settings WHERE user_id=? AND key=?", (user, "billing_client_name"))
+            else:
+                c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+                  ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                          (user, "billing_client_name", client_name, now()))
+        audit(user, "update", "settings", "billing_client_name", {"billing_client_name": client_name})
+    return {"approval_workflow": load_approval_workflow_setting(user), "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user)}
 
 
 @app.get("/api/settings/calendar-feed")
