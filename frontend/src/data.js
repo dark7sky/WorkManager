@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-bulk-action-undo-coverage',
+    timestamp: '2026-07-16T19:33:00+09:00',
+    description: '업무 화면의 "일괄 완료 처리"/"우선순위 변경" 일괄 작업에는 실행 취소 버튼이 있었지만, 같은 화면의 "일괄 연기"와 오늘 화면의 할 일 "일괄 완료"/"일괄 태그 추가"/"이월"에는 실행 취소가 없어 잘못 눌러도 되돌릴 방법이 없었습니다. 네 가지 일괄 작업 모두 변경 전 상태를 스냅샷으로 저장했다가 "실행 취소" 토스트로 복원하도록 맞췄습니다(frontend/src/App.jsx의 onBulkPostpone, onBulkCompleteTodo, onBulkAddTagTodo, onCarryOverTodos).',
+  },
+  {
     id: '2026-07-16-task-dependency-search',
     timestamp: '2026-07-16T19:24:13+09:00',
     description: '업무 수정 화면의 "선행 업무" 선택 목록은 높이 160px짜리 고정 스크롤 상자라, 업무 수가 많아지면 원하는 선행 업무를 찾으려면 계속 스크롤해야 했습니다. 선택지가 6개 이상일 때 검색창을 추가해 제목으로 바로 필터링할 수 있게 했고, 필터로 가려진 항목도 체크 상태는 그대로 유지되도록(DOM에서 제거하지 않고 숨김 처리) 했습니다(frontend/src/taskHierarchy.js의 matchesDependencyFilter, frontend/src/components/TaskForm.jsx).',
