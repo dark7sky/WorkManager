@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-csv-billable-amount',
+    timestamp: '2026-07-17T00:01:47+09:00',
+    description: '업무 기록 CSV 내보내기에는 "청구 가능" 여부만 있어 실제 청구 금액은 시급을 곱해 직접 계산해야 했습니다. 설정에 저장된 청구 시급을 불러와 청구 가능한 기록마다 "청구 금액(원)" 열을 계산해 함께 내보내도록 했습니다(frontend/src/csv.js workLogsToCsv, frontend/src/screens/Today.jsx).',
+  },
+  {
     id: '2026-07-16-billing-hourly-rate',
     timestamp: '2026-07-16T23:55:13+09:00',
     description: '청구 가능 시간을 집계해도 실제 청구 금액은 직접 계산해야 했습니다. 설정 화면에 "청구 시급" 입력을 추가하고(`PUT /api/settings/workflow`의 billing_hourly_rate), 성과 화면 통계와 `/api/achievements` 응답에 시급을 반영한 "청구 예상 금액"을 함께 보여주도록 했습니다(backend/app/main.py, frontend/src/screens/Settings.jsx, frontend/src/screens/Performance.jsx).',

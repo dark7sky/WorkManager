@@ -42,6 +42,8 @@ export default function Today(props) {
   const logImportInputRef = useRef(null)
   const [selectedTodoIds, setSelectedTodoIds] = useState(() => new Set())
   const [bulkTodoTag, setBulkTodoTag] = useState('')
+  const [billingHourlyRate, setBillingHourlyRate] = useState(null)
+  useEffect(() => { api.workflowSettings().then(s => setBillingHourlyRate(s?.billing_hourly_rate ?? null)).catch(() => {}) }, [])
   const now = new Date()
   const dateText = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(now)
   const [todoDraft, setTodoDraft] = useState('')
@@ -289,7 +291,7 @@ export default function Today(props) {
   const bulkDeleteTodos = () => { onBulkDeleteTodo([...selectedTodoIds]); clearSelectedTodos() }
   const bulkAddTagTodos = async () => { const tag = bulkTodoTag.trim(); if (!tag) return; if (await onBulkAddTagTodo([...selectedTodoIds], tag)) setBulkTodoTag('') }
   const exportLogs = () => {
-    const csv = `﻿${workLogsToCsv(shownLogs, taskTitle)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const csv = `﻿${workLogsToCsv(shownLogs, taskTitle, billingHourlyRate)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const importLogsCsv = async event => {
