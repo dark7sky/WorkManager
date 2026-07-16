@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-filter-presets',
+    timestamp: '2026-07-17T06:13:30+09:00',
+    description: '업무 화면은 검색/태그/우선순위 조합을 이름 붙여 저장했다가 다시 불러올 수 있었지만, 오늘 화면(할 일)은 매번 필터를 새로 설정해야 했습니다. 업무 화면과 동일한 방식으로 오늘 화면에도 "필터 저장/선택/삭제" 기능을 추가해, 자주 쓰는 할 일 필터 조합(예: 높은 우선순위 + 특정 태그)을 저장하고 재사용할 수 있습니다 (`frontend/src/todoFilterPresets.js`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-17-calendar-year-view',
     timestamp: '2026-07-17T06:12:00+09:00',
     description: '캘린더 화면은 월간/주간 보기만 지원해, 올해 남은 일정이나 특정 달의 위치를 확인하려면 매번 월을 하나씩 넘겨야 했습니다. "년" 보기를 추가해 12개월을 한 화면에 미니 달력으로 보여주고, 일정이 있는 날짜에 표시를 남기며, 달을 클릭하면 해당 월의 월간 보기로 바로 이동합니다 (`frontend/src/calendarYear.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/styles.css`).',

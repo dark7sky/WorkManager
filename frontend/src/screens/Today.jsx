@@ -7,6 +7,7 @@ import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, sta
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
+import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
@@ -277,6 +278,10 @@ export default function Today(props) {
   const [selectedTags, setSelectedTags] = useState([])
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
+  const [todoFilterPresets, setTodoFilterPresets] = useState(() => loadTodoFilterPresets())
+  const applyTodoFilterPreset = id => { const preset = todoFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setTodoPriorityFilter(preset.priority) }
+  const saveTodoFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildTodoFilterPreset({ name, query, selectedTags, priority: todoPriorityFilter }); const next = addTodoFilterPreset(todoFilterPresets, preset); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
+  const deleteTodoFilterPreset = () => { const name = window.prompt('삭제할 필터 이름을 입력하세요.'); const match = todoFilterPresets.find(p => p.name === name); if (!match) return; const next = removeTodoFilterPreset(todoFilterPresets, match.id); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
   const [tagSuggestions, setTagSuggestions] = useState({})
   const [timer, setTimer] = useState(() => loadWorkLogTimer())
   const [timerNow, setTimerNow] = useState(() => new Date())
@@ -496,6 +501,7 @@ export default function Today(props) {
         <input className="search" type="search" value={query} onChange={event => setQuery(event.target.value)} aria-label="할 일/기록 검색" placeholder="할 일, 업무 기록 검색"/>
         <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
         <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
+        <div className="filter-preset-bar">{todoFilterPresets.length ? <select aria-label="저장된 필터" defaultValue="" onChange={e => { applyTodoFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{todoFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveTodoFilterPreset}>필터 저장</button>{todoFilterPresets.length ? <button type="button" className="text-button" onClick={deleteTodoFilterPreset}>필터 삭제</button> : null}</div>
         <form className="quick-entry" onSubmit={submitTodo}>
           <div className="task-template-bar"><label>Todo 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{todoTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveTodoTemplate}>템플릿으로 저장</button>{todoTemplates.length ? <button type="button" className="text-button" onClick={deleteTodoTemplate}>템플릿 삭제</button> : null}</div>
           <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><select aria-label="우선순위" value={todoPriority} onChange={event => setTodoPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={todoRecurrence} onChange={event => setTodoRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="monthly">매월</option></select>{todoRecurrence ? <input type="date" aria-label="반복 종료일" value={todoRecurrenceEnd} onChange={event => setTodoRecurrenceEnd(event.target.value)}/> : null}<input type="time" aria-label="시간" value={todoTime} onChange={event => setTodoTime(event.target.value)}/><button disabled={saving === 'todo'}>추가</button></div>
