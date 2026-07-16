@@ -5,6 +5,7 @@ import { api } from '../api'
 import { TagChips, TagFilter } from '../components/TagsInput'
 import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, loadPerformanceGoal, savePerformanceGoal, goalProgress } from '../performanceReport'
 import { timelineToCsv, timelineCsvFilename } from '../csv'
+import { billableWorkLogs, workLogsToPrintableInvoice, invoiceFilename } from '../invoiceReport'
 
 const getRange = presetRange
 const PRESETS = [['lastweek', '지난주 리뷰'], ['month', '이번 달'], ['quarter', '이번 분기'], ['year', '올해'], ['custom', '직접 선택']]
@@ -103,6 +104,16 @@ export default function Performance({ notify, onDataChanged }) {
     notify('활동 타임라인을 CSV로 내려받았습니다.')
   }, [data, invalidRange, dates, notify])
 
+  const printInvoice = useCallback(() => {
+    if (!data || invalidRange) return
+    const html = workLogsToPrintableInvoice(data.work_logs || [], { start: dates[0], end: dates[1], hourlyRate: data.summary?.billing_hourly_rate, generatedAt: new Date().toISOString() })
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.open(); win.document.write(html); win.document.close()
+    win.document.title = invoiceFilename(dates[0], dates[1])
+    win.focus(); win.print()
+  }, [data, invalidRange, dates])
+
   const saveCurrentPreset = useCallback(() => {
     if (!presetName.trim()) return
     const newPresets = saveReportPreset(localStorage, savedPresets, { name: presetName, preset, start: dates[0], end: dates[1], tags: selected })
@@ -140,7 +151,7 @@ export default function Performance({ notify, onDataChanged }) {
   const progress = useMemo(() => goalProgress(stats, goal), [stats, goal])
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
-    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button></section>
+    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button>{data && billableWorkLogs(data.work_logs || []).length ? <button type="button" className="secondary" disabled={reportLoading || invalidRange} onClick={printInvoice}><Wallet size={17}/> 청구서 PDF</button> : null}</section>
     {invalidRange ? <p className="inline-error">종료일은 시작일 이후여야 합니다.</p> : null}
     <TagFilter tags={knownTags} selected={selected} onChange={setSelected}/>
     <div className="report-presets">

@@ -1,7 +1,8 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-17 (00:04 KST)
+Last updated: 2026-07-17 (00:07 KST)
 
+- [x] Invoice PDF export (2026-07-17): billable minutes/hourly rate/billable amount were all tracked (Performance stats, CSV, Markdown) but there was no client-ready invoice document — pulling billable work into an invoice meant rebuilding a table by hand. Added a "청구서 PDF" button on the Performance screen that opens a printable invoice (billable work log rows for the selected period, total hours, and hourly-rate × hours amount) via `window.print()`, reusing the existing `data.work_logs`/`GET /api/achievements` response (`frontend/src/invoiceReport.js`, wired into `frontend/src/screens/Performance.jsx`).
 - [x] Markdown performance report billable amount (2026-07-17): the report shared `billable_minutes` with the Performance screen/CSV but omitted `billable_amount`, so exported reports needed manual math against the billing rate. Added the same "청구 예상 금액" line to `performanceReportMarkdown` when an hourly rate is set (`frontend/src/performanceReport.js`).
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).

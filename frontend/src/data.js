@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-invoice-pdf-export',
+    timestamp: '2026-07-17T00:07:39+09:00',
+    description: '청구 가능 시간과 청구 시급, 청구 예상 금액까지 다 계산해 놓고도, 실제 고객에게 보낼 청구서 형태의 문서로 뽑을 방법은 없어 표를 다시 만들어야 했습니다. 성과 화면에 "청구서 PDF" 버튼을 추가해, 선택한 기간의 청구 가능한 업무 기록만 날짜·내용·시간과 함께 나열하고 시급을 곱한 합계 금액을 담은 인쇄용 문서를 새 창으로 열어 인쇄/PDF 저장할 수 있게 했습니다(frontend/src/invoiceReport.js, frontend/src/screens/Performance.jsx).',
+  },
+  {
     id: '2026-07-17-performance-report-billable-amount',
     timestamp: '2026-07-17T00:04:08+09:00',
     description: '성과 화면과 업무 기록 CSV에는 "청구 예상 금액"이 표시되지만, 같은 통계를 담는 Markdown 성과 보고서(내보내기)에는 청구 가능 시간만 있고 금액이 빠져 있었습니다. 청구 시급이 설정된 경우 보고서 요약에도 "청구 예상 금액" 줄을 추가했습니다(frontend/src/performanceReport.js).',
