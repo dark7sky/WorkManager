@@ -368,6 +368,19 @@ class ApiTests(unittest.TestCase):
         logs = a.get("/api/audit-logs?limit=500").json()["items"]
         self.assertTrue(any(x["entity_type"] == "task_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
 
+    def test_task_list_includes_comment_count(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        with_comments = a.post("/api/tasks", json={"title": "task with comments"}).json()
+        without_comments = a.post("/api/tasks", json={"title": "task without comments"}).json()
+        a.post(f"/api/tasks/{with_comments['id']}/comments", json={"body": "댓글1"})
+        a.post(f"/api/tasks/{with_comments['id']}/comments", json={"body": "댓글2"})
+        listed = {t["id"]: t for t in a.get("/api/tasks").json()}
+        self.assertEqual(listed[with_comments["id"]]["comment_count"], 2)
+        self.assertEqual(listed[without_comments["id"]]["comment_count"], 0)
+        b_task = b.post("/api/tasks", json={"title": "other user task"}).json()
+        b.post(f"/api/tasks/{b_task['id']}/comments", json={"body": "몰래"})
+        self.assertNotIn(b_task["id"], {t["id"] for t in a.get("/api/tasks").json()})
+
     def test_task_attachments_upload_download_delete_and_size_limit(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "task with attachments"}).json()

@@ -1049,7 +1049,14 @@ def update_item(table, item_id, data, user_id):
 for _table in CONFIG:
     def list_endpoint(tags: str | None = None, table=_table, user=Depends(require_user)):
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
-        return rows(table, user, f"ORDER BY {order} DESC", tags=(tags or "").split(","))
+        items = rows(table, user, f"ORDER BY {order} DESC", tags=(tags or "").split(","))
+        if table == "tasks" and items:
+            with connection() as c:
+                counts = dict(c.execute(
+                    "SELECT task_id, COUNT(*) FROM task_comments WHERE user_id=? GROUP BY task_id", (user,)).fetchall())
+            for item in items:
+                item["comment_count"] = counts.get(item["id"], 0)
+        return items
 
     def get_endpoint(item_id: int, table=_table, user=Depends(require_user)):
         items = rows(table, user, "WHERE id=?", (item_id,))
