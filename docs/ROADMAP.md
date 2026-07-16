@@ -1,6 +1,6 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-15 (02:32 KST)
+Last updated: 2026-07-16 (19:05 KST)
 
 See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0-P4, done; Wave 2: AI summary evidence and team/assignee feature removal, done; Wave 3: correctness audit and bug fixes, done; Wave 4: undo-delete toast and a browser-verified layout fix, done; Wave 5: live user feedback queue, done; Wave 6: visual design refresh and dark-mode color fixes, done; Wave 7: stability and feature items 33-46, mostly done — see plan for per-item status).
 
@@ -62,6 +62,7 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Subtask completion summary ("하위 업무 n/m 완료") shown on parent rows in the task list (Wave 7 item 37).
 - [x] Gantt task list sorts sibling rows by start date (falling back to due date, then title) instead of alphabetically, so the visible order matches the actual schedule (Wave 8 item 38).
 - [x] Task dependency picker in the task form: `dependency_ids` had full backend cycle-prevention and blocker display, but no UI ever let a user set it — the form now includes a "선행 업무" multi-select (Wave 9 item 39).
+- [x] Estimated-time overrun badge on the task list row: `taskEstimateOverrun`/`taskWorkLogsTotalMinutes` (`taskLogs.js`) already flagged overruns inside the "관련 업무 기록" modal, but a user had to open that modal per task to notice one. `Tasks.jsx` now receives the `logs` list from `App.jsx` and shows a "N시간 초과" badge directly on the gantt/board row when logged time exceeds the estimate, reusing the existing helpers and CSS class (Wave 10 item 40, 2026-07-16).
 - [x] Event templates: tasks and today's quick todos already had localStorage-based save/apply/delete templates, but the calendar event form had no equivalent, so recurring meetings had to be retyped each time. Added the same pattern for events (title/location/color/tags, `frontend/src/eventTemplates.js`, wired into `Calendar.jsx`'s `EventForm`, 2026-07-14).
 
 ## Backlog (identified 2026-07-11, not yet implemented)

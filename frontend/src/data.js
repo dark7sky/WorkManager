@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-16-task-row-estimate-overrun-badge',
+    timestamp: '2026-07-16T19:05:00+09:00',
+    description: '업무의 예상 소요 시간 대비 실제 기록 시간 초과 여부는 "관련 업무 기록" 모달을 열어야만 확인할 수 있었습니다. 업무 목록(간트) 행에도 실제 기록 시간이 예상 시간을 초과한 경우 "N시간 초과" 배지를 바로 표시해, 모달을 열지 않고도 한눈에 확인할 수 있도록 했습니다(frontend/src/screens/Tasks.jsx, frontend/src/taskLogs.js의 기존 taskWorkLogs/taskWorkLogsTotalMinutes/taskEstimateOverrun 재사용, frontend/src/App.jsx가 logs를 Tasks 화면에 전달).',
+  },
+  {
     id: '2026-07-16-changelog-ai-summary',
     timestamp: '2026-07-16T18:52:21+09:00',
     description: '변경 이력이 계속 길어져 지난 항목을 찾기 어렵다는 요청이 있었습니다. 등록된 지 7일이 지난 항목은 월별로 묶어 AI(설정 안 되어 있으면 규칙 기반) 요약으로 압축해 보여주고, 최근 7일 항목은 그대로 표시하도록 변경했습니다(frontend/src/changelogSummary.js, frontend/src/screens/Changelog.jsx, backend/app/ai.py의 smart_changelog_summary, POST /api/public/changelog-summary).',
