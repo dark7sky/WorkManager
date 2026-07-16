@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-event-form-inline-validation',
+    timestamp: '2026-07-17T06:05:00+09:00',
+    description: '업무(Task) 편집 폼은 제목/완료 예정일 오류를 해당 입력 칸에 빨간 테두리와 문구로 바로 보여주는 인라인 검증이 있었지만, 캘린더 일정 폼은 "종료 시간이 시작 시간보다 빠름" 같은 같은 종류의 오류를 화면 하단 배너 문구 하나로만 보여줘 어느 입력칸이 문제인지 알기 어려웠습니다. `formValidation.js`에 `validateEventForm`을 추가하고, 업무 폼과 같은 패턴으로 일정 제목/종료 시간 입력에 인라인 오류 표시를 적용했습니다 (`frontend/src/formValidation.js`, `frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-17-worklog-bulk-actions',
     timestamp: '2026-07-17T05:58:00+09:00',
     description: '업무(Tasks), 오늘 할 일(Todo), 캘린더 일정 목록은 모두 여러 항목을 한 번에 선택해 삭제/태그 추가 등을 하는 일괄 작업 기능이 있었지만, 오늘 화면의 "오늘 한 일"(업무 기록) 목록만 항목별로 하나씩 삭제/태그를 추가해야 했습니다. 업무 기록 목록에도 같은 선택 체크박스 + 일괄 작업 바 패턴을 추가해 여러 기록을 한 번에 삭제하거나 태그를 추가할 수 있도록 했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',

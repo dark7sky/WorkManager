@@ -17,6 +17,7 @@ import { holidayNameForDate } from '../holidays'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
 import { findOverlappingEvents } from '../eventOverlap'
+import { validateEventForm } from '../formValidation'
 import { api } from '../api'
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토']
@@ -39,6 +40,7 @@ function overlapsDay(event, day) {
 function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate, onCancel }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [tags, setTags] = useState(() => event?.tags || [])
   const [suggestions, setSuggestions] = useState([])
   const [startValue, setStartValue] = useState(() => localInput(event?.start_at || event?.start || `${date}T09:00:00`))
@@ -192,8 +194,10 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const submit = async formEvent => {
     formEvent.preventDefault()
     const data = Object.fromEntries(new FormData(formEvent.currentTarget))
-    if (new Date(data.end_at) <= new Date(data.start_at)) { setError('종료 시간은 시작 시간보다 늦어야 합니다.'); return }
+    const errors = validateEventForm(data)
+    if (Object.keys(errors).length) { setFieldErrors(errors); setError(Object.values(errors)[0]); return }
     if (repeatRule && repeatUntil && new Date(repeatUntil) < new Date(data.start_at)) { setError('반복 종료일은 시작일 이후여야 합니다.'); return }
+    setFieldErrors({})
     setSaving(true)
     setError('')
     const linkUrl = data.link_url.trim()
@@ -208,9 +212,9 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       <label>일정 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
     </div> : null}
-    <label className="span-2" key={`title-${prefillKey}`}>일정 제목<input name="title" defaultValue={prefill?.title ?? event?.title ?? ''} required autoFocus/></label>
+    <label className="span-2" key={`title-${prefillKey}`}>일정 제목<input name="title" defaultValue={prefill?.title ?? event?.title ?? ''} required autoFocus className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
     <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
-    <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange}/></label>
+    <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange} className={fieldErrors.end_at ? 'invalid' : ''} aria-invalid={fieldErrors.end_at ? 'true' : 'false'}/>{fieldErrors.end_at ? <small className="field-error" role="alert">{fieldErrors.end_at}</small> : null}</label>
     <label className="span-2" key={`location-${prefillKey}`}>장소<input name="location" defaultValue={prefill?.location ?? event?.location ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={event?.link_url ?? ''}/></label>
     <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? event?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
