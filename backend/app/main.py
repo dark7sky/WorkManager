@@ -101,6 +101,12 @@ def load_approval_workflow_setting(user_id):
     return row["value"] == "on" if row else False
 
 
+def load_billing_hourly_rate_setting(user_id):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, "billing_hourly_rate")).fetchone()
+    return float(row["value"]) if row else None
+
+
 def _ics_escape(value):
     return str(value or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
@@ -510,6 +516,7 @@ class AISettingsPayload(StrictPayload):
 
 class WorkflowSettingsPayload(StrictPayload):
     approval_workflow: bool | None = None
+    billing_hourly_rate: float | None = Field(None, ge=0, le=1000000)
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -1623,11 +1630,15 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
             entry = by_tag.setdefault(tag, {"tag": tag, "completed_tasks": 0, "tracked_minutes": 0, "estimated_minutes": 0})
             entry["tracked_minutes"] += int(x.get("duration_minutes") or 0)
     tag_breakdown = sorted(by_tag.values(), key=lambda e: (e["tracked_minutes"], e["completed_tasks"]), reverse=True)
+    billable_minutes = sum(int(x.get("duration_minutes") or 0) for x in logs if x.get("billable"))
+    hourly_rate = load_billing_hourly_rate_setting(user)
     return {"period": {"start": start, "end": end},
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
                         "tracked_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs),
-                        "billable_minutes": sum(int(x.get("duration_minutes") or 0) for x in logs if x.get("billable")),
+                        "billable_minutes": billable_minutes,
+                        "billing_hourly_rate": hourly_rate,
+                        "billable_amount": round(billable_minutes / 60 * hourly_rate, 2) if hourly_rate is not None else None,
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
             "tags": available_tags, "tag_breakdown": tag_breakdown, "timeline": timeline,
@@ -1677,7 +1688,7 @@ async def ai_settings_test(user=Depends(require_user)):
 @app.get("/api/settings/workflow")
 def workflow_settings(user=Depends(require_user)):
     approval_workflow_on = load_approval_workflow_setting(user)
-    return {"approval_workflow": approval_workflow_on}
+    return {"approval_workflow": approval_workflow_on, "billing_hourly_rate": load_billing_hourly_rate_setting(user)}
 
 
 @app.put("/api/settings/workflow")
@@ -1695,7 +1706,17 @@ def workflow_settings_update(payload: dict = Body(...), user=Depends(require_use
               ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
                       (user, "approval_workflow", stored_value, now()))
         audit(user, "update", "settings", "approval_workflow", {"approval_workflow": approval_workflow_on})
-    return {"approval_workflow": load_approval_workflow_setting(user)}
+    if "billing_hourly_rate" in value:
+        rate = value["billing_hourly_rate"]
+        with connection() as c:
+            if rate is None:
+                c.execute("DELETE FROM app_settings WHERE user_id=? AND key=?", (user, "billing_hourly_rate"))
+            else:
+                c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+                  ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                          (user, "billing_hourly_rate", str(rate), now()))
+        audit(user, "update", "settings", "billing_hourly_rate", {"billing_hourly_rate": rate})
+    return {"approval_workflow": load_approval_workflow_setting(user), "billing_hourly_rate": load_billing_hourly_rate_setting(user)}
 
 
 @app.get("/api/settings/calendar-feed")
