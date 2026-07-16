@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-print-report',
+    timestamp: '2026-07-17T06:20:16+09:00',
+    description: '업무 화면은 필터된 목록을 인쇄용 PDF 보고서로 내보낼 수 있었지만, 일정(캘린더) 화면은 ICS/CSV만 지원하고 인쇄물로 뽑아 볼 방법이 없었습니다. 업무 화면과 동일한 패턴으로 일정 화면 툴바에 "PDF" 버튼을 추가해, 현재 필터된 일정 목록(일시/장소/태그 포함)을 인쇄용 문서로 열고 바로 인쇄할 수 있습니다 (`frontend/src/eventReport.js`, `frontend/src/screens/Calendar.jsx`, 테스트 `frontend/src/eventReport.test.js`).',
+  },
+  {
     id: '2026-07-17-todo-filter-presets',
     timestamp: '2026-07-17T06:13:30+09:00',
     description: '업무 화면은 검색/태그/우선순위 조합을 이름 붙여 저장했다가 다시 불러올 수 있었지만, 오늘 화면(할 일)은 매번 필터를 새로 설정해야 했습니다. 업무 화면과 동일한 방식으로 오늘 화면에도 "필터 저장/선택/삭제" 기능을 추가해, 자주 쓰는 할 일 필터 조합(예: 높은 우선순위 + 특정 태그)을 저장하고 재사용할 수 있습니다 (`frontend/src/todoFilterPresets.js`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
