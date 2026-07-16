@@ -1050,10 +1050,12 @@ for _table in CONFIG:
     def list_endpoint(tags: str | None = None, table=_table, user=Depends(require_user)):
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
         items = rows(table, user, f"ORDER BY {order} DESC", tags=(tags or "").split(","))
-        if table == "tasks" and items:
+        comment_table = {"tasks": "task_comments", "todos": "todo_comments", "work_logs": "work_log_comments", "events": "event_comments"}.get(table)
+        if comment_table and items:
+            fk = {"task_comments": "task_id", "todo_comments": "todo_id", "work_log_comments": "work_log_id", "event_comments": "event_id"}[comment_table]
             with connection() as c:
                 counts = dict(c.execute(
-                    "SELECT task_id, COUNT(*) FROM task_comments WHERE user_id=? GROUP BY task_id", (user,)).fetchall())
+                    f"SELECT {fk}, COUNT(*) FROM {comment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
             for item in items:
                 item["comment_count"] = counts.get(item["id"], 0)
         return items

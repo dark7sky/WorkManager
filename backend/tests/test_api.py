@@ -381,6 +381,21 @@ class ApiTests(unittest.TestCase):
         b.post(f"/api/tasks/{b_task['id']}/comments", json={"body": "몰래"})
         self.assertNotIn(b_task["id"], {t["id"] for t in a.get("/api/tasks").json()})
 
+    def test_todo_and_work_log_and_event_list_include_comment_count(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "todo with comments"}).json()
+        a.post(f"/api/todos/{todo['id']}/comments", json={"body": "댓글1"})
+        listed_todos = {t["id"]: t for t in a.get("/api/todos").json()}
+        self.assertEqual(listed_todos[todo["id"]]["comment_count"], 1)
+        log = a.post("/api/work_logs", json={"content": "log with comments"}).json()
+        a.post(f"/api/work_logs/{log['id']}/comments", json={"body": "댓글1"})
+        a.post(f"/api/work_logs/{log['id']}/comments", json={"body": "댓글2"})
+        listed_logs = {l["id"]: l for l in a.get("/api/work_logs").json()}
+        self.assertEqual(listed_logs[log["id"]]["comment_count"], 2)
+        event = a.post("/api/events", json={"title": "event with comments", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"}).json()
+        listed_events = {e["id"]: e for e in a.get("/api/events").json()}
+        self.assertEqual(listed_events[event["id"]]["comment_count"], 0)
+
     def test_task_attachments_upload_download_delete_and_size_limit(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "task with attachments"}).json()

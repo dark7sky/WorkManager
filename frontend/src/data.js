@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-comment-count-badges-todo-log-event',
+    timestamp: '2026-07-17T05:52:00+09:00',
+    description: '업무 목록에는 댓글 개수 배지가 있었지만 할 일·업무 기록·일정 목록에는 같은 기능이 없어, 세 항목 모두 댓글이 달려 있어도 수정 폼을 열어보기 전까지는 알 수 없었습니다. 목록 API(GET /api/todos, /api/work_logs, /api/events)가 업무와 동일한 방식으로 댓글 개수를 함께 내려주도록 확장하고(backend/app/main.py의 list_endpoint), 오늘 화면의 할 일·업무 기록 행과 캘린더 화면의 일정 행에 "댓글 N개" 배지를 추가했습니다(frontend/src/screens/Today.jsx, frontend/src/screens/Calendar.jsx). 테스트는 backend/tests/test_api.py의 test_todo_and_work_log_and_event_list_include_comment_count.',
+  },
+  {
     id: '2026-07-17-worklog-attachments',
     timestamp: '2026-07-17T05:48:00+09:00',
     description: '업무·일정·할 일에는 파일 첨부 기능이 있었지만 오늘 한 일(업무 기록)에는 없어 네 개 항목 중 유일하게 파일을 남길 수 없었습니다. 업무 기록에도 파일 첨부(업로드/다운로드/삭제, 5MB·20개 제한)를 추가했습니다. `backend/app/main.py`의 `/api/work_logs/{id}/attachments` 엔드포인트, `work_log_attachments` 테이블(`backend/app/db.py`), `frontend/src/api.js`의 첨부 헬퍼, 오늘 화면 업무 기록 수정 폼의 첨부파일 섹션. 테스트는 `backend/tests/test_api.py`의 `test_work_log_attachments_upload_download_delete_and_size_limit`.',
