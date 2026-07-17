@@ -1,7 +1,7 @@
 export const filterEventsByQuery = (events, query = '') => {
   const q = query.trim().toLowerCase()
   if (!q) return events
-  return events.filter(event => `${event.title || ''} ${event.location || ''} ${event.description || ''}`.toLowerCase().includes(q))
+  return events.filter(event => `${event.title || ''} ${event.location || ''} ${event.description || ''} ${(event.tags || []).join(' ')}`.toLowerCase().includes(q))
 }
 
 export const filterEventsByPriority = (events, priority = 'all') => {

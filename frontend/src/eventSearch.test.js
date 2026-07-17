@@ -6,11 +6,12 @@ const events = [
   { id: 1, title: '팀 회의', location: '3층 회의실', description: '', priority: 'high' },
   { id: 2, title: '병원 예약', location: '', description: '정기 검진', priority: 'low' },
   { id: 3, title: '고객 미팅', location: '강남 사무실', description: '' },
+  { id: 4, title: '워크숍', location: '', description: '', priority: 'high', tags: ['긴급', '외부'] },
 ]
 
 test('filterEventsByQuery returns all events for an empty query', () => {
-  assert.equal(filterEventsByQuery(events, '').length, 3)
-  assert.equal(filterEventsByQuery(events).length, 3)
+  assert.equal(filterEventsByQuery(events, '').length, 4)
+  assert.equal(filterEventsByQuery(events).length, 4)
 })
 
 test('filterEventsByQuery matches by title', () => {
@@ -25,13 +26,17 @@ test('filterEventsByQuery matches by description case-insensitively and trims wh
   assert.deepEqual(filterEventsByQuery(events, '  검진  ').map(e => e.id), [2])
 })
 
+test('filterEventsByQuery matches by tags', () => {
+  assert.deepEqual(filterEventsByQuery(events, '외부').map(e => e.id), [4])
+})
+
 test('filterEventsByPriority returns all events for "all"', () => {
-  assert.equal(filterEventsByPriority(events, 'all').length, 3)
-  assert.equal(filterEventsByPriority(events).length, 3)
+  assert.equal(filterEventsByPriority(events, 'all').length, 4)
+  assert.equal(filterEventsByPriority(events).length, 4)
 })
 
 test('filterEventsByPriority matches high priority', () => {
-  assert.deepEqual(filterEventsByPriority(events, 'high').map(e => e.id), [1])
+  assert.deepEqual(filterEventsByPriority(events, 'high').map(e => e.id), [1, 4])
 })
 
 test('filterEventsByPriority treats missing priority as normal', () => {
