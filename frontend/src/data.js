@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-hierarchy-collapse',
+    timestamp: '2026-07-17T20:52:00+09:00',
+    description: '업무(Tasks) 화면의 간트 목록은 상위-하위 업무를 계층으로 보여줬지만, 하위 업무를 접어 숨길 방법이 없어 하위 업무가 많은 업무일수록 목록이 길어져 다른 업무를 찾기 어려웠습니다. 하위 업무가 있는 업무 행에 펼침/접힘 화살표 버튼을 추가해 눌러서 하위 업무 트리를 접었다 펼 수 있고, 접은 상태는 기기별 로컬 저장소에 기억됩니다 (`frontend/src/taskCollapse.js`, `frontend/src/taskHierarchy.js`의 `orderTasksHierarchically`, `frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-17-worklog-quick-add-shortcut',
     timestamp: '2026-07-17T20:45:00+09:00',
     description: '오늘 화면에서 `N` 단축키는 할 일 입력창만 포커스하고 업무 기록(오늘 한 일) 입력창에는 접근할 방법이 없었습니다. `Shift+N`을 누르면 업무 기록 입력창으로 바로 포커스되도록 단축키를 추가했습니다 (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`).',

@@ -39,6 +39,21 @@ test('orderTasksHierarchically keeps matching children visible when parent is fi
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[3, 2], [4, 0]])
 })
 
+test('orderTasksHierarchically reports hasChildren for parent rows', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks)
+  assert.deepEqual(ordered.map(item => [item.task.id, item.hasChildren]), [[1, true], [2, true], [3, false], [4, false]])
+})
+
+test('orderTasksHierarchically hides descendants of collapsed tasks but keeps the task itself', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks, DEFAULT_TASK_SORT, null, new Set([1]))
+  assert.deepEqual(ordered.map(item => item.task.id), [1, 4])
+})
+
+test('orderTasksHierarchically only collapses direct/indirect descendants of the collapsed id, not siblings', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks, DEFAULT_TASK_SORT, null, new Set([2]))
+  assert.deepEqual(ordered.map(item => item.task.id), [1, 2, 4])
+})
+
 test('subtaskCompletionSummary counts direct children only and reports done vs total', () => {
   assert.deepEqual(subtaskCompletionSummary(tasks, 1), { total: 1, done: 1 })
   assert.deepEqual(subtaskCompletionSummary(tasks, 2), { total: 1, done: 0 })

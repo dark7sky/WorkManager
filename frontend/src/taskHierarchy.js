@@ -127,7 +127,7 @@ export const subtaskRowClass = depth => depth > 0 ? ` subtask-row subtask-depth-
 
 export const taskIndent = depth => `${8 + Math.min(depth, 5) * 18}px`
 
-export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, sortBy = DEFAULT_TASK_SORT, pinnedIds = null) => {
+export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, sortBy = DEFAULT_TASK_SORT, pinnedIds = null, collapsedIds = null) => {
   const compare = TASK_SORT_COMPARATORS[sortBy] || bySchedule
   const rank = pinnedIds && pinnedIds.size ? (a, b) => {
     const ap = pinnedIds.has(a.id) ? 0 : 1, bp = pinnedIds.has(b.id) ? 0 : 1
@@ -144,11 +144,13 @@ export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, 
   for (const group of children.values()) group.sort(rank)
   const ordered = []
   const visit = task => {
-    ordered.push(task)
+    const hasChildren = (children.get(task.id) || []).length > 0
+    ordered.push({ task, hasChildren })
+    if (collapsedIds?.has(task.id)) return
     for (const child of children.get(task.id) || []) visit(child)
   }
   for (const task of children.get(null) || []) visit(task)
 
   const depths = taskHierarchyDepths(allTasks)
-  return ordered.map(task => ({ task, depth: depths.get(task.id) || 0 }))
+  return ordered.map(({ task, hasChildren }) => ({ task, depth: depths.get(task.id) || 0, hasChildren }))
 }
