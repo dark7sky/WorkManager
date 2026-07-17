@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-year-view-task-due-dots',
+    timestamp: '2026-07-17T15:38:39+09:00',
+    description: '캘린더 년간 보기의 날짜 점 표시는 일정(이벤트)에만 반응해서, 마감일만 있고 캘린더 일정은 없는 달은 아무 표시 없이 비어 보였습니다. 미완료 업무 마감일도 함께 집계해 일정과 다른 색(주황) 밑줄로 표시하고, 날짜 칸에 마우스를 올리면 "업무 마감 N건"을 보여주도록 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-17-worklog-timer-global-indicator',
     timestamp: '2026-07-17T15:33:52+09:00',
     description: '오늘 화면에서 업무 기록 타이머를 시작한 뒤 다른 화면(업무, 캘린더 등)으로 이동하면 타이머가 계속 돌고 있다는 사실을 알 방법이 없어, 얼마나 오래 켜둔 채 잊고 있었는지 확인하려면 다시 오늘 화면으로 돌아가야 했습니다. 기존 `workLogTimer.js` 저장소를 1초마다 확인해 타이머가 진행 중일 때 오늘 화면이 아닌 모든 화면 상단에 경과 시간과 "오늘 화면에서 정지" 버튼을 보여주는 배너를 추가했습니다 (`frontend/src/components/AppShell.jsx`, `frontend/src/styles.css`).',
