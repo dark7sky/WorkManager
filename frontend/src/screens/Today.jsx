@@ -218,7 +218,7 @@ export default function Today(props) {
     onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onPromoteTodo, onSkipTodoRecurrence, onClearCompletedTodos, onCarryOverTodos, onImportTodos,
     onBulkCompleteTodo, onBulkDeleteTodo, onBulkAddTagTodo,
     onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onImportLogs, onToggleTask, goAI,
-    onBulkDeleteLog, onBulkAddTagLog,
+    onBulkDeleteLog, onBulkAddTagLog, notify,
   } = props
   const todoImportInputRef = useRef(null)
   const logImportInputRef = useRef(null)
@@ -470,7 +470,7 @@ export default function Today(props) {
     const file = event.target.files?.[0]; event.target.value = ''
     if (!file || !onImportTodos) return
     const text = await file.text(), { todos: parsed, errors } = parseTodosCsv(text)
-    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.'); return }
+    if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
     await onImportTodos(parsed, errors)
   }
   const toggleTodoSelected = id => setSelectedTodoIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
@@ -490,7 +490,7 @@ export default function Today(props) {
     const file = event.target.files?.[0]; event.target.value = ''
     if (!file || !onImportLogs) return
     const text = await file.text(), { logs: parsed, errors } = parseWorkLogsCsv(text)
-    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.'); return }
+    if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
     await onImportLogs(parsed, errors)
   }
   return <>

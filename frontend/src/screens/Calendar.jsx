@@ -336,16 +336,16 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
     const file = e.target.files?.[0]; e.target.value = ''
     if (!file) return
     const parsed = parseIcs(await file.text())
-    if (!parsed.length) { window.alert('가져올 일정이 없습니다.'); return }
+    if (!parsed.length) { notify?.('가져올 일정이 없습니다.', 'error'); return }
     await onCreate(parsed.map(({ title, description, location, start_at, end_at }) => ({ title, description: description || '', location: location || '', start_at, end_at, tags: [] })))
   }
   const importCsv = async e => {
     const file = e.target.files?.[0]; e.target.value = ''
     if (!file) return
     const text = await file.text(), { events: parsed, errors } = parseEventsCsv(text)
-    if (!parsed.length) { window.alert(errors.length ? errors.join('\n') : '가져올 일정이 없습니다.'); return }
+    if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 일정이 없습니다.', 'error'); return }
     await onCreate(parsed)
-    if (errors.length) window.alert(errors.join('\n'))
+    if (errors.length) notify?.(errors.join('\n'), 'error')
   }
   return <>
     <Header title="일정" subtitle="월간 달력과 모바일 일정 목록을 한눈에 확인하세요." action="새 일정" onAction={() => setNewDate(dateKey(cursor))}/>

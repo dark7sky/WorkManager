@@ -21,7 +21,7 @@ const scheduleApprovalLabels={none:'일정 검토 없음',pending:'일정 승인
 const iso=d=>d.toLocaleDateString('en-CA')
 const dayMs=86400000
 
-export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onApprove,onBulkComplete,onBulkDelete,onBulkAddTag,onBulkPostpone,onBulkPriority,onReschedule,onDuplicate,onSkipRecurrence,onImport,onViewHistory,onViewLogs,onStatusChange,focusTag}){
+export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onApprove,onBulkComplete,onBulkDelete,onBulkAddTag,onBulkPostpone,onBulkPriority,onReschedule,onDuplicate,onSkipRecurrence,onImport,onViewHistory,onViewLogs,onStatusChange,focusTag,notify}){
   const [query,setQuery]=useState(''),[status,setStatus]=useState('active'),[selectedTags,setSelectedTags]=useState([]),[priority,setPriority]=useState('all'),[sortBy,setSortByState]=useState(()=>loadTaskSort()),[draft,setDraft]=useState({}),[selected,setSelected]=useState(()=>new Set()),[bulkTag,setBulkTag]=useState(''),[bulkPostponeDays,setBulkPostponeDays]=useState(1),[bulkPriority,setBulkPriority]=useState('normal'),[view,setView]=useState('gantt'),[dragOverColumn,setDragOverColumn]=useState(null)
   const importInputRef=useRef(null)
   useEffect(()=>{if(!focusTag)return;setSelectedTags([focusTag.tag]);setStatus('all')},[focusTag])
@@ -74,7 +74,7 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
     const file=e.target.files?.[0];e.target.value=''
     if(!file||!onImport)return
     const text=await file.text(),{tasks:parsed,errors}=parseTasksCsv(text)
-    if(!parsed.length){window.alert(errors.length?errors.join('\n'):'가져올 업무가 없습니다.');return}
+    if(!parsed.length){notify?.(errors.length?errors.join('\n'):'가져올 업무가 없습니다.','error');return}
     await onImport(parsed,errors)
   }
   const togglePin=(e,t)=>{e.stopPropagation();setPinnedIds(ids=>{const next=togglePinnedTask(ids,t.id);savePinnedTaskIds(next);return next})}
