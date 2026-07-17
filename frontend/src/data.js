@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-calendar-bulk-duplicate',
+    timestamp: '2026-07-18T08:12:40+09:00',
+    description: '업무/할 일/업무 기록 화면은 이미 여러 항목을 선택해 한 번에 복제하는 일괄 복제 기능이 있었지만, 일정(Calendar) 화면의 선택 일괄 작업 바에는 복제 버튼이 빠져 있어 여러 일정을 복제하려면 하나씩 반복해야 했습니다. 일정 화면의 선택 도구모음에 "복제" 버튼을 추가해 다른 화면과 동일하게 여러 일정을 한 번에 복제할 수 있도록 맞췄습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-18-checklist-text-search',
     timestamp: '2026-07-18T08:09:15+09:00',
     description: '업무(Tasks) 검색과 명령 팔레트(Ctrl/Cmd+K)는 이미 체크리스트 항목 텍스트로도 검색되지만, 일정/할 일/업무 기록의 검색과 명령 팔레트 검색에는 체크리스트 텍스트가 빠져 있어 체크리스트에만 적어둔 내용을 찾을 수 없었습니다. 일정/할 일/업무 기록의 검색 필터와 명령 팔레트 검색 모두 체크리스트 항목 텍스트를 포함하도록 맞췄습니다 (`frontend/src/eventSearch.js`, `frontend/src/todaySearch.js`, `frontend/src/commandPalette.js`), 각 테스트 파일에 회귀 테스트를 추가했습니다.',
