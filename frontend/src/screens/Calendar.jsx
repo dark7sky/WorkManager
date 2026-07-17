@@ -18,6 +18,7 @@ import { tasksDueByDay } from '../calendarTaskDue'
 import { monthGridCells, yearMonths } from '../calendarYear'
 import { holidayNameForDate } from '../holidays'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
+import { moveChecklistItem } from '../taskFormPayload'
 import { normalizedLinks } from '../taskFormPayload'
 import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingEvents } from '../eventOverlap'
@@ -55,6 +56,10 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [links, setLinks] = useState(() => event?.links || [])
   const [linkUrlText, setLinkUrlText] = useState('')
   const [linkLabelText, setLinkLabelText] = useState('')
+  const [checklist, setChecklist] = useState(() => event?.checklist || [])
+  const [checklistText, setChecklistText] = useState('')
+  const [editingChecklistId, setEditingChecklistId] = useState(null)
+  const [editingChecklistText, setEditingChecklistText] = useState('')
   const [templates, setTemplates] = useState(() => loadEventTemplates())
   const [prefill, setPrefill] = useState(null)
   const [prefillKey, setPrefillKey] = useState(0)
@@ -99,6 +104,21 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setLinkLabelText('')
   }
   const removeLink = id => setLinks(links.filter(item => item.id !== id))
+  const addChecklistItem = () => {
+    const text = checklistText.trim()
+    if (!text) return
+    setChecklist([...checklist, { id: `${Date.now()}`, text, done: false }])
+    setChecklistText('')
+  }
+  const toggleChecklistItem = id => setChecklist(checklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
+  const removeChecklistItem = id => setChecklist(checklist.filter(item => item.id !== id))
+  const shiftChecklistItem = (id, direction) => setChecklist(list => moveChecklistItem(list, id, direction))
+  const beginEditChecklistItem = item => { setEditingChecklistId(item.id); setEditingChecklistText(item.text) }
+  const saveEditChecklistItem = id => {
+    const text = editingChecklistText.trim()
+    if (text) setChecklist(checklist.map(item => item.id === id ? { ...item, text } : item))
+    setEditingChecklistId(null)
+  }
   useEffect(() => {
     setComments([])
     setCommentText('')
@@ -206,7 +226,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setSaving(true)
     setError('')
     const linkUrl = data.link_url.trim()
-    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null, priority: data.priority || null, links: normalizedLinks(links) }
+    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null, priority: data.priority || null, links: normalizedLinks(links), checklist }
     const toSave = !event && repeatRule && repeatUntil ? expandRecurringEvent(payload, repeatRule, repeatUntil) : payload
     const ok = await onSave(toSave, applyToSeries)
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 유지됩니다.')
@@ -226,6 +246,18 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? event?.priority ?? ''}><option value="">보통</option><option value="low">낮음</option><option value="high">중요</option></select></label>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     {event?.recurrence_group_id ? <label className="span-2"><input type="checkbox" checked={applyToSeries} onChange={e => setApplyToSeries(e.target.checked)}/> <span>이 일정과 이후 반복 일정에 모두 적용 (제목·장소·태그·색상 등)</span></label> : null}
+    <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
+      {checklist.map((item, index) => <div key={item.id} className="checklist-editor-item">
+        <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>
+        {editingChecklistId === item.id
+          ? <input type="text" className="inline-edit" autoFocus value={editingChecklistText} onChange={e => setEditingChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditChecklistItem(item.id) } if (e.key === 'Escape') setEditingChecklistId(null) }} onBlur={() => saveEditChecklistItem(item.id)}/>
+          : <span className={item.done ? 'checklist-done-text' : ''} onClick={() => beginEditChecklistItem(item)}>{item.text}</span>}
+        <button type="button" className="text-button" disabled={index === 0} onClick={() => shiftChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button>
+        <button type="button" className="text-button" disabled={index === checklist.length - 1} onClick={() => shiftChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button>
+        <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
+    </div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>
       {links.map(item => <div key={item.id} className="checklist-editor-item">
         <a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a>

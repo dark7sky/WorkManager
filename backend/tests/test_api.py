@@ -1188,6 +1188,27 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_checklist_is_persisted_and_sanitized(self, *_):
+        a = self.client(self.token_a)
+        event = a.post("/api/events", json={
+            "title": "with checklist", "start_at": "2026-07-06T10:00:00", "end_at": "2026-07-06T11:00:00",
+            "checklist": [
+                {"id": "1", "text": " 자료 준비 ", "done": False},
+                {"id": "2", "text": "", "done": True},
+            ],
+        })
+        self.assertEqual(event.status_code, 200, event.text)
+        checklist = event.json()["checklist"]
+        self.assertEqual(len(checklist), 1)
+        self.assertEqual(checklist[0]["text"], "자료 준비")
+        self.assertFalse(checklist[0]["done"])
+        event_id = event.json()["id"]
+        checked = a.patch(f"/api/events/{event_id}", json={"checklist": [{"id": checklist[0]["id"], "text": "자료 준비", "done": True}]})
+        self.assertEqual(checked.status_code, 200, checked.text)
+        self.assertTrue(checked.json()["checklist"][0]["done"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_links_are_persisted_and_invalid_urls_dropped(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "with links", "links": [

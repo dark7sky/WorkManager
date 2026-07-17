@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-checklist',
+    timestamp: '2026-07-18T01:53:54+09:00',
+    description: '업무(Tasks)와 할 일(Todos)에는 있던 체크리스트 기능이 일정(Calendar)에는 입력란만 준비되어 있고 화면에 표시되거나 저장되지 않았습니다. 일정 수정/등록 폼에 체크리스트 목록을 추가해 항목 추가·완료 체크·순서 변경·삭제가 저장되도록 완성했습니다 (`frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-17-worklog-ics-export',
     timestamp: '2026-07-17T21:19:00+09:00',
     description: '업무(Tasks), 일정(Calendar), 오늘(Today)의 할 일 목록은 각각 ICS 캘린더 파일로 내보낼 수 있었지만, 같은 화면의 오늘 한 일(업무 기록) 목록에는 CSV/PDF 내보내기만 있고 ICS 내보내기가 없었습니다. 오늘 한 일 목록 도구모음에도 ICS 내보내기 버튼을 추가했습니다 (`frontend/src/ics.js`의 `logsToIcs`/`logIcsFilename`, `frontend/src/screens/Today.jsx`).',
