@@ -8,7 +8,9 @@ const taskStatusLabels = {
 
 const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
-const headers = ['제목', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모']
+const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
+
+const headers = ['제목', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -32,6 +34,7 @@ export const tasksToCsv = (tasks, todayIso) => {
     task.category,
     (task.tags || []).join('; '),
     task.description,
+    checklistSummary(task.checklist),
   ])
   return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }
@@ -154,7 +157,7 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모']
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '체크리스트']
 
 export const eventsToCsv = events => {
   const rows = events.map(event => [
@@ -166,6 +169,7 @@ export const eventsToCsv = events => {
     event.location,
     (event.tags || []).join('; '),
     event.description,
+    checklistSummary(event.checklist),
   ])
   return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }
@@ -195,7 +199,7 @@ export const parseEventsCsv = text => {
   return { events, errors }
 }
 
-const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '태그']
+const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '태그', '체크리스트']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월' }
 
 export const todosToCsv = todos => {
@@ -206,6 +210,7 @@ export const todosToCsv = todos => {
     todoRecurrenceLabels[todo.recurrence_rule] || '',
     todo.todo_date,
     (todo.tags || []).join('; '),
+    checklistSummary(todo.checklist),
   ])
   return [todoHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }
@@ -234,7 +239,7 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그', '청구 가능', '청구 금액(원)']
+const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '연결 업무', '태그', '청구 가능', '청구 금액(원)', '체크리스트']
 
 export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => {
   const rows = logs.map(log => [
@@ -245,6 +250,7 @@ export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => {
     (log.tags || []).join('; '),
     log.billable ? 'Y' : '',
     log.billable && hourlyRate != null ? Math.round((log.duration_minutes || 0) / 60 * hourlyRate) : '',
+    checklistSummary(log.checklist),
   ])
   return [workLogHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-csv-checklist-summary-column',
+    timestamp: '2026-07-18T08:05:00+09:00',
+    description: '업무·일정·할 일·업무 기록은 모두 체크리스트를 지원하고 목록 화면에 "n/m" 진행 배지로 표시되지만, 네 종류 CSV 내보내기에는 체크리스트 정보가 전혀 포함되지 않아 스프레드시트에서 어떤 항목에 세부 체크리스트가 남아있는지 확인할 방법이 없었습니다. 네 CSV 모두에 "체크리스트" 컬럼(완료/전체 개수, 예: "2/3")을 추가했습니다 (`frontend/src/csv.js`의 `checklistSummary`, `tasksToCsv`/`eventsToCsv`/`todosToCsv`/`workLogsToCsv`; 가져오기는 기존처럼 이 컬럼을 무시합니다), 테스트 추가 (`frontend/src/csv.test.js`).',
+  },
+  {
     id: '2026-07-18-task-bulk-duplicate',
     timestamp: '2026-07-18T07:59:00+09:00',
     description: '업무 관리 화면의 일괄 작업 바(완료 처리/태그 추가/연기/우선순위 변경/삭제)에 "복제"를 추가했습니다. 각 행의 개별 복제 버튼은 있었지만 여러 업무를 한 번에 복제할 방법이 없어, 비슷한 업무 여러 건을 반복 생성할 때 하나씩 눌러야 했던 불편을 줄였습니다. 기존 `buildTaskDuplicatePayload`를 재사용해 선택한 업무마다 새 업무를 만듭니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
