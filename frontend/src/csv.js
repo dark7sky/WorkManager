@@ -6,6 +6,8 @@ const taskStatusLabels = {
   overdue: '지연',
 }
 
+const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
+
 const headers = ['제목', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모']
 
 const escapeCsvCell = value => {
@@ -23,7 +25,7 @@ export const tasksToCsv = (tasks, todayIso) => {
   const rows = tasks.map(task => [
     task.title,
     taskStatusLabels[taskExportStatus(task, todayIso)] || task.status,
-    task.priority,
+    priorityValueToLabel[task.priority] || task.priority,
     task.start_date,
     task.due_date,
     `${Number(task.progress || 0)}%`,
@@ -160,7 +162,7 @@ export const eventsToCsv = events => {
     event.start_at || event.start,
     event.end_at || event.end,
     event.google_is_all_day ? 'Y' : 'N',
-    event.priority,
+    priorityValueToLabel[event.priority] || event.priority,
     event.location,
     (event.tags || []).join('; '),
     event.description,
@@ -200,7 +202,7 @@ export const todosToCsv = todos => {
   const rows = todos.map(todo => [
     todo.title,
     todo.completed ? 'Y' : 'N',
-    todo.priority,
+    priorityValueToLabel[todo.priority] || todo.priority,
     todoRecurrenceLabels[todo.recurrence_rule] || '',
     todo.todo_date,
     (todo.tags || []).join('; '),

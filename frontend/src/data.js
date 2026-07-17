@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-priority-csv-korean-label',
+    timestamp: '2026-07-18T07:58:00+09:00',
+    description: '업무·일정·할 일 CSV 내보내기에서 우선순위 값이 "high/normal/low" 영문 그대로 출력되어, 다른 컬럼(상태·반복 등)은 한글 라벨인데 우선순위만 영문이 섞여 나오는 문제가 있었습니다. `frontend/src/csv.js`에 `priorityValueToLabel` 매핑을 추가해 세 CSV 모두 화면 표기와 동일한 "낮음/보통/높음"으로 내보내도록 했습니다. 가져오기는 기존처럼 한글·영문 값을 모두 인식합니다.',
+  },
+  {
     id: '2026-07-18-event-csv-priority',
     timestamp: '2026-07-18T07:50:00+09:00',
     description: '일정(Calendar) CSV 내보내기·가져오기에서 우선순위가 빠져 있었습니다. 업무·할 일 CSV는 우선순위 컬럼을 저장·복원했지만 일정 CSV는 그렇지 않아, 일정을 내보냈다가 다시 가져오면 우선순위가 항상 "보통"으로 초기화되었습니다. `frontend/src/csv.js`의 `eventHeaders`/`eventsToCsv`/`parseEventsCsv`에 "우선순위" 컬럼을 추가해 일정도 업무·할 일과 동일하게 우선순위를 왕복 저장하도록 했습니다.',
