@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { dayAtOffset, ganttDragDates, ganttDragPreview, postponeTaskDates, postponeTodoDate } from './ganttDrag.js'
+import { dayAtOffset, ganttDragDates, ganttDragPreview, postponeTaskDates, postponeTodoDate, postponeLogDate } from './ganttDrag.js'
 
 test('dayAtOffset maps pixels to day cells and clamps to the window', () => {
   assert.equal(dayAtOffset(0, 1400), 0)
@@ -52,6 +52,13 @@ test('postponeTodoDate shifts todo_date by the given number of days', () => {
   assert.deepEqual(postponeTodoDate({ todo_date: '2026-07-12' }, 3), { todo_date: '2026-07-15' })
   assert.equal(postponeTodoDate({ title: 'no date' }), null)
   assert.equal(postponeTodoDate(null), null)
+})
+
+test('postponeLogDate shifts log_date by the given number of days', () => {
+  assert.deepEqual(postponeLogDate({ log_date: '2026-07-12' }), { log_date: '2026-07-13' })
+  assert.deepEqual(postponeLogDate({ log_date: '2026-07-12' }, 3), { log_date: '2026-07-15' })
+  assert.equal(postponeLogDate({ content: 'no date' }), null)
+  assert.equal(postponeLogDate(null), null)
 })
 
 test('preview clamps to the visible window', () => {

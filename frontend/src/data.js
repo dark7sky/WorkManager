@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-log-bulk-postpone',
+    timestamp: '2026-07-17T16:24:00+09:00',
+    description: '업무(Tasks), 오늘의 할 일, 캘린더 일정은 다중 선택 시 날짜를 한 번에 연기하는 "연기" 기능이 있었지만, 업무 기록(work log) 일괄 작업 도구에는 태그 추가/삭제만 있고 날짜 연기가 없었습니다. 업무 기록 다중 선택 시에도 "연기" 폼을 추가해 선택한 기록들의 날짜를 한 번에 미룰 수 있게 했습니다 (`frontend/src/ganttDrag.js`의 `postponeLogDate`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',
+  },
+  {
     id: '2026-07-17-calendar-bulk-priority',
     timestamp: '2026-07-17T16:15:00+09:00',
     description: '업무(Tasks) 일괄 작업 도구는 선택한 업무의 우선순위를 한 번에 바꿀 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제/태그 추가/연기만 있고 우선순위 변경 기능이 없었습니다. 캘린더 일정 다중 선택 시 "우선순위 변경" 폼을 추가해 선택한 일정들의 우선순위를 한 번에 바꿀 수 있게 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',

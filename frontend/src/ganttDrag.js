@@ -47,6 +47,12 @@ export function postponeTodoDate(todo, deltaDays = 1) {
   return { todo_date: addDays(todo.todo_date, deltaDays) }
 }
 
+// Same one-click "postpone" idea, applied to a work log's single log_date.
+export function postponeLogDate(log, deltaDays = 1) {
+  if (!log?.log_date) return null
+  return { log_date: addDays(log.log_date, deltaDays) }
+}
+
 // Preview geometry (in day units within the visible window) while dragging.
 export function ganttDragPreview(mode, { left, width }, { grabDay, dropDay }, days = GANTT_DAYS) {
   if (mode === 'move') {
