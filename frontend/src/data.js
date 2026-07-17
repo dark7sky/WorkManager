@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-log-bulk-duplicate',
+    timestamp: '2026-07-18T08:20:00+09:00',
+    description: '오늘 화면의 업무 기록 일괄 작업 바(태그 추가/연기/삭제)에 "복제"를 추가했습니다. 업무·할 일은 이미 일괄 복제를 지원했지만 업무 기록 목록에는 개별 복제 버튼만 있었습니다. 기존 `buildLogDuplicatePayload`를 재사용해 선택한 기록마다 새 기록을 만듭니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`). 남은 일괄 복제 격차는 캘린더 일정 목록입니다.',
+  },
+  {
     id: '2026-07-18-todo-bulk-duplicate',
     timestamp: '2026-07-18T08:10:00+09:00',
     description: '오늘 화면의 할 일 일괄 작업 바(완료 처리/태그 추가/연기/우선순위 변경/삭제)에 "복제"를 추가했습니다. 업무 관리 화면에는 이미 일괄 복제가 있었지만 할 일 목록에는 개별 복제 버튼만 있어 여러 건을 반복 생성할 때 하나씩 눌러야 했던 불편을 줄였습니다. 기존 `buildTodoDuplicatePayload`를 재사용해 선택한 할 일마다 새 할 일을 만듭니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
