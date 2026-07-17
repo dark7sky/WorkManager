@@ -733,7 +733,14 @@ async def test_connection(user_id: str) -> dict[str, Any]:
         return {"ok": True, "message": f"{provider_name} · {config['model']} 연결에 성공했습니다."}
     except httpx.HTTPStatusError as exc:
         status_code = exc.response.status_code
-        detail = "API 키가 올바르지 않습니다." if status_code in (401, 403) else f"서버 응답 오류 ({status_code})."
+        if status_code in (401, 403):
+            detail = "API 키가 올바르지 않습니다."
+        elif status_code in (400, 404):
+            detail = "모델 이름을 확인해 주세요."
+        elif status_code == 429:
+            detail = "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요."
+        else:
+            detail = f"서버 응답 오류 ({status_code})."
         return {"ok": False, "message": f"{provider_name} 연결에 실패했습니다: {detail}"}
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError, RuntimeError) as exc:
         return {"ok": False, "message": f"{provider_name} 연결에 실패했습니다 ({type(exc).__name__})."}

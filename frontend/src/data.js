@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-ai-connection-test-error-detail',
+    timestamp: '2026-07-18T02:10:12+09:00',
+    description: 'AI 설정 화면의 연결 테스트가 401/403 오류 외에는 모두 뭉뚱그려 "서버 응답 오류"로만 안내해 원인 파악이 어려웠습니다. 모델 이름 오류(400/404)와 요청 과다(429)에 대해 구체적인 안내 문구를 추가했습니다 (`backend/app/ai.py`의 `test_connection`).',
+  },
+  {
     id: '2026-07-18-todo-checklist-reorder',
     timestamp: '2026-07-18T02:02:07+09:00',
     description: '업무와 캘린더 일정의 체크리스트는 위/아래 이동 버튼으로 순서를 조정할 수 있었지만, 오늘 화면의 할 일 체크리스트는 순서를 바꾸려면 항목을 지우고 다시 추가해야 했습니다. 할 일 체크리스트 편집에도 동일한 위/아래 이동 버튼을 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/taskFormPayload.js`의 `moveChecklistItem` 재사용).',

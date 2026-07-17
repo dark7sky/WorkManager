@@ -5,6 +5,8 @@ import unittest
 from datetime import date, timedelta
 from unittest.mock import patch
 
+import httpx
+
 from app import ai
 
 
@@ -241,6 +243,40 @@ class ValidationAndStatusTests(unittest.TestCase):
             with patch('app.ai.httpx.AsyncClient', return_value=FakeClient()):
                 result = asyncio.run(ai.test_connection("__legacy__"))
         self.assertTrue(result["ok"])
+
+    def test_test_connection_reports_rate_limit_message_on_429(self):
+        class FakeResponse:
+            status_code = 429
+            def raise_for_status(self):
+                raise httpx.HTTPStatusError("rate limited", request=None, response=self)
+        class FakeClient:
+            async def __aenter__(self): return self
+            async def __aexit__(self, *a): return False
+            async def post(self, *a, **k): return FakeResponse()
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db"), "AI_API_KEY": "test-key", "AI_MODEL": "gpt-4o-mini"}):
+            from app.db import init_db
+            init_db()
+            with patch('app.ai.httpx.AsyncClient', return_value=FakeClient()):
+                result = asyncio.run(ai.test_connection("__legacy__"))
+        self.assertFalse(result["ok"])
+        self.assertIn("잠시 후 다시 시도", result["message"])
+
+    def test_test_connection_reports_model_message_on_404(self):
+        class FakeResponse:
+            status_code = 404
+            def raise_for_status(self):
+                raise httpx.HTTPStatusError("not found", request=None, response=self)
+        class FakeClient:
+            async def __aenter__(self): return self
+            async def __aexit__(self, *a): return False
+            async def post(self, *a, **k): return FakeResponse()
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db"), "AI_API_KEY": "test-key", "AI_MODEL": "bad-model"}):
+            from app.db import init_db
+            init_db()
+            with patch('app.ai.httpx.AsyncClient', return_value=FakeClient()):
+                result = asyncio.run(ai.test_connection("__legacy__"))
+        self.assertFalse(result["ok"])
+        self.assertIn("모델 이름을 확인", result["message"])
 
     def test_recommendations_prioritize_due_date(self):
         tasks = [
