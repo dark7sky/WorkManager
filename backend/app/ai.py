@@ -328,6 +328,36 @@ def _links(text: str) -> list[dict] | None:
     return [{"url": u, "label": ""} for u in urls]
 
 
+_ESTIMATE_RE = re.compile(r"예상\s*(\d+)\s*시간\s*(\d+)?\s*분?|예상\s*(\d+)\s*분|예상\s*(\d+)\s*시간")
+_DURATION_RE = re.compile(r"(\d+)\s*시간\s*(\d+)?\s*분?\s*(?:했음|소요|걸림|동안)|(\d+)\s*분\s*(?:했음|소요|걸림|동안)|(\d+)\s*시간\s*(?:했음|소요|걸림|동안)")
+
+
+def _estimated_minutes(text: str) -> int | None:
+    match = _ESTIMATE_RE.search(text)
+    if not match:
+        return None
+    if match.group(1):
+        return int(match.group(1)) * 60 + int(match.group(2) or 0)
+    if match.group(3):
+        return int(match.group(3))
+    if match.group(4):
+        return int(match.group(4)) * 60
+    return None
+
+
+def _duration_minutes(text: str) -> int | None:
+    match = _DURATION_RE.search(text)
+    if not match:
+        return None
+    if match.group(1):
+        return int(match.group(1)) * 60 + int(match.group(2) or 0)
+    if match.group(3):
+        return int(match.group(3))
+    if match.group(4):
+        return int(match.group(4)) * 60
+    return None
+
+
 _RECURRENCE_WORDS = (("매일", "daily"), ("격주", "biweekly"), ("매주", "weekly"), ("매월", "monthly"), ("매달", "monthly"))
 _RECURRENCE_UNTIL_RE = re.compile(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}\s*월\s*\d{1,2}\s*일)\s*까지")
 
@@ -404,6 +434,11 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
         if color: data["color"] = color
         if link: data["link_url"] = link
         if links: data["links"] = links
+        duration = _duration_minutes(combined)
+        if duration is not None:
+            data["duration_minutes"] = duration
+        if any(word in combined for word in ("청구", "billable")):
+            data["billable"] = True
         return {"action": "create", "entity": "work_log", "data": data,
                 "confidence": 0.78, "source": "local-rules"}
     if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
@@ -439,6 +474,9 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
     if color: data["color"] = color
     if link: data["link_url"] = link
     if links: data["links"] = links
+    estimate = _estimated_minutes(combined)
+    if estimate is not None:
+        data["estimated_minutes"] = estimate
     if any(word in combined for word in ("긴급", "중요", "급함")):
         data["priority"] = "high"
     checklist = _checklist(combined)
@@ -541,7 +579,10 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "{url, label} objects (label is a short description of what the link is, or empty string). "
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
         "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
-        "input lists multiple steps for one task. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
+        "input lists multiple steps for one task. Tasks may set data.estimated_minutes (integer) when the input "
+        "states an expected effort/duration (e.g. '예상 2시간', '예상 30분'). Work logs may set data.duration_minutes "
+        "(integer) when the input states time actually spent (e.g. '2시간 했음', '30분 소요'), and data.billable "
+        "(boolean true) when the input mentions billing/청구. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
         "set data.recurrence_rule to daily|weekly|biweekly|monthly and data.recurrence_end_date to the ISO end date; "
         "omit both if no repeat or end date is stated. "
         "If the input contains several separate requests, one per line or a numbered list like "

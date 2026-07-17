@@ -132,6 +132,37 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["entity"], "work_log")
         self.assertEqual(result["data"]["link_url"], "https://github.com/org/repo/pull/1")
 
+    def test_task_extracts_estimated_minutes_from_hours_and_minutes(self):
+        result = ai.rule_parse("보고서 작성 예상 2시간 30분")
+        self.assertEqual(result["entity"], "task")
+        self.assertEqual(result["data"]["estimated_minutes"], 150)
+
+    def test_task_extracts_estimated_minutes_from_minutes_only(self):
+        result = ai.rule_parse("보고서 작성 예상 30분")
+        self.assertEqual(result["data"]["estimated_minutes"], 30)
+
+    def test_task_without_estimate_omits_estimated_minutes(self):
+        result = ai.rule_parse("분기 보고서 작성")
+        self.assertNotIn("estimated_minutes", result["data"])
+
+    def test_work_log_extracts_duration_minutes(self):
+        result = ai.rule_parse("오늘 한 일: 미팅 준비 30분 했음")
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["duration_minutes"], 30)
+
+    def test_work_log_extracts_duration_hours_and_minutes(self):
+        result = ai.rule_parse("오늘 한 일: 배포 작업 2시간 소요")
+        self.assertEqual(result["data"]["duration_minutes"], 120)
+
+    def test_work_log_extracts_billable_flag(self):
+        result = ai.rule_parse("오늘 한 일: 고객 미팅 1시간 했음 청구 대상")
+        self.assertEqual(result["data"]["duration_minutes"], 60)
+        self.assertTrue(result["data"]["billable"])
+
+    def test_work_log_without_duration_omits_duration_minutes(self):
+        result = ai.rule_parse("오늘 한 일: 배포 완료")
+        self.assertNotIn("duration_minutes", result["data"])
+
     def test_task_with_multiple_urls_sets_links_array(self):
         result = ai.rule_parse("분기 보고서 작성 https://docs.example.com/a https://sheet.example.com/b")
         self.assertEqual(result["data"]["link_url"], "https://docs.example.com/a")

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-ai-effort-duration-parsing',
+    timestamp: '2026-07-17T11:21:00+09:00',
+    description: 'AI 빠른 입력(⌘/Ctrl+K)이 업무의 예상 소요시간(estimated_minutes)과 업무 기록의 실제 소요시간(duration_minutes)·청구 여부(billable)를 전혀 인식하지 못해, 수기로 폼을 채워야만 이 필드들이 채워졌습니다. "예상 2시간 30분" 같은 문구에서 업무의 예상 소요시간을, "1시간 했음"/"30분 소요" 같은 문구에서 업무 기록의 실제 소요시간을, "청구" 언급 시 청구 대상 여부를 로컬 규칙 파서와 원격 AI 프롬프트 모두에서 추출하도록 추가했습니다 (`backend/app/ai.py`의 `_estimated_minutes`/`_duration_minutes`, 테스트 `backend/tests/test_ai.py`).',
+  },
+  {
     id: '2026-07-17-biweekly-recurrence',
     timestamp: '2026-07-17T10:58:26+09:00',
     description: '업무/할 일/일정 모두 매일·매주·매월 반복만 지원해, 2주 간격으로 진행하는 업무(예: 격주 정기 회의)는 반복 설정 없이 매번 새로 만들어야 했습니다. 반복 규칙에 "격주"(biweekly, 14일 간격)를 추가해 업무 폼·오늘 할 일 빠른 추가/수정·일정 등록 폼의 반복 선택지와 AI 어시스턴트(로컬 규칙 파싱/원격 프롬프트 모두)에서 사용할 수 있고, CSV 내보내기/가져오기에도 반영됩니다 (`backend/app/main.py`, `backend/app/ai.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Tasks.jsx`, `frontend/src/eventRecurrence.js`, `frontend/src/csv.js`, 테스트 `backend/tests/test_api.py`/`test_ai.py`, `frontend/src/eventRecurrence.test.js`).',
