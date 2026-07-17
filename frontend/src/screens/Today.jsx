@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle, Clock3, Copy, Download, ExternalLink, FileText, Paperclip, Pencil, Play, Plus, SkipForward, Sparkles, Square, Star, Tag, Trash2, Upload, X } from 'lucide-react'
+import { ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle, Clock3, Copy, Download, ExternalLink, FileText, Flag, Paperclip, Pencil, Play, Plus, SkipForward, Sparkles, Square, Star, Tag, Trash2, Upload, X } from 'lucide-react'
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
@@ -220,7 +220,7 @@ export default function Today(props) {
   const {
     tasks = [], allTasks = [], events = [], todos = [], overdueTodos = [], logs = [], loading,
     onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onPromoteTodo, onSkipTodoRecurrence, onClearCompletedTodos, onCarryOverTodos, onImportTodos,
-    onBulkCompleteTodo, onBulkDeleteTodo, onBulkAddTagTodo, onBulkPostponeTodo,
+    onBulkCompleteTodo, onBulkDeleteTodo, onBulkAddTagTodo, onBulkPostponeTodo, onBulkPriorityTodo,
     onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onImportLogs, onToggleTask, goAI,
     onBulkDeleteLog, onBulkAddTagLog, onBulkPostponeLog, notify,
   } = props
@@ -229,6 +229,7 @@ export default function Today(props) {
   const [selectedTodoIds, setSelectedTodoIds] = useState(() => new Set())
   const [bulkTodoTag, setBulkTodoTag] = useState('')
   const [bulkTodoPostponeDays, setBulkTodoPostponeDays] = useState(1)
+  const [bulkTodoPriority, setBulkTodoPriority] = useState('high')
   const [selectedLogIds, setSelectedLogIds] = useState(() => new Set())
   const [bulkLogTag, setBulkLogTag] = useState('')
   const [bulkLogPostponeDays, setBulkLogPostponeDays] = useState(1)
@@ -502,6 +503,7 @@ export default function Today(props) {
   const bulkDeleteTodos = () => { onBulkDeleteTodo([...selectedTodoIds]); clearSelectedTodos() }
   const bulkAddTagTodos = async () => { const tag = bulkTodoTag.trim(); if (!tag) return; if (await onBulkAddTagTodo([...selectedTodoIds], tag)) setBulkTodoTag('') }
   const bulkPostponeTodos = async () => { const days = Number(bulkTodoPostponeDays); if (!days) return; const ok = await onBulkPostponeTodo([...selectedTodoIds], days); if (ok) clearSelectedTodos() }
+  const bulkChangeTodoPriority = async () => { await onBulkPriorityTodo([...selectedTodoIds], bulkTodoPriority); clearSelectedTodos() }
   const toggleLogSelected = id => setSelectedLogIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
   const clearSelectedLogs = () => setSelectedLogIds(new Set())
   const allShownLogIds = useMemo(() => shownLogs.map(l => l.id), [shownLogs])
@@ -550,7 +552,7 @@ export default function Today(props) {
         {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="할 일 전체 선택" checked={allShownTodosSelected} onChange={toggleSelectAllTodos}/>전체 선택</label> : null}
-        {selectedTodoIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 할 일 일괄 작업"><span>{selectedTodoIds.size}개 선택됨</span><button type="button" className="secondary" onClick={bulkCompleteTodos}><CheckCircle2 size={16}/>완료 처리</button><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagTodos() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkTodoTag} onChange={e => setBulkTodoTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkTodoTag.trim()}>추가</button></form>{onBulkPostponeTodo ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeTodos() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkTodoPostponeDays} onChange={e => setBulkTodoPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkTodoPostponeDays)}>연기</button></form> : null}<button type="button" className="danger-button" onClick={bulkDeleteTodos}>삭제</button><button type="button" className="text-button" onClick={clearSelectedTodos}>선택 해제</button></div> : null}
+        {selectedTodoIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 할 일 일괄 작업"><span>{selectedTodoIds.size}개 선택됨</span><button type="button" className="secondary" onClick={bulkCompleteTodos}><CheckCircle2 size={16}/>완료 처리</button><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagTodos() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkTodoTag} onChange={e => setBulkTodoTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkTodoTag.trim()}>추가</button></form>{onBulkPostponeTodo ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeTodos() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkTodoPostponeDays} onChange={e => setBulkTodoPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkTodoPostponeDays)}>연기</button></form> : null}{onBulkPriorityTodo ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeTodoPriority() }}><Flag size={14}/><select aria-label="변경할 우선순위" value={bulkTodoPriority} onChange={e => setBulkTodoPriority(e.target.value)}><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select><button type="submit" className="secondary">우선순위 변경</button></form> : null}<button type="button" className="danger-button" onClick={bulkDeleteTodos}>삭제</button><button type="button" className="text-button" onClick={clearSelectedTodos}>선택 해제</button></div> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''} ${todo.priority === 'high' ? 'priority-high' : ''} ${selectedTodoIds.has(todo.id) ? 'row-selected' : ''}`} style={eventColorHex(todo.color) ? { borderLeft: `3px solid ${eventColorHex(todo.color)}` } : undefined} key={todo.id}>
           <input type="checkbox" className="row-select" aria-label={`${todo.title} 선택`} checked={selectedTodoIds.has(todo.id)} onChange={() => toggleTodoSelected(todo.id)}/>
           <button className="todo-check" aria-label={`${todo.title} 완료 상태 변경`} onClick={() => onToggleTodo(todo)}>{todo.completed ? <Check/> : <Circle/>}</button>

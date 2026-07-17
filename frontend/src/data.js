@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-bulk-priority',
+    timestamp: '2026-07-17T16:15:54+09:00',
+    description: '업무(Tasks)와 캘린더 일정은 다중 선택 시 우선순위를 한 번에 바꾸는 "우선순위 변경" 기능이 있었지만, 오늘의 할 일 일괄 작업 도구에는 완료/태그/연기/삭제만 있고 우선순위 일괄 변경이 없었습니다. 할 일 다중 선택 시에도 "우선순위 변경" 폼을 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onBulkPriorityTodo`, 실행 취소 지원).',
+  },
+  {
     id: '2026-07-17-todo-alert-lead-time',
     timestamp: '2026-07-17T16:07:17+09:00',
     description: '할 일(Todo) 알림 시점이 설정 화면에 별도 항목 없이 "일정 시작 전 알림 시점" 값을 그대로 재사용하고 있어, 일정 알림 시점을 바꾸면 할 일 알림도 의도치 않게 함께 바뀌었습니다. 할 일 전용 알림 시점 설정("할 일 예정 시간 전 알림 시점")을 추가해 일정과 독립적으로 조절할 수 있게 했습니다 (`frontend/src/todoAlerts.js`의 `loadTodoAlertLeadMinutes`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`).',
