@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-event-todo-log-view-history',
+    timestamp: '2026-07-17T20:30:09+09:00',
+    description: '업무(Tasks) 화면의 각 업무 행에는 "이력" 버튼으로 그 업무의 감사 로그(변경 이력)만 필터링해서 볼 수 있었지만, 캘린더 일정과 오늘 화면의 할 일/업무 기록에는 동일한 기능이 없어 특정 항목의 변경 이력을 찾으려면 감사 로그 전체를 훑어야 했습니다. 일정 수정 폼과 할 일/업무 기록 행에도 같은 방식의 "이력" 버튼을 추가해 클릭 시 감사 로그 화면으로 이동하며 해당 항목으로 바로 필터링되도록 했습니다 (`frontend/src/screens/Calendar.jsx`의 `EventForm`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onViewHistory`/`onViewHistoryTodo`/`onViewHistoryLog`).',
+  },
+  {
     id: '2026-07-17-today-list-empty-state',
     timestamp: '2026-07-17T16:31:00+09:00',
     description: '업무(Tasks)와 캘린더 목록은 필터/검색 결과가 없을 때 안내 문구를 보여줬지만, 오늘 화면의 할 일 목록과 업무 기록 목록은 결과가 없으면 아무 표시 없이 비어 보였습니다. 두 목록에도 "조건에 맞는 항목이 없습니다" 형태의 빈 상태 안내를 추가해 다른 화면과 동일하게 동작하도록 했습니다 (`frontend/src/screens/Today.jsx`).',
