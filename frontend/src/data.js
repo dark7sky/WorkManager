@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-alert-lead-time',
+    timestamp: '2026-07-17T16:07:17+09:00',
+    description: '할 일(Todo) 알림 시점이 설정 화면에 별도 항목 없이 "일정 시작 전 알림 시점" 값을 그대로 재사용하고 있어, 일정 알림 시점을 바꾸면 할 일 알림도 의도치 않게 함께 바뀌었습니다. 할 일 전용 알림 시점 설정("할 일 예정 시간 전 알림 시점")을 추가해 일정과 독립적으로 조절할 수 있게 했습니다 (`frontend/src/todoAlerts.js`의 `loadTodoAlertLeadMinutes`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-17-log-bulk-postpone',
     timestamp: '2026-07-17T16:24:00+09:00',
     description: '업무(Tasks), 오늘의 할 일, 캘린더 일정은 다중 선택 시 날짜를 한 번에 연기하는 "연기" 기능이 있었지만, 업무 기록(work log) 일괄 작업 도구에는 태그 추가/삭제만 있고 날짜 연기가 없었습니다. 업무 기록 다중 선택 시에도 "연기" 폼을 추가해 선택한 기록들의 날짜를 한 번에 미룰 수 있게 했습니다 (`frontend/src/ganttDrag.js`의 `postponeLogDate`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',

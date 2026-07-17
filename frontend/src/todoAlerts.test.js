@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { todosDueForAlert } from './todoAlerts.js'
+import { todosDueForAlert, DEFAULT_TODO_ALERT_LEAD_MINUTES } from './todoAlerts.js'
 
 const now = new Date(2026, 0, 1, 9, 0).getTime()
 const time = minutesFromNow => {
@@ -27,7 +27,14 @@ test('todosDueForAlert excludes past due todos', () => {
 })
 
 test('todosDueForAlert defaults to a 15 minute window', () => {
+  assert.equal(DEFAULT_TODO_ALERT_LEAD_MINUTES, 15)
   const todos = [{ id: 1, completed: false, ...time(15) }, { id: 2, completed: false, ...time(16) }]
   const due = todosDueForAlert(todos, now)
+  assert.deepEqual(due.map(t => t.id), [1])
+})
+
+test('todosDueForAlert respects a wider configured lead time independent of events', () => {
+  const todos = [{ id: 1, completed: false, ...time(25) }]
+  const due = todosDueForAlert(todos, now, 30)
   assert.deepEqual(due.map(t => t.id), [1])
 })
