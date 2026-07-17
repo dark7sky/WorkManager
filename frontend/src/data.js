@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-attachment-count-badge',
+    timestamp: '2026-07-17T11:10:00+09:00',
+    description: '업무/일정/오늘 할 일/업무 기록 모두 파일 첨부 기능은 있었지만, 목록에서는 첨부파일이 있는지 알 수 없어 항목을 직접 열어봐야만 확인할 수 있었습니다(댓글은 이미 "댓글 n개" 배지로 표시됨). 목록 조회 시 각 항목의 첨부파일 개수를 함께 내려주고(`backend/app/main.py`의 `attachment_count`), Tasks/Calendar/Today 화면의 각 행에 "첨부파일 n개" 배지를 추가했습니다 (`backend/tests/test_api.py::test_task_todo_work_log_event_list_include_attachment_count`).',
+  },
+  {
     id: '2026-07-17-task-unblock-notification',
     timestamp: '2026-07-17T11:35:00+09:00',
     description: '업무 화면은 선행 업무가 남아 대기 중인 업무를 "선행 업무 대기" 배너/필터로만 보여줘, 막고 있던 선행 업무가 완료돼도 그 사실을 알아채려면 업무 화면을 다시 열어봐야 했습니다. 선행 업무가 모두 끝나 이제 진행할 수 있게 된 업무를 감지하면 다른 업무/일정 알림과 동일한 방식으로 브라우저 알림과 알림 기록에 "진행 가능: {업무명}"을 남기도록 추가했습니다 (`newlyUnblockedTasks` in `frontend/src/taskFilters.js`, 테스트 `frontend/src/taskFilters.test.js`, wired into `frontend/src/App.jsx`).',

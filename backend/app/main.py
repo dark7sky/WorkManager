@@ -1062,6 +1062,14 @@ for _table in CONFIG:
                     f"SELECT {fk}, COUNT(*) FROM {comment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
             for item in items:
                 item["comment_count"] = counts.get(item["id"], 0)
+        attachment_table = {"tasks": "task_attachments", "todos": "todo_attachments", "work_logs": "work_log_attachments", "events": "event_attachments"}.get(table)
+        if attachment_table and items:
+            fk = {"task_attachments": "task_id", "todo_attachments": "todo_id", "work_log_attachments": "work_log_id", "event_attachments": "event_id"}[attachment_table]
+            with connection() as c:
+                counts = dict(c.execute(
+                    f"SELECT {fk}, COUNT(*) FROM {attachment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
+            for item in items:
+                item["attachment_count"] = counts.get(item["id"], 0)
         return items
 
     def get_endpoint(item_id: int, table=_table, user=Depends(require_user)):

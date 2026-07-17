@@ -408,6 +408,34 @@ class ApiTests(unittest.TestCase):
         listed_events = {e["id"]: e for e in a.get("/api/events").json()}
         self.assertEqual(listed_events[event["id"]]["comment_count"], 0)
 
+    def test_task_todo_work_log_event_list_include_attachment_count(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        with_attachment = a.post("/api/tasks", json={"title": "task with attachment"}).json()
+        without_attachment = a.post("/api/tasks", json={"title": "task without attachment"}).json()
+        a.post(f"/api/tasks/{with_attachment['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        listed_tasks = {t["id"]: t for t in a.get("/api/tasks").json()}
+        self.assertEqual(listed_tasks[with_attachment["id"]]["attachment_count"], 1)
+        self.assertEqual(listed_tasks[without_attachment["id"]]["attachment_count"], 0)
+        b_task = b.post("/api/tasks", json={"title": "other user task"}).json()
+        b.post(f"/api/tasks/{b_task['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        self.assertNotIn(b_task["id"], {t["id"] for t in a.get("/api/tasks").json()})
+
+        todo = a.post("/api/todos", json={"title": "todo with attachment"}).json()
+        a.post(f"/api/todos/{todo['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        listed_todos = {t["id"]: t for t in a.get("/api/todos").json()}
+        self.assertEqual(listed_todos[todo["id"]]["attachment_count"], 1)
+
+        log = a.post("/api/work_logs", json={"content": "log with attachments"}).json()
+        a.post(f"/api/work_logs/{log['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        a.post(f"/api/work_logs/{log['id']}/attachments", files={"file": ("b.txt", b"hi", "text/plain")})
+        listed_logs = {l["id"]: l for l in a.get("/api/work_logs").json()}
+        self.assertEqual(listed_logs[log["id"]]["attachment_count"], 2)
+
+        event = a.post("/api/events", json={"title": "event with attachment", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"}).json()
+        a.post(f"/api/events/{event['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        listed_events = {e["id"]: e for e in a.get("/api/events").json()}
+        self.assertEqual(listed_events[event["id"]]["attachment_count"], 1)
+
     def test_task_attachments_upload_download_delete_and_size_limit(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "task with attachments"}).json()
