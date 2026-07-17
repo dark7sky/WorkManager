@@ -67,6 +67,23 @@ test('auditLogCsvFilename uses the requested date', () => {
   assert.equal(auditLogCsvFilename('2026-07-13'), 'workmanager-audit-log-2026-07-13.csv')
 })
 
+test('auditLogsToCsv labels import/rename actions and comment/settings entities', () => {
+  const csv = auditLogsToCsv([
+    { created_at: '2026-07-18T10:00:00', action: 'import', entity_type: 'backup', entity_id: null, metadata: null },
+    { created_at: '2026-07-18T09:00:00', action: 'rename', entity_type: 'tags', entity_id: 3, metadata: null },
+    { created_at: '2026-07-18T08:00:00', action: 'create', entity_type: 'task_comment', entity_id: 7, metadata: null },
+    { created_at: '2026-07-18T07:00:00', action: 'update', entity_type: 'settings', entity_id: null, metadata: null },
+  ])
+
+  assert.equal(csv, [
+    '일시,작업,대상,대상 ID,상세',
+    '2026-07-18T10:00:00,가져오기,백업,,',
+    '2026-07-18T09:00:00,이름 변경,태그,3,',
+    '2026-07-18T08:00:00,생성,업무 댓글,7,',
+    '2026-07-18T07:00:00,수정,설정,,',
+  ].join('\n'))
+})
+
 test('eventsToCsv exports event rows with labels and escaping', () => {
   const csv = eventsToCsv([
     {

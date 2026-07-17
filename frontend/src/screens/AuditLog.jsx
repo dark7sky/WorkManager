@@ -2,43 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ClipboardList, Download, Filter, LoaderCircle, Search } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
-import { auditLogCsvFilename, auditLogsToCsv } from '../csv'
-
-const actionLabels = {
-  create: '생성',
-  update: '수정',
-  delete: '삭제',
-  restore: '복원',
-  purge: '정리',
-  sync: '동기화',
-  remote_delete: '원격 삭제',
-  resolve_conflict: '충돌 해결',
-  recurrence_create: '반복 생성',
-  import: '가져오기',
-  rename: '이름 변경',
-}
-
-const entityLabels = {
-  tasks: '업무',
-  events: '일정',
-  todos: 'Todo',
-  work_logs: '업무 기록',
-  trash: '휴지통',
-  google_calendar: 'Google 캘린더',
-  task_comment: '업무 댓글',
-  event_comment: '일정 댓글',
-  todo_comment: 'Todo 댓글',
-  work_log_comment: '업무 기록 댓글',
-  task_attachment: '업무 첨부파일',
-  event_attachment: '일정 첨부파일',
-  todo_attachment: 'Todo 첨부파일',
-  work_log_attachment: '업무 기록 첨부파일',
-  session: '세션',
-  settings: '설정',
-  feature_requests: '기능 요청',
-  tags: '태그',
-  backup: '백업',
-}
+import { auditLogCsvFilename, auditLogsToCsv, auditActionLabels as actionLabels, auditEntityLabels as entityLabels } from '../csv'
 
 const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
   dateStyle: 'medium',

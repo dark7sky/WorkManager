@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-audit-log-csv-labels',
+    timestamp: '2026-07-18T02:51:00+09:00',
+    description: '감사 로그(Audit Log) 화면에는 "가져오기"·"이름 변경" 작업과 댓글/첨부파일/세션/설정 등 대상 라벨이 모두 표시되지만, CSV로 내보내면 해당 라벨 매핑이 빠져 있어 원문 영문 값(import, rename, task_comment, settings 등)이 그대로 노출되었습니다. 화면과 CSV가 동일한 라벨 매핑을 공유하도록 정리해 내보내기 결과가 화면 표시와 일치하도록 했습니다 (`frontend/src/csv.js`의 `auditActionLabels`/`auditEntityLabels`, `frontend/src/screens/AuditLog.jsx`).',
+  },
+  {
     id: '2026-07-18-todo-csv-monthly-recurrence',
     timestamp: '2026-07-18T02:44:00+09:00',
     description: '할 일은 매일/매주/격주/매월 반복을 모두 지원하지만, CSV 내보내기·가져오기의 반복 라벨 매핑에는 "매월"이 빠져 있어 매월 반복 할 일을 CSV로 내보내면 반복 값이 비고, 다시 가져오면 반복 설정이 조용히 사라졌습니다. CSV 반복 라벨 매핑에 매월을 추가해 내보내기·가져오기 왕복 시 반복 값이 보존되도록 했습니다 (`frontend/src/csv.js`의 `todoRecurrenceLabels`/`todoRecurrenceLabelToValue`).',
