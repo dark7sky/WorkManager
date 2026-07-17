@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-bulk-duplicate',
+    timestamp: '2026-07-18T07:59:00+09:00',
+    description: '업무 관리 화면의 일괄 작업 바(완료 처리/태그 추가/연기/우선순위 변경/삭제)에 "복제"를 추가했습니다. 각 행의 개별 복제 버튼은 있었지만 여러 업무를 한 번에 복제할 방법이 없어, 비슷한 업무 여러 건을 반복 생성할 때 하나씩 눌러야 했던 불편을 줄였습니다. 기존 `buildTaskDuplicatePayload`를 재사용해 선택한 업무마다 새 업무를 만듭니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-18-priority-csv-korean-label',
     timestamp: '2026-07-18T07:58:00+09:00',
     description: '업무·일정·할 일 CSV 내보내기에서 우선순위 값이 "high/normal/low" 영문 그대로 출력되어, 다른 컬럼(상태·반복 등)은 한글 라벨인데 우선순위만 영문이 섞여 나오는 문제가 있었습니다. `frontend/src/csv.js`에 `priorityValueToLabel` 매핑을 추가해 세 CSV 모두 화면 표기와 동일한 "낮음/보통/높음"으로 내보내도록 했습니다. 가져오기는 기존처럼 한글·영문 값을 모두 인식합니다.',
