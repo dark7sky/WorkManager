@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-event-series-edit',
+    timestamp: '2026-07-17T11:23:52+09:00',
+    description: '반복 일정(매일/매주/격주/매월)을 만든 뒤 시간대나 장소가 바뀌면 각 회차를 하나씩 열어 똑같이 고쳐야 했습니다. 새 일정을 반복으로 등록할 때 같은 회차끼리 `recurrence_group_id`를 공유하도록 표시하고, 일정 수정 폼에 "이 일정과 이후 반복 일정에 모두 적용" 체크박스를 추가해 제목·장소·태그·색상·링크·우선순위 등을 한 번에 이후 회차까지 반영할 수 있게 했습니다 (`backend/app/db.py`, `backend/app/main.py`의 `PATCH /api/events/series/{group_id}`, `frontend/src/eventRecurrence.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`), 회귀 테스트 `test_event_series_update_applies_to_future_occurrences_only` (`backend/tests/test_api.py`).',
+  },
+  {
     id: '2026-07-17-csv-ics-import-error-toast',
     timestamp: '2026-07-17T11:14:34+09:00',
     description: '업무/일정/오늘 할 일/업무 기록 CSV(및 일정 ICS) 가져오기가 성공하면 앱의 토스트 알림으로 결과를 보여줬지만, 가져올 항목이 없거나 형식 오류가 있을 때는 브라우저 기본 alert 창이 떠서 다크 모드에도 맞지 않고 화면을 막아버렸습니다. 실패 시에도 동일한 `notify(..., "error")` 토스트를 쓰도록 통일했습니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`에서 `notify` prop 연결).',

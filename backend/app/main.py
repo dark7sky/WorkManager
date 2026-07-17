@@ -392,6 +392,7 @@ class EventPayload(StrictPayload):
     color: str | None = None
     links: list[dict] | None = Field(None, max_length=50)
     priority: Literal["low", "normal", "high"] | None = None
+    recurrence_group_id: str | None = Field(None, max_length=64)
 
     @field_validator("link_url", "color", "priority", mode="before")
     @classmethod
@@ -530,7 +531,7 @@ class WorkflowSettingsPayload(StrictPayload):
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
-    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority"}, "updated_at"),
+    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable"}, None),
 }
@@ -652,7 +653,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
-                "events": {"link_url", "color", "priority"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable"}}[table]
+                "events": {"link_url", "color", "priority", "recurrence_group_id"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -1640,6 +1641,24 @@ def skip_task_recurrence(item_id: int, user=Depends(require_user)):
     if next_due:
         patch["due_date"] = next_due
     return update_item("tasks", item_id, patch, user)
+
+
+EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority"}
+
+
+@app.patch("/api/events/series/{group_id}")
+def update_event_series(group_id: str, from_start_at: str, payload: dict = Body(...), user=Depends(require_user)):
+    data = {k: v for k, v in payload.items() if k in EVENT_SERIES_EDITABLE_FIELDS}
+    if not data:
+        raise HTTPException(422, "수정할 필드가 없습니다.")
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM events WHERE user_id=? AND recurrence_group_id=? AND start_at>=? AND deleted_at IS NULL ORDER BY start_at",
+            (user, group_id, from_start_at)).fetchall()]
+    if not ids:
+        raise HTTPException(404, "반복 일정을 찾을 수 없습니다.")
+    items = [update_item("events", item_id, dict(data), user) for item_id in ids]
+    return {"ok": True, "updated": len(items), "items": items}
 
 
 @app.get("/api/trash")

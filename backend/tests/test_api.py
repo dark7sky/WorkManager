@@ -636,6 +636,37 @@ class ApiTests(unittest.TestCase):
         logs = a.get("/api/audit-logs?limit=500").json()["items"]
         self.assertTrue(any(x["entity_type"] == "event_comment" and x["action"] == "delete" and x["entity_id"] == str(comment_id) for x in logs))
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_series_update_applies_to_future_occurrences_only(self, *_):
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "rec-test-group-1"
+        occurrences = []
+        for day in ("2026-09-01", "2026-09-08", "2026-09-15"):
+            created = b.post("/api/events", json={
+                "title": "주간 회의", "start_at": f"{day}T09:00:00", "end_at": f"{day}T10:00:00",
+                "recurrence_group_id": group_id})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/events", json={"title": "지난 회의", "start_at": "2026-08-25T09:00:00", "end_at": "2026-08-25T10:00:00", "recurrence_group_id": group_id})
+        self.assertEqual(past.status_code, 200, past.text)
+        other_user_conflict = a.patch(f"/api/events/series/{group_id}?from_start_at=2026-09-01T09:00:00", json={"title": "몰래 변경"})
+        self.assertEqual(other_user_conflict.status_code, 404)
+        response = b.patch(f"/api/events/series/{group_id}?from_start_at=2026-09-01T09:00:00", json={"title": "주간 회의 (변경)", "location": "3층 회의실", "start_at": "1999-01-01T00:00:00"})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["updated"], 3)
+        for occurrence in occurrences:
+            refreshed = b.get(f"/api/events/{occurrence['id']}").json()
+            self.assertEqual(refreshed["title"], "주간 회의 (변경)")
+            self.assertEqual(refreshed["location"], "3층 회의실")
+            self.assertEqual(refreshed["start_at"], occurrence["start_at"])
+        untouched = b.get(f"/api/events/{past.json()['id']}").json()
+        self.assertEqual(untouched["title"], "지난 회의")
+        no_op = b.patch(f"/api/events/series/{group_id}?from_start_at=2026-09-01T09:00:00", json={"start_at": "1999-01-01T00:00:00"})
+        self.assertEqual(no_op.status_code, 422)
+        missing_group = b.patch("/api/events/series/does-not-exist?from_start_at=2026-09-01T09:00:00", json={"title": "x"})
+        self.assertEqual(missing_group.status_code, 404)
+
     def test_todo_comments_are_user_scoped_and_persisted(self):
         a, b = self.client(self.token_a), self.client(self.token_b)
         todo = a.post("/api/todos", json={"title": "todo with comments", "todo_date": "2026-08-01"}).json()

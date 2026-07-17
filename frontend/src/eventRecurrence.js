@@ -1,6 +1,7 @@
 const MAX_OCCURRENCES = 52
 const pad = n => String(n).padStart(2, '0')
 const toLocalString = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+const makeRecurrenceGroupId = () => `rec-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 
 function advance(date, rule) {
   const next = new Date(date)
@@ -23,5 +24,8 @@ export function expandRecurringEvent(payload, rule, until) {
     occurrences.push({ ...payload, start_at: toLocalString(cursor), end_at: toLocalString(new Date(cursor.getTime() + duration)) })
     cursor = advance(cursor, rule)
   }
-  return occurrences.length ? occurrences : [payload]
+  if (!occurrences.length) return [payload]
+  if (occurrences.length === 1) return occurrences
+  const groupId = makeRecurrenceGroupId()
+  return occurrences.map(o => ({ ...o, recurrence_group_id: groupId }))
 }

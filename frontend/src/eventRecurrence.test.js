@@ -40,3 +40,13 @@ test('falls back to a single event when until is before start', () => {
   const result = expandRecurringEvent(basePayload, 'weekly', '2026-07-01')
   assert.deepEqual(result, [basePayload])
 })
+
+test('stamps a shared recurrence_group_id on multi-occurrence series but not single occurrences', () => {
+  const series = expandRecurringEvent(basePayload, 'weekly', '2026-07-27')
+  assert.equal(series.length, 3)
+  assert.ok(series[0].recurrence_group_id)
+  assert.equal(series[1].recurrence_group_id, series[0].recurrence_group_id)
+  assert.equal(series[2].recurrence_group_id, series[0].recurrence_group_id)
+  const single = expandRecurringEvent(basePayload, null, null)
+  assert.equal(single[0].recurrence_group_id, undefined)
+})

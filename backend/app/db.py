@@ -174,10 +174,11 @@ def init_db():
             "recurrence": "TEXT NOT NULL DEFAULT '[]'",
             "local_uid": "TEXT", "google_is_series_master": "INTEGER NOT NULL DEFAULT 0",
             "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT", "color": "TEXT",
-            "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT",
+            "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_events_recurrence_group ON events(user_id,recurrence_group_id)")
         for name, definition in {"lease_owner": "TEXT", "lease_until": "TEXT"}.items():
             _add_column(c, "google_sync_state", name, definition)
         for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT", "priority": "TEXT NOT NULL DEFAULT 'normal'", "link_url": "TEXT", "recurrence_end_date": "TEXT", "memo": "TEXT",
