@@ -199,7 +199,7 @@ export const parseEventsCsv = text => {
   return { events, errors }
 }
 
-const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '태그', '체크리스트']
+const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월' }
 
 export const todosToCsv = todos => {
@@ -209,7 +209,11 @@ export const todosToCsv = todos => {
     priorityValueToLabel[todo.priority] || todo.priority,
     todoRecurrenceLabels[todo.recurrence_rule] || '',
     todo.todo_date,
+    todo.todo_time,
     (todo.tags || []).join('; '),
+    todo.memo,
+    todo.link_url,
+    todo.estimated_minutes ?? '',
     checklistSummary(todo.checklist),
   ])
   return [todoHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -224,7 +228,7 @@ export const parseTodosCsv = text => {
   if (!rows.length) return { todos: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTags = col('태그')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
   const todos = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -233,7 +237,11 @@ export const parseTodosCsv = text => {
     if (iPriority >= 0 && cells[iPriority]) todo.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iRecurrence >= 0 && cells[iRecurrence]) todo.recurrence_rule = todoRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
     if (iDate >= 0 && cells[iDate]) todo.todo_date = cells[iDate].trim()
+    if (iTime >= 0 && cells[iTime]) todo.todo_time = cells[iTime].trim()
     if (iTags >= 0 && cells[iTags]) todo.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
+    if (iMemo >= 0 && cells[iMemo]) todo.memo = cells[iMemo]
+    if (iLink >= 0 && cells[iLink]) todo.link_url = cells[iLink].trim()
+    if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) todo.estimated_minutes = Number(cells[iEstimate])
     todos.push(todo)
   })
   return { todos, errors }

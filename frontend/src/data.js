@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-csv-columns',
+    timestamp: '2026-07-18T08:23:55+09:00',
+    description: '할 일(Todo) CSV 내보내기가 시간·메모·링크·예상 소요 시간을 빠뜨려, 업무(Tasks) CSV와 달리 이 필드들은 백업/이관 시 유실되고 있었습니다. 할 일 CSV 내보내기/가져오기에 시간·메모·링크·예상 소요 시간(분) 열을 추가해 왕복 편집이 가능하도록 했습니다 (`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-todo-estimated-minutes',
     timestamp: '2026-07-18T08:17:56+09:00',
     description: '업무(Tasks)는 예상 소요 시간을 기록하고 실제 업무 기록과 비교해 초과 여부를 보여줬지만, 오늘 화면의 할 일(Todo)에는 예상 소요 시간을 남길 방법이 없었습니다. 할 일 추가/수정 폼에 예상 소요 시간(분) 입력을 추가하고, 값이 있으면 목록에 "예상 n분" 배지로 표시했습니다. 할 일 복제·업무 기록·반복 생성 시에도 값이 그대로 이어집니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/todoDuplicate.js`).',

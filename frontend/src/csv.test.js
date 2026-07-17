@@ -194,9 +194,19 @@ test('todosToCsv exports todo rows with labels and escaping', () => {
   ])
 
   assert.equal(csv, [
-    '제목,완료 여부,우선순위,반복,날짜,태그,체크리스트',
-    '"보고서, 검토",Y,높음,매일,2026-07-13,분기; 고객,',
-    '메모 작성,N,보통,,2026-07-13,,',
+    '제목,완료 여부,우선순위,반복,날짜,시간,태그,메모,링크,예상 소요시간(분),체크리스트',
+    '"보고서, 검토",Y,높음,매일,2026-07-13,,분기; 고객,,,,',
+    '메모 작성,N,보통,,2026-07-13,,,,,,',
+  ].join('\n'))
+})
+
+test('todosToCsv includes memo, link, time, and estimated minutes', () => {
+  const csv = todosToCsv([
+    { title: '자료 조사', completed: false, priority: 'normal', todo_date: '2026-07-13', todo_time: '14:00', tags: [], memo: '참고 자료 정리', link_url: 'https://example.com', estimated_minutes: 90 },
+  ])
+  assert.equal(csv, [
+    '제목,완료 여부,우선순위,반복,날짜,시간,태그,메모,링크,예상 소요시간(분),체크리스트',
+    '자료 조사,N,보통,,2026-07-13,14:00,,참고 자료 정리,https://example.com,90,',
   ].join('\n'))
 })
 
@@ -218,6 +228,23 @@ test('parseTodosCsv reads back an exported todo row', () => {
     recurrence_rule: 'daily',
     todo_date: '2026-07-13',
     tags: ['분기', '고객'],
+  }])
+})
+
+test('todosToCsv and parseTodosCsv round-trip memo, link, time, and estimated minutes', () => {
+  const csv = todosToCsv([
+    { title: '자료 조사', completed: false, priority: 'normal', todo_date: '2026-07-13', todo_time: '14:00', tags: [], memo: '참고 자료 정리', link_url: 'https://example.com', estimated_minutes: 90 },
+  ])
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(todos, [{
+    title: '자료 조사',
+    priority: 'normal',
+    todo_date: '2026-07-13',
+    todo_time: '14:00',
+    memo: '참고 자료 정리',
+    link_url: 'https://example.com',
+    estimated_minutes: 90,
   }])
 })
 
