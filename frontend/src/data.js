@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-bulk-priority',
+    timestamp: '2026-07-17T16:15:00+09:00',
+    description: '업무(Tasks) 일괄 작업 도구는 선택한 업무의 우선순위를 한 번에 바꿀 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제/태그 추가/연기만 있고 우선순위 변경 기능이 없었습니다. 캘린더 일정 다중 선택 시 "우선순위 변경" 폼을 추가해 선택한 일정들의 우선순위를 한 번에 바꿀 수 있게 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',
+  },
+  {
     id: '2026-07-17-calendar-bulk-postpone',
     timestamp: '2026-07-17T16:05:00+09:00',
     description: '업무(Tasks) 일괄 작업 도구는 선택한 업무의 일정을 며칠씩 한 번에 연기할 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제/태그 추가만 있고 일정 연기 기능이 없었습니다. 캘린더 일정 다중 선택 시 "연기" 폼을 추가해 시작/종료 시각을 유지한 채 며칠씩 미룰 수 있게 했습니다 (`frontend/src/calendarDrag.js`의 postponeEventDates, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',
