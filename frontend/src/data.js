@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-log-billable-filter',
+    timestamp: '2026-07-17T11:34:49+09:00',
+    description: '오늘 화면의 할 일 목록에는 우선순위 필터가 있었지만, 업무 기록 목록에는 검색/태그 필터만 있고 "청구 가능" 여부로 걸러볼 방법이 없어 정산 전에 청구 가능한 기록만 확인하려면 배지를 하나씩 눈으로 확인해야 했습니다. 업무 기록 목록에 "전체/청구 가능/청구 불가" 필터 셀렉트를 추가했습니다 (`frontend/src/todaySearch.js`의 `filterLogsByBillable`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-task-template-checklist',
     timestamp: '2026-07-17T11:31:34+09:00',
     description: '업무(task), 오늘 할 일, 일정, 업무 기록 모두 자주 쓰는 항목을 템플릿으로 저장/재사용할 수 있었지만, 업무 템플릿은 체크리스트를 저장하지 않아 "설계 검토 → 코드 리뷰 → QA → 배포" 같은 반복되는 하위 단계 구성을 템플릿으로 만들어도 매번 다시 입력해야 했습니다. 업무 템플릿 저장/적용 시 체크리스트 항목(완료 여부는 초기화)도 함께 저장·복원되도록 했습니다 (`frontend/src/taskTemplates.js`, `frontend/src/components/TaskForm.jsx`).',

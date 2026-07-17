@@ -6,7 +6,7 @@ import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
-import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from '../todaySearch'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
@@ -279,6 +279,7 @@ export default function Today(props) {
   const [selectedTags, setSelectedTags] = useState([])
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
+  const [logBillableFilter, setLogBillableFilter] = useState('all')
   const [todoFilterPresets, setTodoFilterPresets] = useState(() => loadTodoFilterPresets())
   const applyTodoFilterPreset = id => { const preset = todoFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setTodoPriorityFilter(preset.priority) }
   const saveTodoFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildTodoFilterPreset({ name, query, selectedTags, priority: todoPriorityFilter }); const next = addTodoFilterPreset(todoFilterPresets, preset); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
@@ -344,7 +345,7 @@ export default function Today(props) {
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
   const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds)
   const completedTodos = shownTodos.filter(todo => todo.completed)
-  const shownLogs = orderLogsByPin(filterLogsByQuery(logs.filter(matches), query), pinnedLogIds)
+  const shownLogs = orderLogsByPin(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), pinnedLogIds)
 
   const applyTemplate = id => {
     const template = todoTemplates.find(t => t.id === id)
@@ -538,6 +539,7 @@ export default function Today(props) {
       </aside>
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
+        <select aria-label="청구 가능 필터" value={logBillableFilter} onChange={event => setLogBillableFilter(event.target.value)}><option value="all">전체</option><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}

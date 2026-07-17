@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority } from './todaySearch.js'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from './todaySearch.js'
 
 const todos = [
   { id: 1, title: '보고서 작성', priority: 'high' },
@@ -11,6 +11,12 @@ const todos = [
 const logs = [
   { id: 1, content: '주간 보고서 초안 작성' },
   { id: 2, content: '고객 통화', tags: ['sales'] },
+]
+
+const billingLogs = [
+  { id: 1, content: '청구 가능 작업', billable: true },
+  { id: 2, content: '내부 작업', billable: false },
+  { id: 3, content: '태그 없는 작업' },
 ]
 
 test('filterTodosByQuery returns all todos for an empty query', () => {
@@ -53,4 +59,17 @@ test('filterTodosByPriority matches an explicit priority', () => {
 
 test('filterTodosByPriority treats a missing priority as normal', () => {
   assert.deepEqual(filterTodosByPriority(todos, 'normal').map(t => t.id), [3])
+})
+
+test('filterLogsByBillable returns all logs when billable is all', () => {
+  assert.equal(filterLogsByBillable(billingLogs, 'all').length, 3)
+  assert.equal(filterLogsByBillable(billingLogs).length, 3)
+})
+
+test('filterLogsByBillable matches only billable logs', () => {
+  assert.deepEqual(filterLogsByBillable(billingLogs, 'billable').map(l => l.id), [1])
+})
+
+test('filterLogsByBillable matches non-billable logs including missing field', () => {
+  assert.deepEqual(filterLogsByBillable(billingLogs, 'non-billable').map(l => l.id), [2, 3])
 })
