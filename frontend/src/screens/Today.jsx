@@ -247,6 +247,8 @@ export default function Today(props) {
   const [todoMemo, setTodoMemo] = useState('')
   const [todoColor, setTodoColor] = useState('')
   const [todoTime, setTodoTime] = useState('')
+  const [todoChecklist, setTodoChecklist] = useState([])
+  const [todoChecklistText, setTodoChecklistText] = useState('')
   const [todoTemplates, setTodoTemplates] = useState(() => loadTodoTemplates())
   const [editRecurrence, setEditRecurrence] = useState('')
   const [editRecurrenceEnd, setEditRecurrenceEnd] = useState('')
@@ -351,6 +353,15 @@ export default function Today(props) {
     setEditTodoLinkLabelText('')
   }
   const removeEditTodoLink = id => setEditTodoLinks(editTodoLinks.filter(item => item.id !== id))
+  const addTodoChecklistItem = () => {
+    const text = todoChecklistText.trim()
+    if (!text) return
+    setTodoChecklist([...todoChecklist, { id: `${Date.now()}`, text, done: false }])
+    setTodoChecklistText('')
+  }
+  const toggleTodoChecklistItem = id => setTodoChecklist(todoChecklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
+  const removeTodoChecklistItem = id => setTodoChecklist(todoChecklist.filter(item => item.id !== id))
+  const shiftTodoChecklistItem = (id, direction) => setTodoChecklist(list => moveChecklistItem(list, id, direction))
   const addEditTodoChecklistItem = () => {
     const text = editTodoChecklistText.trim()
     if (!text) return
@@ -392,12 +403,13 @@ export default function Today(props) {
     setTodoPriority(filled.priority)
     setTodoRecurrence(filled.recurrence_rule)
     setTodoTags(filled.tags)
+    setTodoChecklist(filled.checklist)
   }
   const saveTodoTemplate = () => {
     if (!todoDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', todoDraft.trim())
     if (!name) return
-    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags })
+    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags, checklist: todoChecklist })
     const next = addTodoTemplate(todoTemplates, template)
     setTodoTemplates(next)
     saveTodoTemplates(next)
@@ -442,7 +454,7 @@ export default function Today(props) {
     event.preventDefault()
     if (!todoDraft.trim()) return
     setSaving('todo')
-    if (await onAddTodo(todoDraft.trim(), todoTags, todoRecurrence, todoPriority, todoLink.trim(), todoRecurrenceEnd, todoMemo.trim(), todoColor, todoTime)) {
+    if (await onAddTodo(todoDraft.trim(), todoTags, todoRecurrence, todoPriority, todoLink.trim(), todoRecurrenceEnd, todoMemo.trim(), todoColor, todoTime, normalizedChecklist(todoChecklist))) {
       setTodoDraft('')
       setTodoTags([])
       setTodoRecurrence('')
@@ -452,6 +464,8 @@ export default function Today(props) {
       setTodoMemo('')
       setTodoColor('')
       setTodoTime('')
+      setTodoChecklist([])
+      setTodoChecklistText('')
     }
     setSaving('')
   }
@@ -573,6 +587,7 @@ export default function Today(props) {
           <div className="task-template-bar"><label>Todo 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{todoTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveTodoTemplate}>템플릿으로 저장</button>{todoTemplates.length ? <button type="button" className="text-button" onClick={deleteTodoTemplate}>템플릿 삭제</button> : null}</div>
           <div className="quick-add"><Plus/><input value={todoDraft} onChange={event => setTodoDraft(event.target.value)} aria-label="오늘 Todo" placeholder="오늘 꼭 할 일을 추가하세요"/><select aria-label="우선순위" value={todoPriority} onChange={event => setTodoPriority(event.target.value)}><option value="low">낮음</option><option value="normal">보통</option><option value="high">높음</option></select><select aria-label="반복" value={todoRecurrence} onChange={event => setTodoRecurrence(event.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select>{todoRecurrence ? <input type="date" aria-label="반복 종료일" value={todoRecurrenceEnd} onChange={event => setTodoRecurrenceEnd(event.target.value)}/> : null}<input type="time" aria-label="시간" value={todoTime} onChange={event => setTodoTime(event.target.value)}/><button disabled={saving === 'todo'}>추가</button></div>
           <input className="link-input" type="url" value={todoLink} onChange={event => setTodoLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/>
+          <div className="checklist-editor"><span className="dependency-picker-label">체크리스트{todoChecklist.length ? ` (${todoChecklist.filter(i => i.done).length}/${todoChecklist.length})` : ''}</span>{todoChecklist.map((item, index) => <div key={item.id} className="checklist-editor-item"><button type="button" className="text-button" onClick={() => toggleTodoChecklistItem(item.id)} aria-label={`${item.text} 완료 상태 변경`}>{item.done ? <Check aria-hidden="true"/> : <Square aria-hidden="true"/>}</button><span className={item.done ? 'checklist-done-text' : ''}>{item.text}</span><button type="button" className="text-button" disabled={index === 0} onClick={() => shiftTodoChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button><button type="button" className="text-button" disabled={index === todoChecklist.length - 1} onClick={() => shiftTodoChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button><button type="button" className="text-button" onClick={() => removeTodoChecklistItem(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="text" value={todoChecklistText} placeholder="세부 항목 추가" onChange={e => setTodoChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTodoChecklistItem() } }}/><button type="button" className="text-button" onClick={addTodoChecklistItem}>추가</button></div></div>
           <input className="link-input" value={todoMemo} onChange={event => setTodoMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/>
           <select aria-label="색상" value={todoColor} onChange={event => setTodoColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select>
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-template-checklist',
+    timestamp: '2026-07-18T07:52:00+09:00',
+    description: '업무(Task) 템플릿은 체크리스트까지 저장·불러오기가 되지만, 오늘 할 일(Todo) 템플릿은 제목/우선순위/반복/태그만 저장할 뿐 체크리스트는 담을 수 없었고, 애초에 할 일 빠른 추가 폼 자체에 체크리스트 입력란이 없어 새 할 일에 세부 항목을 붙이려면 저장 후 다시 열어 편집해야 했습니다. 할 일 빠른 추가 폼에 업무 편집 폼과 동일한 체크리스트 편집기를 추가하고, `todoTemplates.js`의 `buildTodoTemplate`/`applyTodoTemplate`이 체크리스트를 함께 저장·복원하도록 확장했습니다 (`frontend/src/todoTemplates.js`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onAddTodo`).',
+  },
+  {
     id: '2026-07-18-audit-log-csv-labels',
     timestamp: '2026-07-18T02:51:00+09:00',
     description: '감사 로그(Audit Log) 화면에는 "가져오기"·"이름 변경" 작업과 댓글/첨부파일/세션/설정 등 대상 라벨이 모두 표시되지만, CSV로 내보내면 해당 라벨 매핑이 빠져 있어 원문 영문 값(import, rename, task_comment, settings 등)이 그대로 노출되었습니다. 화면과 CSV가 동일한 라벨 매핑을 공유하도록 정리해 내보내기 결과가 화면 표시와 일치하도록 했습니다 (`frontend/src/csv.js`의 `auditActionLabels`/`auditEntityLabels`, `frontend/src/screens/AuditLog.jsx`).',

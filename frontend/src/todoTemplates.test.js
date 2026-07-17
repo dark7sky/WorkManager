@@ -61,5 +61,18 @@ test('removeTodoTemplate filters out the matching id only', () => {
 
 test('applyTodoTemplate maps template fields onto a draft', () => {
   const template = buildTodoTemplate({ name: '아침 루틴', title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'] })
-  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'] })
+  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'], checklist: [] })
+})
+
+test('buildTodoTemplate normalizes checklist items, dropping blanks and forcing done:false', () => {
+  const template = buildTodoTemplate({ name: '출장', title: '출장 준비', checklist: [{ text: '항공권 확인', done: true }, { text: '  ' }, { text: '숙소 확인' }] })
+  assert.deepEqual(template.checklist.map(i => ({ text: i.text, done: i.done })), [{ text: '항공권 확인', done: false }, { text: '숙소 확인', done: false }])
+})
+
+test('applyTodoTemplate carries the checklist onto the draft with fresh ids', () => {
+  const template = buildTodoTemplate({ name: '출장', title: '출장 준비', checklist: [{ text: '항공권 확인' }] })
+  const filled = applyTodoTemplate(template)
+  assert.equal(filled.checklist.length, 1)
+  assert.equal(filled.checklist[0].text, '항공권 확인')
+  assert.equal(filled.checklist[0].done, false)
 })
