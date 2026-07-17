@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-csv-monthly-recurrence',
+    timestamp: '2026-07-18T02:44:00+09:00',
+    description: '할 일은 매일/매주/격주/매월 반복을 모두 지원하지만, CSV 내보내기·가져오기의 반복 라벨 매핑에는 "매월"이 빠져 있어 매월 반복 할 일을 CSV로 내보내면 반복 값이 비고, 다시 가져오면 반복 설정이 조용히 사라졌습니다. CSV 반복 라벨 매핑에 매월을 추가해 내보내기·가져오기 왕복 시 반복 값이 보존되도록 했습니다 (`frontend/src/csv.js`의 `todoRecurrenceLabels`/`todoRecurrenceLabelToValue`).',
+  },
+  {
     id: '2026-07-18-worklog-checklist',
     timestamp: '2026-07-18T02:22:32+09:00',
     description: '업무/일정/할 일에는 있던 체크리스트 편집 기능이 업무 기록(work_logs)에는 없었습니다. 업무 기록 수정 화면에 체크리스트 편집기를 추가하고, 목록에 진행률 배지를 표시하며, 복제·업무 전환 시 체크리스트를 함께 옮기도록 했습니다 (`backend/app/main.py`의 `WorkLogPayload`, `frontend/src/screens/Today.jsx`, `frontend/src/logDuplicate.js`).',

@@ -202,6 +202,17 @@ test('parseTodosCsv returns nothing for empty input', () => {
   assert.deepEqual(parseTodosCsv(''), { todos: [], errors: [] })
 })
 
+test('todosToCsv and parseTodosCsv round-trip a monthly recurring todo', () => {
+  const csv = todosToCsv([
+    { title: '월간 정산', completed: false, priority: 'normal', recurrence_rule: 'monthly', todo_date: '2026-07-13', tags: [] },
+  ])
+  assert.match(csv, /매월/)
+
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.equal(todos[0].recurrence_rule, 'monthly')
+})
+
 test('workLogsToCsv exports work log rows with linked task title and escaping', () => {
   const csv = workLogsToCsv([
     { log_date: '2026-07-14', content: '회의, 진행', duration_minutes: 30, task_id: 5, tags: ['분기'], billable: true },
