@@ -13,6 +13,7 @@ import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
 import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
 import { addLogTemplate, applyLogTemplate, buildLogTemplate, loadLogTemplates, removeLogTemplate, saveLogTemplates } from '../logTemplates'
+import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
 
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월' }
 
@@ -475,11 +476,17 @@ export default function Today(props) {
   }
   const toggleTodoSelected = id => setSelectedTodoIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
   const clearSelectedTodos = () => setSelectedTodoIds(new Set())
+  const allShownTodoIds = useMemo(() => shownTodos.map(t => t.id), [shownTodos])
+  const allShownTodosSelected = allIdsSelected(allShownTodoIds, selectedTodoIds)
+  const toggleSelectAllTodos = () => setSelectedTodoIds(toggleSelectAllIds(allShownTodoIds, selectedTodoIds))
   const bulkCompleteTodos = async () => { if (await onBulkCompleteTodo([...selectedTodoIds])) clearSelectedTodos() }
   const bulkDeleteTodos = () => { onBulkDeleteTodo([...selectedTodoIds]); clearSelectedTodos() }
   const bulkAddTagTodos = async () => { const tag = bulkTodoTag.trim(); if (!tag) return; if (await onBulkAddTagTodo([...selectedTodoIds], tag)) setBulkTodoTag('') }
   const toggleLogSelected = id => setSelectedLogIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
   const clearSelectedLogs = () => setSelectedLogIds(new Set())
+  const allShownLogIds = useMemo(() => shownLogs.map(l => l.id), [shownLogs])
+  const allShownLogsSelected = allIdsSelected(allShownLogIds, selectedLogIds)
+  const toggleSelectAllLogs = () => setSelectedLogIds(toggleSelectAllIds(allShownLogIds, selectedLogIds))
   const bulkDeleteLogs = () => { onBulkDeleteLog([...selectedLogIds]); clearSelectedLogs() }
   const bulkAddTagLogs = async () => { const tag = bulkLogTag.trim(); if (!tag) return; if (await onBulkAddTagLog([...selectedLogIds], tag)) setBulkLogTag('') }
   const exportLogs = () => {
@@ -514,6 +521,7 @@ export default function Today(props) {
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
+        {shownTodos.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="할 일 전체 선택" checked={allShownTodosSelected} onChange={toggleSelectAllTodos}/>전체 선택</label> : null}
         {selectedTodoIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 할 일 일괄 작업"><span>{selectedTodoIds.size}개 선택됨</span><button type="button" className="secondary" onClick={bulkCompleteTodos}><CheckCircle2 size={16}/>완료 처리</button><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagTodos() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkTodoTag} onChange={e => setBulkTodoTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkTodoTag.trim()}>추가</button></form><button type="button" className="danger-button" onClick={bulkDeleteTodos}>삭제</button><button type="button" className="text-button" onClick={clearSelectedTodos}>선택 해제</button></div> : null}
         {shownTodos.length ? <div className="todo-list">{shownTodos.map(todo => <div className={`todo-row ${todo.completed ? 'completed' : ''} ${todo.priority === 'high' ? 'priority-high' : ''} ${selectedTodoIds.has(todo.id) ? 'row-selected' : ''}`} style={eventColorHex(todo.color) ? { borderLeft: `3px solid ${eventColorHex(todo.color)}` } : undefined} key={todo.id}>
           <input type="checkbox" className="row-select" aria-label={`${todo.title} 선택`} checked={selectedTodoIds.has(todo.id)} onChange={() => toggleTodoSelected(todo.id)}/>
@@ -532,6 +540,7 @@ export default function Today(props) {
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
+        {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}
         {selectedLogIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 업무 기록 일괄 작업"><span>{selectedLogIds.size}개 선택됨</span><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagLogs() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkLogTag} onChange={e => setBulkLogTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkLogTag.trim()}>추가</button></form><button type="button" className="danger-button" onClick={bulkDeleteLogs}>삭제</button><button type="button" className="text-button" onClick={clearSelectedLogs}>선택 해제</button></div> : null}
         <div className="worklog-timer">{timer ? <><span className="worklog-timer-display">{formatElapsed(timer.startedAt, timerNow)}</span><button type="button" className="text-button" onClick={stopTimer}><Square size={14}/> 타이머 중지</button></> : <button type="button" className="text-button" onClick={startTimer}><Play size={14}/> 타이머 시작</button>}</div>
         <div className="task-template-bar"><label>기록 템플릿<select onChange={e => { applyLogTpl(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{logTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveLogTpl}>템플릿으로 저장</button>{logTemplates.length ? <button type="button" className="text-button" onClick={deleteLogTpl}>템플릿 삭제</button> : null}</div>

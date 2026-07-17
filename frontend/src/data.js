@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-today-select-all',
+    timestamp: '2026-07-17T11:27:14+09:00',
+    description: '업무 관리(Gantt) 화면은 필터에 표시된 업무를 한 번에 선택하는 "전체 선택" 체크박스가 있었지만, 오늘 화면의 할 일과 업무 기록 일괄 작업 목록에는 같은 기능이 없어 여러 개를 선택하려면 하나씩 체크해야 했습니다. Tasks 화면과 동일한 `allIdsSelected`/`toggleSelectAllIds` 헬퍼(`frontend/src/taskFilters.js`)를 재사용해 오늘 화면의 할 일 목록과 업무 기록 목록에도 "전체 선택" 체크박스를 추가했습니다 (`frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-event-series-edit',
     timestamp: '2026-07-17T11:23:52+09:00',
     description: '반복 일정(매일/매주/격주/매월)을 만든 뒤 시간대나 장소가 바뀌면 각 회차를 하나씩 열어 똑같이 고쳐야 했습니다. 새 일정을 반복으로 등록할 때 같은 회차끼리 `recurrence_group_id`를 공유하도록 표시하고, 일정 수정 폼에 "이 일정과 이후 반복 일정에 모두 적용" 체크박스를 추가해 제목·장소·태그·색상·링크·우선순위 등을 한 번에 이후 회차까지 반영할 수 있게 했습니다 (`backend/app/db.py`, `backend/app/main.py`의 `PATCH /api/events/series/{group_id}`, `frontend/src/eventRecurrence.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`), 회귀 테스트 `test_event_series_update_applies_to_future_occurrences_only` (`backend/tests/test_api.py`).',
