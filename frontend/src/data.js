@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-select-all',
+    timestamp: '2026-07-17T11:38:32+09:00',
+    description: '업무(Tasks)와 오늘 화면의 할 일/업무 기록 목록에는 이미 "전체 선택" 체크박스가 있었지만, 일정(Calendar) 화면의 모바일 일정 목록은 개별 체크박스로만 다중 선택이 가능해 여러 일정을 한 번에 삭제하려면 하나씩 체크해야 했습니다. 기존 `allIdsSelected`/`toggleSelectAllIds` 헬퍼(`frontend/src/taskFilters.js`)를 재사용해 일정 목록에도 동일한 "전체 선택" 체크박스를 추가했습니다 (`frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-17-log-billable-filter',
     timestamp: '2026-07-17T11:34:49+09:00',
     description: '오늘 화면의 할 일 목록에는 우선순위 필터가 있었지만, 업무 기록 목록에는 검색/태그 필터만 있고 "청구 가능" 여부로 걸러볼 방법이 없어 정산 전에 청구 가능한 기록만 확인하려면 배지를 하나씩 눈으로 확인해야 했습니다. 업무 기록 목록에 "전체/청구 가능/청구 불가" 필터 셀렉트를 추가했습니다 (`frontend/src/todaySearch.js`의 `filterLogsByBillable`, `frontend/src/screens/Today.jsx`).',
