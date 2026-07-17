@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-log-filter-presets',
+    timestamp: '2026-07-17T11:58:00+09:00',
+    description: '업무(Tasks), 오늘 화면의 할 일, 캘린더 일정에는 검색어·태그 조합을 이름 붙여 저장하고 다시 불러오는 "필터 저장" 기능이 있었지만, 오늘 화면의 업무 기록(오늘 한 일)에는 같은 검색/태그/청구 가능 필터가 있으면서도 저장된 필터 기능이 없어 자주 쓰는 조합(예: 청구 가능 + 특정 태그)을 매번 다시 설정해야 했습니다. `frontend/src/logFilterPresets.js`를 추가하고(`todoFilterPresets.js`와 동일한 구조, 우선순위 대신 청구 가능 여부 저장) 오늘 화면의 업무 기록 필터 바에 "필터 저장/선택/삭제" 컨트롤을 연결했습니다 (`frontend/src/screens/Today.jsx`, 테스트 `frontend/src/logFilterPresets.test.js`).',
+  },
+  {
     id: '2026-07-17-event-filter-presets',
     timestamp: '2026-07-17T11:52:00+09:00',
     description: '업무(Tasks)와 오늘 화면의 할 일 목록에는 검색어·태그·우선순위 조합을 이름 붙여 저장하고 다시 불러오는 "필터 저장" 기능이 있었지만, 캘린더(일정) 화면에는 같은 검색/태그/우선순위 필터가 있으면서도 저장된 필터 기능이 없어 자주 쓰는 조합을 매번 다시 설정해야 했습니다. `frontend/src/eventFilterPresets.js`를 추가하고(`todoFilterPresets.js`와 동일한 구조) 캘린더 화면 필터 바에 "필터 저장/선택/삭제" 컨트롤을 연결했습니다 (`frontend/src/screens/Calendar.jsx`, 테스트 `frontend/src/eventFilterPresets.test.js`).',

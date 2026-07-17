@@ -8,6 +8,7 @@ import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo
 import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
+import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
@@ -285,6 +286,10 @@ export default function Today(props) {
   const applyTodoFilterPreset = id => { const preset = todoFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setTodoPriorityFilter(preset.priority) }
   const saveTodoFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildTodoFilterPreset({ name, query, selectedTags, priority: todoPriorityFilter }); const next = addTodoFilterPreset(todoFilterPresets, preset); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
   const deleteTodoFilterPreset = () => { const name = window.prompt('삭제할 필터 이름을 입력하세요.'); const match = todoFilterPresets.find(p => p.name === name); if (!match) return; const next = removeTodoFilterPreset(todoFilterPresets, match.id); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
+  const [logFilterPresets, setLogFilterPresets] = useState(() => loadLogFilterPresets())
+  const applyLogFilterPreset = id => { const preset = logFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setLogBillableFilter(preset.billable) }
+  const saveLogFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildLogFilterPreset({ name, query, selectedTags, billable: logBillableFilter }); const next = addLogFilterPreset(logFilterPresets, preset); setLogFilterPresets(next); saveLogFilterPresets(next) }
+  const deleteLogFilterPreset = () => { const name = window.prompt('삭제할 필터 이름을 입력하세요.'); const match = logFilterPresets.find(p => p.name === name); if (!match) return; const next = removeLogFilterPreset(logFilterPresets, match.id); setLogFilterPresets(next); saveLogFilterPresets(next) }
   const [tagSuggestions, setTagSuggestions] = useState({})
   const [timer, setTimer] = useState(() => loadWorkLogTimer())
   const [timerNow, setTimerNow] = useState(() => new Date())
@@ -542,6 +547,7 @@ export default function Today(props) {
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         <select aria-label="청구 가능 필터" value={logBillableFilter} onChange={event => setLogBillableFilter(event.target.value)}><option value="all">전체</option><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select>
+        <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}</div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}
