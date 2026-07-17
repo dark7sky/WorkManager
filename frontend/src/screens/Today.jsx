@@ -11,7 +11,7 @@ import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, remo
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
-import { todoIcsFilename, todosToIcs } from '../ics'
+import { todoIcsFilename, todosToIcs, logIcsFilename, logsToIcs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedChecklist, normalizedLinks } from '../taskFormPayload'
@@ -527,6 +527,10 @@ export default function Today(props) {
   const bulkDeleteLogs = () => { onBulkDeleteLog([...selectedLogIds]); clearSelectedLogs() }
   const bulkAddTagLogs = async () => { const tag = bulkLogTag.trim(); if (!tag) return; if (await onBulkAddTagLog([...selectedLogIds], tag)) setBulkLogTag('') }
   const bulkPostponeLogs = async () => { const days = Number(bulkLogPostponeDays); if (!days) return; const ok = await onBulkPostponeLog([...selectedLogIds], days); if (ok) clearSelectedLogs() }
+  const exportLogsIcs = () => {
+    const ics = logsToIcs(shownLogs), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = logIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
+  }
   const exportLogs = () => {
     const csv = `﻿${workLogsToCsv(shownLogs, taskTitle, billingHourlyRate)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
@@ -588,6 +592,7 @@ export default function Today(props) {
         <select aria-label="업무 기록 정렬" value={logSort} onChange={event => setLogSort(event.target.value)}><option value="none">기본순</option><option value="time">시각순</option><option value="duration">소요 시간순</option><option value="content">내용순</option></select>
         <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}</div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs}><Download size={14}/> ICS</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}

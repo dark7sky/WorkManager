@@ -86,6 +86,30 @@ export const todosToIcs = todos => {
 
 export const todoIcsFilename = date => `workmanager-todos-${date}.ics`
 
+export const logsToIcs = logs => {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//WorkManager//Work Log Export//KO']
+  for (const log of logs) {
+    if (!log.log_date) continue
+    lines.push('BEGIN:VEVENT')
+    lines.push(`UID:log-${log.id}@workmanager`)
+    lines.push(`DTSTAMP:${toIcsDate(new Date())}`)
+    if (log.log_time) {
+      const start = new Date(`${log.log_date}T${log.log_time}:00`)
+      const end = new Date(start.getTime() + (log.duration_minutes || 30) * 60000)
+      lines.push(`DTSTART:${toIcsDate(start)}`)
+      lines.push(`DTEND:${toIcsDate(end)}`)
+    } else {
+      lines.push(`DTSTART;VALUE=DATE:${toIcsAllDayDate(log.log_date)}`)
+    }
+    lines.push(`SUMMARY:${escapeIcsText(`[기록] ${log.content}`)}`)
+    lines.push('END:VEVENT')
+  }
+  lines.push('END:VCALENDAR')
+  return lines.map(foldLine).join('\r\n')
+}
+
+export const logIcsFilename = date => `workmanager-worklogs-${date}.ics`
+
 const unfoldIcs = text => text.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '')
 
 const unescapeIcsText = value => value.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\')

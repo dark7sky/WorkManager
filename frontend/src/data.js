@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-ics-export',
+    timestamp: '2026-07-17T21:19:00+09:00',
+    description: '업무(Tasks), 일정(Calendar), 오늘(Today)의 할 일 목록은 각각 ICS 캘린더 파일로 내보낼 수 있었지만, 같은 화면의 오늘 한 일(업무 기록) 목록에는 CSV/PDF 내보내기만 있고 ICS 내보내기가 없었습니다. 오늘 한 일 목록 도구모음에도 ICS 내보내기 버튼을 추가했습니다 (`frontend/src/ics.js`의 `logsToIcs`/`logIcsFilename`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-todo-checklist',
     timestamp: '2026-07-17T21:12:00+09:00',
     description: '업무(Tasks)에는 세부 항목을 체크할 수 있는 체크리스트가 있었지만, 가장 가까운 형제 항목인 오늘(Today)의 할 일에는 체크리스트가 없어 여러 단계로 나뉜 할 일(예: 출장 준비, 장보기)의 진행 상황을 기록할 수 없었습니다. 할 일 수정 화면에 체크리스트 추가/완료 표시/삭제 기능을 추가하고, 목록에도 완료 개수 배지를 표시했습니다. 복제 및 업무로 전환 시에도 체크리스트가 함께 복사됩니다 (`backend/app/db.py`, `backend/app/main.py`, `frontend/src/screens/Today.jsx`, `frontend/src/todoDuplicate.js`).',
