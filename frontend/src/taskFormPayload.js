@@ -31,7 +31,7 @@ const normalizedOptionalId = value => {
   const number = Number(value)
   return Number.isInteger(number) && number > 0 ? number : null
 }
-const normalizedEstimatedMinutes = value => {
+export const normalizedEstimatedMinutes = value => {
   if (value === '' || value === null || value === undefined) return null
   const number = Number(value)
   return Number.isFinite(number) && number >= 0 ? Math.round(number) : null

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-estimated-minutes',
+    timestamp: '2026-07-18T08:17:56+09:00',
+    description: '업무(Tasks)는 예상 소요 시간을 기록하고 실제 업무 기록과 비교해 초과 여부를 보여줬지만, 오늘 화면의 할 일(Todo)에는 예상 소요 시간을 남길 방법이 없었습니다. 할 일 추가/수정 폼에 예상 소요 시간(분) 입력을 추가하고, 값이 있으면 목록에 "예상 n분" 배지로 표시했습니다. 할 일 복제·업무 기록·반복 생성 시에도 값이 그대로 이어집니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/todoDuplicate.js`).',
+  },
+  {
     id: '2026-07-18-todo-row-postpone',
     timestamp: '2026-07-18T08:14:31+09:00',
     description: '업무(Tasks) 화면은 기한이 지난 업무를 행 단위로 하루씩 미룰 수 있는 버튼이 있었지만, 오늘 화면의 할 일 목록에는 여러 항목을 선택해야만 쓸 수 있는 일괄 연기 기능만 있고 개별 할 일을 바로 미루는 버튼이 없었습니다. 할 일 행의 작업 버튼 목록에 "하루 미루기" 버튼을 추가해 선택 없이 즉시 하루 연기할 수 있도록 하고, 실행 취소도 지원했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',

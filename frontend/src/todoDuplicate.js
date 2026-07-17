@@ -1,3 +1,5 @@
+import { normalizedEstimatedMinutes } from './taskFormPayload.js'
+
 export const buildTodoDuplicatePayload = todo => ({
   title: `${(todo?.title || '').trim()} (사본)`,
   todo_date: new Date().toLocaleDateString('en-CA'),
@@ -12,6 +14,7 @@ export const buildTodoDuplicatePayload = todo => ({
   memo: todo?.memo || null,
   color: todo?.color || null,
   checklist: Array.isArray(todo?.checklist) ? todo.checklist.map(item => ({ ...item, done: false })) : [],
+  estimated_minutes: normalizedEstimatedMinutes(todo?.estimated_minutes),
 })
 
 const TODO_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }
@@ -26,4 +29,5 @@ export const buildTaskFromTodoPayload = todo => ({
   link_url: todo?.link_url || null,
   description: todo?.memo || null,
   checklist: Array.isArray(todo?.checklist) ? todo.checklist : [],
+  estimated_minutes: normalizedEstimatedMinutes(todo?.estimated_minutes),
 })

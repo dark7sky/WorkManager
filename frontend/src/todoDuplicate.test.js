@@ -87,3 +87,16 @@ test('buildTaskFromTodoPayload carries checklist items as-is', () => {
   assert.deepEqual(result.checklist, [{ id: '1', text: '우유', done: true }])
   assert.deepEqual(buildTaskFromTodoPayload({ title: '무제' }).checklist, [])
 })
+
+test('buildTodoDuplicatePayload normalizes estimated_minutes to a non-negative integer or null', () => {
+  const todo = { title: '보고서 작성', estimated_minutes: 90 }
+  assert.equal(buildTodoDuplicatePayload(todo).estimated_minutes, 90)
+  assert.equal(buildTodoDuplicatePayload({ title: '무제', estimated_minutes: '' }).estimated_minutes, null)
+  assert.equal(buildTodoDuplicatePayload({ title: '무제', estimated_minutes: -5 }).estimated_minutes, null)
+})
+
+test('buildTaskFromTodoPayload carries estimated_minutes', () => {
+  const todo = { title: '보고서 작성', estimated_minutes: 90 }
+  assert.equal(buildTaskFromTodoPayload(todo).estimated_minutes, 90)
+  assert.equal(buildTaskFromTodoPayload({ title: '무제' }).estimated_minutes, null)
+})
