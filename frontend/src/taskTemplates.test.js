@@ -78,6 +78,29 @@ test('applyTaskTemplate uses today for both dates when the template has no durat
   assert.equal(result.due_date, '2026-07-10')
 })
 
+test('buildTaskTemplate carries checklist text, resets done to false, drops blanks, and caps length', () => {
+  const checklist = [
+    { id: 'a', text: '설계 검토', done: true },
+    { id: 'b', text: '  ', done: false },
+    { id: 'c', text: 'QA', done: false },
+  ]
+  const template = buildTaskTemplate({ name: '이름', title: '제목', checklist })
+  assert.deepEqual(template.checklist.map(i => ({ text: i.text, done: i.done })), [
+    { text: '설계 검토', done: false },
+    { text: 'QA', done: false },
+  ])
+  assert.equal(new Set(template.checklist.map(i => i.id)).size, 2)
+})
+
+test('applyTaskTemplate carries the template checklist with reset done state and fresh ids', () => {
+  const template = buildTaskTemplate({ name: '이름', title: '제목', checklist: [{ text: '단계 1', done: true }] })
+  const result = applyTaskTemplate(template, '2026-07-10')
+  assert.equal(result.checklist.length, 1)
+  assert.equal(result.checklist[0].text, '단계 1')
+  assert.equal(result.checklist[0].done, false)
+  assert.notEqual(result.checklist[0].id, template.checklist[0].id)
+})
+
 test('durationDaysBetween computes whole days and floors negative spans to zero', () => {
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-13'), 3)
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-10'), 0)

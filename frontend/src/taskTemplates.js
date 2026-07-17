@@ -2,6 +2,10 @@ const STORAGE_KEY = 'wm-task-templates'
 const NAME_LIMIT = 100
 const TITLE_LIMIT = 300
 const TAG_LIMIT = 50
+const CHECKLIST_LIMIT = 50
+const CHECKLIST_TEXT_LIMIT = 300
+
+const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 export const loadTaskTemplates = (storage = localStorage) => {
   try {
@@ -16,7 +20,7 @@ export const saveTaskTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags, durationDays }) => ({
+export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags, durationDays, checklist }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
@@ -24,6 +28,10 @@ export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags
   recurrence_rule: recurrence_rule || '',
   tags: (Array.isArray(tags) ? tags : []).slice(0, TAG_LIMIT),
   durationDays: Number.isFinite(Number(durationDays)) && Number(durationDays) > 0 ? Math.round(Number(durationDays)) : 0,
+  checklist: (Array.isArray(checklist) ? checklist : [])
+    .filter(i => i && String(i.text || '').trim())
+    .slice(0, CHECKLIST_LIMIT)
+    .map(i => ({ id: genId(), text: String(i.text).trim().slice(0, CHECKLIST_TEXT_LIMIT), done: false })),
 })
 
 export const addTaskTemplate = (templates, template) => {
@@ -46,6 +54,7 @@ export const applyTaskTemplate = (template, today) => ({
   tags: template.tags,
   start_date: today,
   due_date: template.durationDays > 0 ? addDays(today, template.durationDays) : today,
+  checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
 })
 
 export const durationDaysBetween = (startDate, dueDate) => {

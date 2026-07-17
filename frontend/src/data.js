@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-template-checklist',
+    timestamp: '2026-07-17T11:31:34+09:00',
+    description: '업무(task), 오늘 할 일, 일정, 업무 기록 모두 자주 쓰는 항목을 템플릿으로 저장/재사용할 수 있었지만, 업무 템플릿은 체크리스트를 저장하지 않아 "설계 검토 → 코드 리뷰 → QA → 배포" 같은 반복되는 하위 단계 구성을 템플릿으로 만들어도 매번 다시 입력해야 했습니다. 업무 템플릿 저장/적용 시 체크리스트 항목(완료 여부는 초기화)도 함께 저장·복원되도록 했습니다 (`frontend/src/taskTemplates.js`, `frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-17-today-select-all',
     timestamp: '2026-07-17T11:27:14+09:00',
     description: '업무 관리(Gantt) 화면은 필터에 표시된 업무를 한 번에 선택하는 "전체 선택" 체크박스가 있었지만, 오늘 화면의 할 일과 업무 기록 일괄 작업 목록에는 같은 기능이 없어 여러 개를 선택하려면 하나씩 체크해야 했습니다. Tasks 화면과 동일한 `allIdsSelected`/`toggleSelectAllIds` 헬퍼(`frontend/src/taskFilters.js`)를 재사용해 오늘 화면의 할 일 목록과 업무 기록 목록에도 "전체 선택" 체크박스를 추가했습니다 (`frontend/src/screens/Today.jsx`).',

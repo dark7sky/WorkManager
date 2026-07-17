@@ -50,6 +50,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setPrefillKey(k => k + 1)
     setTags(filled.tags)
     setRecurrenceRule(filled.recurrence_rule || '')
+    setChecklist(filled.checklist || [])
   }
 
   const saveAsTemplate = () => {
@@ -63,6 +64,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       recurrence_rule: data.get('recurrence_rule'),
       tags,
       durationDays: durationDaysBetween(data.get('start_date'), data.get('due_date')),
+      checklist,
     })
     const next = addTaskTemplate(templates, template)
     setTemplates(next)
