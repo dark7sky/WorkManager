@@ -85,6 +85,8 @@ See docs/IMPROVEMENT_PLAN.md for the current real-use readiness plan (Wave 1: P0
 - [x] Estimated-time overrun badge on the task list row: `taskEstimateOverrun`/`taskWorkLogsTotalMinutes` (`taskLogs.js`) already flagged overruns inside the "관련 업무 기록" modal, but a user had to open that modal per task to notice one. `Tasks.jsx` now receives the `logs` list from `App.jsx` and shows a "N시간 초과" badge directly on the gantt/board row when logged time exceeds the estimate, reusing the existing helpers and CSS class (Wave 10 item 40, 2026-07-16).
 - [x] Event templates: tasks and today's quick todos already had localStorage-based save/apply/delete templates, but the calendar event form had no equivalent, so recurring meetings had to be retyped each time. Added the same pattern for events (title/location/color/tags, `frontend/src/eventTemplates.js`, wired into `Calendar.jsx`'s `EventForm`, 2026-07-14).
 
+- [x] Task unblock notification: the Tasks screen already surfaced a "선행 업무 대기" banner/filter for blocked tasks, but nothing told a user when a blocking dependency finally finished, so a now-actionable task stayed invisible until the Tasks screen was reopened. Added `newlyUnblockedTasks` (`frontend/src/taskFilters.js`) and a browser-notification effect in `App.jsx` matching the existing task/event/todo alert pattern, 2026-07-17.
+
 ## Backlog (identified 2026-07-11, not yet implemented)
 
 - [x] Global search across tasks/events/todos/work logs from a single command palette or search box — already covered by the Ctrl/⌘+K command palette (`commandPalette.js` `searchItems`/`searchScreens`, wired into `QuickCapture`), found already implemented while auditing this backlog.

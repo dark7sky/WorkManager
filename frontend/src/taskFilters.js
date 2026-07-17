@@ -119,3 +119,11 @@ export const summarizeBlockedTasks = tasks => {
     items: blocked,
   }
 }
+
+export const newlyUnblockedTasks = (prevTasks, tasks) => {
+  if (!prevTasks?.length || !tasks?.length) return []
+  const prevBlockedIds = new Set(
+    prevTasks.filter(task => task.status !== 'done' && taskBlockingDependencies(task, prevTasks).length).map(task => task.id)
+  )
+  return tasks.filter(task => task.status !== 'done' && prevBlockedIds.has(task.id) && taskBlockingDependencies(task, tasks).length === 0)
+}

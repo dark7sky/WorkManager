@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-unblock-notification',
+    timestamp: '2026-07-17T11:35:00+09:00',
+    description: '업무 화면은 선행 업무가 남아 대기 중인 업무를 "선행 업무 대기" 배너/필터로만 보여줘, 막고 있던 선행 업무가 완료돼도 그 사실을 알아채려면 업무 화면을 다시 열어봐야 했습니다. 선행 업무가 모두 끝나 이제 진행할 수 있게 된 업무를 감지하면 다른 업무/일정 알림과 동일한 방식으로 브라우저 알림과 알림 기록에 "진행 가능: {업무명}"을 남기도록 추가했습니다 (`newlyUnblockedTasks` in `frontend/src/taskFilters.js`, 테스트 `frontend/src/taskFilters.test.js`, wired into `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-17-ai-effort-duration-parsing',
     timestamp: '2026-07-17T11:21:00+09:00',
     description: 'AI 빠른 입력(⌘/Ctrl+K)이 업무의 예상 소요시간(estimated_minutes)과 업무 기록의 실제 소요시간(duration_minutes)·청구 여부(billable)를 전혀 인식하지 못해, 수기로 폼을 채워야만 이 필드들이 채워졌습니다. "예상 2시간 30분" 같은 문구에서 업무의 예상 소요시간을, "1시간 했음"/"30분 소요" 같은 문구에서 업무 기록의 실제 소요시간을, "청구" 언급 시 청구 대상 여부를 로컬 규칙 파서와 원격 AI 프롬프트 모두에서 추출하도록 추가했습니다 (`backend/app/ai.py`의 `_estimated_minutes`/`_duration_minutes`, 테스트 `backend/tests/test_ai.py`).',

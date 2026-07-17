@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -150,6 +150,30 @@ test('summarizeBlockedTasks counts unfinished tasks blocked by incomplete depend
   assert.equal(summary.blockerTotal, 1)
   assert.equal(summary.nextDueDate, '2026-07-10')
   assert.deepEqual(summary.items[0].blockers.map(task => task.id), [1])
+})
+
+test('newlyUnblockedTasks finds tasks whose blockers just finished', () => {
+  const prev = [...tasks, { id: 5, title: '출시', status: 'todo', due_date: '2026-07-10', dependency_ids: [1] }]
+  const next = [
+    { ...tasks[0], status: 'done' },
+    tasks[1], tasks[2], tasks[3],
+    { id: 5, title: '출시', status: 'todo', due_date: '2026-07-10', dependency_ids: [1] },
+  ]
+
+  const unblocked = newlyUnblockedTasks(prev, next)
+  assert.deepEqual(unblocked.map(task => task.id), [5])
+})
+
+test('newlyUnblockedTasks ignores tasks that were never blocked or are already done', () => {
+  const prev = [...tasks, { id: 5, title: '출시', status: 'todo', due_date: '2026-07-10', dependency_ids: [1] }]
+  const next = [
+    { ...tasks[0], status: 'done' },
+    tasks[1], tasks[2], tasks[3],
+    { id: 5, title: '출시', status: 'done', due_date: '2026-07-10', dependency_ids: [1] },
+  ]
+
+  assert.deepEqual(newlyUnblockedTasks(prev, next), [])
+  assert.deepEqual(newlyUnblockedTasks([], next), [])
 })
 
 test('withAddedTag appends a new tag to an existing list', () => {
