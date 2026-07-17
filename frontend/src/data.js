@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-work-log-priority',
+    timestamp: '2026-07-18T08:32:17+09:00',
+    description: '업무(Tasks)·할 일(Todo)·일정(Calendar)은 모두 우선순위를 지정할 수 있었지만, 업무 기록(Work Log)에는 우선순위 필드가 없어 나중에 검토할 때 중요한 기록을 구분할 방법이 없었습니다. 업무 기록 작성/수정 폼에 우선순위 선택을 추가하고, 우선순위가 "높음"인 기록은 목록에 배지로 표시했습니다. 복제 시에도 값이 그대로 이어집니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/logDuplicate.js`).',
+  },
+  {
     id: '2026-07-18-todo-csv-columns',
     timestamp: '2026-07-18T08:23:55+09:00',
     description: '할 일(Todo) CSV 내보내기가 시간·메모·링크·예상 소요 시간을 빠뜨려, 업무(Tasks) CSV와 달리 이 필드들은 백업/이관 시 유실되고 있었습니다. 할 일 CSV 내보내기/가져오기에 시간·메모·링크·예상 소요 시간(분) 열을 추가해 왕복 편집이 가능하도록 했습니다 (`frontend/src/csv.js`).',

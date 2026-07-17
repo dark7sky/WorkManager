@@ -1019,6 +1019,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_priority_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "urgent fix", "log_date": "2026-07-06", "priority": "high"})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["priority"], "high")
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"priority": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["priority"])
+        default = a.post("/api/work_logs", json={"content": "no priority set", "log_date": "2026-07-06"})
+        self.assertEqual(default.status_code, 200, default.text)
+        self.assertIsNone(default.json()["priority"])
+        self.assertEqual(a.post("/api/work_logs", json={"content": "bad priority", "log_date": "2026-07-06", "priority": "urgent"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_billable_is_persisted_and_included_in_achievements_summary(self, *_):
         a = self.client(self.token_a)
         billable = a.post("/api/work_logs", json={"content": "client work", "log_date": "2026-07-06", "duration_minutes": 90, "billable": True})

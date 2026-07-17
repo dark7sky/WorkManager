@@ -9,6 +9,7 @@ export const buildLogDuplicatePayload = log => ({
   color: log?.color || null,
   log_time: log?.log_time || null,
   billable: !!log?.billable,
+  priority: log?.priority || 'normal',
   checklist: Array.isArray(log?.checklist) ? log.checklist.map(item => ({ ...item, done: false })) : [],
 })
 
