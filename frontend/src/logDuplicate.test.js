@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { buildLogDuplicatePayload, buildTaskFromLogPayload } from './logDuplicate.js'
 
 test('buildLogDuplicatePayload copies fields and resets log_date to today', () => {
-  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green', log_time: '09:30' }
+  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green', log_time: '09:30', checklist: [{ id: 'c1', text: '준비', done: true }] }
   const result = buildLogDuplicatePayload(log)
   assert.equal(result.content, '스탠드업 참여 (사본)')
   assert.equal(result.log_date, new Date().toLocaleDateString('en-CA'))
@@ -14,6 +14,7 @@ test('buildLogDuplicatePayload copies fields and resets log_date to today', () =
   assert.deepEqual(result.links, [{ id: 1, url: 'https://a.com', label: 'A' }])
   assert.equal(result.color, 'green')
   assert.equal(result.log_time, '09:30')
+  assert.deepEqual(result.checklist, [{ id: 'c1', text: '준비', done: false }])
 })
 
 test('buildLogDuplicatePayload handles missing optional fields', () => {
@@ -26,10 +27,11 @@ test('buildLogDuplicatePayload handles missing optional fields', () => {
   assert.deepEqual(result.links, [])
   assert.equal(result.color, null)
   assert.equal(result.log_time, null)
+  assert.deepEqual(result.checklist, [])
 })
 
 test('buildTaskFromLogPayload carries title/tags/due date and marks the task done', () => {
-  const log = { content: '스탠드업 참여', log_date: '2026-07-01', tags: ['회의'], link_url: 'https://x.com' }
+  const log = { content: '스탠드업 참여', log_date: '2026-07-01', tags: ['회의'], link_url: 'https://x.com', checklist: [{ id: 'c1', text: '준비', done: true }] }
   const result = buildTaskFromLogPayload(log)
   assert.equal(result.title, '스탠드업 참여')
   assert.deepEqual(result.tags, ['회의'])
@@ -38,6 +40,7 @@ test('buildTaskFromLogPayload carries title/tags/due date and marks the task don
   assert.equal(result.status, 'done')
   assert.equal(result.progress, 100)
   assert.equal(result.link_url, 'https://x.com')
+  assert.deepEqual(result.checklist, [{ id: 'c1', text: '준비', done: true }])
 })
 
 test('buildTaskFromLogPayload handles missing optional fields', () => {
@@ -46,4 +49,5 @@ test('buildTaskFromLogPayload handles missing optional fields', () => {
   assert.deepEqual(result.tags, [])
   assert.equal(result.due_date, null)
   assert.equal(result.link_url, null)
+  assert.deepEqual(result.checklist, [])
 })

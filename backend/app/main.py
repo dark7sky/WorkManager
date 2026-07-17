@@ -491,6 +491,7 @@ class WorkLogPayload(StrictPayload):
     color: str | None = None
     log_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     billable: bool | None = None
+    checklist: list[dict] | None = Field(None, max_length=200)
 
     @field_validator("link_url", "color", "log_time", mode="before")
     @classmethod
@@ -510,6 +511,11 @@ class WorkLogPayload(StrictPayload):
         if value is not None and value not in VALID_EVENT_COLORS:
             raise ValueError(f"color must be one of {sorted(VALID_EVENT_COLORS)}")
         return value
+
+    @field_validator("checklist")
+    @classmethod
+    def checklist_items_well_formed(cls, value):
+        return _clean_checklist(value)
 
     @field_validator("links")
     @classmethod
@@ -549,7 +555,7 @@ CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist"}, None),
-    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable"}, None),
+    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist"}, None),
 }
 
 VALID_EVENT_COLORS = {"red", "orange", "yellow", "green", "purple", "gray"}

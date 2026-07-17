@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-checklist',
+    timestamp: '2026-07-18T02:22:32+09:00',
+    description: '업무/일정/할 일에는 있던 체크리스트 편집 기능이 업무 기록(work_logs)에는 없었습니다. 업무 기록 수정 화면에 체크리스트 편집기를 추가하고, 목록에 진행률 배지를 표시하며, 복제·업무 전환 시 체크리스트를 함께 옮기도록 했습니다 (`backend/app/main.py`의 `WorkLogPayload`, `frontend/src/screens/Today.jsx`, `frontend/src/logDuplicate.js`).',
+  },
+  {
     id: '2026-07-18-calendar-conflict-nav-badge',
     timestamp: '2026-07-18T02:26:40+09:00',
     description: 'Google 캘린더 동기화 충돌(`sync_state === "conflict"`)이 발생해도 캘린더 화면을 직접 열기 전까지는 알 수 없었습니다. 업무/오늘 메뉴처럼 사이드바·하단 메뉴의 "일정" 항목에도 미해결 충돌 건수 배지를 표시하도록 했습니다 (`frontend/src/App.jsx`의 `navBadges` 계산).',

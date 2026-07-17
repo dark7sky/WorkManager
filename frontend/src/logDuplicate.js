@@ -9,6 +9,7 @@ export const buildLogDuplicatePayload = log => ({
   color: log?.color || null,
   log_time: log?.log_time || null,
   billable: !!log?.billable,
+  checklist: Array.isArray(log?.checklist) ? log.checklist.map(item => ({ ...item, done: false })) : [],
 })
 
 export const buildTaskFromLogPayload = log => ({
@@ -19,4 +20,5 @@ export const buildTaskFromLogPayload = log => ({
   status: 'done',
   progress: 100,
   link_url: log?.link_url || null,
+  checklist: Array.isArray(log?.checklist) ? log.checklist : [],
 })

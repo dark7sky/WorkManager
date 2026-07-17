@@ -1440,6 +1440,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_checklist_is_persisted_and_sanitized(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "with checklist", "checklist": [
+            {"id": "1", "text": " 코드리뷰 ", "done": False},
+            {"id": "2", "text": "", "done": True},
+        ]})
+        self.assertEqual(log.status_code, 200, log.text)
+        checklist = log.json()["checklist"]
+        self.assertEqual(len(checklist), 1)
+        self.assertEqual(checklist[0]["text"], "코드리뷰")
+        self.assertFalse(checklist[0]["done"])
+        log_id = log.json()["id"]
+        checked = a.patch(f"/api/work_logs/{log_id}", json={"checklist": [{"id": checklist[0]["id"], "text": "코드리뷰", "done": True}]})
+        self.assertEqual(checked.status_code, 200, checked.text)
+        self.assertTrue(checked.json()["checklist"][0]["done"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_completing_monthly_todo_spawns_next_month_occurrence(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "monthly report", "todo_date": "2026-07-15", "recurrence_rule": "monthly"}).json()
