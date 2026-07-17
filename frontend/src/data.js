@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-board-view-styling',
+    timestamp: '2026-07-17T15:24:26+09:00',
+    description: '업무(Tasks) 화면에 간트 보기 외에 상태별 "보드" 보기(간트/보드 전환 버튼)가 있었지만, 보드 화면의 컬럼과 카드에 실제 스타일(styles.css)이 전혀 정의되어 있지 않아 열 구분 없이 카드가 세로로 쌓여 보이는 등 사실상 사용할 수 없는 상태였습니다. `.task-board`/`.task-board-column`/`.task-board-card` 스타일을 추가해 칸반형 가로 컬럼 레이아웃, 드래그 오버 상태 강조, 카드 호버/우선순위 바 표시가 정상 동작하도록 했습니다 (`frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-17-log-filter-presets',
     timestamp: '2026-07-17T11:58:00+09:00',
     description: '업무(Tasks), 오늘 화면의 할 일, 캘린더 일정에는 검색어·태그 조합을 이름 붙여 저장하고 다시 불러오는 "필터 저장" 기능이 있었지만, 오늘 화면의 업무 기록(오늘 한 일)에는 같은 검색/태그/청구 가능 필터가 있으면서도 저장된 필터 기능이 없어 자주 쓰는 조합(예: 청구 가능 + 특정 태그)을 매번 다시 설정해야 했습니다. `frontend/src/logFilterPresets.js`를 추가하고(`todoFilterPresets.js`와 동일한 구조, 우선순위 대신 청구 가능 여부 저장) 오늘 화면의 업무 기록 필터 바에 "필터 저장/선택/삭제" 컨트롤을 연결했습니다 (`frontend/src/screens/Today.jsx`, 테스트 `frontend/src/logFilterPresets.test.js`).',
