@@ -152,7 +152,7 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '장소', '태그', '메모']
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모']
 
 export const eventsToCsv = events => {
   const rows = events.map(event => [
@@ -160,6 +160,7 @@ export const eventsToCsv = events => {
     event.start_at || event.start,
     event.end_at || event.end,
     event.google_is_all_day ? 'Y' : 'N',
+    event.priority,
     event.location,
     (event.tags || []).join('; '),
     event.description,
@@ -174,7 +175,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -183,6 +184,7 @@ export const parseEventsCsv = text => {
     if (!start) { errors.push(`${idx + 2}행: 시작 일시가 없어 건너뜀`); return }
     const event = { title, start_at: start, end_at: (iEnd >= 0 && cells[iEnd]?.trim()) || start }
     if (iAllDay >= 0 && cells[iAllDay]) event.google_is_all_day = cells[iAllDay].trim().toUpperCase() === 'Y'
+    if (iPriority >= 0 && cells[iPriority]) event.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iLocation >= 0 && cells[iLocation]) event.location = cells[iLocation].trim()
     if (iTags >= 0 && cells[iTags]) event.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]

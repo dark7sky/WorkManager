@@ -91,17 +91,18 @@ test('eventsToCsv exports event rows with labels and escaping', () => {
       start_at: '2026-07-13T10:00:00',
       end_at: '2026-07-13T11:00:00',
       google_is_all_day: false,
+      priority: 'high',
       location: '3층 회의실',
       tags: ['내부'],
       description: '분기 계획\n검토',
     },
-    { title: '휴가', start_at: '2026-07-14T00:00:00', end_at: '2026-07-15T00:00:00', google_is_all_day: true, location: null, tags: [], description: null },
+    { title: '휴가', start_at: '2026-07-14T00:00:00', end_at: '2026-07-15T00:00:00', google_is_all_day: true, priority: 'low', location: null, tags: [], description: null },
   ])
 
   assert.equal(csv, [
-    '제목,시작,종료,종일 여부,장소,태그,메모',
-    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,3층 회의실,내부,"분기 계획\n검토"',
-    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,,,',
+    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,high,3층 회의실,내부,"분기 계획\n검토"',
+    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,low,,,',
   ].join('\n'))
 })
 
@@ -111,8 +112,8 @@ test('eventCsvFilename uses the requested date', () => {
 
 test('parseEventsCsv reads back an exported event row', () => {
   const csv = [
-    '제목,시작,종료,종일 여부,장소,태그,메모',
-    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,3층 회의실,내부,"분기 계획\n검토"',
+    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,high,3층 회의실,내부,"분기 계획\n검토"',
   ].join('\n')
 
   const { events, errors } = parseEventsCsv(csv)
@@ -122,10 +123,21 @@ test('parseEventsCsv reads back an exported event row', () => {
     start_at: '2026-07-13T10:00:00',
     end_at: '2026-07-13T11:00:00',
     google_is_all_day: false,
+    priority: 'high',
     location: '3층 회의실',
     tags: ['내부'],
     description: '분기 계획\n검토',
   }])
+})
+
+test('parseEventsCsv falls back to normal priority for unrecognized labels', () => {
+  const csv = [
+    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모',
+    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,매우 높음,,,',
+  ].join('\n')
+  const { events, errors } = parseEventsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.equal(events[0].priority, 'normal')
 })
 
 test('parseEventsCsv defaults end to start and skips rows missing title or start', () => {

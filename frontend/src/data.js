@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-csv-priority',
+    timestamp: '2026-07-18T07:50:00+09:00',
+    description: '일정(Calendar) CSV 내보내기·가져오기에서 우선순위가 빠져 있었습니다. 업무·할 일 CSV는 우선순위 컬럼을 저장·복원했지만 일정 CSV는 그렇지 않아, 일정을 내보냈다가 다시 가져오면 우선순위가 항상 "보통"으로 초기화되었습니다. `frontend/src/csv.js`의 `eventHeaders`/`eventsToCsv`/`parseEventsCsv`에 "우선순위" 컬럼을 추가해 일정도 업무·할 일과 동일하게 우선순위를 왕복 저장하도록 했습니다.',
+  },
+  {
     id: '2026-07-18-todo-template-checklist',
     timestamp: '2026-07-18T07:52:00+09:00',
     description: '업무(Task) 템플릿은 체크리스트까지 저장·불러오기가 되지만, 오늘 할 일(Todo) 템플릿은 제목/우선순위/반복/태그만 저장할 뿐 체크리스트는 담을 수 없었고, 애초에 할 일 빠른 추가 폼 자체에 체크리스트 입력란이 없어 새 할 일에 세부 항목을 붙이려면 저장 후 다시 열어 편집해야 했습니다. 할 일 빠른 추가 폼에 업무 편집 폼과 동일한 체크리스트 편집기를 추가하고, `todoTemplates.js`의 `buildTodoTemplate`/`applyTodoTemplate`이 체크리스트를 함께 저장·복원하도록 확장했습니다 (`frontend/src/todoTemplates.js`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onAddTodo`).',
