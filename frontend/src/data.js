@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-today-list-empty-state',
+    timestamp: '2026-07-17T16:31:00+09:00',
+    description: '업무(Tasks)와 캘린더 목록은 필터/검색 결과가 없을 때 안내 문구를 보여줬지만, 오늘 화면의 할 일 목록과 업무 기록 목록은 결과가 없으면 아무 표시 없이 비어 보였습니다. 두 목록에도 "조건에 맞는 항목이 없습니다" 형태의 빈 상태 안내를 추가해 다른 화면과 동일하게 동작하도록 했습니다 (`frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-event-search-tags',
     timestamp: '2026-07-17T16:26:00+09:00',
     description: '업무/할 일/업무 기록 검색은 태그까지 함께 검색됐지만, 캘린더 일정 검색은 제목/장소/메모만 검색하고 태그는 검색되지 않았습니다. 일정 검색에도 태그를 포함시켜 다른 화면과 동일하게 동작하도록 했습니다 (`frontend/src/eventSearch.js`의 `filterEventsByQuery`, 검색창 안내 문구 업데이트).',
