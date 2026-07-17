@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-agenda-duplicate',
+    timestamp: '2026-07-17T21:04:00+09:00',
+    description: '업무(Tasks)와 오늘(Today)의 할 일/기록 목록은 항목 옆 버튼 한 번으로 바로 복제할 수 있었지만, 일정(Calendar) 목록에서는 수정 모달을 먼저 열어야만 복제할 수 있었습니다. 일정 목록의 각 행에도 복제 버튼을 추가해 다른 화면과 동일하게 목록에서 바로 복제할 수 있도록 했습니다 (`frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-17-calendar-event-sort',
     timestamp: '2026-07-17T20:53:00+09:00',
     description: '업무(Tasks)와 오늘(Today) 화면은 목록 정렬 방식(우선순위순/제목순/시간순 등)을 선택할 수 있었지만, 일정(Calendar) 화면의 일정 목록은 항상 시간순 고정이라 우선순위나 제목으로 훑어보기 어려웠습니다. 일정 화면 도구모음에 정렬 선택 메뉴(시간순/우선순위순/제목순)를 추가했고, 선택한 정렬 방식은 기기별 로컬 저장소에 기억됩니다 (`frontend/src/eventPins.js`의 `EVENT_SORT_COMPARATORS`/`loadEventSort`/`saveEventSort`, `frontend/src/screens/Calendar.jsx`).',
