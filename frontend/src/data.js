@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-timer-global-indicator',
+    timestamp: '2026-07-17T15:33:52+09:00',
+    description: '오늘 화면에서 업무 기록 타이머를 시작한 뒤 다른 화면(업무, 캘린더 등)으로 이동하면 타이머가 계속 돌고 있다는 사실을 알 방법이 없어, 얼마나 오래 켜둔 채 잊고 있었는지 확인하려면 다시 오늘 화면으로 돌아가야 했습니다. 기존 `workLogTimer.js` 저장소를 1초마다 확인해 타이머가 진행 중일 때 오늘 화면이 아닌 모든 화면 상단에 경과 시간과 "오늘 화면에서 정지" 버튼을 보여주는 배너를 추가했습니다 (`frontend/src/components/AppShell.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-17-task-dependent-tasks-display',
     timestamp: '2026-07-17T15:33:00+09:00',
     description: '업무 편집 폼의 "선행 업무" 선택기는 이 업무가 완료되어야 진행 가능한 다른 업무를 고를 수 있게 해주었지만, 반대로 "이 업무를 선행 업무로 지정한 업무들(후속 업무)"이 무엇인지는 어디에서도 확인할 수 없어 업무를 완료 처리하기 전에 어떤 업무들이 영향을 받는지 알기 어려웠습니다. 선행 업무 순환을 막는 데만 쓰이던 기존 의존성 그래프 로직(`dependentTaskIds`)을 재사용해 직접적인 후속 업무만 추려내는 `directDependentTasks`를 추가하고(`frontend/src/taskHierarchy.js`, 테스트 추가), 기존 업무를 편집할 때 선행 업무 선택기 아래에 읽기 전용 "후속 업무" 목록을 표시하도록 했습니다 (`frontend/src/components/TaskForm.jsx`).',
