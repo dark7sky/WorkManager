@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-row-postpone',
+    timestamp: '2026-07-18T08:14:31+09:00',
+    description: '업무(Tasks) 화면은 기한이 지난 업무를 행 단위로 하루씩 미룰 수 있는 버튼이 있었지만, 오늘 화면의 할 일 목록에는 여러 항목을 선택해야만 쓸 수 있는 일괄 연기 기능만 있고 개별 할 일을 바로 미루는 버튼이 없었습니다. 할 일 행의 작업 버튼 목록에 "하루 미루기" 버튼을 추가해 선택 없이 즉시 하루 연기할 수 있도록 하고, 실행 취소도 지원했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-18-calendar-bulk-duplicate',
     timestamp: '2026-07-18T08:12:40+09:00',
     description: '업무/할 일/업무 기록 화면은 이미 여러 항목을 선택해 한 번에 복제하는 일괄 복제 기능이 있었지만, 일정(Calendar) 화면의 선택 일괄 작업 바에는 복제 버튼이 빠져 있어 여러 일정을 복제하려면 하나씩 반복해야 했습니다. 일정 화면의 선택 도구모음에 "복제" 버튼을 추가해 다른 화면과 동일하게 여러 일정을 한 번에 복제할 수 있도록 맞췄습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
