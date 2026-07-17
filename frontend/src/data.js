@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-worklog-quick-add-shortcut',
+    timestamp: '2026-07-17T20:45:00+09:00',
+    description: '오늘 화면에서 `N` 단축키는 할 일 입력창만 포커스하고 업무 기록(오늘 한 일) 입력창에는 접근할 방법이 없었습니다. `Shift+N`을 누르면 업무 기록 입력창으로 바로 포커스되도록 단축키를 추가했습니다 (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`).',
+  },
+  {
     id: '2026-07-17-bulk-tag-add-undo-parity',
     timestamp: '2026-07-17T20:41:00+09:00',
     description: '오늘 화면의 할 일/업무 기록 일괄 태그 추가는 "실행 취소" 토스트를 제공했지만, 업무(Tasks)와 캘린더 일정의 일괄 태그 추가에는 취소 기능이 빠져 있었습니다. 업무와 일정의 일괄 태그 추가도 동일하게 이전 태그를 기억했다가 되돌릴 수 있도록 했습니다 (`frontend/src/App.jsx`의 `onBulkAddTag`).',
