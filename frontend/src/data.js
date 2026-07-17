@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-series-delete',
+    timestamp: '2026-07-18T02:00:43+09:00',
+    description: '반복 일정은 "이 일정과 이후 반복 일정에 모두 적용" 옵션으로 제목·장소 등을 한 번에 수정할 수 있었지만, 삭제는 항상 한 건씩만 가능해 여러 번 반복되는 일정을 정리하려면 매번 따로 지워야 했습니다. 일정 삭제 확인창에 같은 옵션을 추가해 이후 반복 일정을 한 번에 삭제할 수 있게 했습니다 (`DELETE /api/events/series/{group_id}` in `backend/app/main.py`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-18-event-checklist',
     timestamp: '2026-07-18T01:53:54+09:00',
     description: '업무(Tasks)와 할 일(Todos)에는 있던 체크리스트 기능이 일정(Calendar)에는 입력란만 준비되어 있고 화면에 표시되거나 저장되지 않았습니다. 일정 수정/등록 폼에 체크리스트 목록을 추가해 항목 추가·완료 체크·순서 변경·삭제가 저장되도록 완성했습니다 (`frontend/src/screens/Calendar.jsx`).',

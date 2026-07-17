@@ -65,6 +65,7 @@ export const api = {
   skipTaskRecurrence: id => request(`/tasks/${id}/skip-recurrence`,{method:'POST'}),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
   updateEventSeries: (groupId,fromStartAt,data) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,json('PATCH',data)),
+  deleteEventSeries: (groupId,fromStartAt) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,{method:'DELETE'}),
   createLog: data => request('/work_logs',json('POST',data)), updateLog: (id,data) => request(`/work_logs/${id}`,json('PATCH',data)), deleteLog: id => request(`/work_logs/${id}`,{method:'DELETE'}),
   workLogs: () => request('/work_logs'),
   todos: () => request('/todos'),

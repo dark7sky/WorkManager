@@ -667,6 +667,32 @@ class ApiTests(unittest.TestCase):
         missing_group = b.patch("/api/events/series/does-not-exist?from_start_at=2026-09-01T09:00:00", json={"title": "x"})
         self.assertEqual(missing_group.status_code, 404)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_series_delete_removes_only_future_occurrences(self, *_):
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "rec-test-group-2"
+        occurrences = []
+        for day in ("2026-10-01", "2026-10-08", "2026-10-15"):
+            created = b.post("/api/events", json={
+                "title": "격주 점검", "start_at": f"{day}T09:00:00", "end_at": f"{day}T10:00:00",
+                "recurrence_group_id": group_id})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/events", json={"title": "지난 점검", "start_at": "2026-09-24T09:00:00", "end_at": "2026-09-24T10:00:00", "recurrence_group_id": group_id})
+        self.assertEqual(past.status_code, 200, past.text)
+        other_user_denied = a.delete(f"/api/events/series/{group_id}?from_start_at=2026-10-01T09:00:00")
+        self.assertEqual(other_user_denied.status_code, 404)
+        response = b.delete(f"/api/events/series/{group_id}?from_start_at=2026-10-01T09:00:00")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["deleted"], 3)
+        for occurrence in occurrences:
+            self.assertEqual(b.get(f"/api/events/{occurrence['id']}").status_code, 404)
+        untouched = b.get(f"/api/events/{past.json()['id']}")
+        self.assertEqual(untouched.status_code, 200, untouched.text)
+        missing_group = b.delete("/api/events/series/does-not-exist?from_start_at=2026-10-01T09:00:00")
+        self.assertEqual(missing_group.status_code, 404)
+
     def test_todo_comments_are_user_scoped_and_persisted(self):
         a, b = self.client(self.token_a), self.client(self.token_b)
         todo = a.post("/api/todos", json={"title": "todo with comments", "todo_date": "2026-08-01"}).json()

@@ -1067,6 +1067,24 @@ def update_item(table, item_id, data, user_id):
     return item
 
 
+def _soft_delete_event(item_id: int, user: str) -> bool:
+    remote = None
+    with connection() as c:
+        existing = c.execute("SELECT * FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not existing:
+            return False
+        if existing["google_event_id"] and existing["google_calendar_id"]:
+            remote = (existing["google_event_id"], existing["google_calendar_id"])
+            c.execute("INSERT OR IGNORE INTO deleted_google_events(user_id,google_event_id,calendar_id,created_at) VALUES(?,?,?,?)", (user, *remote, now()))
+        c.execute("UPDATE events SET deleted_at=?,sync_state='deleted' WHERE id=? AND user_id=?", (now(), item_id, user))
+    if remote:
+        try:
+            google_calendar.delete_event(user, *remote)
+        except HTTPException:
+            return True
+    return False
+
+
 for _table in CONFIG:
     def list_endpoint(tags: str | None = None, table=_table, user=Depends(require_user)):
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
@@ -1102,30 +1120,24 @@ for _table in CONFIG:
         return update_item(table, item_id, payload, user)
 
     def delete_endpoint(item_id: int, table=_table, user=Depends(require_user)):
-        remote = None
         promoted_children = []
-        with connection() as c:
-            existing = c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if table == "events":
+            existing = rows("events", user, "WHERE id=?", (item_id,))
             if not existing:
                 raise HTTPException(404, "Item not found")
-            if table == "events" and existing["google_event_id"] and existing["google_calendar_id"]:
-                remote = (existing["google_event_id"], existing["google_calendar_id"])
-                c.execute("INSERT OR IGNORE INTO deleted_google_events(user_id,google_event_id,calendar_id,created_at) VALUES(?,?,?,?)", (user, *remote, now()))
-            if table == "events":
-                c.execute("UPDATE events SET deleted_at=?,sync_state='deleted' WHERE id=? AND user_id=?", (now(), item_id, user))
-            else:
+            pending = _soft_delete_event(item_id, user)
+        else:
+            with connection() as c:
+                existing = c.execute(f"SELECT * FROM {table} WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+                if not existing:
+                    raise HTTPException(404, "Item not found")
                 c.execute(f"UPDATE {table} SET deleted_at=? WHERE id=? AND user_id=?", (now(), item_id, user))
-            if table == "tasks":
-                promoted_children = [r["id"] for r in c.execute(
-                    "SELECT id FROM tasks WHERE user_id=? AND parent_id=? AND deleted_at IS NULL", (user, item_id)).fetchall()]
-                if promoted_children:
-                    c.execute(f"UPDATE tasks SET parent_id=NULL WHERE user_id=? AND parent_id=?", (user, item_id))
-        pending = False
-        if remote:
-            try:
-                google_calendar.delete_event(user, *remote)
-            except HTTPException:
-                pending = True
+                if table == "tasks":
+                    promoted_children = [r["id"] for r in c.execute(
+                        "SELECT id FROM tasks WHERE user_id=? AND parent_id=? AND deleted_at IS NULL", (user, item_id)).fetchall()]
+                    if promoted_children:
+                        c.execute(f"UPDATE tasks SET parent_id=NULL WHERE user_id=? AND parent_id=?", (user, item_id))
+            pending = False
         audit(user, "delete", table, item_id, {"sync_pending": pending})
         for child_id in promoted_children:
             audit(user, "update", "tasks", child_id, {"parent_id": None, "reason": "parent_deleted"})
@@ -1675,6 +1687,22 @@ def update_event_series(group_id: str, from_start_at: str, payload: dict = Body(
         raise HTTPException(404, "반복 일정을 찾을 수 없습니다.")
     items = [update_item("events", item_id, dict(data), user) for item_id in ids]
     return {"ok": True, "updated": len(items), "items": items}
+
+
+@app.delete("/api/events/series/{group_id}")
+def delete_event_series(group_id: str, from_start_at: str, user=Depends(require_user)):
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM events WHERE user_id=? AND recurrence_group_id=? AND start_at>=? AND deleted_at IS NULL ORDER BY start_at",
+            (user, group_id, from_start_at)).fetchall()]
+    if not ids:
+        raise HTTPException(404, "반복 일정을 찾을 수 없습니다.")
+    pending = False
+    for item_id in ids:
+        if _soft_delete_event(item_id, user):
+            pending = True
+        audit(user, "delete", "events", item_id, {"sync_pending": pending, "series": True})
+    return {"ok": True, "deleted": len(ids), "sync_pending": pending}
 
 
 @app.get("/api/trash")
