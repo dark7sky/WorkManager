@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-checklist-reorder',
+    timestamp: '2026-07-18T02:02:07+09:00',
+    description: '업무와 캘린더 일정의 체크리스트는 위/아래 이동 버튼으로 순서를 조정할 수 있었지만, 오늘 화면의 할 일 체크리스트는 순서를 바꾸려면 항목을 지우고 다시 추가해야 했습니다. 할 일 체크리스트 편집에도 동일한 위/아래 이동 버튼을 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/taskFormPayload.js`의 `moveChecklistItem` 재사용).',
+  },
+  {
     id: '2026-07-18-event-series-delete',
     timestamp: '2026-07-18T02:00:43+09:00',
     description: '반복 일정은 "이 일정과 이후 반복 일정에 모두 적용" 옵션으로 제목·장소 등을 한 번에 수정할 수 있었지만, 삭제는 항상 한 건씩만 가능해 여러 번 반복되는 일정을 정리하려면 매번 따로 지워야 했습니다. 일정 삭제 확인창에 같은 옵션을 추가해 이후 반복 일정을 한 번에 삭제할 수 있게 했습니다 (`DELETE /api/events/series/{group_id}` in `backend/app/main.py`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
