@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-biweekly-recurrence',
+    timestamp: '2026-07-17T10:58:26+09:00',
+    description: '업무/할 일/일정 모두 매일·매주·매월 반복만 지원해, 2주 간격으로 진행하는 업무(예: 격주 정기 회의)는 반복 설정 없이 매번 새로 만들어야 했습니다. 반복 규칙에 "격주"(biweekly, 14일 간격)를 추가해 업무 폼·오늘 할 일 빠른 추가/수정·일정 등록 폼의 반복 선택지와 AI 어시스턴트(로컬 규칙 파싱/원격 프롬프트 모두)에서 사용할 수 있고, CSV 내보내기/가져오기에도 반영됩니다 (`backend/app/main.py`, `backend/app/ai.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Tasks.jsx`, `frontend/src/eventRecurrence.js`, `frontend/src/csv.js`, 테스트 `backend/tests/test_api.py`/`test_ai.py`, `frontend/src/eventRecurrence.test.js`).',
+  },
+  {
     id: '2026-07-17-calendar-print-report',
     timestamp: '2026-07-17T06:20:16+09:00',
     description: '업무 화면은 필터된 목록을 인쇄용 PDF 보고서로 내보낼 수 있었지만, 일정(캘린더) 화면은 ICS/CSV만 지원하고 인쇄물로 뽑아 볼 방법이 없었습니다. 업무 화면과 동일한 패턴으로 일정 화면 툴바에 "PDF" 버튼을 추가해, 현재 필터된 일정 목록(일시/장소/태그 포함)을 인쇄용 문서로 열고 바로 인쇄할 수 있습니다 (`frontend/src/eventReport.js`, `frontend/src/screens/Calendar.jsx`, 테스트 `frontend/src/eventReport.test.js`).',

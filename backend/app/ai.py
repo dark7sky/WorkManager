@@ -328,7 +328,7 @@ def _links(text: str) -> list[dict] | None:
     return [{"url": u, "label": ""} for u in urls]
 
 
-_RECURRENCE_WORDS = (("매일", "daily"), ("매주", "weekly"), ("매월", "monthly"), ("매달", "monthly"))
+_RECURRENCE_WORDS = (("매일", "daily"), ("격주", "biweekly"), ("매주", "weekly"), ("매월", "monthly"), ("매달", "monthly"))
 _RECURRENCE_UNTIL_RE = re.compile(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}\s*월\s*\d{1,2}\s*일)\s*까지")
 
 
@@ -542,7 +542,7 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
         "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
         "input lists multiple steps for one task. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
-        "set data.recurrence_rule to daily|weekly|monthly and data.recurrence_end_date to the ISO end date; "
+        "set data.recurrence_rule to daily|weekly|biweekly|monthly and data.recurrence_end_date to the ISO end date; "
         "omit both if no repeat or end date is stated. "
         "If the input contains several separate requests, one per line or a numbered list like "
         "'1. AAA 2. BBB 3. CCC', return one item per request, up to " + str(MAX_BATCH_ITEMS) + " items. "

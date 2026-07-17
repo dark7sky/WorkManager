@@ -6,6 +6,7 @@ function advance(date, rule) {
   const next = new Date(date)
   if (rule === 'daily') next.setDate(next.getDate() + 1)
   else if (rule === 'weekly') next.setDate(next.getDate() + 7)
+  else if (rule === 'biweekly') next.setDate(next.getDate() + 14)
   else if (rule === 'monthly') next.setMonth(next.getMonth() + 1)
   return next
 }
