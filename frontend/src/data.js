@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-due-today-filter',
+    timestamp: '2026-07-17T11:45:14+09:00',
+    description: '업무(Tasks) 화면의 상태 필터에는 "지연 업무"(기한 지남)와 "이번 주 마감"은 있었지만, 오늘 마감인 업무만 골라 보는 옵션이 없어 하루 계획을 세우려면 "이번 주 마감" 목록에서 오늘 날짜를 직접 찾아야 했습니다. 기존 상태 필터에 "오늘 마감" 옵션을 추가했습니다 (`frontend/src/taskFilters.js`의 `filterTasks`, `frontend/src/screens/Tasks.jsx`의 상태 select, 테스트 `frontend/src/taskFilters.test.js`).',
+  },
+  {
     id: '2026-07-17-today-todo-bulk-postpone',
     timestamp: '2026-07-17T11:39:29+09:00',
     description: '업무(Tasks) 화면의 일괄 작업 도구에는 선택한 업무의 일정을 한 번에 N일 미루는 "연기" 기능이 있었지만, 오늘 화면의 할 일 일괄 작업(완료 처리/태그 추가/삭제)에는 같은 기능이 없어 여러 할 일의 날짜를 미루려면 하나씩 열어 고쳐야 했습니다. Tasks 화면과 동일한 패턴으로 `postponeTodoDate` 헬퍼(`frontend/src/ganttDrag.js`)를 추가하고, 오늘 화면 할 일 일괄 작업 바에 "연기" 입력·버튼과 실행 취소를 지원하는 `onBulkPostponeTodo`를 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, 테스트 `frontend/src/ganttDrag.test.js`).',

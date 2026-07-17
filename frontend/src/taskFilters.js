@@ -35,6 +35,8 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
     const matchesStatus = status === 'all'
       || (status === 'overdue'
         ? isTaskOverdue(task, todayIso)
+        : status === 'due_today'
+          ? task.status !== 'done' && task.due_date && todayIso && task.due_date === todayIso
         : status === 'due_this_week'
           ? task.status !== 'done' && task.due_date && todayIso && task.due_date >= todayIso && task.due_date <= addDays(todayIso, 6)
           : status === 'no_due_date'

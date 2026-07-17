@@ -56,6 +56,11 @@ test('filterTasks narrows active tasks by priority', () => {
   assert.deepEqual(shown.map(task => task.id), [1, 4])
 })
 
+test('filterTasks status=due_today keeps only unfinished tasks due exactly today', () => {
+  const shown = filterTasks(tasks, { status: 'due_today', todayIso: '2026-07-08' })
+  assert.deepEqual(shown.map(task => task.id), [1])
+})
+
 test('filterTasks status=due_this_week keeps only unfinished tasks due within the next 6 days', () => {
   const weekTasks = [
     ...tasks,
