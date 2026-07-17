@@ -61,6 +61,31 @@ export const tasksToIcs = tasks => {
 
 export const taskIcsFilename = date => `workmanager-tasks-${date}.ics`
 
+export const todosToIcs = todos => {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//WorkManager//Todo Export//KO']
+  for (const todo of todos) {
+    if (!todo.todo_date) continue
+    lines.push('BEGIN:VEVENT')
+    lines.push(`UID:todo-${todo.id}@workmanager`)
+    lines.push(`DTSTAMP:${toIcsDate(new Date())}`)
+    if (todo.todo_time) {
+      const start = new Date(`${todo.todo_date}T${todo.todo_time}:00`)
+      const end = new Date(start.getTime() + 30 * 60000)
+      lines.push(`DTSTART:${toIcsDate(start)}`)
+      lines.push(`DTEND:${toIcsDate(end)}`)
+    } else {
+      lines.push(`DTSTART;VALUE=DATE:${toIcsAllDayDate(todo.todo_date)}`)
+    }
+    lines.push(`SUMMARY:${escapeIcsText(`[할 일] ${todo.title}`)}`)
+    if (todo.memo) lines.push(`DESCRIPTION:${escapeIcsText(todo.memo)}`)
+    lines.push('END:VEVENT')
+  }
+  lines.push('END:VCALENDAR')
+  return lines.map(foldLine).join('\r\n')
+}
+
+export const todoIcsFilename = date => `workmanager-todos-${date}.ics`
+
 const unfoldIcs = text => text.replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '')
 
 const unescapeIcsText = value => value.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\')

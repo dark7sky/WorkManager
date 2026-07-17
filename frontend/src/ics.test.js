@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { eventsToIcs, icsFilename, parseIcs, taskIcsFilename, tasksToIcs } from './ics.js'
+import { eventsToIcs, icsFilename, parseIcs, taskIcsFilename, tasksToIcs, todoIcsFilename, todosToIcs } from './ics.js'
 
 test('eventsToIcs emits a VEVENT per event with escaped text fields', () => {
   const ics = eventsToIcs([
@@ -38,6 +38,24 @@ test('tasksToIcs emits an all-day VEVENT per task with a due date', () => {
 
 test('taskIcsFilename uses the requested date', () => {
   assert.equal(taskIcsFilename('2026-07-12'), 'workmanager-tasks-2026-07-12.ics')
+})
+
+test('todosToIcs emits an all-day VEVENT for a date-only todo and a timed VEVENT for one with a time', () => {
+  const ics = todosToIcs([
+    { id: 7, title: '기획, 검토', todo_date: '2026-07-20', memo: '메모\n확인' },
+    { id: 8, title: '시간 있음', todo_date: '2026-07-21', todo_time: '10:00' },
+    { id: 9, title: '날짜 없음' },
+  ])
+  assert.match(ics, /BEGIN:VEVENT[\s\S]*UID:todo-7@workmanager[\s\S]*END:VEVENT/)
+  assert.match(ics, /DTSTART;VALUE=DATE:20260720/)
+  assert.match(ics, /SUMMARY:\[할 일\] 기획\\, 검토/)
+  assert.match(ics, /DESCRIPTION:메모\\n확인/)
+  assert.match(ics, /UID:todo-8@workmanager[\s\S]*DTSTART:20260721T010000Z[\s\S]*DTEND:20260721T013000Z/)
+  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 2)
+})
+
+test('todoIcsFilename uses the requested date', () => {
+  assert.equal(todoIcsFilename('2026-07-12'), 'workmanager-todos-2026-07-12.ics')
 })
 
 test('parseIcs round-trips events exported by eventsToIcs', () => {

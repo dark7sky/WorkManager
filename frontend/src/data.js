@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-todo-ics-export',
+    timestamp: '2026-07-17T21:05:00+09:00',
+    description: '업무(Tasks)와 일정(Calendar) 화면은 각각 ICS 캘린더 파일로 내보낼 수 있었지만, 오늘(Today) 화면의 할 일 목록에는 CSV/PDF 내보내기만 있고 ICS 내보내기가 없어 캘린더 앱으로 일정을 옮기기 불편했습니다. 할 일 목록 도구모음에도 ICS 내보내기 버튼을 추가했습니다 (`frontend/src/ics.js`의 `todosToIcs`/`todoIcsFilename`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-screen-nav-shortcuts',
     timestamp: '2026-07-17T21:15:00+09:00',
     description: '항목 생성(N)이나 빠른 입력(Ctrl/⌘+K) 같은 단축키는 있었지만, 마우스 없이 사이드바 화면(오늘/업무/일정/성과/AI/감사/변경/설정)을 전환할 방법은 없었습니다. 숫자 키 1~8을 누르면 사이드바 메뉴 순서대로 해당 화면으로 바로 이동하도록 추가했고, 단축키 안내 목록에도 반영했습니다 (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`).',

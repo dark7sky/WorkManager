@@ -11,6 +11,7 @@ import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, remo
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
+import { todoIcsFilename, todosToIcs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { normalizedLinks } from '../taskFormPayload'
@@ -482,6 +483,10 @@ export default function Today(props) {
     const csv = `﻿${todosToCsv(shownTodos)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
+  const exportTodosIcs = () => {
+    const ics = todosToIcs(shownTodos), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = todoIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
+  }
   const printTodosReport = () => {
     const html = todosToPrintableReport(shownTodos), win = window.open('', '_blank')
     if (!win) return
@@ -549,6 +554,7 @@ export default function Today(props) {
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs}><Download size={14}/> ICS</button> : null}
         {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="할 일 전체 선택" checked={allShownTodosSelected} onChange={toggleSelectAllTodos}/>전체 선택</label> : null}
