@@ -48,6 +48,16 @@ test('filterLogsByQuery matches by tags', () => {
   assert.deepEqual(filterLogsByQuery(logs, 'sales').map(l => l.id), [2])
 })
 
+test('filterTodosByQuery matches by checklist item text', () => {
+  const withChecklist = [...todos, { id: 4, title: '여행 준비', checklist: [{ text: '여권 확인', done: false }] }]
+  assert.deepEqual(filterTodosByQuery(withChecklist, '여권').map(t => t.id), [4])
+})
+
+test('filterLogsByQuery matches by checklist item text', () => {
+  const withChecklist = [...logs, { id: 3, content: '배포 작업', checklist: [{ text: '롤백 스크립트 점검', done: false }] }]
+  assert.deepEqual(filterLogsByQuery(withChecklist, '롤백').map(l => l.id), [3])
+})
+
 test('filterTodosByPriority returns all todos when priority is all', () => {
   assert.equal(filterTodosByPriority(todos, 'all').length, 3)
   assert.equal(filterTodosByPriority(todos).length, 3)

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-checklist-text-search',
+    timestamp: '2026-07-18T08:09:15+09:00',
+    description: '업무(Tasks) 검색과 명령 팔레트(Ctrl/Cmd+K)는 이미 체크리스트 항목 텍스트로도 검색되지만, 일정/할 일/업무 기록의 검색과 명령 팔레트 검색에는 체크리스트 텍스트가 빠져 있어 체크리스트에만 적어둔 내용을 찾을 수 없었습니다. 일정/할 일/업무 기록의 검색 필터와 명령 팔레트 검색 모두 체크리스트 항목 텍스트를 포함하도록 맞췄습니다 (`frontend/src/eventSearch.js`, `frontend/src/todaySearch.js`, `frontend/src/commandPalette.js`), 각 테스트 파일에 회귀 테스트를 추가했습니다.',
+  },
+  {
     id: '2026-07-18-report-checklist-summary-column',
     timestamp: '2026-07-18T08:03:39+09:00',
     description: 'CSV 내보내기 4종(업무/일정/할 일/업무 기록)은 이미 "체크리스트" 완료 요약(n/m) 열을 지원하지만, 같은 데이터로 만드는 인쇄용 PDF 보고서 4종에는 체크리스트 진행률이 전혀 표시되지 않았습니다. 각 보고서 표에 "체크리스트" 열을 추가해 CSV와 동일하게 완료/전체 건수를 보여줍니다 (`frontend/src/taskReport.js`, `frontend/src/eventReport.js`, `frontend/src/todoReport.js`, `frontend/src/workLogReport.js`), 테스트를 각 보고서 테스트 파일에 추가했습니다.',

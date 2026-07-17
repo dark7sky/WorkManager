@@ -1,13 +1,19 @@
 export const filterTodosByQuery = (todos, query = '') => {
   const q = query.trim().toLowerCase()
   if (!q) return todos
-  return todos.filter(todo => `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')}`.toLowerCase().includes(q))
+  return todos.filter(todo => {
+    const checklistText = (todo.checklist || []).map(item => item?.text || '').join(' ')
+    return `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+  })
 }
 
 export const filterLogsByQuery = (logs, query = '') => {
   const q = query.trim().toLowerCase()
   if (!q) return logs
-  return logs.filter(log => `${log.content || ''} ${(log.tags || []).join(' ')}`.toLowerCase().includes(q))
+  return logs.filter(log => {
+    const checklistText = (log.checklist || []).map(item => item?.text || '').join(' ')
+    return `${log.content || ''} ${(log.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+  })
 }
 
 export const filterTodosByPriority = (todos, priority = 'all') => {

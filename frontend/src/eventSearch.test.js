@@ -30,6 +30,11 @@ test('filterEventsByQuery matches by tags', () => {
   assert.deepEqual(filterEventsByQuery(events, '외부').map(e => e.id), [4])
 })
 
+test('filterEventsByQuery matches by checklist item text', () => {
+  const withChecklist = [...events, { id: 5, title: '컨퍼런스', checklist: [{ text: '배너 인쇄 확인', done: false }] }]
+  assert.deepEqual(filterEventsByQuery(withChecklist, '배너 인쇄').map(e => e.id), [5])
+})
+
 test('filterEventsByPriority returns all events for "all"', () => {
   assert.equal(filterEventsByPriority(events, 'all').length, 4)
   assert.equal(filterEventsByPriority(events).length, 4)

@@ -60,3 +60,14 @@ test('searchItems matches task checklist item text', () => {
   assert.equal(results.length, 1)
   assert.equal(results[0].id, 9)
 })
+
+test('searchItems matches event/todo/log checklist item text', () => {
+  const withChecklist = {
+    events: [{ id: 20, title: '워크숍', tags: [], checklist: [{ text: '다과 준비', done: false }] }],
+    todos: [{ id: 21, title: '이사 준비', tags: [], checklist: [{ text: '박스 포장', done: false }] }],
+    work_logs: [{ id: 22, content: '주간 정리', tags: [], checklist: [{ text: '문서 백업', done: false }] }],
+  }
+  assert.equal(searchItems('다과', withChecklist)[0]?.id, 20)
+  assert.equal(searchItems('박스 포장', withChecklist)[0]?.id, 21)
+  assert.equal(searchItems('문서 백업', withChecklist)[0]?.id, 22)
+})
