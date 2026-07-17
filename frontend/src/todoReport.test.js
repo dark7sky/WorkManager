@@ -18,3 +18,11 @@ test('todosToPrintableReport renders escaped printable todo rows and summary', (
 test('todoReportFilename uses the requested date', () => {
   assert.equal(todoReportFilename('2026-07-17'), 'workmanager-todos-2026-07-17.html')
 })
+
+test('todosToPrintableReport shows checklist completion summary', () => {
+  const html = todosToPrintableReport([
+    { title: '체크리스트 할 일', completed: false, priority: 'normal', tags: [], checklist: [{ text: 'a', done: false }, { text: 'b', done: false }] },
+  ])
+  assert.match(html, /<td>0\/2<\/td>/)
+  assert.match(html, /<th>체크리스트<\/th>/)
+})

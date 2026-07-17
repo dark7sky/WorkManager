@@ -38,3 +38,11 @@ test('eventsToPrintableReport handles an empty list', () => {
 test('eventReportFilename uses the requested date', () => {
   assert.equal(eventReportFilename('2026-07-07'), 'workmanager-events-2026-07-07.html')
 })
+
+test('eventsToPrintableReport shows checklist completion summary', () => {
+  const html = eventsToPrintableReport([
+    { title: '체크리스트 일정', start_at: '2026-07-07T10:00:00', tags: [], checklist: [{ text: 'a', done: true }, { text: 'b', done: false }, { text: 'c', done: true }] },
+  ])
+  assert.match(html, /<td>2\/3<\/td>/)
+  assert.match(html, /<th>체크리스트<\/th>/)
+})

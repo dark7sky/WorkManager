@@ -11,6 +11,8 @@ const escapeHtml = value => String(value ?? '')
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#39;')
 
+const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : '-'
+
 export const todosToPrintableReport = (todos, { generatedAt = new Date().toISOString(), title = 'WorkManager Todo 보고서' } = {}) => {
   const done = todos.filter(todo => todo.completed).length
   const rows = todos.map(todo => `<tr>
@@ -19,6 +21,7 @@ export const todosToPrintableReport = (todos, { generatedAt = new Date().toISOSt
       <td>${escapeHtml(priorityLabels[todo.priority] || todo.priority || '')}</td>
       <td>${escapeHtml(todo.todo_time || '-')}</td>
       <td>${escapeHtml((todo.tags || []).join(', '))}</td>
+      <td>${escapeHtml(checklistSummary(todo.checklist))}</td>
     </tr>`).join('')
 
   return `<!doctype html>
@@ -46,8 +49,8 @@ export const todosToPrintableReport = (todos, { generatedAt = new Date().toISOSt
   </header>
   <p class="summary">총 ${todos.length}개 · 완료 ${done}개</p>
   <table>
-    <thead><tr><th>Todo</th><th>상태</th><th>우선순위</th><th>시간</th><th>태그</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="5">표시할 Todo가 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>Todo</th><th>상태</th><th>우선순위</th><th>시간</th><th>태그</th><th>체크리스트</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="6">표시할 Todo가 없습니다.</td></tr>'}</tbody>
   </table>
 </body>
 </html>`

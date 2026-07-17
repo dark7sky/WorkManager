@@ -19,3 +19,11 @@ test('workLogsToPrintableReport renders escaped printable log rows and summary',
 test('workLogReportFilename uses the requested date', () => {
   assert.equal(workLogReportFilename('2026-07-17'), 'workmanager-worklogs-2026-07-17.html')
 })
+
+test('workLogsToPrintableReport shows checklist completion summary', () => {
+  const html = workLogsToPrintableReport([
+    { content: '체크리스트 기록', log_time: '10:00', duration_minutes: 30, billable: false, tags: [], checklist: [{ text: 'a', done: true }] },
+  ], new Map(), null)
+  assert.match(html, /<td>1\/1<\/td>/)
+  assert.match(html, /<th>체크리스트<\/th>/)
+})

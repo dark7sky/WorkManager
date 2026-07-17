@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-report-checklist-summary-column',
+    timestamp: '2026-07-18T08:03:39+09:00',
+    description: 'CSV 내보내기 4종(업무/일정/할 일/업무 기록)은 이미 "체크리스트" 완료 요약(n/m) 열을 지원하지만, 같은 데이터로 만드는 인쇄용 PDF 보고서 4종에는 체크리스트 진행률이 전혀 표시되지 않았습니다. 각 보고서 표에 "체크리스트" 열을 추가해 CSV와 동일하게 완료/전체 건수를 보여줍니다 (`frontend/src/taskReport.js`, `frontend/src/eventReport.js`, `frontend/src/todoReport.js`, `frontend/src/workLogReport.js`), 테스트를 각 보고서 테스트 파일에 추가했습니다.',
+  },
+  {
     id: '2026-07-18-log-bulk-duplicate',
     timestamp: '2026-07-18T08:20:00+09:00',
     description: '오늘 화면의 업무 기록 일괄 작업 바(태그 추가/연기/삭제)에 "복제"를 추가했습니다. 업무·할 일은 이미 일괄 복제를 지원했지만 업무 기록 목록에는 개별 복제 버튼만 있었습니다. 기존 `buildLogDuplicatePayload`를 재사용해 선택한 기록마다 새 기록을 만듭니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`). 남은 일괄 복제 격차는 캘린더 일정 목록입니다.',
