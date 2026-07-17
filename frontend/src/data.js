@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-bulk-tag-add',
+    timestamp: '2026-07-17T15:48:29+09:00',
+    description: '업무·오늘 화면의 일괄 작업 도구는 선택한 항목에 태그를 한 번에 추가할 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제만 있고 태그 추가 기능이 없었습니다. 캘린더 목록에 일정 다중 선택 시 태그 추가 폼을 추가했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-17-today-todo-log-sort',
     timestamp: '2026-07-17T15:47:29+09:00',
     description: '업무(Tasks) 화면에는 일정순/우선순위순/진행률순/제목순 정렬 컨트롤이 있었지만, 오늘 화면의 할 일과 업무 기록 목록은 정렬 방법을 고를 수 없어 항상 고정 순서로만 보였습니다. 할 일에는 우선순위순/제목순/시간순, 업무 기록에는 기본순/시각순/소요 시간순/내용순 정렬 드롭다운을 추가하고 선택값을 로컬 저장소에 기억하도록 했습니다 (`frontend/src/todoPins.js`, `frontend/src/logPins.js`, `frontend/src/screens/Today.jsx`).',
