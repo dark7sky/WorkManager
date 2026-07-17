@@ -20,3 +20,13 @@ export function moveEventToDay(event, dayIso) {
   if (!dayDelta) return null
   return { start_at: shiftDateTime(start, dayDelta), end_at: shiftDateTime(end, dayDelta) }
 }
+
+// One-click "postpone" patch for an event: shifts start_at/end_at forward by
+// deltaDays, keeping time of day and duration. Returns null when there is no
+// start_at to shift.
+export function postponeEventDates(event, deltaDays = 1) {
+  const start = event?.start_at || event?.start
+  if (!start || !deltaDays) return null
+  const end = event?.end_at || event?.end
+  return { start_at: shiftDateTime(start, deltaDays), end_at: shiftDateTime(end, deltaDays) }
+}

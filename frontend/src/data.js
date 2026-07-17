@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-bulk-postpone',
+    timestamp: '2026-07-17T16:05:00+09:00',
+    description: '업무(Tasks) 일괄 작업 도구는 선택한 업무의 일정을 며칠씩 한 번에 연기할 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제/태그 추가만 있고 일정 연기 기능이 없었습니다. 캘린더 일정 다중 선택 시 "연기" 폼을 추가해 시작/종료 시각을 유지한 채 며칠씩 미룰 수 있게 했습니다 (`frontend/src/calendarDrag.js`의 postponeEventDates, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`, 실행 취소 지원).',
+  },
+  {
     id: '2026-07-17-today-pdf-report',
     timestamp: '2026-07-17T15:55:37+09:00',
     description: '업무·캘린더 화면은 필터된 목록을 PDF로 인쇄할 수 있었지만, 오늘 화면의 Todo·업무 기록 목록에는 CSV 내보내기만 있고 PDF 인쇄 기능이 없었습니다. 오늘 화면에도 Todo/업무 기록용 PDF 보고서 인쇄 버튼을 추가했습니다 (`frontend/src/todoReport.js`, `frontend/src/workLogReport.js`, `frontend/src/screens/Today.jsx`).',
