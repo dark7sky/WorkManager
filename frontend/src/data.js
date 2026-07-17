@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-calendar-conflict-nav-badge',
+    timestamp: '2026-07-18T02:26:40+09:00',
+    description: 'Google 캘린더 동기화 충돌(`sync_state === "conflict"`)이 발생해도 캘린더 화면을 직접 열기 전까지는 알 수 없었습니다. 업무/오늘 메뉴처럼 사이드바·하단 메뉴의 "일정" 항목에도 미해결 충돌 건수 배지를 표시하도록 했습니다 (`frontend/src/App.jsx`의 `navBadges` 계산).',
+  },
+  {
     id: '2026-07-18-ai-connection-test-error-detail',
     timestamp: '2026-07-18T02:10:12+09:00',
     description: 'AI 설정 화면의 연결 테스트가 401/403 오류 외에는 모두 뭉뚱그려 "서버 응답 오류"로만 안내해 원인 파악이 어려웠습니다. 모델 이름 오류(400/404)와 요청 과다(429)에 대해 구체적인 안내 문구를 추가했습니다 (`backend/app/ai.py`의 `test_connection`).',
