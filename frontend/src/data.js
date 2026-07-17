@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-screen-nav-shortcuts',
+    timestamp: '2026-07-17T21:15:00+09:00',
+    description: '항목 생성(N)이나 빠른 입력(Ctrl/⌘+K) 같은 단축키는 있었지만, 마우스 없이 사이드바 화면(오늘/업무/일정/성과/AI/감사/변경/설정)을 전환할 방법은 없었습니다. 숫자 키 1~8을 누르면 사이드바 메뉴 순서대로 해당 화면으로 바로 이동하도록 추가했고, 단축키 안내 목록에도 반영했습니다 (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`).',
+  },
+  {
     id: '2026-07-17-calendar-agenda-duplicate',
     timestamp: '2026-07-17T21:04:00+09:00',
     description: '업무(Tasks)와 오늘(Today)의 할 일/기록 목록은 항목 옆 버튼 한 번으로 바로 복제할 수 있었지만, 일정(Calendar) 목록에서는 수정 모달을 먼저 열어야만 복제할 수 있었습니다. 일정 목록의 각 행에도 복제 버튼을 추가해 다른 화면과 동일하게 목록에서 바로 복제할 수 있도록 했습니다 (`frontend/src/screens/Calendar.jsx`).',
