@@ -11,6 +11,7 @@ export const buildTodoDuplicatePayload = todo => ({
   links: Array.isArray(todo?.links) ? todo.links : [],
   memo: todo?.memo || null,
   color: todo?.color || null,
+  checklist: Array.isArray(todo?.checklist) ? todo.checklist.map(item => ({ ...item, done: false })) : [],
 })
 
 const TODO_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }
@@ -24,4 +25,5 @@ export const buildTaskFromTodoPayload = todo => ({
   progress: todo?.completed ? 100 : 0,
   link_url: todo?.link_url || null,
   description: todo?.memo || null,
+  checklist: Array.isArray(todo?.checklist) ? todo.checklist : [],
 })

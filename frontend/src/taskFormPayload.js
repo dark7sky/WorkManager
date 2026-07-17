@@ -40,7 +40,7 @@ const normalizedLinkUrl = value => {
   const trimmed = trimField(value).slice(0, 2000)
   return trimmed && /^https?:\/\//.test(trimmed) ? trimmed : null
 }
-const normalizedChecklist = items => {
+export const normalizedChecklist = items => {
   const cleaned = []
   for (const raw of Array.isArray(items) ? items : []) {
     const text = trimField(raw?.text).slice(0, 300)

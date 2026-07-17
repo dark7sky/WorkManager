@@ -72,3 +72,18 @@ test('buildTodoDuplicatePayload carries todo_time', () => {
   assert.equal(buildTodoDuplicatePayload(todo).todo_time, '14:30')
   assert.equal(buildTodoDuplicatePayload({ title: '무제' }).todo_time, null)
 })
+
+test('buildTodoDuplicatePayload copies checklist items but resets done state', () => {
+  const todo = { title: '장보기', checklist: [{ id: '1', text: '우유', done: true }] }
+  const result = buildTodoDuplicatePayload(todo)
+  assert.equal(result.checklist[0].text, '우유')
+  assert.equal(result.checklist[0].done, false)
+  assert.deepEqual(buildTodoDuplicatePayload({ title: '무제' }).checklist, [])
+})
+
+test('buildTaskFromTodoPayload carries checklist items as-is', () => {
+  const todo = { title: '장보기', checklist: [{ id: '1', text: '우유', done: true }] }
+  const result = buildTaskFromTodoPayload(todo)
+  assert.deepEqual(result.checklist, [{ id: '1', text: '우유', done: true }])
+  assert.deepEqual(buildTaskFromTodoPayload({ title: '무제' }).checklist, [])
+})
