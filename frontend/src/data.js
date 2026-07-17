@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-today-pdf-report',
+    timestamp: '2026-07-17T15:55:37+09:00',
+    description: '업무·캘린더 화면은 필터된 목록을 PDF로 인쇄할 수 있었지만, 오늘 화면의 Todo·업무 기록 목록에는 CSV 내보내기만 있고 PDF 인쇄 기능이 없었습니다. 오늘 화면에도 Todo/업무 기록용 PDF 보고서 인쇄 버튼을 추가했습니다 (`frontend/src/todoReport.js`, `frontend/src/workLogReport.js`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-calendar-bulk-tag-add',
     timestamp: '2026-07-17T15:48:29+09:00',
     description: '업무·오늘 화면의 일괄 작업 도구는 선택한 항목에 태그를 한 번에 추가할 수 있었지만, 캘린더의 일정 일괄 작업 도구에는 삭제만 있고 태그 추가 기능이 없었습니다. 캘린더 목록에 일정 다중 선택 시 태그 추가 폼을 추가했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
