@@ -41,6 +41,12 @@ export function postponeTaskDates(task, deltaDays = 1) {
   return { start_date: addDays(task.start_date, deltaDays), due_date }
 }
 
+// Same one-click "postpone" idea, applied to a todo's single todo_date.
+export function postponeTodoDate(todo, deltaDays = 1) {
+  if (!todo?.todo_date) return null
+  return { todo_date: addDays(todo.todo_date, deltaDays) }
+}
+
 // Preview geometry (in day units within the visible window) while dragging.
 export function ganttDragPreview(mode, { left, width }, { grabDay, dropDay }, days = GANTT_DAYS) {
   if (mode === 'move') {

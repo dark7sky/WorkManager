@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-today-todo-bulk-postpone',
+    timestamp: '2026-07-17T11:39:29+09:00',
+    description: '업무(Tasks) 화면의 일괄 작업 도구에는 선택한 업무의 일정을 한 번에 N일 미루는 "연기" 기능이 있었지만, 오늘 화면의 할 일 일괄 작업(완료 처리/태그 추가/삭제)에는 같은 기능이 없어 여러 할 일의 날짜를 미루려면 하나씩 열어 고쳐야 했습니다. Tasks 화면과 동일한 패턴으로 `postponeTodoDate` 헬퍼(`frontend/src/ganttDrag.js`)를 추가하고, 오늘 화면 할 일 일괄 작업 바에 "연기" 입력·버튼과 실행 취소를 지원하는 `onBulkPostponeTodo`를 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, 테스트 `frontend/src/ganttDrag.test.js`).',
+  },
+  {
     id: '2026-07-17-calendar-select-all',
     timestamp: '2026-07-17T11:38:32+09:00',
     description: '업무(Tasks)와 오늘 화면의 할 일/업무 기록 목록에는 이미 "전체 선택" 체크박스가 있었지만, 일정(Calendar) 화면의 모바일 일정 목록은 개별 체크박스로만 다중 선택이 가능해 여러 일정을 한 번에 삭제하려면 하나씩 체크해야 했습니다. 기존 `allIdsSelected`/`toggleSelectAllIds` 헬퍼(`frontend/src/taskFilters.js`)를 재사용해 일정 목록에도 동일한 "전체 선택" 체크박스를 추가했습니다 (`frontend/src/screens/Calendar.jsx`).',
