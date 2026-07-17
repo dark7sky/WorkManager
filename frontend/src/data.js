@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-event-filter-presets',
+    timestamp: '2026-07-17T11:52:00+09:00',
+    description: '업무(Tasks)와 오늘 화면의 할 일 목록에는 검색어·태그·우선순위 조합을 이름 붙여 저장하고 다시 불러오는 "필터 저장" 기능이 있었지만, 캘린더(일정) 화면에는 같은 검색/태그/우선순위 필터가 있으면서도 저장된 필터 기능이 없어 자주 쓰는 조합을 매번 다시 설정해야 했습니다. `frontend/src/eventFilterPresets.js`를 추가하고(`todoFilterPresets.js`와 동일한 구조) 캘린더 화면 필터 바에 "필터 저장/선택/삭제" 컨트롤을 연결했습니다 (`frontend/src/screens/Calendar.jsx`, 테스트 `frontend/src/eventFilterPresets.test.js`).',
+  },
+  {
     id: '2026-07-17-task-due-today-filter',
     timestamp: '2026-07-17T11:45:14+09:00',
     description: '업무(Tasks) 화면의 상태 필터에는 "지연 업무"(기한 지남)와 "이번 주 마감"은 있었지만, 오늘 마감인 업무만 골라 보는 옵션이 없어 하루 계획을 세우려면 "이번 주 마감" 목록에서 오늘 날짜를 직접 찾아야 했습니다. 기존 상태 필터에 "오늘 마감" 옵션을 추가했습니다 (`frontend/src/taskFilters.js`의 `filterTasks`, `frontend/src/screens/Tasks.jsx`의 상태 select, 테스트 `frontend/src/taskFilters.test.js`).',
