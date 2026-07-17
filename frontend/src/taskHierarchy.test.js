@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { DEFAULT_TASK_SORT, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+import { DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -82,6 +82,22 @@ test('taskDependencyOptions includes all tasks when creating a new task', () => 
     { id: 2, title: 'Bravo', dependency_ids: [1] },
   ]
   assert.deepEqual(taskDependencyOptions(linked).map(option => option.id), [1, 2])
+})
+
+test('directDependentTasks lists only tasks that directly depend on the given task', () => {
+  const linked = [
+    { id: 1, title: 'Alpha' },
+    { id: 2, title: 'Bravo', dependency_ids: [1] },
+    { id: 3, title: 'Charlie', dependency_ids: [2] },
+    { id: 4, title: 'Delta' },
+  ]
+  assert.deepEqual(directDependentTasks(linked, 1).map(t => t.id), [2])
+  assert.deepEqual(directDependentTasks(linked, 2).map(t => t.id), [3])
+  assert.deepEqual(directDependentTasks(linked, 4), [])
+})
+
+test('directDependentTasks returns an empty list when there is no current task', () => {
+  assert.deepEqual(directDependentTasks([{ id: 1, dependency_ids: [] }]), [])
 })
 
 test('matchesDependencyFilter matches case-insensitively on the option label', () => {

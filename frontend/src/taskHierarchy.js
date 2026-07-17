@@ -80,6 +80,12 @@ export const dependentTaskIds = (tasks, taskId) => {
   return result
 }
 
+export const directDependentTasks = (tasks, taskId) => {
+  if (!taskId) return []
+  return tasks.filter(task => (task.dependency_ids || []).map(String).includes(String(taskId)))
+    .map(task => ({ id: task.id, title: task.title || `#${task.id}` }))
+}
+
 export const taskDependencyOptions = (tasks, currentTaskId) => {
   const blocked = dependentTaskIds(tasks, currentTaskId)
   if (currentTaskId) blocked.add(currentTaskId)

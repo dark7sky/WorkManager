@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-task-dependent-tasks-display',
+    timestamp: '2026-07-17T15:33:00+09:00',
+    description: '업무 편집 폼의 "선행 업무" 선택기는 이 업무가 완료되어야 진행 가능한 다른 업무를 고를 수 있게 해주었지만, 반대로 "이 업무를 선행 업무로 지정한 업무들(후속 업무)"이 무엇인지는 어디에서도 확인할 수 없어 업무를 완료 처리하기 전에 어떤 업무들이 영향을 받는지 알기 어려웠습니다. 선행 업무 순환을 막는 데만 쓰이던 기존 의존성 그래프 로직(`dependentTaskIds`)을 재사용해 직접적인 후속 업무만 추려내는 `directDependentTasks`를 추가하고(`frontend/src/taskHierarchy.js`, 테스트 추가), 기존 업무를 편집할 때 선행 업무 선택기 아래에 읽기 전용 "후속 업무" 목록을 표시하도록 했습니다 (`frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-17-task-board-view-styling',
     timestamp: '2026-07-17T15:24:26+09:00',
     description: '업무(Tasks) 화면에 간트 보기 외에 상태별 "보드" 보기(간트/보드 전환 버튼)가 있었지만, 보드 화면의 컬럼과 카드에 실제 스타일(styles.css)이 전혀 정의되어 있지 않아 열 구분 없이 카드가 세로로 쌓여 보이는 등 사실상 사용할 수 없는 상태였습니다. `.task-board`/`.task-board-column`/`.task-board-card` 스타일을 추가해 칸반형 가로 컬럼 레이아웃, 드래그 오버 상태 강조, 카드 호버/우선순위 바 표시가 정상 동작하도록 했습니다 (`frontend/src/styles.css`).',
