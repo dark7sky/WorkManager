@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-today-todo-log-sort',
+    timestamp: '2026-07-17T15:47:29+09:00',
+    description: '업무(Tasks) 화면에는 일정순/우선순위순/진행률순/제목순 정렬 컨트롤이 있었지만, 오늘 화면의 할 일과 업무 기록 목록은 정렬 방법을 고를 수 없어 항상 고정 순서로만 보였습니다. 할 일에는 우선순위순/제목순/시간순, 업무 기록에는 기본순/시각순/소요 시간순/내용순 정렬 드롭다운을 추가하고 선택값을 로컬 저장소에 기억하도록 했습니다 (`frontend/src/todoPins.js`, `frontend/src/logPins.js`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-17-calendar-year-view-task-due-dots',
     timestamp: '2026-07-17T15:38:39+09:00',
     description: '캘린더 년간 보기의 날짜 점 표시는 일정(이벤트)에만 반응해서, 마감일만 있고 캘린더 일정은 없는 달은 아무 표시 없이 비어 보였습니다. 미완료 업무 마감일도 함께 집계해 일정과 다른 색(주황) 밑줄로 표시하고, 날짜 칸에 마우스를 올리면 "업무 마감 N건"을 보여주도록 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/styles.css`).',

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from './todoPins.js'
+import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from './todoPins.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -65,4 +65,27 @@ test('orderTodosByPin ranks pin above priority', () => {
 test('orderTodosByPin treats a missing priority as normal', () => {
   const todos = [{ id: 1 }, { id: 2, priority: 'high' }]
   assert.deepEqual(orderTodosByPin(todos, new Set()).map(t => t.id), [2, 1])
+})
+
+test('orderTodosByPin sorts by title when sortBy is "title"', () => {
+  const todos = [{ id: 1, title: '나' }, { id: 2, title: '가' }, { id: 3, title: '다' }]
+  assert.deepEqual(orderTodosByPin(todos, new Set(), 'title').map(t => t.id), [2, 1, 3])
+})
+
+test('orderTodosByPin sorts by todo_time when sortBy is "time"', () => {
+  const todos = [{ id: 1, todo_time: '15:00' }, { id: 2, todo_time: '09:00' }, { id: 3 }]
+  assert.deepEqual(orderTodosByPin(todos, new Set(), 'time').map(t => t.id), [3, 2, 1])
+})
+
+test('loadTodoSort defaults to priority and round-trips through saveTodoSort', () => {
+  const storage = new MemoryStorage()
+  assert.equal(loadTodoSort(storage), 'priority')
+  saveTodoSort('title', storage)
+  assert.equal(loadTodoSort(storage), 'title')
+})
+
+test('loadTodoSort falls back to the default for an unknown stored value', () => {
+  const storage = new MemoryStorage()
+  storage.setItem('wm-todo-sort', 'bogus')
+  assert.equal(loadTodoSort(storage), 'priority')
 })

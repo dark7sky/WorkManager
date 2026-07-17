@@ -4,8 +4,8 @@ import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from '../workLogTimer'
-import { loadPinnedTodoIds, orderTodosByPin, savePinnedTodoIds, togglePinnedTodo } from '../todoPins'
-import { loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, togglePinnedLog } from '../logPins'
+import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from '../todoPins'
+import { loadLogSort, loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, saveLogSort, togglePinnedLog } from '../logPins'
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
@@ -282,6 +282,10 @@ export default function Today(props) {
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
   const [logBillableFilter, setLogBillableFilter] = useState('all')
+  const [todoSort, setTodoSortState] = useState(() => loadTodoSort())
+  const [logSort, setLogSortState] = useState(() => loadLogSort())
+  const setTodoSort = value => { setTodoSortState(value); saveTodoSort(value) }
+  const setLogSort = value => { setLogSortState(value); saveLogSort(value) }
   const [todoFilterPresets, setTodoFilterPresets] = useState(() => loadTodoFilterPresets())
   const applyTodoFilterPreset = id => { const preset = todoFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setTodoPriorityFilter(preset.priority) }
   const saveTodoFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildTodoFilterPreset({ name, query, selectedTags, priority: todoPriorityFilter }); const next = addTodoFilterPreset(todoFilterPresets, preset); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
@@ -349,9 +353,9 @@ export default function Today(props) {
   const matches = item => !selectedTags.length || selectedTags.every(tag => (item.tags || []).includes(tag))
   const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
-  const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds)
+  const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds, todoSort)
   const completedTodos = shownTodos.filter(todo => todo.completed)
-  const shownLogs = orderLogsByPin(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), pinnedLogIds)
+  const shownLogs = orderLogsByPin(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), pinnedLogIds, logSort)
 
   const applyTemplate = id => {
     const template = todoTemplates.find(t => t.id === id)
@@ -516,6 +520,7 @@ export default function Today(props) {
         <input className="search" type="search" value={query} onChange={event => setQuery(event.target.value)} aria-label="할 일/기록 검색" placeholder="할 일, 업무 기록 검색"/>
         <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
         <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
+        <select aria-label="Todo 정렬" value={todoSort} onChange={event => setTodoSort(event.target.value)}><option value="priority">우선순위순</option><option value="title">제목순</option><option value="time">시간순</option></select>
         <div className="filter-preset-bar">{todoFilterPresets.length ? <select aria-label="저장된 필터" defaultValue="" onChange={e => { applyTodoFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{todoFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveTodoFilterPreset}>필터 저장</button>{todoFilterPresets.length ? <button type="button" className="text-button" onClick={deleteTodoFilterPreset}>필터 삭제</button> : null}</div>
         <form className="quick-entry" onSubmit={submitTodo}>
           <div className="task-template-bar"><label>Todo 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{todoTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button type="button" className="text-button" onClick={saveTodoTemplate}>템플릿으로 저장</button>{todoTemplates.length ? <button type="button" className="text-button" onClick={deleteTodoTemplate}>템플릿 삭제</button> : null}</div>
@@ -547,6 +552,7 @@ export default function Today(props) {
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         <select aria-label="청구 가능 필터" value={logBillableFilter} onChange={event => setLogBillableFilter(event.target.value)}><option value="all">전체</option><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select>
+        <select aria-label="업무 기록 정렬" value={logSort} onChange={event => setLogSort(event.target.value)}><option value="none">기본순</option><option value="time">시각순</option><option value="duration">소요 시간순</option><option value="content">내용순</option></select>
         <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}</div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
