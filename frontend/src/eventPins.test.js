@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { loadPinnedEventIds, orderEventsByPin, savePinnedEventIds, togglePinnedEvent } from './eventPins.js'
+import { loadEventSort, loadPinnedEventIds, orderEventsByPin, savePinnedEventIds, saveEventSort, togglePinnedEvent } from './eventPins.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -45,4 +45,37 @@ test('orderEventsByPin does not mutate the input array', () => {
   const copy = [...events]
   orderEventsByPin(events, new Set([2]))
   assert.deepEqual(events, copy)
+})
+
+test('orderEventsByPin sorts by start time by default', () => {
+  const events = [{ id: 1, start_at: '2026-07-20T15:00:00' }, { id: 2, start_at: '2026-07-20T09:00:00' }]
+  assert.deepEqual(orderEventsByPin(events, new Set()).map(e => e.id), [2, 1])
+})
+
+test('orderEventsByPin sorts by priority (high, normal, low) when sortBy is "priority"', () => {
+  const events = [{ id: 1, priority: 'normal' }, { id: 2, priority: 'high' }, { id: 3, priority: 'low' }]
+  assert.deepEqual(orderEventsByPin(events, new Set(), 'priority').map(e => e.id), [2, 1, 3])
+})
+
+test('orderEventsByPin sorts by title when sortBy is "title"', () => {
+  const events = [{ id: 1, title: '나' }, { id: 2, title: '가' }, { id: 3, title: '다' }]
+  assert.deepEqual(orderEventsByPin(events, new Set(), 'title').map(e => e.id), [2, 1, 3])
+})
+
+test('orderEventsByPin ranks pin above sort order', () => {
+  const events = [{ id: 1, start_at: '2026-07-20T09:00:00' }, { id: 2, start_at: '2026-07-20T15:00:00' }]
+  assert.deepEqual(orderEventsByPin(events, new Set([2])).map(e => e.id), [2, 1])
+})
+
+test('loadEventSort defaults to time and round-trips through saveEventSort', () => {
+  const storage = new MemoryStorage()
+  assert.equal(loadEventSort(storage), 'time')
+  saveEventSort('priority', storage)
+  assert.equal(loadEventSort(storage), 'priority')
+})
+
+test('loadEventSort falls back to the default for an unknown stored value', () => {
+  const storage = new MemoryStorage()
+  storage.setItem('wm-event-sort', 'bogus')
+  assert.equal(loadEventSort(storage), 'time')
 })

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-17-calendar-event-sort',
+    timestamp: '2026-07-17T20:53:00+09:00',
+    description: '업무(Tasks)와 오늘(Today) 화면은 목록 정렬 방식(우선순위순/제목순/시간순 등)을 선택할 수 있었지만, 일정(Calendar) 화면의 일정 목록은 항상 시간순 고정이라 우선순위나 제목으로 훑어보기 어려웠습니다. 일정 화면 도구모음에 정렬 선택 메뉴(시간순/우선순위순/제목순)를 추가했고, 선택한 정렬 방식은 기기별 로컬 저장소에 기억됩니다 (`frontend/src/eventPins.js`의 `EVENT_SORT_COMPARATORS`/`loadEventSort`/`saveEventSort`, `frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-17-task-hierarchy-collapse',
     timestamp: '2026-07-17T20:52:00+09:00',
     description: '업무(Tasks) 화면의 간트 목록은 상위-하위 업무를 계층으로 보여줬지만, 하위 업무를 접어 숨길 방법이 없어 하위 업무가 많은 업무일수록 목록이 길어져 다른 업무를 찾기 어려웠습니다. 하위 업무가 있는 업무 행에 펼침/접힘 화살표 버튼을 추가해 눌러서 하위 업무 트리를 접었다 펼 수 있고, 접은 상태는 기기별 로컬 저장소에 기억됩니다 (`frontend/src/taskCollapse.js`, `frontend/src/taskHierarchy.js`의 `orderTasksHierarchically`, `frontend/src/screens/Tasks.jsx`).',

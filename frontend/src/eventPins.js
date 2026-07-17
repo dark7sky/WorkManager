@@ -19,5 +19,33 @@ export const togglePinnedEvent = (pinnedIds, eventId) => {
   return next
 }
 
-export const orderEventsByPin = (events, pinnedIds) =>
-  [...events].sort((a, b) => (pinnedIds.has(b.id) ? 1 : 0) - (pinnedIds.has(a.id) ? 1 : 0))
+const priorityRank = { high: 0, normal: 1, low: 2 }
+const startTime = event => event.start_at || event.start || ''
+
+export const EVENT_SORT_COMPARATORS = {
+  time: (a, b) => startTime(a).localeCompare(startTime(b)),
+  priority: (a, b) => (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1),
+  title: (a, b) => (a.title || '').localeCompare(b.title || '', 'ko'),
+}
+export const DEFAULT_EVENT_SORT = 'time'
+const EVENT_SORT_STORAGE_KEY = 'wm-event-sort'
+
+export const loadEventSort = (storage = localStorage) => {
+  try {
+    const saved = storage.getItem(EVENT_SORT_STORAGE_KEY)
+    return saved && EVENT_SORT_COMPARATORS[saved] ? saved : DEFAULT_EVENT_SORT
+  } catch {
+    return DEFAULT_EVENT_SORT
+  }
+}
+
+export const saveEventSort = (sortBy, storage = localStorage) => {
+  storage.setItem(EVENT_SORT_STORAGE_KEY, sortBy)
+}
+
+export const orderEventsByPin = (events, pinnedIds, sortBy = DEFAULT_EVENT_SORT) =>
+  [...events].sort((a, b) => {
+    const pinDiff = (pinnedIds.has(b.id) ? 1 : 0) - (pinnedIds.has(a.id) ? 1 : 0)
+    if (pinDiff !== 0) return pinDiff
+    return (EVENT_SORT_COMPARATORS[sortBy] || EVENT_SORT_COMPARATORS[DEFAULT_EVENT_SORT])(a, b)
+  })
