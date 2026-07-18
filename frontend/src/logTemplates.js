@@ -16,7 +16,7 @@ export const saveLogTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildLogTemplate = ({ name, content, tags, color, duration_minutes, estimated_minutes }) => ({
+export const buildLogTemplate = ({ name, content, tags, color, duration_minutes, estimated_minutes, priority }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   content: String(content || '').trim().slice(0, CONTENT_LIMIT),
@@ -24,6 +24,7 @@ export const buildLogTemplate = ({ name, content, tags, color, duration_minutes,
   color: color || '',
   duration_minutes: duration_minutes || '',
   estimated_minutes: estimated_minutes || '',
+  priority: priority || 'normal',
 })
 
 export const addLogTemplate = (templates, template) => {
@@ -39,4 +40,5 @@ export const applyLogTemplate = template => ({
   color: template.color,
   duration_minutes: template.duration_minutes,
   estimated_minutes: template.estimated_minutes || '',
+  priority: template.priority || 'normal',
 })

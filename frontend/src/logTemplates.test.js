@@ -40,6 +40,7 @@ test('buildLogTemplate trims fields and defaults', () => {
   assert.deepEqual(template.tags, [])
   assert.equal(template.color, '')
   assert.equal(template.duration_minutes, '')
+  assert.equal(template.priority, 'normal')
 })
 
 test('addLogTemplate rejects templates missing a name or content', () => {
@@ -61,7 +62,13 @@ test('removeLogTemplate filters out the matching id only', () => {
 
 test('applyLogTemplate maps template fields onto a draft', () => {
   const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15 })
-  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15, estimated_minutes: '' })
+  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15, estimated_minutes: '', priority: 'normal' })
+})
+
+test('buildLogTemplate and applyLogTemplate carry the priority', () => {
+  const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', priority: 'high' })
+  assert.equal(template.priority, 'high')
+  assert.equal(applyLogTemplate(template).priority, 'high')
 })
 
 test('buildLogTemplate and applyLogTemplate carry the estimate', () => {

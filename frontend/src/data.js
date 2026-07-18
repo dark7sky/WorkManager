@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-log-template-priority',
+    timestamp: '2026-07-18T22:16:49+09:00',
+    description: '업무 기록(Work Log) 템플릿에 저장할 때 우선순위가 함께 저장되지 않고, 템플릿을 불러와도 우선순위가 항상 "보통"으로 초기화되는 문제가 있었습니다. 업무·일정·할 일 템플릿은 이미 우선순위를 저장/복원하고 있었는데 업무 기록 템플릿만 누락되어 있었습니다. `buildLogTemplate`/`applyLogTemplate`가 우선순위 필드를 함께 다루도록 수정했습니다(`frontend/src/logTemplates.js`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-18-backup-comments-attachments',
     timestamp: '2026-07-18T22:16:00+09:00',
     description: '설정 화면의 "JSON 내보내기/백업에서 복원" 기능이 업무·일정·할 일·업무 기록 본문만 백업하고, 각 항목에 달린 댓글과 첨부파일(이미지 포함)은 백업 파일에 전혀 포함되지 않아 복원 시 조용히 사라지는 문제가 있었습니다. `/api/export`가 8개 댓글·첨부 테이블(task/event/todo/work_log × comments/attachments)도 함께 내려받도록 하고, `/api/import`가 부모 항목이 새 ID로 재생성된 뒤 댓글·첨부의 외래키를 새 ID로 매핑해 함께 복원하도록 했습니다. 설정 화면의 가져오기 미리보기에도 댓글·첨부 건수를 표시합니다(`backend/app/main.py`, `frontend/src/screens/Settings.jsx`).',

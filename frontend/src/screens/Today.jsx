@@ -445,12 +445,13 @@ export default function Today(props) {
     setLogColor(filled.color)
     setLogMinutes(filled.duration_minutes)
     setLogEstimate(filled.estimated_minutes || '')
+    setLogPriority(filled.priority)
   }
   const saveLogTpl = () => {
     if (!logDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', logDraft.trim())
     if (!name) return
-    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate })
+    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate, priority: logPriority })
     const next = addLogTemplate(logTemplates, template)
     setLogTemplates(next)
     saveLogTemplates(next)
