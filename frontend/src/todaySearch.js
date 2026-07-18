@@ -21,6 +21,11 @@ export const filterTodosByPriority = (todos, priority = 'all') => {
   return todos.filter(todo => (todo.priority || 'normal') === priority)
 }
 
+export const filterTodosByCompleted = (todos, hideCompleted = false) => {
+  if (!hideCompleted) return todos
+  return todos.filter(todo => !todo.completed)
+}
+
 export const filterLogsByPriority = (logs, priority = 'all') => {
   if (priority === 'all') return logs
   return logs.filter(log => (log.priority || 'normal') === priority)

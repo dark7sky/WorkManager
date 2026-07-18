@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-today-hide-completed-todos',
+    timestamp: '2026-07-19T04:09:33+09:00',
+    description: '오늘 화면의 할 일 목록에서 완료된 항목을 계속 보고 있어야 했습니다. 우선순위 필터 옆에 "완료 항목 숨기기" 체크박스를 추가해 완료된 할 일을 목록에서 감출 수 있게 했습니다. (`frontend/src/todaySearch.js`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-19-worklog-priority-filter',
     timestamp: '2026-07-19T04:25:00+09:00',
     description: '오늘 화면의 업무 기록 목록은 할 일·업무와 달리 우선순위로 필터링할 수 없었습니다. 청구 가능 필터 옆에 우선순위 필터를 추가하고 필터 프리셋 저장/적용에도 반영했습니다. (`frontend/src/todaySearch.js`, `frontend/src/logFilterPresets.js`, `frontend/src/screens/Today.jsx`)',

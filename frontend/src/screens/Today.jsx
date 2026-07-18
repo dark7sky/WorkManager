@@ -6,7 +6,7 @@ import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from '../todoPins'
 import { loadLogSort, loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, saveLogSort, togglePinnedLog } from '../logPins'
-import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByPriority, filterLogsByBillable } from '../todaySearch'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterTodosByCompleted, filterLogsByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
@@ -310,6 +310,7 @@ export default function Today(props) {
   const [selectedTags, setSelectedTags] = useState([])
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
+  const [hideCompletedTodos, setHideCompletedTodos] = useState(false)
   const [logBillableFilter, setLogBillableFilter] = useState('all')
   const [logPriorityFilter, setLogPriorityFilter] = useState('all')
   const [todoSort, setTodoSortState] = useState(() => loadTodoSort())
@@ -410,8 +411,9 @@ export default function Today(props) {
   const matches = item => !selectedTags.length || selectedTags.every(tag => (item.tags || []).includes(tag))
   const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
-  const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds, todoSort)
-  const completedTodos = shownTodos.filter(todo => todo.completed)
+  const filteredTodos = filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter)
+  const completedTodos = filteredTodos.filter(todo => todo.completed)
+  const shownTodos = orderTodosByPin(filterTodosByCompleted(filteredTodos, hideCompletedTodos), pinnedTodoIds, todoSort)
   const shownLogs = orderLogsByPin(filterLogsByPriority(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), logPriorityFilter), pinnedLogIds, logSort)
   const todayKey = now.toLocaleDateString('en-CA')
   const overlappingNewLog = useMemo(() => findOverlappingWorkLogs(todayKey, logTime, logMinutes, logs, null), [todayKey, logTime, logMinutes, logs])
@@ -645,6 +647,7 @@ export default function Today(props) {
         <input className="search" type="search" value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { setQuery(''); event.target.blur() } }} aria-label="할 일/기록 검색" placeholder="할 일, 업무 기록 검색"/>
         <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
         <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
+        <label className="select-all-shown"><input type="checkbox" checked={hideCompletedTodos} onChange={event => setHideCompletedTodos(event.target.checked)}/>완료 항목 숨기기</label>
         <select aria-label="Todo 정렬" value={todoSort} onChange={event => setTodoSort(event.target.value)}><option value="priority">우선순위순</option><option value="title">제목순</option><option value="time">시간순</option></select>
         <div className="filter-preset-bar">{todoFilterPresets.length ? <select aria-label="저장된 필터" defaultValue="" onChange={e => { applyTodoFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{todoFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveTodoFilterPreset}>필터 저장</button>{todoFilterPresets.length ? <button type="button" className="text-button" onClick={deleteTodoFilterPreset}>필터 삭제</button> : null}</div>
         <form className="quick-entry" onSubmit={submitTodo}>
