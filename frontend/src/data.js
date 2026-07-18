@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-csv-estimated-minutes',
+    timestamp: '2026-07-18T13:40:12+09:00',
+    description: '업무(Task)와 할 일(Todo)의 CSV 내보내기/가져오기에는 "예상 소요시간(분)" 열이 있었고, 일정(Calendar Event)도 같은 필드를 폼에서 지원하게 되었지만, 일정 CSV 내보내기/가져오기에는 이 열이 빠져 있어 예상 소요 시간이 CSV로는 백업되거나 대량 등록되지 않았습니다. 일정 CSV에도 "예상 소요시간(분)" 열을 추가했습니다(`frontend/src/csv.js`의 `eventHeaders`/`eventsToCsv`/`parseEventsCsv`, 테스트는 `frontend/src/csv.test.js`).',
+  },
+  {
     id: '2026-07-18-today-quick-entry-inline-validation',
     timestamp: '2026-07-18T13:32:21+09:00',
     description: '업무(Task)와 일정(Event) 작성 폼에는 빈 제목을 저장하려 하면 빨간 테두리와 함께 안내 문구가 즉시 표시되는 인라인 검증이 있었지만, 오늘 화면의 Todo·업무 기록 빠른 입력 폼은 빈 값 입력 시 아무 안내 없이 조용히 무시되기만 했습니다. 동일한 인라인 검증 패턴(`invalid` 스타일, `aria-invalid`, `field-error` 메시지)을 Todo·업무 기록 빠른 입력에도 적용했습니다(`frontend/src/formValidation.js`의 `validateTodoForm`/`validateLogForm`, `frontend/src/screens/Today.jsx`).',

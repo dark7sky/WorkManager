@@ -164,7 +164,7 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '체크리스트']
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
 
 export const eventsToCsv = events => {
   const rows = events.map(event => [
@@ -177,6 +177,7 @@ export const eventsToCsv = events => {
     (event.tags || []).join('; '),
     event.description,
     event.link_url,
+    event.estimated_minutes ?? '',
     checklistSummary(event.checklist),
   ])
   return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -189,7 +190,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -203,6 +204,7 @@ export const parseEventsCsv = text => {
     if (iTags >= 0 && cells[iTags]) event.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) event.link_url = cells[iLink].trim()
+    if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) event.estimated_minutes = Number(cells[iEstimate])
     events.push(event)
   })
   return { events, errors }

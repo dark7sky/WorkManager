@@ -100,9 +100,9 @@ test('eventsToCsv exports event rows with labels and escaping', () => {
   ])
 
   assert.equal(csv, [
-    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모,링크,체크리스트',
-    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,높음,3층 회의실,내부,"분기 계획\n검토",,',
-    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,낮음,,,,,',
+    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모,링크,예상 소요시간(분),체크리스트',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,높음,3층 회의실,내부,"분기 계획\n검토",,,',
+    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,낮음,,,,,,',
   ].join('\n'))
 })
 
@@ -149,6 +149,13 @@ test('parseEventsCsv defaults end to start and skips rows missing title or start
 
 test('parseEventsCsv returns nothing for empty input', () => {
   assert.deepEqual(parseEventsCsv(''), { events: [], errors: [] })
+})
+
+test('eventsToCsv and parseEventsCsv round-trip estimated minutes', () => {
+  const csv = eventsToCsv([{ title: '워크숍', start_at: '2026-07-18T09:00:00', estimated_minutes: 120 }])
+  assert.match(csv, /,120,$/m)
+  const { events } = parseEventsCsv(csv)
+  assert.equal(events[0].estimated_minutes, 120)
 })
 
 test('parseTasksCsv reads back an exported task row', () => {
@@ -386,7 +393,7 @@ test('tasksToCsv and parseTasksCsv round-trip the estimated minutes column', () 
 
 test('eventsToCsv and parseEventsCsv round-trip the link column', () => {
   const csv = eventsToCsv([{ title: '일정', start_at: '2026-07-18T09:00:00', link_url: 'https://example.com/doc' }])
-  assert.match(csv, /,https:\/\/example\.com\/doc,$/m)
+  assert.match(csv, /,https:\/\/example\.com\/doc,,$/m)
   const { events } = parseEventsCsv(csv)
   assert.equal(events[0].link_url, 'https://example.com/doc')
 })
