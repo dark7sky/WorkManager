@@ -317,6 +317,19 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
   const [newDate, setNewDate] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteSeries, setDeleteSeries] = useState(false)
+  useEffect(() => {
+    const onKey = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const tag = e.target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return
+      if (editing || newDate || deleting) return
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() - 7) : view === 'year' ? new Date(date.getFullYear() - 1, date.getMonth(), 1) : new Date(date.getFullYear(), date.getMonth() - 1, 1)) }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); setCursor(date => view === 'week' ? new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7) : view === 'year' ? new Date(date.getFullYear() + 1, date.getMonth(), 1) : new Date(date.getFullYear(), date.getMonth() + 1, 1)) }
+      else if (e.key.toLowerCase() === 't') { e.preventDefault(); setCursor(new Date()) }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [view, editing, newDate, deleting])
   const [selectedTags, setSelectedTags] = useState([])
   const [query, setQuery] = useState('')
   const [priority, setPriority] = useState('all')

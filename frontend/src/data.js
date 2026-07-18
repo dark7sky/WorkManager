@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-calendar-arrow-navigation',
+    timestamp: '2026-07-19T04:05:00+09:00',
+    description: '캘린더 화면은 월/주/년 전환 버튼을 마우스로만 클릭할 수 있어 다른 화면(업무·오늘)의 키보드 탐색과 일관성이 없었습니다. `←`/`→` 키로 이전·다음 달(주/년)로 이동하고, `T` 키로 오늘로 바로 이동하도록 추가했습니다. (`frontend/src/screens/Calendar.jsx`)',
+  },
+  {
     id: '2026-07-19-today-row-arrow-navigation',
     timestamp: '2026-07-19T03:58:01+09:00',
     description: '오늘 화면의 할 일·업무 기록 목록은 업무(간트) 화면과 달리 키보드로 행 사이를 이동할 수 없었습니다. 각 항목의 "수정" 버튼에 포커스된 상태에서 `↑`/`↓` 키로 이전·다음 행으로 바로 이동하도록 업무 화면과 동일한 키보드 탐색을 추가했습니다. (`frontend/src/screens/Today.jsx`)',
