@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-trash-select-all',
+    timestamp: '2026-07-19T03:22:00+09:00',
+    description: '업무/캘린더/오늘 화면에는 있던 "전체 선택" 체크박스가 휴지통 화면에는 없어, 여러 항목을 한 번에 복원하거나 영구 삭제하려면 각 항목을 일일이 선택해야 했습니다. 휴지통 목록에도 필터링된 항목을 한 번에 선택하는 "전체 선택" 체크박스를 추가했습니다. (`frontend/src/components/TrashSection.jsx`)',
+  },
+  {
     id: '2026-07-19-log-promote-estimate',
     timestamp: '2026-07-19T03:20:00+09:00',
     description: '업무 기록을 업무로 승격할 때 예상 소요 시간(estimated_minutes)이 새 업무에 복사되지 않아, 할 일에서 승격할 때와 달리 정보가 누락됐습니다. `buildTaskFromLogPayload`(`frontend/src/logDuplicate.js`)에 예상 소요 시간을 포함하도록 수정했습니다.',
