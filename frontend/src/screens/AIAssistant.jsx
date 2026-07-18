@@ -32,6 +32,6 @@ function PreviewItem({ item, onApply }) {
 }
 
 function RecommendationList({ items = [] }) {
-  if (!items.length) return <div className="ai-empty"><CheckCircle2/><strong>추천할 진행 중 업무가 없습니다.</strong><p>새 업무를 등록하거나 완료된 업무의 상태를 확인해 보세요.</p></div>
-  return <ol className="recommendation-list">{items.map((item, index) => <li key={item.task_id}><span className="recommendation-rank">{index + 1}</span><div><h3>{item.title}</h3><p>{item.reason}</p><div className="recommendation-meta"><span>권장 진행률 <b>{item.suggested_progress}%</b></span><span>권장 완료일 <b>{item.suggested_due_date || item.due_date || '미정'}</b></span></div></div></li>)}</ol>
+  if (!items.length) return <div className="ai-empty"><CheckCircle2/><strong>추천할 업무나 할 일이 없습니다.</strong><p>새 업무·할 일을 등록하거나 완료된 항목의 상태를 확인해 보세요.</p></div>
+  return <ol className="recommendation-list">{items.map((item, index) => <li key={`${item.entity}-${item.task_id || item.todo_id}`}><span className="recommendation-rank">{index + 1}</span><div><h3>{item.title}<span className="recommendation-entity">{item.entity === 'todo' ? '오늘 할 일' : '업무'}</span></h3><p>{item.reason}</p><div className="recommendation-meta">{item.entity === 'todo' ? <span>예정일 <b>{item.due_date || '미정'}</b></span> : <><span>권장 진행률 <b>{item.suggested_progress}%</b></span><span>권장 완료일 <b>{item.suggested_due_date || item.due_date || '미정'}</b></span></>}</div></div></li>)}</ol>
 }

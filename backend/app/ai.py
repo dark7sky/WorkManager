@@ -618,15 +618,17 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         return {"items": items}
 
 
-def recommendations(tasks: list[dict], logs: list[dict], limit: int = 5) -> list[dict]:
+def recommendations(tasks: list[dict], todos: list[dict], logs: list[dict], limit: int = 5) -> list[dict]:
     today = date.today().isoformat()
-    active = [t for t in tasks if t.get("status") != "done" and int(t.get("progress") or 0) < 100]
     priority = {"high": 0, "normal": 1, "low": 2}
-    active.sort(key=lambda t: (t.get("due_date") or "9999-12-31", priority.get(t.get("priority"), 1),
+    active_tasks = [t for t in tasks if t.get("status") != "done" and int(t.get("progress") or 0) < 100]
+    active_tasks.sort(key=lambda t: (t.get("due_date") or "9999-12-31", priority.get(t.get("priority"), 1),
                                -int(t.get("progress") or 0)))
     recent_task_ids = {log.get("task_id") for log in logs[:30] if log.get("task_id")}
-    output = []
-    for task in active[:max(0, limit)]:
+    active_todos = [t for t in todos if not t.get("completed")]
+    active_todos.sort(key=lambda t: (t.get("todo_date") or "9999-12-31", priority.get(t.get("priority"), 1)))
+    candidates = []
+    for task in active_tasks:
         overdue = bool(task.get("due_date") and task["due_date"] < today)
         if overdue:
             reason = "완료일이 지났습니다"
@@ -636,11 +638,24 @@ def recommendations(tasks: list[dict], logs: list[dict], limit: int = 5) -> list
             reason = "최근 작업 기록이 있어 흐름을 이어가기 좋습니다"
         else:
             reason = "완료일과 우선순위를 기준으로 추천했습니다"
-        output.append({"task_id": task["id"], "title": task["title"], "reason": reason,
+        sort_key = (task.get("due_date") or "9999-12-31", priority.get(task.get("priority"), 1))
+        candidates.append((sort_key, {"entity": "task", "task_id": task["id"], "title": task["title"], "reason": reason,
                        "suggested_progress": min(100, int(task.get("progress") or 0) + 15),
                        "due_date": task.get("due_date"),
-                       "suggested_due_date": task.get("due_date") or (date.today() + timedelta(days=3)).isoformat()})
-    return output
+                       "suggested_due_date": task.get("due_date") or (date.today() + timedelta(days=3)).isoformat()}))
+    for todo in active_todos:
+        overdue = bool(todo.get("todo_date") and todo["todo_date"] < today)
+        if overdue:
+            reason = "예정일이 지났습니다"
+        elif todo.get("todo_date") == today:
+            reason = "오늘 예정된 할 일입니다"
+        else:
+            reason = "예정일과 우선순위를 기준으로 추천했습니다"
+        sort_key = (todo.get("todo_date") or "9999-12-31", priority.get(todo.get("priority"), 1))
+        candidates.append((sort_key, {"entity": "todo", "todo_id": todo["id"], "title": todo["title"], "reason": reason,
+                       "due_date": todo.get("todo_date")}))
+    candidates.sort(key=lambda c: c[0])
+    return [item for _, item in candidates[:max(0, limit)]]
 
 
 def tag_recommendations(text: str, existing_tags=None, limit: int = 5) -> list[str]:

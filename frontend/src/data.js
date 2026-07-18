@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-ai-recommend-includes-todos',
+    timestamp: '2026-07-18T17:20:00+09:00',
+    description: 'AI 도우미의 "오늘 할 일 추천" 기능이 이름과 달리 업무(Task)만 추천하고 오늘 할 일(Todo)은 완전히 제외하고 있었습니다. 추천 엔진(`backend/app/ai.py`의 `recommendations`)이 미완료 할 일도 함께 조회해 완료 예정일·우선순위 기준으로 업무와 함께 정렬하도록 수정했고, 프론트엔드 추천 목록에 항목 종류(업무/오늘 할 일) 배지를 표시했습니다(`frontend/src/screens/AIAssistant.jsx`).',
+  },
+  {
     id: '2026-07-18-event-csv-estimated-minutes',
     timestamp: '2026-07-18T13:40:12+09:00',
     description: '업무(Task)와 할 일(Todo)의 CSV 내보내기/가져오기에는 "예상 소요시간(분)" 열이 있었고, 일정(Calendar Event)도 같은 필드를 폼에서 지원하게 되었지만, 일정 CSV 내보내기/가져오기에는 이 열이 빠져 있어 예상 소요 시간이 CSV로는 백업되거나 대량 등록되지 않았습니다. 일정 CSV에도 "예상 소요시간(분)" 열을 추가했습니다(`frontend/src/csv.js`의 `eventHeaders`/`eventsToCsv`/`parseEventsCsv`, 테스트는 `frontend/src/csv.test.js`).',

@@ -283,9 +283,23 @@ class ValidationAndStatusTests(unittest.TestCase):
             {"id": 1, "title": "later", "status": "todo", "progress": 0, "priority": "high", "due_date": "2999-01-01"},
             {"id": 2, "title": "overdue", "status": "doing", "progress": 50, "priority": "normal", "due_date": "2000-01-01"},
         ]
-        result = ai.recommendations(tasks, [], 1)
+        result = ai.recommendations(tasks, [], [], 1)
         self.assertEqual(result[0]["task_id"], 2)
         self.assertEqual(result[0]["reason"], "완료일이 지났습니다")
+
+    def test_recommendations_include_active_todos_sorted_with_tasks(self):
+        tasks = [{"id": 1, "title": "task later", "status": "todo", "progress": 0, "priority": "normal", "due_date": "2999-01-01"}]
+        todos = [
+            {"id": 5, "title": "overdue todo", "completed": 0, "priority": "normal", "todo_date": "2000-01-01"},
+            {"id": 6, "title": "done todo", "completed": 1, "priority": "high", "todo_date": "2000-01-01"},
+        ]
+        result = ai.recommendations(tasks, todos, [], 5)
+        self.assertEqual(result[0]["entity"], "todo")
+        self.assertEqual(result[0]["todo_id"], 5)
+        self.assertEqual(result[0]["reason"], "예정일이 지났습니다")
+        self.assertTrue(all(item["todo_id"] != 6 for item in result if item["entity"] == "todo"))
+        self.assertEqual(result[1]["entity"], "task")
+        self.assertEqual(result[1]["task_id"], 1)
 
     def test_period_summary_includes_real_activity(self):
         report = {"summary": {"completed_tasks": 1, "work_logs": 1, "events": 0, "active_tasks": 0},
