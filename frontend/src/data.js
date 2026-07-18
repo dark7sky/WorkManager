@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-csv-billable-import',
+    timestamp: '2026-07-18T22:20:19+09:00',
+    description: '업무 기록(Work Log) CSV를 내보내면 "청구 가능" 열이 함께 포함되었지만, 그 CSV를 다시 가져올 때는 이 값이 읽히지 않아 청구 가능 여부가 항상 초기화되는 문제가 있었습니다. `parseWorkLogsCsv`가 "청구 가능" 열(Y/공백)을 읽어 `billable` 값을 복원하도록 수정했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-log-template-priority',
     timestamp: '2026-07-18T22:16:49+09:00',
     description: '업무 기록(Work Log) 템플릿에 저장할 때 우선순위가 함께 저장되지 않고, 템플릿을 불러와도 우선순위가 항상 "보통"으로 초기화되는 문제가 있었습니다. 업무·일정·할 일 템플릿은 이미 우선순위를 저장/복원하고 있었는데 업무 기록 템플릿만 누락되어 있었습니다. `buildLogTemplate`/`applyLogTemplate`가 우선순위 필드를 함께 다루도록 수정했습니다(`frontend/src/logTemplates.js`, `frontend/src/screens/Today.jsx`).',

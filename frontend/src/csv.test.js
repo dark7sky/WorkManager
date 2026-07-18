@@ -364,6 +364,18 @@ test('workLogsToCsv and parseWorkLogsCsv round-trip the link column', () => {
   }])
 })
 
+test('workLogsToCsv and parseWorkLogsCsv round-trip the billable column', () => {
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-14', content: '고객 미팅', duration_minutes: 60, task_id: null, tags: [], billable: true },
+    { log_date: '2026-07-15', content: '내부 정리', duration_minutes: 30, task_id: null, tags: [], billable: false },
+  ], new Map())
+
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.equal(logs[0].billable, true)
+  assert.equal(logs[1].billable, undefined)
+})
+
 test('workLogCsvFilename uses the requested date', () => {
   assert.equal(workLogCsvFilename('2026-07-14'), 'workmanager-work-logs-2026-07-14.csv')
 })

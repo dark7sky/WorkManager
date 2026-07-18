@@ -295,7 +295,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTags = col('태그'), iLink = col('링크'), iColor = col('색상')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iColor = col('색상')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -307,6 +307,7 @@ export const parseWorkLogsCsv = text => {
     if (iPriority >= 0 && cells[iPriority]) log.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iLink >= 0 && cells[iLink]) log.link_url = cells[iLink].trim()
+    if (iBillable >= 0 && cells[iBillable]) log.billable = cells[iBillable].trim().toUpperCase() === 'Y'
     if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''
     logs.push(log)
   })
