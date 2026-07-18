@@ -1706,6 +1706,35 @@ class ApiTests(unittest.TestCase):
         bad = a.post("/api/import", json={"mode": "merge", "data": {"version": 1, "tasks": [{"title": ""}]}})
         self.assertEqual(bad.status_code, 422)
 
+    def test_wipe_requires_confirmation_and_deletes_only_own_data(self):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        task = a.post("/api/tasks", json={"title": "지울 업무", "status": "todo", "progress": 0}).json()
+        a.post(f"/api/tasks/{task['id']}/comments", json={"body": "지울 댓글"})
+        a.post("/api/events", json={"title": "지울 일정", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"})
+        a.post("/api/todos", json={"title": "지울 할 일", "todo_date": "2026-08-01"})
+        a.post("/api/work_logs", json={"content": "지울 기록", "log_date": "2026-08-01"})
+        other_task = b.post("/api/tasks", json={"title": "다른 사용자 업무", "status": "todo", "progress": 0}).json()
+
+        self.assertEqual(a.post("/api/data/wipe", json={}).status_code, 422)
+        self.assertEqual(a.post("/api/data/wipe", json={"confirm": "delete"}).status_code, 422)
+
+        result = a.post("/api/data/wipe", json={"confirm": "DELETE"})
+        self.assertEqual(result.status_code, 200, result.text)
+        deleted = result.json()["deleted"]
+        self.assertGreaterEqual(deleted["tasks"], 1)
+        self.assertGreaterEqual(deleted["events"], 1)
+        self.assertGreaterEqual(deleted["todos"], 1)
+        self.assertGreaterEqual(deleted["work_logs"], 1)
+
+        self.assertEqual(a.get("/api/tasks").json(), [])
+        self.assertEqual(a.get("/api/events").json(), [])
+        self.assertEqual(a.get("/api/todos").json(), [])
+        self.assertEqual(a.get("/api/work_logs").json(), [])
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}/comments").status_code, 404)  # cascaded away with the task
+        self.assertEqual(a.get("/api/export").json()["task_comments"], [])
+        # other users' data is untouched
+        self.assertIn(other_task["id"], {t["id"] for t in b.get("/api/tasks").json()})
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_calendar_feed_rotate_serves_ics_and_old_token_is_invalidated(self, *_):

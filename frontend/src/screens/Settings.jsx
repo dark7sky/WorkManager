@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun, Upload } from 'lucide-react'
+import { Bell, Bot, CalendarSync, Check, ClipboardList, Cloud, Download, LoaderCircle, Monitor, Moon, RefreshCw, Smartphone, Sun, Trash2, Upload } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import TrashSection from '../components/TrashSection'
@@ -31,6 +31,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [errorsRefreshing, setErrorsRefreshing] = useState(false)
   const [importPlan, setImportPlan] = useState(null)
   const [importMode, setImportMode] = useState('merge')
+  const [wipeText, setWipeText] = useState('')
   const [reminderDigestScope, setReminderDigestScope] = useState(() => (localStorage.getItem(REMINDER_DIGEST_STORAGE_KEY) === 'due_soon' ? 'due_soon' : 'today'))
   const [eventAlertLead, setEventAlertLead] = useState(loadEventAlertLeadMinutes)
   const [todoAlertLead, setTodoAlertLead] = useState(loadTodoAlertLeadMinutes)
@@ -225,6 +226,23 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const wipeAllData = async () => {
+    if (wipeText !== 'DELETE') return
+    if (!confirm('업무, 일정, 할 일, 업무 기록과 그에 딸린 댓글·첨부파일이 모두 삭제됩니다. 되돌릴 수 없습니다. 계속할까요?')) return
+    setBusy('wipe')
+    try {
+      const result = await api.wipeData(wipeText)
+      const total = Object.values(result.deleted || {}).reduce((a, b) => a + b, 0)
+      notify(`삭제했습니다 · ${total}개 항목`)
+      setWipeText('')
+      await onDataChanged?.()
+    } catch (err) {
+      notify(err.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
   const toggleWorkflowSettings = async e => {
     const newValue = e.target.checked
     setBusy("workflow-save")
@@ -360,6 +378,13 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
           <label><input type="radio" name="import-mode" checked={importMode === 'merge'} onChange={() => setImportMode('merge')} /> 기존 데이터에 추가 (merge)</label>
           <label><input type="radio" name="import-mode" checked={importMode === 'replace'} onChange={() => setImportMode('replace')} /> 기존 데이터를 지우고 교체 (replace)</label></div>
           <div className="import-plan-actions"><button className="primary" disabled={!!busy} onClick={applyImport}>{busy === 'import-apply' ? <LoaderCircle className="spin" /> : <Upload />} 복원 실행</button><button className="secondary" disabled={!!busy} onClick={() => setImportPlan(null)}>취소</button></div></div>}
+      </section>
+      <section className="settings-card settings-card-danger">
+        <div className="settings-heading"><span><Trash2 /></span><div><h2>모든 데이터 삭제</h2><p>업무, 일정, 할 일, 업무 기록과 그에 딸린 댓글·첨부파일을 모두 삭제합니다. 되돌릴 수 없으니 먼저 백업을 내려받으세요.</p></div></div>
+        <div className="integration-body import-plan"><div><strong>확인을 위해 아래 칸에 DELETE를 입력하세요.</strong><small>삭제 후에는 복구할 수 없습니다.</small></div>
+          <input value={wipeText} onChange={e => setWipeText(e.target.value)} placeholder="DELETE" />
+          <div className="import-plan-actions"><button className="danger-button" disabled={!!busy || wipeText !== 'DELETE'} onClick={wipeAllData}>{busy === 'wipe' ? <LoaderCircle className="spin" /> : <Trash2 />} 모두 삭제</button></div>
+        </div>
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><CalendarSync /></span><div><h2>Google 캘린더</h2><p>업무용 캘린더의 일정을 WorkManager와 동기화합니다.</p></div><em className={`status-pill ${connected ? 'online' : ''}`}>{connected ? '연결됨' : '연결 안 됨'}</em></div>

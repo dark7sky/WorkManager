@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-settings-data-wipe',
+    timestamp: '2026-07-18T23:09:00+09:00',
+    description: '설정 화면에 JSON 내보내기/복원만 있고 계정 데이터를 한 번에 지우는 기능이 없어, 초기화하려면 빈 백업 파일을 만들어 "교체" 복원을 실행하는 우회가 필요했습니다. 설정 화면에 "모든 데이터 삭제" 카드를 추가해 확인 문구(DELETE) 입력 후 업무·일정·할 일·업무 기록과 딸린 댓글·첨부파일을 한 번에 삭제할 수 있게 했습니다 (`POST /api/data/wipe`, `frontend/src/screens/Settings.jsx`).',
+  },
+  {
     id: '2026-07-18-audit-log-pdf-report',
     timestamp: '2026-07-18T23:05:00+09:00',
     description: '업무/일정/오늘 화면은 목록을 CSV뿐 아니라 인쇄용 PDF 보고서로도 내보낼 수 있었지만, 감사 로그 화면에는 CSV 내보내기만 있고 PDF 보고서 버튼이 없었습니다. 다른 화면과 동일한 인쇄 보고서 패턴으로 `frontend/src/auditLogReport.js`를 추가하고 감사 로그 화면(`frontend/src/screens/AuditLog.jsx`)에 PDF 버튼을 연결했습니다.',

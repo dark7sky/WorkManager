@@ -80,6 +80,7 @@ export const api = {
   exportData: () => request('/export'),
   importPreview: data => request('/import/preview',json('POST',data)),
   importData: (mode,data) => request('/import',json('POST',{mode,data})),
+  wipeData: confirm => request('/data/wipe',json('POST',{confirm})),
   tags: () => request('/tags'),
   renameTag: (from,to) => request('/tags/rename',json('POST',{from,to})),
   auditLogs: (limit=100, start='', end='') => request(`/audit-logs?limit=${limit}${start?`&start=${start}`:''}${end?`&end=${end}`:''}`),

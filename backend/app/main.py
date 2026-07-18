@@ -1952,6 +1952,20 @@ def import_data(payload: dict = Body(...), user=Depends(require_user)):
     return {"ok": True, "mode": mode, "imported": counts}
 
 
+@app.post("/api/data/wipe")
+def wipe_data(payload: dict = Body(...), user=Depends(require_user)):
+    enforce_rate(user, "wipe", 3, 300)
+    if payload.get("confirm") != "DELETE":
+        raise HTTPException(422, "confirm 필드에 'DELETE'를 입력해야 합니다")
+    with connection() as c:
+        counts = {table: c.execute(f"SELECT COUNT(*) n FROM {table} WHERE user_id=?", (user,)).fetchone()["n"]
+                  for table in IMPORT_TABLES}
+        for table in IMPORT_TABLES:
+            c.execute(f"DELETE FROM {table} WHERE user_id=?", (user,))
+    audit(user, "wipe", "backup", metadata=counts)
+    return {"ok": True, "deleted": counts}
+
+
 @app.get("/api/tags")
 def tag_usage(user=Depends(require_user)):
     counts = {}
