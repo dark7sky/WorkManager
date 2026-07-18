@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-calendar-event-postpone',
+    timestamp: '2026-07-18T12:30:41+09:00',
+    description: '업무·할 일·업무 기록에는 개별 항목을 하루 미루는 버튼이 있었지만 일정(Calendar)은 여러 개를 선택한 일괄 연기만 가능하고 일정 하나를 바로 미루는 버튼이 없어 드래그 없이는 일정을 하루씩 옮길 수 없었습니다. 일정 수정 모달에 "하루 미루기" 버튼을 추가해 다른 화면과 동일하게 단일 일정도 즉시 하루 연기할 수 있도록 했습니다(`frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-18-task-csv-estimate',
     timestamp: '2026-07-18T12:24:34+09:00',
     description: '할 일(Todo) CSV 내보내기/가져오기에는 "예상 소요시간(분)" 열이 있었지만, 업무(Task)도 동일한 예상 소요 시간 필드(estimated_minutes)와 초과 배지 기능을 갖고 있음에도 CSV에는 반영되지 않아 백업·복원 시 예상 소요 시간이 유실됐습니다. 업무 CSV 내보내기·가져오기에 "예상 소요시간(분)" 열을 추가해 할 일과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',
