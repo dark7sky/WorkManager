@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-inline-edit-save-shortcut',
+    timestamp: '2026-07-19T03:52:30+09:00',
+    description: '창(모달)으로 열리는 입력 폼은 `Ctrl+Enter`로 저장, `Esc`로 닫기가 가능했지만, 오늘 화면의 할 일/업무 기록 인라인 수정 행에는 이 단축키가 동작하지 않아 여러 필드를 고친 뒤 반드시 마우스로 저장/취소 버튼을 눌러야 했습니다. 수정 중인 할 일·업무 기록 행에도 `Ctrl+Enter`(저장)/`Esc`(취소)를 추가해 다른 폼과 동작을 통일했습니다(단축키 안내 목록에도 반영). (`frontend/src/screens/Today.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',
+  },
+  {
     id: '2026-07-19-undo-shortcut',
     timestamp: '2026-07-19T03:47:42+09:00',
     description: '삭제/완료 처리/우선순위 변경 등 알림에 "실행 취소" 버튼이 함께 뜨지만 마우스로만 누를 수 있었습니다. 실행 취소 가능한 알림이 떠 있을 때 `Ctrl+Z`(맥 `⌘Z`)를 누르면 바로 실행 취소되도록 단축키를 추가했습니다(단축키 안내 목록에도 반영). (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',
