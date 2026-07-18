@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-duplicate-link-checklist',
+    timestamp: '2026-07-18T22:45:57+09:00',
+    description: '일정(Calendar)을 복제하면 업무·할 일·업무 기록과 달리 링크·첨부 링크·체크리스트·종일 여부가 모두 사라졌습니다(우선순위·예상 소요시간만 복사됨). `buildEventDuplicatePayload`가 `link_url`/`links`/`checklist`(완료 여부는 초기화)/`google_is_all_day`도 함께 복사하도록 고쳐 다른 항목들과 동일하게 동작합니다(`frontend/src/eventDuplicate.js`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-gantt-zoom',
     timestamp: '2026-07-18T22:44:41+09:00',
     description: '업무(Gantt) 화면이 항상 2주 창으로 고정돼 있어, 짧은 일정을 세밀히 보거나 한 달 단위로 넓게 볼 수 없었습니다. 표시 기간을 1주/2주/1개월 중에서 선택할 수 있는 드롭다운을 추가하고(`frontend/src/screens/Tasks.jsx`), 드래그 이동/크기 조절 계산이 선택한 기간에 맞게 동작하도록 했습니다(`frontend/src/ganttDrag.js`), 선택값은 localStorage에 저장되고, 테스트 추가.',

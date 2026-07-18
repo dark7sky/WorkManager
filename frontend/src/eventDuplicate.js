@@ -1,4 +1,4 @@
-import { normalizedEstimatedMinutes } from './taskFormPayload.js'
+import { normalizedEstimatedMinutes, normalizedChecklist, normalizedLinks } from './taskFormPayload.js'
 
 export const buildEventDuplicatePayload = event => ({
   title: `${(event?.title || '').trim()} (사본)`,
@@ -10,4 +10,8 @@ export const buildEventDuplicatePayload = event => ({
   color: event?.color || null,
   priority: event?.priority || null,
   estimated_minutes: normalizedEstimatedMinutes(event?.estimated_minutes),
+  link_url: event?.link_url || null,
+  links: normalizedLinks(event?.links),
+  checklist: normalizedChecklist(event?.checklist).map(item => ({ ...item, done: false })),
+  google_is_all_day: !!event?.google_is_all_day,
 })

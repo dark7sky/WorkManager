@@ -13,6 +13,25 @@ test('buildEventDuplicatePayload copies fields and suffixes the title', () => {
   assert.deepEqual(result.tags, ['업무'])
 })
 
+test('buildEventDuplicatePayload copies link_url, links, checklist (reset done) and google_is_all_day', () => {
+  const event = { title: '워크숍', link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], checklist: [{ id: 'c1', text: '준비', done: true }], google_is_all_day: true }
+  const result = buildEventDuplicatePayload(event)
+  assert.equal(result.link_url, 'https://x.com')
+  assert.deepEqual(result.links, [{ id: '1', url: 'https://a.com', label: 'A' }])
+  assert.equal(result.checklist.length, 1)
+  assert.equal(result.checklist[0].done, false)
+  assert.equal(result.checklist[0].text, '준비')
+  assert.equal(result.google_is_all_day, true)
+})
+
+test('buildEventDuplicatePayload defaults link_url/links/checklist/google_is_all_day when missing', () => {
+  const result = buildEventDuplicatePayload({ title: '휴가' })
+  assert.equal(result.link_url, null)
+  assert.deepEqual(result.links, [])
+  assert.deepEqual(result.checklist, [])
+  assert.equal(result.google_is_all_day, false)
+})
+
 test('buildEventDuplicatePayload handles missing optional fields', () => {
   const result = buildEventDuplicatePayload({ title: '휴가' })
   assert.equal(result.title, '휴가 (사본)')
