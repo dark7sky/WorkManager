@@ -80,3 +80,12 @@ test('preview clamps to the visible window', () => {
   assert.deepEqual(ganttDragPreview('resize-start', { left: 2, width: 3 }, { dropDay: 0 }), { left: 0, width: 5 })
   assert.deepEqual(ganttDragPreview('resize-start', { left: 2, width: 3 }, { dropDay: 6 }), { left: 4, width: 1 })
 })
+
+test('dayAtOffset and preview respect a custom window size (zoom)', () => {
+  assert.equal(dayAtOffset(0, 700, 7), 0)
+  assert.equal(dayAtOffset(699, 700, 7), 6)
+  assert.equal(dayAtOffset(9999, 700, 7), 6)
+  assert.equal(dayAtOffset(9999, 3000, 30), 29)
+  assert.deepEqual(ganttDragPreview('move', { left: 5, width: 2 }, { grabDay: 3, dropDay: 6 }, 7), { left: 6, width: 2 })
+  assert.deepEqual(ganttDragPreview('resize-end', { left: 2, width: 3 }, { dropDay: 29 }, 30), { left: 2, width: 28 })
+})

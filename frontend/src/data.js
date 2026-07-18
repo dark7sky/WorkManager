@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-gantt-zoom',
+    timestamp: '2026-07-18T22:44:41+09:00',
+    description: '업무(Gantt) 화면이 항상 2주 창으로 고정돼 있어, 짧은 일정을 세밀히 보거나 한 달 단위로 넓게 볼 수 없었습니다. 표시 기간을 1주/2주/1개월 중에서 선택할 수 있는 드롭다운을 추가하고(`frontend/src/screens/Tasks.jsx`), 드래그 이동/크기 조절 계산이 선택한 기간에 맞게 동작하도록 했습니다(`frontend/src/ganttDrag.js`), 선택값은 localStorage에 저장되고, 테스트 추가.',
+  },
+  {
     id: '2026-07-18-gantt-resize-start',
     timestamp: '2026-07-18T22:38:20+09:00',
     description: '업무(Gantt) 화면의 막대는 오른쪽 끝을 끌어 마감일(기간)만 조절할 수 있고, 시작일을 바꾸려면 항상 편집 폼을 열어야 했습니다. 막대 왼쪽 끝에도 크기 조절 핸들을 추가해 시작일을 마감일 이전으로 직접 드래그로 조절할 수 있도록 했습니다(`frontend/src/ganttDrag.js`의 `resize-start` 모드, `frontend/src/screens/Tasks.jsx`), 테스트 추가.',
