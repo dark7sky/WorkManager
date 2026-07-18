@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-csv-priority',
+    timestamp: '2026-07-18T12:17:34+09:00',
+    description: '업무 기록(Work Log)에 우선순위 필드가 추가된 이후에도 CSV 내보내기/가져오기에는 반영되지 않아, 업무·일정·할 일 CSV와 달리 우선순위를 백업하거나 일괄로 가져올 수 없었습니다. 업무 기록 CSV 내보내기·가져오기에 "우선순위" 열을 추가해 다른 항목들과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-worklog-bulk-priority',
     timestamp: '2026-07-18T12:14:54+09:00',
     description: '업무(Tasks)·일정(Event)·할 일(Todo)은 여러 개를 선택했을 때 일괄로 우선순위를 바꾸는 기능이 있었지만, 업무 기록(Work Log)에는 개별 우선순위 필드만 있고 선택 항목 일괄 변경 기능이 빠져 있었습니다. Today 화면의 업무 기록 일괄 작업 바에 할 일과 동일한 방식으로 "우선순위 변경" 폼을 추가했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',

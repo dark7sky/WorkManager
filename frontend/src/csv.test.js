@@ -287,14 +287,14 @@ test('todosToCsv and parseTodosCsv round-trip a monthly recurring todo', () => {
 
 test('workLogsToCsv exports work log rows with linked task title and escaping', () => {
   const csv = workLogsToCsv([
-    { log_date: '2026-07-14', content: '회의, 진행', duration_minutes: 30, task_id: 5, tags: ['분기'], billable: true },
+    { log_date: '2026-07-14', content: '회의, 진행', duration_minutes: 30, priority: 'high', task_id: 5, tags: ['분기'], billable: true },
     { log_date: '2026-07-13', content: '문서 정리', duration_minutes: null, task_id: null, tags: [] },
   ], new Map([[5, '보고서 작성']]))
 
   assert.equal(csv, [
-    '날짜,내용,소요 시간(분),연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
-    '2026-07-14,"회의, 진행",30,#5 보고서 작성,분기,Y,,',
-    '2026-07-13,문서 정리,,,,,,',
+    '날짜,내용,소요 시간(분),우선순위,연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
+    '2026-07-14,"회의, 진행",30,높음,#5 보고서 작성,분기,Y,,',
+    '2026-07-13,문서 정리,,,,,,,',
   ].join('\n'))
 })
 
@@ -305,10 +305,26 @@ test('workLogsToCsv computes billable amount when an hourly rate is given', () =
   ], new Map(), 40000)
 
   assert.equal(csv, [
-    '날짜,내용,소요 시간(분),연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
-    '2026-07-14,개발,90,,,Y,60000,',
-    '2026-07-14,내부 회의,60,,,,,',
+    '날짜,내용,소요 시간(분),우선순위,연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
+    '2026-07-14,개발,90,,,,Y,60000,',
+    '2026-07-14,내부 회의,60,,,,,,',
   ].join('\n'))
+})
+
+test('workLogsToCsv and parseWorkLogsCsv round-trip the priority column', () => {
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-14', content: '긴급 대응', duration_minutes: 45, priority: 'high', task_id: null, tags: [] },
+  ], new Map())
+  assert.match(csv, /,높음,/)
+
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(logs, [{
+    content: '긴급 대응',
+    log_date: '2026-07-14',
+    duration_minutes: 45,
+    priority: 'high',
+  }])
 })
 
 test('workLogCsvFilename uses the requested date', () => {
@@ -317,8 +333,8 @@ test('workLogCsvFilename uses the requested date', () => {
 
 test('parseWorkLogsCsv reads back an exported work log row', () => {
   const csv = [
-    '날짜,내용,소요 시간(분),연결 업무,태그',
-    '2026-07-14,"회의, 진행",30,#5 보고서 작성,분기; 고객',
+    '날짜,내용,소요 시간(분),우선순위,연결 업무,태그',
+    '2026-07-14,"회의, 진행",30,보통,#5 보고서 작성,분기; 고객',
   ].join('\n')
 
   const { logs, errors } = parseWorkLogsCsv(csv)
@@ -327,6 +343,7 @@ test('parseWorkLogsCsv reads back an exported work log row', () => {
     content: '회의, 진행',
     log_date: '2026-07-14',
     duration_minutes: 30,
+    priority: 'normal',
     tags: ['분기', '고객'],
   }])
 })
