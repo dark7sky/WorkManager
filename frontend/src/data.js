@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-csv-task-link-import',
+    timestamp: '2026-07-18T22:25:23+09:00',
+    description: '업무 기록(Work Log) CSV를 내보내면 "연결 업무" 열에 연결된 업무(#ID)가 표시되었지만, 그 CSV를 다시 가져올 때는 이 값이 읽히지 않아 업무 연결이 항상 사라지는 문제가 있었습니다. `parseWorkLogsCsv`가 "연결 업무" 열에서 업무 ID(#숫자)를 읽어 `task_id`를 복원하도록 수정했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-worklog-csv-billable-import',
     timestamp: '2026-07-18T22:20:19+09:00',
     description: '업무 기록(Work Log) CSV를 내보내면 "청구 가능" 열이 함께 포함되었지만, 그 CSV를 다시 가져올 때는 이 값이 읽히지 않아 청구 가능 여부가 항상 초기화되는 문제가 있었습니다. `parseWorkLogsCsv`가 "청구 가능" 열(Y/공백)을 읽어 `billable` 값을 복원하도록 수정했습니다(`frontend/src/csv.js`).',

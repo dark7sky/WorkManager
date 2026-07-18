@@ -295,7 +295,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iColor = col('색상')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iColor = col('색상')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -305,6 +305,7 @@ export const parseWorkLogsCsv = text => {
     if (iDuration >= 0 && cells[iDuration] && !Number.isNaN(Number(cells[iDuration]))) log.duration_minutes = Number(cells[iDuration])
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) log.estimated_minutes = Number(cells[iEstimate])
     if (iPriority >= 0 && cells[iPriority]) log.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
+    if (iTaskLink >= 0 && cells[iTaskLink]) { const m = cells[iTaskLink].trim().match(/^#(\d+)/); if (m) log.task_id = Number(m[1]) }
     if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iLink >= 0 && cells[iLink]) log.link_url = cells[iLink].trim()
     if (iBillable >= 0 && cells[iBillable]) log.billable = cells[iBillable].trim().toUpperCase() === 'Y'

@@ -393,8 +393,22 @@ test('parseWorkLogsCsv reads back an exported work log row', () => {
     log_date: '2026-07-14',
     duration_minutes: 30,
     priority: 'normal',
+    task_id: 5,
     tags: ['분기', '고객'],
   }])
+})
+
+test('workLogsToCsv and parseWorkLogsCsv round-trip the linked task column', () => {
+  const taskTitleById = new Map([[7, '분기 보고서']])
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-16', content: '자료 정리', duration_minutes: 45, task_id: 7, tags: [] },
+    { log_date: '2026-07-17', content: '독립 작업', duration_minutes: 15, task_id: null, tags: [] },
+  ], taskTitleById)
+
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.equal(logs[0].task_id, 7)
+  assert.equal(logs[1].task_id, undefined)
 })
 
 test('parseWorkLogsCsv skips rows without content and reports the row number', () => {
