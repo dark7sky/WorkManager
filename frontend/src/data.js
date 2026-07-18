@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-task-row-arrow-navigation',
+    timestamp: '2026-07-19T03:54:10+09:00',
+    description: '업무 관리(간트) 화면에서 업무 목록을 훑어보려면 매번 마우스로 각 행을 클릭해야 했습니다. 업무 제목에 포커스된 상태에서 `↑`/`↓` 키로 이전·다음 업무 행으로 바로 이동할 수 있도록 키보드 탐색을 추가했습니다(단축키 안내 목록에도 반영). (`frontend/src/rowNavigation.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`, 테스트 `frontend/src/rowNavigation.test.js`)',
+  },
+  {
     id: '2026-07-19-inline-edit-save-shortcut',
     timestamp: '2026-07-19T03:52:30+09:00',
     description: '창(모달)으로 열리는 입력 폼은 `Ctrl+Enter`로 저장, `Esc`로 닫기가 가능했지만, 오늘 화면의 할 일/업무 기록 인라인 수정 행에는 이 단축키가 동작하지 않아 여러 필드를 고친 뒤 반드시 마우스로 저장/취소 버튼을 눌러야 했습니다. 수정 중인 할 일·업무 기록 행에도 `Ctrl+Enter`(저장)/`Esc`(취소)를 추가해 다른 폼과 동작을 통일했습니다(단축키 안내 목록에도 반영). (`frontend/src/screens/Today.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',
