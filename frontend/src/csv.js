@@ -10,7 +10,7 @@ const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
 
-const headers = ['제목', '상태', '우선순위', '시작일', '기한', '진행률', '분류', '태그', '메모', '체크리스트']
+const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -29,7 +29,9 @@ export const tasksToCsv = (tasks, todayIso) => {
     taskStatusLabels[taskExportStatus(task, todayIso)] || task.status,
     priorityValueToLabel[task.priority] || task.priority,
     task.start_date,
+    task.start_time,
     task.due_date,
+    task.due_time,
     `${Number(task.progress || 0)}%`,
     task.category,
     (task.tags || []).join('; '),
@@ -67,7 +69,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iDue = col('기한'), iTags = col('태그'), iDescription = col('메모')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -75,7 +77,9 @@ export const parseTasksCsv = text => {
     const task = { title }
     if (iPriority >= 0 && cells[iPriority]) task.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iStart >= 0 && cells[iStart]) task.start_date = cells[iStart].trim()
+    if (iStartTime >= 0 && cells[iStartTime]) task.start_time = cells[iStartTime].trim()
     if (iDue >= 0 && cells[iDue]) task.due_date = cells[iDue].trim()
+    if (iDueTime >= 0 && cells[iDueTime]) task.due_time = cells[iDueTime].trim()
     if (iTags >= 0 && cells[iTags]) task.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
     tasks.push(task)

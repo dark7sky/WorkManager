@@ -1133,6 +1133,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_start_time_and_due_time_are_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "timed task", "start_date": "2026-07-06", "due_date": "2026-07-06",
+                                           "start_time": "09:00", "due_time": "18:30"})
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["start_time"], "09:00")
+        self.assertEqual(task.json()["due_time"], "18:30")
+        cleared = a.patch(f"/api/tasks/{task.json()['id']}", json={"due_time": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["due_time"])
+        self.assertEqual(a.post("/api/tasks", json={"title": "bad time", "due_time": "25:00"}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_link_url_is_persisted_and_validated(self, *_):
         a = self.client(self.token_a)
         event = a.post("/api/events", json={"title": "with link", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "link_url": "https://example.com/agenda"})

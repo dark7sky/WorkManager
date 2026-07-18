@@ -143,8 +143,13 @@ def build_calendar_feed(user_id):
         lines.append("END:VEVENT")
     for t in rows("tasks", user_id):
         if not t.get("due_date"): continue
+        if t.get("due_time"):
+            due_datetime = f"{t['due_date']}T{t['due_time']}:00"
+            dtstart = f"DTSTART:{_ics_datetime(due_datetime)}"
+        else:
+            dtstart = f"DTSTART;VALUE=DATE:{t['due_date'].replace('-', '')}"
         lines += ["BEGIN:VEVENT", f"UID:task-{t['id']}@workmanager", f"DTSTAMP:{_ics_datetime(now())}",
-                  f"DTSTART;VALUE=DATE:{t['due_date'].replace('-', '')}",
+                  dtstart,
                   f"SUMMARY:{_ics_escape('[업무] ' + t['title'])}"]
         if t.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(t['description'])}")
         lines.append("END:VEVENT")
@@ -322,6 +327,8 @@ class TaskPayload(StrictPayload):
     progress: int | None = Field(None, ge=0, le=100)
     start_date: date | None = None
     due_date: date | None = None
+    start_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    due_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     schedule_approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
@@ -345,7 +352,7 @@ class TaskPayload(StrictPayload):
     def links_well_formed(cls, value):
         return _clean_links(value)
 
-    @field_validator("start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", mode="before")
+    @field_validator("start_date", "due_date", "start_time", "due_time", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", mode="before")
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
@@ -554,7 +561,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "estimated_minutes"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority"}, None),
@@ -676,7 +683,7 @@ def normalize(table, data):
     for key in text_fields:
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
-    nullable = {"tasks": {"start_date", "due_date", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
+    nullable = {"tasks": {"start_date", "due_date", "start_time", "due_time", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color"},
                 "events": {"link_url", "color", "priority", "recurrence_group_id"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable", "priority"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
@@ -855,10 +862,10 @@ def spawn_recurring_task(task, user_id):
         if not c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, task["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,tags,
-          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,start_time,due_time,tags,
+          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
-           start_date, due_date, json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
+           start_date, due_date, task.get("start_time"), task.get("due_time"), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
            task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
@@ -1024,7 +1031,7 @@ def update_item(table, item_id, data, user_id):
                 if normalized_json != (existing[key] or "[]") and key not in data:
                     data[key] = normalized_json
             target_status = data.get("status", existing["status"])
-            schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date"))
+            schedule_changed = any(key in data and data[key] != existing[key] for key in ("start_date", "due_date", "start_time", "due_time"))
             if schedule_changed and approval_workflow_on and "schedule_approval_status" not in data:
                 data["schedule_approval_status"] = "pending"
             if target_status != "done" and "approval_status" not in data and existing["approval_status"] not in (None, "none"):

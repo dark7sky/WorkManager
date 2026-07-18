@@ -50,7 +50,14 @@ export const tasksToIcs = tasks => {
     lines.push('BEGIN:VEVENT')
     lines.push(`UID:task-${task.id}@workmanager`)
     lines.push(`DTSTAMP:${toIcsDate(new Date())}`)
-    lines.push(`DTSTART;VALUE=DATE:${toIcsAllDayDate(task.due_date)}`)
+    if (task.due_time) {
+      const start = new Date(`${task.due_date}T${task.due_time}:00`)
+      const end = new Date(start.getTime() + 30 * 60000)
+      lines.push(`DTSTART:${toIcsDate(start)}`)
+      lines.push(`DTEND:${toIcsDate(end)}`)
+    } else {
+      lines.push(`DTSTART;VALUE=DATE:${toIcsAllDayDate(task.due_date)}`)
+    }
     lines.push(`SUMMARY:${escapeIcsText(`[업무] ${task.title}`)}`)
     if (task.description) lines.push(`DESCRIPTION:${escapeIcsText(task.description)}`)
     lines.push('END:VEVENT')

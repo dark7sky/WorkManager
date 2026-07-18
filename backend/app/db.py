@@ -166,6 +166,7 @@ def init_db():
             "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'", "estimated_minutes": "INTEGER",
             "link_url": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "recurrence_end_date": "TEXT",
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
+            "start_time": "TEXT", "due_time": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
         for name, definition in {

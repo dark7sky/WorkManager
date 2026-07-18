@@ -36,6 +36,13 @@ test('tasksToIcs emits an all-day VEVENT per task with a due date', () => {
   assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 1)
 })
 
+test('tasksToIcs emits a timed VEVENT when the task has a due_time', () => {
+  const ics = tasksToIcs([{ id: 9, title: '시간 있음', due_date: '2026-07-20', due_time: '15:00' }])
+  assert.doesNotMatch(ics, /DTSTART;VALUE=DATE/)
+  assert.match(ics, /DTSTART:20260720T060000Z/)
+  assert.match(ics, /DTEND:20260720T063000Z/)
+})
+
 test('taskIcsFilename uses the requested date', () => {
   assert.equal(taskIcsFilename('2026-07-12'), 'workmanager-tasks-2026-07-12.ics')
 })

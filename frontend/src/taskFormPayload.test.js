@@ -131,6 +131,22 @@ test('buildTaskPayload only keeps recurrence_end_date when a recurrence rule is 
   assert.equal(withRule.recurrence_end_date, '2026-08-01')
 })
 
+test('buildTaskPayload passes through start_time/due_time or nulls them when blank', () => {
+  const withTimes = buildTaskPayload({ ...baseData, start_time: '09:00', due_time: '18:00' }, { task: { id: 1 } })
+  assert.equal(withTimes.start_time, '09:00')
+  assert.equal(withTimes.due_time, '18:00')
+
+  const withoutTimes = buildTaskPayload(baseData, { task: { id: 1 } })
+  assert.equal(withoutTimes.start_time, null)
+  assert.equal(withoutTimes.due_time, null)
+})
+
+test('buildTaskDuplicatePayload copies start_time/due_time', () => {
+  const payload = buildTaskDuplicatePayload({ id: 1, title: '업무', start_time: '09:00', due_time: '18:00' })
+  assert.equal(payload.start_time, '09:00')
+  assert.equal(payload.due_time, '18:00')
+})
+
 test('initialTaskDateValue keeps blank dates blank when editing an existing task', () => {
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'start_date', '2026-07-08'), '')
   assert.equal(initialTaskDateValue({ id: 1, start_date: '', due_date: null }, 'due_date', '2026-07-08'), '')

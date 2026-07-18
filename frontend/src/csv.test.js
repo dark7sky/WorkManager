@@ -19,8 +19,8 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
   ], '2026-07-07')
 
   assert.equal(csv, [
-    '제목,상태,우선순위,시작일,기한,진행률,분류,태그,메모,체크리스트',
-    '"보고서, 검토",지연,높음,2026-07-06,2026-07-06,25%,기획,분기; 고객,"첫 줄\n둘째 줄",1/2',
+    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,체크리스트',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",1/2',
   ].join('\n'))
 })
 
@@ -167,6 +167,21 @@ test('parseTasksCsv reads back an exported task row', () => {
     due_date: '2026-07-10',
     tags: ['분기', '고객'],
     description: '첫 줄\n둘째 줄',
+  }])
+})
+
+test('parseTasksCsv reads start/due time columns', () => {
+  const csv = [
+    '제목,시작일,시작 시각,기한,완료 시각',
+    '보고서,2026-07-06,09:00,2026-07-10,18:30',
+  ].join('\n')
+  const { tasks } = parseTasksCsv(csv)
+  assert.deepEqual(tasks, [{
+    title: '보고서',
+    start_date: '2026-07-06',
+    start_time: '09:00',
+    due_date: '2026-07-10',
+    due_time: '18:30',
   }])
 })
 
