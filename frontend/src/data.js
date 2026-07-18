@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-log-promote-estimate',
+    timestamp: '2026-07-19T03:20:00+09:00',
+    description: '업무 기록을 업무로 승격할 때 예상 소요 시간(estimated_minutes)이 새 업무에 복사되지 않아, 할 일에서 승격할 때와 달리 정보가 누락됐습니다. `buildTaskFromLogPayload`(`frontend/src/logDuplicate.js`)에 예상 소요 시간을 포함하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-18-settings-data-wipe',
     timestamp: '2026-07-18T23:09:00+09:00',
     description: '설정 화면에 JSON 내보내기/복원만 있고 계정 데이터를 한 번에 지우는 기능이 없어, 초기화하려면 빈 백업 파일을 만들어 "교체" 복원을 실행하는 우회가 필요했습니다. 설정 화면에 "모든 데이터 삭제" 카드를 추가해 확인 문구(DELETE) 입력 후 업무·일정·할 일·업무 기록과 딸린 댓글·첨부파일을 한 번에 삭제할 수 있게 했습니다 (`POST /api/data/wipe`, `frontend/src/screens/Settings.jsx`).',

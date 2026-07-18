@@ -1,3 +1,5 @@
+import { normalizedEstimatedMinutes } from './taskFormPayload.js'
+
 export const buildLogDuplicatePayload = log => ({
   content: `${(log?.content || '').trim()} (사본)`,
   log_date: new Date().toLocaleDateString('en-CA'),
@@ -23,4 +25,5 @@ export const buildTaskFromLogPayload = log => ({
   progress: 100,
   link_url: log?.link_url || null,
   checklist: Array.isArray(log?.checklist) ? log.checklist : [],
+  estimated_minutes: normalizedEstimatedMinutes(log?.estimated_minutes),
 })
