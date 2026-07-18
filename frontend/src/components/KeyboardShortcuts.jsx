@@ -3,6 +3,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform
 const shortcuts = [
   { keys: [isMac ? '⌘' : 'Ctrl', 'K'], label: '빠른 입력 열기 (AI로 업무/일정/할 일 추가)' },
   { keys: [isMac ? '⌘' : 'Ctrl', 'Enter'], label: '열려 있는 입력 창 저장' },
+  { keys: [isMac ? '⌘' : 'Ctrl', 'Z'], label: '방금 작업 실행 취소 (실행 취소 가능한 알림이 떠 있을 때)' },
   { keys: ['N'], label: '새 항목 만들기 (업무/일정 등록 창 열기, 오늘 화면에서는 할 일 입력창 포커스)' },
   { keys: ['Shift', 'N'], label: '오늘 화면에서 업무 기록(오늘 한 일) 입력창 포커스' },
   { keys: ['/'], label: '현재 화면의 검색창 포커스' },
