@@ -290,44 +290,45 @@ test('dailyActivityTrend: returns empty array when the range spans more than 62 
 
 test('loadPerformanceGoal: returns nulls for missing key', () => {
   const storage = { getItem: () => null }
-  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null })
+  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
 })
 
 test('loadPerformanceGoal: returns nulls for corrupt JSON', () => {
   const storage = { getItem: () => 'not json' }
-  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null })
+  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
 })
 
 test('loadPerformanceGoal: discards non-positive or non-numeric values', () => {
-  const storage = { getItem: () => JSON.stringify({ taskGoal: -5, minutesGoal: 'abc', todoGoal: 0 }) }
-  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null })
+  const storage = { getItem: () => JSON.stringify({ taskGoal: -5, minutesGoal: 'abc', todoGoal: 0, eventGoal: -1 }) }
+  assert.deepStrictEqual(loadPerformanceGoal(storage), { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
 })
 
 test('savePerformanceGoal: persists positive numeric goals', () => {
   const saved = {}
   const storage = { setItem: (k, v) => { saved.key = k; saved.value = v } }
-  const result = savePerformanceGoal(storage, { taskGoal: '20', minutesGoal: '600', todoGoal: '30' })
-  assert.deepStrictEqual(result, { taskGoal: 20, minutesGoal: 600, todoGoal: 30 })
+  const result = savePerformanceGoal(storage, { taskGoal: '20', minutesGoal: '600', todoGoal: '30', eventGoal: '15' })
+  assert.deepStrictEqual(result, { taskGoal: 20, minutesGoal: 600, todoGoal: 30, eventGoal: 15 })
   assert.strictEqual(saved.key, 'workmanager.performanceGoal')
-  assert.deepStrictEqual(JSON.parse(saved.value), { taskGoal: 20, minutesGoal: 600, todoGoal: 30 })
+  assert.deepStrictEqual(JSON.parse(saved.value), { taskGoal: 20, minutesGoal: 600, todoGoal: 30, eventGoal: 15 })
 })
 
 test('savePerformanceGoal: clears invalid/empty entries to null', () => {
   const storage = { setItem: () => {} }
-  const result = savePerformanceGoal(storage, { taskGoal: '', minutesGoal: '-3', todoGoal: '' })
-  assert.deepStrictEqual(result, { taskGoal: null, minutesGoal: null, todoGoal: null })
+  const result = savePerformanceGoal(storage, { taskGoal: '', minutesGoal: '-3', todoGoal: '', eventGoal: '' })
+  assert.deepStrictEqual(result, { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
 })
 
 test('goalProgress: computes clamped percentages against each goal', () => {
-  const stats = { completed_tasks: 15, tracked_minutes: 900, completed_todos: 45 }
-  const result = goalProgress(stats, { taskGoal: 20, minutesGoal: 600, todoGoal: 30 })
+  const stats = { completed_tasks: 15, tracked_minutes: 900, completed_todos: 45, events: 20 }
+  const result = goalProgress(stats, { taskGoal: 20, minutesGoal: 600, todoGoal: 30, eventGoal: 10 })
   assert.strictEqual(result.taskPercent, 75)
   assert.strictEqual(result.minutesPercent, 100)
   assert.strictEqual(result.todoPercent, 100)
+  assert.strictEqual(result.eventsPercent, 100)
 })
 
 test('goalProgress: returns null percent when a goal is unset', () => {
-  const stats = { completed_tasks: 5, tracked_minutes: 100, completed_todos: 2 }
-  const result = goalProgress(stats, { taskGoal: null, minutesGoal: null, todoGoal: null })
-  assert.deepStrictEqual(result, { taskPercent: null, minutesPercent: null, todoPercent: null })
+  const stats = { completed_tasks: 5, tracked_minutes: 100, completed_todos: 2, events: 3 }
+  const result = goalProgress(stats, { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
+  assert.deepStrictEqual(result, { taskPercent: null, minutesPercent: null, todoPercent: null, eventsPercent: null })
 })

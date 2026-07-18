@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-performance-event-goal',
+    timestamp: '2026-07-18T12:34:26+09:00',
+    description: '성과 화면의 "기간 목표" 트래커는 완료 업무·기록 시간·완료 할 일 목표만 지원했고, 이미 통계 카드에 표시되던 일정 수(stats.events)는 목표 대상에서 빠져 있었습니다. 일정 목표를 추가해 다른 지표와 동일하게 목표 저장·진행률 막대·달성률 표시가 되도록 했습니다(`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-18-performance-todo-goal',
     timestamp: '2026-07-18T12:32:17+09:00',
     description: '성과 화면의 "기간 목표" 트래커는 완료 업무 수와 기록 시간만 목표로 설정할 수 있었고, 이미 통계에 포함돼 있던 완료한 오늘 할 일 수(completed_todos)는 목표 대상에서 빠져 있었습니다. 완료 할 일 목표를 추가해 다른 두 지표와 동일하게 목표 저장·진행률 막대·달성률 표시가 되도록 했습니다(`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',

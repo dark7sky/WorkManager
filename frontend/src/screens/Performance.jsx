@@ -25,7 +25,7 @@ export default function Performance({ notify, onDataChanged }) {
   const [savedPresets, setSavedPresets] = useState(() => loadReportPresets(localStorage))
   const [presetName, setPresetName] = useState('')
   const [goal, setGoal] = useState(() => loadPerformanceGoal(localStorage))
-  const [goalDraft, setGoalDraft] = useState(() => ({ taskGoal: goal.taskGoal ?? '', minutesGoal: goal.minutesGoal ?? '', todoGoal: goal.todoGoal ?? '' }))
+  const [goalDraft, setGoalDraft] = useState(() => ({ taskGoal: goal.taskGoal ?? '', minutesGoal: goal.minutesGoal ?? '', todoGoal: goal.todoGoal ?? '', eventGoal: goal.eventGoal ?? '' }))
   const invalidRange = !dates[0] || !dates[1] || dates[0] > dates[1]
   const selectedKey = selected.join('|')
 
@@ -136,9 +136,9 @@ export default function Performance({ notify, onDataChanged }) {
 
   const saveGoal = useCallback(event => {
     event.preventDefault()
-    const saved = savePerformanceGoal(localStorage, { taskGoal: goalDraft.taskGoal, minutesGoal: goalDraft.minutesGoal, todoGoal: goalDraft.todoGoal })
+    const saved = savePerformanceGoal(localStorage, { taskGoal: goalDraft.taskGoal, minutesGoal: goalDraft.minutesGoal, todoGoal: goalDraft.todoGoal, eventGoal: goalDraft.eventGoal })
     setGoal(saved)
-    setGoalDraft({ taskGoal: saved.taskGoal ?? '', minutesGoal: saved.minutesGoal ?? '', todoGoal: saved.todoGoal ?? '' })
+    setGoalDraft({ taskGoal: saved.taskGoal ?? '', minutesGoal: saved.minutesGoal ?? '', todoGoal: saved.todoGoal ?? '', eventGoal: saved.eventGoal ?? '' })
     notify('기간 목표를 저장했습니다.')
   }, [goalDraft, notify])
 
@@ -175,12 +175,14 @@ export default function Performance({ notify, onDataChanged }) {
           <label>완료 업무 목표 <input type="number" min="1" placeholder="예: 20" value={goalDraft.taskGoal} onChange={e => setGoalDraft(d => ({ ...d, taskGoal: e.target.value }))}/></label>
           <label>기록 시간 목표(분) <input type="number" min="1" placeholder="예: 1200" value={goalDraft.minutesGoal} onChange={e => setGoalDraft(d => ({ ...d, minutesGoal: e.target.value }))}/></label>
           <label>완료 할 일 목표 <input type="number" min="1" placeholder="예: 30" value={goalDraft.todoGoal} onChange={e => setGoalDraft(d => ({ ...d, todoGoal: e.target.value }))}/></label>
+          <label>일정 목표 <input type="number" min="1" placeholder="예: 15" value={goalDraft.eventGoal} onChange={e => setGoalDraft(d => ({ ...d, eventGoal: e.target.value }))}/></label>
           <button type="submit" className="secondary">목표 저장</button>
         </form>
         {goal.taskGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">완료 업무</span><span className="tag-breakdown-bar"><i style={{width: `${progress.taskPercent}%`}}/></span><span className="tag-breakdown-figures">{stats.completed_tasks || 0} / {goal.taskGoal} ({progress.taskPercent}%)</span></div> : null}
         {goal.minutesGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">기록 시간</span><span className="tag-breakdown-bar"><i style={{width: `${progress.minutesPercent}%`}}/></span><span className="tag-breakdown-figures">{formatDuration(stats.tracked_minutes)} / {formatDuration(goal.minutesGoal)} ({progress.minutesPercent}%)</span></div> : null}
         {goal.todoGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">완료 할 일</span><span className="tag-breakdown-bar"><i style={{width: `${progress.todoPercent}%`}}/></span><span className="tag-breakdown-figures">{stats.completed_todos || 0} / {goal.todoGoal} ({progress.todoPercent}%)</span></div> : null}
-        {!goal.taskGoal && !goal.minutesGoal && !goal.todoGoal ? <p className="empty-state">선택한 기간에 대한 목표를 설정하면 진행률을 볼 수 있습니다.</p> : null}
+        {goal.eventGoal ? <div className="tag-breakdown-row"><span className="tag-breakdown-name">일정</span><span className="tag-breakdown-bar"><i style={{width: `${progress.eventsPercent}%`}}/></span><span className="tag-breakdown-figures">{stats.events || 0} / {goal.eventGoal} ({progress.eventsPercent}%)</span></div> : null}
+        {!goal.taskGoal && !goal.minutesGoal && !goal.todoGoal && !goal.eventGoal ? <p className="empty-state">선택한 기간에 대한 목표를 설정하면 진행률을 볼 수 있습니다.</p> : null}
       </section>
       {trend.length ? <section className="performance-timeline activity-trend"><h2>일별 활동 추이 <small>{trend.reduce((sum, d) => sum + d.count, 0)}건</small></h2><div className="activity-trend-chart">{trend.map(d => <div key={d.date} className="activity-trend-bar" title={`${d.date} · ${d.count}건`}><i style={{height: `${Math.round(d.count / maxTrendCount * 100)}%`}}/></div>)}</div></section> : null}
       <section className="performance-timeline tag-breakdown"><h2>태그별 소요 시간 <small>{tagBreakdown.length}개 태그</small></h2>{tagBreakdown.length ? tagBreakdown.map(t => <div className="tag-breakdown-row" key={t.tag}><span className="tag-breakdown-name">{t.tag}</span><span className="tag-breakdown-bar"><i style={{width: `${Math.round(t.tracked_minutes / maxTagMinutes * 100)}%`}}/></span><span className="tag-breakdown-figures">{formatDuration(t.tracked_minutes)} · 완료 {t.completed_tasks}건</span></div>) : <p className="empty-state">선택한 기간과 태그에 해당하는 기록이 없습니다.</p>}</section>

@@ -137,21 +137,22 @@ export const deleteReportPreset = (storage, presets, name) => {
 }
 
 export const loadPerformanceGoal = storage => {
+  const empty = { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null }
   try {
     const data = storage.getItem(PERFORMANCE_GOAL_KEY)
-    if (!data) return { taskGoal: null, minutesGoal: null, todoGoal: null }
+    if (!data) return empty
     const parsed = JSON.parse(data)
-    if (!parsed || typeof parsed !== 'object') return { taskGoal: null, minutesGoal: null, todoGoal: null }
+    if (!parsed || typeof parsed !== 'object') return empty
     const clean = n => (Number.isFinite(n) && n > 0 ? n : null)
-    return { taskGoal: clean(Number(parsed.taskGoal)), minutesGoal: clean(Number(parsed.minutesGoal)), todoGoal: clean(Number(parsed.todoGoal)) }
+    return { taskGoal: clean(Number(parsed.taskGoal)), minutesGoal: clean(Number(parsed.minutesGoal)), todoGoal: clean(Number(parsed.todoGoal)), eventGoal: clean(Number(parsed.eventGoal)) }
   } catch {
-    return { taskGoal: null, minutesGoal: null, todoGoal: null }
+    return empty
   }
 }
 
 export const savePerformanceGoal = (storage, goal) => {
   const clean = n => (Number.isFinite(n) && n > 0 ? n : null)
-  const saved = { taskGoal: clean(Number(goal?.taskGoal)), minutesGoal: clean(Number(goal?.minutesGoal)), todoGoal: clean(Number(goal?.todoGoal)) }
+  const saved = { taskGoal: clean(Number(goal?.taskGoal)), minutesGoal: clean(Number(goal?.minutesGoal)), todoGoal: clean(Number(goal?.todoGoal)), eventGoal: clean(Number(goal?.eventGoal)) }
   storage.setItem(PERFORMANCE_GOAL_KEY, JSON.stringify(saved))
   return saved
 }
@@ -162,5 +163,6 @@ export const goalProgress = (stats, goal) => {
     taskPercent: pct(stats?.completed_tasks, goal?.taskGoal),
     minutesPercent: pct(stats?.tracked_minutes, goal?.minutesGoal),
     todoPercent: pct(stats?.completed_todos, goal?.todoGoal),
+    eventsPercent: pct(stats?.events, goal?.eventGoal),
   }
 }
