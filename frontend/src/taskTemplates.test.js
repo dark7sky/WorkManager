@@ -78,6 +78,17 @@ test('applyTaskTemplate uses today for both dates when the template has no durat
   assert.equal(result.due_date, '2026-07-10')
 })
 
+test('buildTaskTemplate captures a valid estimate and defaults invalid ones to empty', () => {
+  assert.equal(buildTaskTemplate({ name: '이름', title: '제목', estimated_minutes: '90' }).estimated_minutes, 90)
+  assert.equal(buildTaskTemplate({ name: '이름', title: '제목', estimated_minutes: '-5' }).estimated_minutes, '')
+  assert.equal(buildTaskTemplate({ name: '이름', title: '제목' }).estimated_minutes, '')
+})
+
+test('applyTaskTemplate carries the estimate onto the draft', () => {
+  const template = buildTaskTemplate({ name: '이름', title: '제목', estimated_minutes: '90' })
+  assert.equal(applyTaskTemplate(template, '2026-07-10').estimated_minutes, 90)
+})
+
 test('buildTaskTemplate carries checklist text, resets done to false, drops blanks, and caps length', () => {
   const checklist = [
     { id: 'a', text: '설계 검토', done: true },

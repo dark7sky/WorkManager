@@ -20,7 +20,7 @@ export const saveEventTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildEventTemplate = ({ name, title, location, color, tags, priority, checklist }) => ({
+export const buildEventTemplate = ({ name, title, location, color, tags, priority, checklist, estimated_minutes }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
@@ -28,6 +28,7 @@ export const buildEventTemplate = ({ name, title, location, color, tags, priorit
   color: color || '',
   priority: priority || '',
   tags: (Array.isArray(tags) ? tags : []).slice(0, TAG_LIMIT),
+  estimated_minutes: Number.isFinite(Number(estimated_minutes)) && Number(estimated_minutes) > 0 ? Math.round(Number(estimated_minutes)) : '',
   checklist: (Array.isArray(checklist) ? checklist : [])
     .filter(i => i && String(i.text || '').trim())
     .slice(0, CHECKLIST_LIMIT)
@@ -47,5 +48,6 @@ export const applyEventTemplate = template => ({
   color: template.color,
   priority: template.priority,
   tags: template.tags,
+  estimated_minutes: template.estimated_minutes || '',
   checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
 })

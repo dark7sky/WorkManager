@@ -61,7 +61,13 @@ test('removeTodoTemplate filters out the matching id only', () => {
 
 test('applyTodoTemplate maps template fields onto a draft', () => {
   const template = buildTodoTemplate({ name: '아침 루틴', title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'] })
-  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'], checklist: [] })
+  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'], estimated_minutes: '', checklist: [] })
+})
+
+test('buildTodoTemplate and applyTodoTemplate carry the estimate', () => {
+  const template = buildTodoTemplate({ name: '아침 루틴', title: '메일 확인', estimated_minutes: '20' })
+  assert.equal(template.estimated_minutes, 20)
+  assert.equal(applyTodoTemplate(template).estimated_minutes, 20)
 })
 
 test('buildTodoTemplate normalizes checklist items, dropping blanks and forcing done:false', () => {

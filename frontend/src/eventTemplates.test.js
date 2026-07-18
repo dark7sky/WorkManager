@@ -61,7 +61,13 @@ test('removeEventTemplate filters out the matching id only', () => {
 
 test('applyEventTemplate maps template fields onto a draft', () => {
   const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', location: '회의실 A', color: 'blue', tags: ['정기'] })
-  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], checklist: [] })
+  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], estimated_minutes: '', checklist: [] })
+})
+
+test('buildEventTemplate and applyEventTemplate carry the estimate', () => {
+  const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', estimated_minutes: '30' })
+  assert.equal(template.estimated_minutes, 30)
+  assert.equal(applyEventTemplate(template).estimated_minutes, 30)
 })
 
 test('buildEventTemplate captures priority and checklist like task/todo templates', () => {

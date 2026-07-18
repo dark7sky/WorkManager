@@ -67,6 +67,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       tags,
       durationDays: durationDaysBetween(data.get('start_date'), data.get('due_date')),
       checklist,
+      estimated_minutes: data.get('estimated_minutes'),
     })
     const next = addTaskTemplate(templates, template)
     setTemplates(next)
@@ -253,7 +254,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`due-time-${prefillKey}`}>완료 예정 시각<input name="due_time" type="time" defaultValue={prefill?.due_time ?? task?.due_time ?? ''}/></label>
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
-    <label>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={task?.estimated_minutes ?? ''}/></label>
+    <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={prefill?.estimated_minutes ?? task?.estimated_minutes ?? ''}/></label>
     <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
     <label>색상<select name="color" defaultValue={task?.color || ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>

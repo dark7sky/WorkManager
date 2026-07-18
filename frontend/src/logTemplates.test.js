@@ -61,5 +61,11 @@ test('removeLogTemplate filters out the matching id only', () => {
 
 test('applyLogTemplate maps template fields onto a draft', () => {
   const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15 })
-  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15 })
+  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15, estimated_minutes: '' })
+})
+
+test('buildLogTemplate and applyLogTemplate carry the estimate', () => {
+  const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', estimated_minutes: 10 })
+  assert.equal(template.estimated_minutes, 10)
+  assert.equal(applyLogTemplate(template).estimated_minutes, 10)
 })

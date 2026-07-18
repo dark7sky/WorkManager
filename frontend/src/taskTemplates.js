@@ -20,7 +20,7 @@ export const saveTaskTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags, durationDays, checklist }) => ({
+export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags, durationDays, checklist, estimated_minutes }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
@@ -28,6 +28,7 @@ export const buildTaskTemplate = ({ name, title, priority, recurrence_rule, tags
   recurrence_rule: recurrence_rule || '',
   tags: (Array.isArray(tags) ? tags : []).slice(0, TAG_LIMIT),
   durationDays: Number.isFinite(Number(durationDays)) && Number(durationDays) > 0 ? Math.round(Number(durationDays)) : 0,
+  estimated_minutes: Number.isFinite(Number(estimated_minutes)) && Number(estimated_minutes) > 0 ? Math.round(Number(estimated_minutes)) : '',
   checklist: (Array.isArray(checklist) ? checklist : [])
     .filter(i => i && String(i.text || '').trim())
     .slice(0, CHECKLIST_LIMIT)
@@ -54,6 +55,7 @@ export const applyTaskTemplate = (template, today) => ({
   tags: template.tags,
   start_date: today,
   due_date: template.durationDays > 0 ? addDays(today, template.durationDays) : today,
+  estimated_minutes: template.estimated_minutes || '',
   checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
 })
 

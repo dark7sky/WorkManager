@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-template-estimated-minutes',
+    timestamp: '2026-07-18T17:47:37+09:00',
+    description: '업무/일정/할 일/업무 기록 생성 폼에는 모두 예상 소요 시간(분) 입력란이 있지만, 4종 템플릿(저장된 프리셋) 모두 이 값을 저장·복원하지 않아 템플릿을 불러오면 예상 소요 시간이 매번 비어 있었습니다. 네 템플릿 모듈과 각 폼의 템플릿 저장/적용 로직에 예상 소요 시간 저장·복원을 추가했습니다(`frontend/src/taskTemplates.js`, `frontend/src/eventTemplates.js`, `frontend/src/todoTemplates.js`, `frontend/src/logTemplates.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-18-event-template-priority-checklist',
     timestamp: '2026-07-18T17:46:23+09:00',
     description: '업무/할 일 템플릿은 저장·적용 시 우선순위와 체크리스트를 함께 보관했지만, 일정 템플릿은 제목/장소/색상/태그만 저장하고 우선순위와 체크리스트를 저장하지 않아 템플릿으로 저장한 일정을 다시 불러오면 해당 정보가 사라졌습니다. 일정 템플릿에도 우선순위·체크리스트 저장/복원을 추가해 세 템플릿 기능의 동작을 통일했습니다(`frontend/src/eventTemplates.js`, `frontend/src/screens/Calendar.jsx`, 테스트는 `frontend/src/eventTemplates.test.js`).',
