@@ -26,3 +26,11 @@ test('todosToPrintableReport shows checklist completion summary', () => {
   assert.match(html, /<td>0\/2<\/td>/)
   assert.match(html, /<th>체크리스트<\/th>/)
 })
+
+test('todosToPrintableReport shows estimated minutes column', () => {
+  const html = todosToPrintableReport([
+    { title: '예상 소요 할 일', completed: false, priority: 'normal', tags: [], estimated_minutes: 30 },
+  ])
+  assert.match(html, /<th>예상 소요시간<\/th>/)
+  assert.match(html, /<td>30분<\/td>/)
+})

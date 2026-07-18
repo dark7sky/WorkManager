@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-report-estimated-minutes-column',
+    timestamp: '2026-07-18T17:24:13+09:00',
+    description: 'PDF/인쇄용 보고서(업무·일정·할 일)에 예상 소요 시간(`estimated_minutes`) 열이 없어, 이미 CSV 내보내기와 폼에는 있는 값이 보고서에서는 누락됐습니다. `tasksToPrintableReport`/`eventsToPrintableReport`/`todosToPrintableReport`에 "예상 소요시간" 열을 추가했습니다(`frontend/src/taskReport.js`, `frontend/src/eventReport.js`, `frontend/src/todoReport.js`).',
+  },
+  {
     id: '2026-07-18-worklog-estimated-minutes',
     timestamp: '2026-07-18T17:22:40+09:00',
     description: '업무·일정·할 일에는 있던 예상 소요 시간(`estimated_minutes`) 필드가 업무 기록(work_logs)에는 없어, 실제 소요 시간(`duration_minutes`)만 기록하고 계획 대비 실적을 비교할 수 없었습니다. 업무 기록 등록/수정 폼과 CSV 내보내기·가져오기, 복제 기능에 예상 소요 시간을 추가했습니다 (`backend/app/main.py`의 `WorkLogPayload`, `backend/app/db.py`, `frontend/src/screens/Today.jsx`, `frontend/src/csv.js`, `frontend/src/logDuplicate.js`).',

@@ -46,3 +46,11 @@ test('eventsToPrintableReport shows checklist completion summary', () => {
   assert.match(html, /<td>2\/3<\/td>/)
   assert.match(html, /<th>체크리스트<\/th>/)
 })
+
+test('eventsToPrintableReport shows estimated minutes column', () => {
+  const html = eventsToPrintableReport([
+    { title: '예상 소요 일정', start_at: '2026-07-07T10:00:00', tags: [], estimated_minutes: 45 },
+  ])
+  assert.match(html, /<th>예상 소요시간<\/th>/)
+  assert.match(html, /<td>45분<\/td>/)
+})

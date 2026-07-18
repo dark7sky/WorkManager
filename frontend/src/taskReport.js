@@ -27,6 +27,8 @@ const reportStatus = (task, todayIso) => {
 
 export const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : '-'
 
+export const estimateSummary = minutes => minutes ? `${Number(minutes)}분` : '-'
+
 export const tasksToPrintableReport = (tasks, { todayIso, generatedAt = new Date().toISOString(), title = 'WorkManager 업무 보고서' } = {}) => {
   const active = tasks.filter(task => task.status !== 'done').length
   const done = tasks.filter(task => task.status === 'done').length
@@ -42,6 +44,7 @@ export const tasksToPrintableReport = (tasks, { todayIso, generatedAt = new Date
       <td>${Number(task.progress || 0)}%</td>
       <td>${escapeHtml((task.tags || []).join(', '))}</td>
       <td>${escapeHtml(checklistSummary(task.checklist))}</td>
+      <td>${escapeHtml(estimateSummary(task.estimated_minutes))}</td>
     </tr>`
   }).join('')
 
@@ -70,8 +73,8 @@ export const tasksToPrintableReport = (tasks, { todayIso, generatedAt = new Date
   </header>
   <p class="summary">총 ${tasks.length}개 · 진행 ${active}개 · 완료 ${done}개 · 지연 ${overdue}개</p>
   <table>
-    <thead><tr><th>업무</th><th>상태</th><th>우선순위</th><th>시작일</th><th>기한</th><th>진행률</th><th>태그</th><th>체크리스트</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="8">표시할 업무가 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>업무</th><th>상태</th><th>우선순위</th><th>시작일</th><th>기한</th><th>진행률</th><th>태그</th><th>체크리스트</th><th>예상 소요시간</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="9">표시할 업무가 없습니다.</td></tr>'}</tbody>
   </table>
 </body>
 </html>`
