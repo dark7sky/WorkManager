@@ -1201,6 +1201,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_estimated_minutes_is_persisted_and_validated(self, *_):
+        a = self.client(self.token_a)
+        event = a.post("/api/events", json={"title": "planning", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "estimated_minutes": 90})
+        self.assertEqual(event.status_code, 200, event.text)
+        self.assertEqual(event.json()["estimated_minutes"], 90)
+        cleared = a.patch(f"/api/events/{event.json()['id']}", json={"estimated_minutes": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["estimated_minutes"])
+        self.assertEqual(a.post("/api/events", json={"title": "bad estimate", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "estimated_minutes": -5}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_ai_apply_expands_recurring_event_into_one_row_per_occurrence(self, *_):
         a = self.client(self.token_a)
         result = a.post("/api/ai/apply", json={"action": "create", "entity": "event", "data": {

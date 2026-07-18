@@ -21,4 +21,10 @@ test('buildEventDuplicatePayload handles missing optional fields', () => {
   assert.equal(result.end_at, null)
   assert.equal(result.location, '')
   assert.deepEqual(result.tags, [])
+  assert.equal(result.estimated_minutes, null)
+})
+
+test('buildEventDuplicatePayload copies estimated_minutes', () => {
+  const result = buildEventDuplicatePayload({ title: '워크숍', estimated_minutes: 90 })
+  assert.equal(result.estimated_minutes, 90)
 })

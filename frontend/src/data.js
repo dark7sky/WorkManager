@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-estimated-minutes',
+    timestamp: '2026-07-18T13:27:17+09:00',
+    description: '업무(Task)와 할 일(Todo)은 모두 "예상 소요 시간(분)" 필드를 지원해 계획 시간을 기록할 수 있었지만, 일정(Calendar Event)에는 동일한 필드가 없어 회의·작업 시간을 계획 단위로 잡아도 예상 소요 시간을 남길 방법이 없었습니다. 일정 작성/수정 폼에 "예상 소요 시간(분)" 입력을 추가하고, 목록·복제 시에도 값이 유지되도록 했습니다(`backend/app/main.py`, `backend/app/db.py`, `frontend/src/screens/Calendar.jsx`, `frontend/src/eventDuplicate.js`).',
+  },
+  {
     id: '2026-07-18-task-csv-category-column',
     timestamp: '2026-07-18T13:23:00+09:00',
     description: '업무 CSV 내보내기에 "분류" 열이 항상 포함되어 있었지만, 업무에는 분류(category) 필드 자체가 없어(백엔드·업무 작성 폼 어디에도 없음) 이 열은 항상 빈 값으로 내보내지고 가져오기 시에도 무시되는 죽은 열이었습니다. 혼동을 없애기 위해 "분류" 열을 CSV 내보내기에서 제거했습니다(`frontend/src/csv.js`).',
