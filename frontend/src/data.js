@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-worklog-overlap-warning',
+    timestamp: '2026-07-19T04:05:00+09:00',
+    description: '캘린더 일정은 시간이 겹치면 경고를 보여주지만, 업무 기록(오늘 한 일)은 같은 시각에 이미 다른 기록이 있어도 알림 없이 저장되어 이중 기록을 인지하지 못하는 경우가 있었습니다. 업무 기록 작성/수정 폼에도 같은 날짜·시각에 겹치는 기록이 있으면 제목을 알려주는 경고 문구를 표시하도록 했습니다(막지는 않고 안내만 함, `frontend/src/workLogOverlap.js`, `frontend/src/screens/Today.jsx`, 테스트 `frontend/src/workLogOverlap.test.js`).',
+  },
+  {
     id: '2026-07-19-alert-snooze',
     timestamp: '2026-07-19T03:58:00+09:00',
     description: '업무/일정/할 일 마감 알림은 한 번 뜨고 나면 다시 알려줄 방법이 없어, 확인 못 하고 지나치면 놓치기 쉬웠습니다. 알림에 "10분 후 다시 알림" 버튼을 추가해 눌러두면 10분 뒤 같은 알림이 다시 표시되도록 했습니다. (`frontend/src/notificationSnooze.js`, `App.jsx`, `public/sw.js`)',
