@@ -455,6 +455,15 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             data["recurrence_rule"], data["recurrence_end_date"] = recurrence
         if any(word in combined for word in ("긴급", "중요", "급함")):
             data["priority"] = "high"
+        estimate = _estimated_minutes(combined)
+        if estimate is not None:
+            data["estimated_minutes"] = estimate
+        checklist = _checklist(combined)
+        if checklist:
+            prefix, items = checklist
+            if prefix:
+                data["title"] = prefix[:160]
+            data["checklist"] = [{"text": item, "done": False} for item in items]
         return {"action": "create", "entity": "event", "data": data,
                 "confidence": 0.8, "source": "local-rules"}
     if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
@@ -467,6 +476,15 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             data["todo_time"] = f"{explicit_time[0]:02d}:{explicit_time[1]:02d}"
         if any(word in combined for word in ("긴급", "중요", "급함")):
             data["priority"] = "high"
+        estimate = _estimated_minutes(combined)
+        if estimate is not None:
+            data["estimated_minutes"] = estimate
+        checklist = _checklist(combined)
+        if checklist:
+            prefix, items = checklist
+            if prefix:
+                data["title"] = prefix[:160]
+            data["checklist"] = [{"text": item, "done": False} for item in items]
         return {"action": "create", "entity": "todo", "data": data,
                 "confidence": 0.76, "source": "local-rules"}
     data = {"title": title, "description": clean, "status": "todo", "priority": "normal", "progress": 0,
@@ -578,9 +596,10 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "input contains two or more distinguishable URLs for one item, also set data.links as a list of "
         "{url, label} objects (label is a short description of what the link is, or empty string). "
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
-        "extra detail beyond the title. Tasks may set data.checklist as a list of {text} sub-steps when the "
-        "input lists multiple steps for one task. Tasks may set data.estimated_minutes (integer) when the input "
-        "states an expected effort/duration (e.g. '예상 2시간', '예상 30분'). Work logs may set data.duration_minutes "
+        "extra detail beyond the title. Tasks, events, and todos may all set data.checklist as a list of "
+        "{text} sub-steps when the input lists multiple steps for one item, and data.estimated_minutes "
+        "(integer) when the input states an expected effort/duration (e.g. '예상 2시간', '예상 30분'). "
+        "Work logs may set data.duration_minutes "
         "(integer) when the input states time actually spent (e.g. '2시간 했음', '30분 소요'), and data.billable "
         "(boolean true) when the input mentions billing/청구. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
         "set data.recurrence_rule to daily|weekly|biweekly|monthly and data.recurrence_end_date to the ISO end date; "

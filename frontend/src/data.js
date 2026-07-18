@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-ai-parses-event-todo-estimate-checklist',
+    timestamp: '2026-07-18T17:17:25+09:00',
+    description: 'AI 빠른 입력(자연어 파싱)이 예상 소요 시간(`estimated_minutes`)과 체크리스트(`checklist`) 추출을 업무(Task)에만 적용하고 있었습니다. 두 필드는 이미 일정(Event)과 할 일(Todo)에도 폼·CSV·배지로 지원되고 있었지만, 로컬 규칙 기반 파서와 원격 AI 프롬프트가 업무 항목에 대해서만 이를 채우고 있어 "1시간 회의 예상" 같은 입력에서 값이 누락됐습니다. `rule_parse`의 일정·할 일 분기에도 동일한 추출 로직을 추가하고, 원격 AI 시스템 프롬프트 설명도 세 항목 모두를 포함하도록 갱신했습니다(`backend/app/ai.py`, 테스트는 `backend/tests/test_ai.py`).',
+  },
+  {
     id: '2026-07-18-ai-recommend-includes-todos',
     timestamp: '2026-07-18T17:20:00+09:00',
     description: 'AI 도우미의 "오늘 할 일 추천" 기능이 이름과 달리 업무(Task)만 추천하고 오늘 할 일(Todo)은 완전히 제외하고 있었습니다. 추천 엔진(`backend/app/ai.py`의 `recommendations`)이 미완료 할 일도 함께 조회해 완료 예정일·우선순위 기준으로 업무와 함께 정렬하도록 수정했고, 프론트엔드 추천 목록에 항목 종류(업무/오늘 할 일) 배지를 표시했습니다(`frontend/src/screens/AIAssistant.jsx`).',

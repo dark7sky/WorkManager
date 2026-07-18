@@ -147,6 +147,32 @@ class RuleParserTests(unittest.TestCase):
         result = ai.rule_parse("분기 보고서 작성")
         self.assertNotIn("estimated_minutes", result["data"])
 
+    def test_event_extracts_estimated_minutes(self):
+        result = ai.rule_parse("내일 오후 3시 고객 회의 예상 1시간 30분")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["estimated_minutes"], 90)
+
+    def test_todo_extracts_estimated_minutes(self):
+        result = ai.rule_parse("오늘 보고서 검토 예상 30분 해야함")
+        self.assertEqual(result["entity"], "todo")
+        self.assertEqual(result["data"]["estimated_minutes"], 30)
+
+    def test_event_extracts_checklist_from_numbered_steps(self):
+        result = ai.rule_parse("회의 단계 1. 자료 취합 2. 슬라이드 작성")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["checklist"], [
+            {"text": "자료 취합", "done": False},
+            {"text": "슬라이드 작성", "done": False},
+        ])
+
+    def test_todo_extracts_checklist_from_numbered_steps(self):
+        result = ai.rule_parse("보고서 제출 해야함 단계 1. 초안 작성 2. 최종 검토")
+        self.assertEqual(result["entity"], "todo")
+        self.assertEqual(result["data"]["checklist"], [
+            {"text": "초안 작성", "done": False},
+            {"text": "최종 검토", "done": False},
+        ])
+
     def test_work_log_extracts_duration_minutes(self):
         result = ai.rule_parse("오늘 한 일: 미팅 준비 30분 했음")
         self.assertEqual(result["entity"], "work_log")
