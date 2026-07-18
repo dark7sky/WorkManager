@@ -145,8 +145,16 @@ export const parseIcs = text => {
     if (key === 'SUMMARY') current.title = value
     else if (key === 'DESCRIPTION') current.description = value
     else if (key === 'LOCATION') current.location = value
-    else if (key === 'DTSTART') current.start_at = parseIcsDate(value)
+    else if (key === 'DTSTART') { current.start_at = parseIcsDate(value); current.start_all_day = line.slice(0, sep).includes('VALUE=DATE') }
     else if (key === 'DTEND') current.end_at = parseIcsDate(value)
   }
-  return events.filter(e => e.start_at && e.end_at)
+  return events.filter(e => e.start_at && (e.end_at || e.start_all_day))
 }
+
+export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day }) => {
+  const date = new Date(start_at)
+  const task = { title, due_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  if (!start_all_day) task.due_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (description) task.description = description
+  return task
+})

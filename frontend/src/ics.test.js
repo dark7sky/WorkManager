@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { eventsToIcs, icsFilename, logIcsFilename, logsToIcs, parseIcs, taskIcsFilename, tasksToIcs, todoIcsFilename, todosToIcs } from './ics.js'
+import { eventsToIcs, icsFilename, icsToTasks, logIcsFilename, logsToIcs, parseIcs, taskIcsFilename, tasksToIcs, todoIcsFilename, todosToIcs } from './ics.js'
 
 test('eventsToIcs emits a VEVENT per event with escaped text fields', () => {
   const ics = eventsToIcs([
@@ -98,6 +98,32 @@ test('parseIcs round-trips events exported by eventsToIcs', () => {
 test('parseIcs skips VEVENTs missing a title or times', () => {
   const ics = 'BEGIN:VCALENDAR\nBEGIN:VEVENT\nDTSTART:20260706T010000Z\nEND:VEVENT\nEND:VCALENDAR'
   assert.deepEqual(parseIcs(ics), [])
+})
+
+test('parseIcs keeps all-day VEVENTs even without a DTEND', () => {
+  const ics = 'BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:마감\nDTSTART;VALUE=DATE:20260720\nEND:VEVENT\nEND:VCALENDAR'
+  const parsed = parseIcs(ics)
+  assert.equal(parsed.length, 1)
+  assert.equal(parsed[0].title, '마감')
+  assert.equal(parsed[0].start_all_day, true)
+  assert.equal(parsed[0].end_at, undefined)
+})
+
+test('icsToTasks round-trips an all-day task VEVENT exported by tasksToIcs', () => {
+  const ics = tasksToIcs([{ id: 5, title: '기획 승인', description: '검토 필요', due_date: '2026-07-20' }])
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks.length, 1)
+  assert.equal(tasks[0].title, '[업무] 기획 승인')
+  assert.equal(tasks[0].due_date, '2026-07-20')
+  assert.equal(tasks[0].due_time, undefined)
+  assert.equal(tasks[0].description, '검토 필요')
+})
+
+test('icsToTasks sets due_time for a timed VEVENT', () => {
+  const ics = tasksToIcs([{ id: 9, title: '시간 있음', due_date: '2026-07-20', due_time: '15:00' }])
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks[0].due_date, '2026-07-20')
+  assert.equal(tasks[0].due_time, '15:00')
 })
 
 test('parseIcs handles multiple VEVENTs and folded lines', () => {

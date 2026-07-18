@@ -399,7 +399,7 @@ export default function Calendar({ events, tasks = [], onOpenTask, onCreate, onU
   const importIcs = async e => {
     const file = e.target.files?.[0]; e.target.value = ''
     if (!file) return
-    const parsed = parseIcs(await file.text())
+    const parsed = parseIcs(await file.text()).filter(e => e.end_at)
     if (!parsed.length) { notify?.('가져올 일정이 없습니다.', 'error'); return }
     await onCreate(parsed.map(({ title, description, location, start_at, end_at }) => ({ title, description: description || '', location: location || '', start_at, end_at, tags: [] })))
   }

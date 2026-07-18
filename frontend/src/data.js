@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-ics-import',
+    timestamp: '2026-07-18T22:07:00+09:00',
+    description: '캘린더 화면은 ICS 파일을 가져와 일정으로 등록할 수 있었지만, 업무(Tasks) 화면에는 ICS 가져오기 기능이 없어 마감일이 있는 외부 캘린더 항목(예: 종일 마감 이벤트)을 업무로 옮기려면 수동으로 다시 입력해야 했습니다. ICS의 VEVENT를 업무(제목/마감일/마감 시각/메모)로 변환하는 `icsToTasks`를 추가하고, 업무 화면 툴바에 "ICS 가져오기" 버튼과 파일 입력을 추가했습니다. 종료 시각이 없는 종일 일정도 업무로는 가져올 수 있도록 `parseIcs`가 DTEND 없는 종일(VALUE=DATE) 이벤트를 보존하게 하고, 캘린더 쪽 가져오기는 기존처럼 종료 시각이 있는 이벤트만 사용하도록 필터를 추가했습니다(`frontend/src/ics.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-18-attachment-image-thumbnail',
     timestamp: '2026-07-18T18:05:22+09:00',
     description: '업무/일정/할 일/업무 기록의 첨부파일 목록은 이미지 파일을 올려도 파일명 링크로만 표시되어 내용을 확인하려면 매번 새 창에서 열어야 했습니다. 첨부파일 응답에 이미 포함되어 있던 content_type을 활용해 이미지(image/*) 첨부파일에는 작은 미리보기 썸네일을 함께 표시하도록 4종 첨부파일 목록에 모두 추가했습니다(`frontend/src/screens/Calendar.jsx`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
