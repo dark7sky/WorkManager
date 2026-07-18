@@ -8,6 +8,7 @@ import { aiDefaults, aiModels, describeAiBinding, getAiDraft, normalizeAiProvide
 import { REMINDER_DIGEST_STORAGE_KEY } from '../taskFilters'
 import { EVENT_ALERT_LEAD_OPTIONS, EVENT_ALERT_LEAD_STORAGE_KEY, loadEventAlertLeadMinutes, QUIET_HOURS_STORAGE_KEY, loadQuietHours } from '../eventAlerts'
 import { TODO_ALERT_LEAD_OPTIONS, TODO_ALERT_LEAD_STORAGE_KEY, loadTodoAlertLeadMinutes } from '../todoAlerts'
+import { TASK_ALERT_LEAD_OPTIONS, TASK_ALERT_LEAD_STORAGE_KEY, loadTaskAlertLeadMinutes } from '../taskAlerts'
 import { clearNotificationHistory, loadNotificationHistory } from '../notificationHistory'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
@@ -35,6 +36,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [reminderDigestScope, setReminderDigestScope] = useState(() => (localStorage.getItem(REMINDER_DIGEST_STORAGE_KEY) === 'due_soon' ? 'due_soon' : 'today'))
   const [eventAlertLead, setEventAlertLead] = useState(loadEventAlertLeadMinutes)
   const [todoAlertLead, setTodoAlertLead] = useState(loadTodoAlertLeadMinutes)
+  const [taskAlertLead, setTaskAlertLead] = useState(loadTaskAlertLeadMinutes)
   const [quietHours, setQuietHours] = useState(loadQuietHours)
   const [notificationHistory, setNotificationHistory] = useState(loadNotificationHistory)
   const aiLoadSeq = useRef(0)
@@ -359,6 +361,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         <label><input type="checkbox" checked={reminderDigestScope === 'due_soon'} onChange={e => { const scope = e.target.checked ? 'due_soon' : 'today'; setReminderDigestScope(scope); localStorage.setItem(REMINDER_DIGEST_STORAGE_KEY, scope) }}/> <span>지연·2일 내 마감 업무까지 알림에 포함 (기본: 오늘 마감만)</span></label>
         <label>일정 시작 전 알림 시점<select value={eventAlertLead} onChange={e => { const minutes = Number(e.target.value); setEventAlertLead(minutes); localStorage.setItem(EVENT_ALERT_LEAD_STORAGE_KEY, String(minutes)) }}>{EVENT_ALERT_LEAD_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes}분 전</option>)}</select></label>
         <label>할 일 예정 시간 전 알림 시점<select value={todoAlertLead} onChange={e => { const minutes = Number(e.target.value); setTodoAlertLead(minutes); localStorage.setItem(TODO_ALERT_LEAD_STORAGE_KEY, String(minutes)) }}>{TODO_ALERT_LEAD_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes}분 전</option>)}</select></label>
+        <label>업무 마감 시간 전 알림 시점<select value={taskAlertLead} onChange={e => { const minutes = Number(e.target.value); setTaskAlertLead(minutes); localStorage.setItem(TASK_ALERT_LEAD_STORAGE_KEY, String(minutes)) }}>{TASK_ALERT_LEAD_OPTIONS.map(minutes => <option key={minutes} value={minutes}>{minutes}분 전</option>)}</select></label>
         <label><input type="checkbox" checked={quietHours.enabled} onChange={e => { const next = { ...quietHours, enabled: e.target.checked }; setQuietHours(next); localStorage.setItem(QUIET_HOURS_STORAGE_KEY, JSON.stringify(next)) }}/> <span>무음 시간대 사용 (지정한 시간에는 알림을 보내지 않음)</span></label>
         {quietHours.enabled ? <label className="quiet-hours-range">무음 시간<input type="time" value={quietHours.start} onChange={e => { const next = { ...quietHours, start: e.target.value }; setQuietHours(next); localStorage.setItem(QUIET_HOURS_STORAGE_KEY, JSON.stringify(next)) }}/><span>~</span><input type="time" value={quietHours.end} onChange={e => { const next = { ...quietHours, end: e.target.value }; setQuietHours(next); localStorage.setItem(QUIET_HOURS_STORAGE_KEY, JSON.stringify(next)) }}/></label> : null}
         {notificationHistory.length ? <div className="notification-history">

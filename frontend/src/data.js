@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-task-due-alert',
+    timestamp: '2026-07-19T03:47:00+09:00',
+    description: '일정과 할 일은 마감/예정 시간이 다가오면 기기 알림을 보내주었지만, 업무(Task)는 마감 시간이 있어도 별도 알림이 없었습니다. 업무도 마감 시간 전에 동일한 방식으로 알림을 받을 수 있도록 추가하고, 설정 화면에서 알림 시점(5/10/15/30분 전)을 선택할 수 있게 했습니다. (`frontend/src/taskAlerts.js`, `App.jsx`, `screens/Settings.jsx`)',
+  },
+  {
     id: '2026-07-19-bulk-color-change',
     timestamp: '2026-07-19T03:25:00+09:00',
     description: '업무/일정/할 일/업무 기록 모두 개별 항목의 색상은 바꿀 수 있었지만, 여러 항목을 선택해 한 번에 색상을 바꾸는 일괄 작업은 없어 대량으로 색 분류하려면 하나씩 수정해야 했습니다. 우선순위 일괄 변경과 동일한 방식으로 4개 화면(업무/캘린더/오늘의 할 일/업무 기록) 일괄 작업 바에 색상 변경 기능을 추가했습니다.',
