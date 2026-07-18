@@ -158,3 +158,21 @@ export const icsToTasks = text => parseIcs(text).map(({ title, description, star
   if (description) task.description = description
   return task
 })
+
+export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day }) => {
+  const date = new Date(start_at)
+  const todo = { title, todo_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  if (!start_all_day) todo.todo_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (description) todo.memo = description
+  return todo
+})
+
+export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day }) => {
+  const date = new Date(start_at)
+  const log = { content: title, log_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  if (!start_all_day) {
+    log.log_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+    if (end_at) log.duration_minutes = Math.round((new Date(end_at) - date) / 60000)
+  }
+  return log
+})

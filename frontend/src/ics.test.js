@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { eventsToIcs, icsFilename, icsToTasks, logIcsFilename, logsToIcs, parseIcs, taskIcsFilename, tasksToIcs, todoIcsFilename, todosToIcs } from './ics.js'
+import { eventsToIcs, icsFilename, icsToTasks, icsToTodos, icsToLogs, logIcsFilename, logsToIcs, parseIcs, taskIcsFilename, tasksToIcs, todoIcsFilename, todosToIcs } from './ics.js'
 
 test('eventsToIcs emits a VEVENT per event with escaped text fields', () => {
   const ics = eventsToIcs([
@@ -124,6 +124,40 @@ test('icsToTasks sets due_time for a timed VEVENT', () => {
   const tasks = icsToTasks(ics)
   assert.equal(tasks[0].due_date, '2026-07-20')
   assert.equal(tasks[0].due_time, '15:00')
+})
+
+test('icsToTodos round-trips an all-day todo VEVENT exported by todosToIcs', () => {
+  const ics = todosToIcs([{ id: 3, title: '장보기', memo: '우유 사기', todo_date: '2026-07-20' }])
+  const todos = icsToTodos(ics)
+  assert.equal(todos.length, 1)
+  assert.equal(todos[0].title, '[할 일] 장보기')
+  assert.equal(todos[0].todo_date, '2026-07-20')
+  assert.equal(todos[0].todo_time, undefined)
+  assert.equal(todos[0].memo, '우유 사기')
+})
+
+test('icsToTodos sets todo_time for a timed VEVENT', () => {
+  const ics = todosToIcs([{ id: 7, title: '회의 준비', todo_date: '2026-07-20', todo_time: '09:30' }])
+  const todos = icsToTodos(ics)
+  assert.equal(todos[0].todo_date, '2026-07-20')
+  assert.equal(todos[0].todo_time, '09:30')
+})
+
+test('icsToLogs round-trips an all-day log VEVENT exported by logsToIcs', () => {
+  const ics = logsToIcs([{ id: 2, content: '보고서 작성', log_date: '2026-07-20' }])
+  const logs = icsToLogs(ics)
+  assert.equal(logs.length, 1)
+  assert.equal(logs[0].content, '[기록] 보고서 작성')
+  assert.equal(logs[0].log_date, '2026-07-20')
+  assert.equal(logs[0].log_time, undefined)
+})
+
+test('icsToLogs sets log_time and duration_minutes for a timed VEVENT', () => {
+  const ics = logsToIcs([{ id: 4, content: '통화', log_date: '2026-07-20', log_time: '14:00', duration_minutes: 45 }])
+  const logs = icsToLogs(ics)
+  assert.equal(logs[0].log_date, '2026-07-20')
+  assert.equal(logs[0].log_time, '14:00')
+  assert.equal(logs[0].duration_minutes, 45)
 })
 
 test('parseIcs handles multiple VEVENTs and folded lines', () => {

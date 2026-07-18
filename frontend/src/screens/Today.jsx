@@ -11,7 +11,7 @@ import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, remo
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
-import { todoIcsFilename, todosToIcs, logIcsFilename, logsToIcs } from '../ics'
+import { todoIcsFilename, todosToIcs, icsToTodos, logIcsFilename, logsToIcs, icsToLogs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
 import { dropZoneHandlers } from '../fileDrop'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
@@ -230,6 +230,8 @@ export default function Today(props) {
   } = props
   const todoImportInputRef = useRef(null)
   const logImportInputRef = useRef(null)
+  const todoIcsImportInputRef = useRef(null)
+  const logIcsImportInputRef = useRef(null)
   const [selectedTodoIds, setSelectedTodoIds] = useState(() => new Set())
   const [bulkTodoTag, setBulkTodoTag] = useState('')
   const [bulkTodoPostponeDays, setBulkTodoPostponeDays] = useState(1)
@@ -559,6 +561,13 @@ export default function Today(props) {
     if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
     await onImportTodos(parsed, errors)
   }
+  const importTodosIcs = async event => {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file || !onImportTodos) return
+    const parsed = icsToTodos(await file.text())
+    if (!parsed.length) { notify?.('가져올 항목이 없습니다.', 'error'); return }
+    await onImportTodos(parsed, [])
+  }
   const toggleTodoSelected = id => setSelectedTodoIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
   const clearSelectedTodos = () => setSelectedTodoIds(new Set())
   const allShownTodoIds = useMemo(() => shownTodos.map(t => t.id), [shownTodos])
@@ -600,6 +609,13 @@ export default function Today(props) {
     if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
     await onImportLogs(parsed, errors)
   }
+  const importLogsIcs = async event => {
+    const file = event.target.files?.[0]; event.target.value = ''
+    if (!file || !onImportLogs) return
+    const parsed = icsToLogs(await file.text())
+    if (!parsed.length) { notify?.('가져올 항목이 없습니다.', 'error'); return }
+    await onImportLogs(parsed, [])
+  }
   return <>
     <Header title="오늘" subtitle={`${dateText} · 중요한 일에 집중해 보세요.`}/>
     <div className="content today-grid">
@@ -624,7 +640,7 @@ export default function Today(props) {
         {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs}><Download size={14}/> ICS</button> : null}
-        {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/></> : null}
+        {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/><button type="button" className="text-button" onClick={() => todoIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={todoIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importTodosIcs}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="할 일 전체 선택" checked={allShownTodosSelected} onChange={toggleSelectAllTodos}/>전체 선택</label> : null}
         {selectedTodoIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 할 일 일괄 작업"><span>{selectedTodoIds.size}개 선택됨</span><button type="button" className="secondary" onClick={bulkCompleteTodos}><CheckCircle2 size={16}/>완료 처리</button><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagTodos() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkTodoTag} onChange={e => setBulkTodoTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkTodoTag.trim()}>추가</button></form>{onBulkPostponeTodo ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeTodos() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkTodoPostponeDays} onChange={e => setBulkTodoPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkTodoPostponeDays)}>연기</button></form> : null}{onBulkPriorityTodo ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeTodoPriority() }}><Flag size={14}/><select aria-label="변경할 우선순위" value={bulkTodoPriority} onChange={e => setBulkTodoPriority(e.target.value)}><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select><button type="submit" className="secondary">우선순위 변경</button></form> : null}{onBulkDuplicateTodo ? <button type="button" className="secondary" onClick={bulkDuplicateTodos}><Copy size={16}/>복제</button> : null}<button type="button" className="danger-button" onClick={bulkDeleteTodos}>삭제</button><button type="button" className="text-button" onClick={clearSelectedTodos}>선택 해제</button></div> : null}
@@ -649,7 +665,7 @@ export default function Today(props) {
         {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs}><Download size={14}/> ICS</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
-        {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/></> : null}
+        {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/><button type="button" className="text-button" onClick={() => logIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={logIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importLogsIcs}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}
         {selectedLogIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 업무 기록 일괄 작업"><span>{selectedLogIds.size}개 선택됨</span><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagLogs() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkLogTag} onChange={e => setBulkLogTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkLogTag.trim()}>추가</button></form>{onBulkPostponeLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeLogs() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkLogPostponeDays} onChange={e => setBulkLogPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkLogPostponeDays)}>연기</button></form> : null}{onBulkPriorityLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogPriority() }}><Flag size={14}/><select aria-label="변경할 우선순위" value={bulkLogPriority} onChange={e => setBulkLogPriority(e.target.value)}><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select><button type="submit" className="secondary">우선순위 변경</button></form> : null}{onBulkDuplicateLog ? <button type="button" className="secondary" onClick={bulkDuplicateLogs}><Copy size={16}/>복제</button> : null}<button type="button" className="danger-button" onClick={bulkDeleteLogs}>삭제</button><button type="button" className="text-button" onClick={clearSelectedLogs}>선택 해제</button></div> : null}
         <div className="worklog-timer">{timer ? <><span className="worklog-timer-display">{formatElapsed(timer.startedAt, timerNow)}</span><button type="button" className="text-button" onClick={stopTimer}><Square size={14}/> 타이머 중지</button></> : <button type="button" className="text-button" onClick={startTimer}><Play size={14}/> 타이머 시작</button>}</div>

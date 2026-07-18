@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-todo-log-ics-import',
+    timestamp: '2026-07-18T22:34:32+09:00',
+    description: 'ICS 가져오기(import)가 업무·일정에만 있고 할 일·업무 기록에는 없어, ICS로 내보낸(export) 할 일/기록을 다시 불러올 방법이 없었습니다. `icsToTodos`/`icsToLogs` 파서를 추가하고(`frontend/src/ics.js`), 오늘 화면의 할 일/업무 기록 영역에 "ICS 가져오기" 버튼을 추가했습니다(`frontend/src/screens/Today.jsx`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-checklist-csv-round-trip',
     timestamp: '2026-07-18T22:30:22+09:00',
     description: '업무·일정·할 일·업무 기록 CSV의 "체크리스트" 열은 완료/전체 개수만 보여주는 요약("2/3")이라 다시 가져오기(import) 시 체크리스트 항목이 전혀 복원되지 않았습니다. "체크리스트" 열 형식을 각 항목의 완료 여부를 담은 "[x] 항목1; [ ] 항목2" 형태로 바꾸고, 네 가지 CSV 가져오기(`parseTasksCsv`/`parseEventsCsv`/`parseTodosCsv`/`parseWorkLogsCsv`)가 이 열을 읽어 체크리스트를 복원하도록 했습니다(`frontend/src/csv.js`), 테스트 추가.',
