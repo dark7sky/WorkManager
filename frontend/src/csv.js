@@ -10,7 +10,10 @@ const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
 
-const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
+const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
+const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
+
+const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -37,6 +40,7 @@ export const tasksToCsv = (tasks, todayIso) => {
     task.description,
     task.link_url,
     task.estimated_minutes ?? '',
+    colorValueToLabel[task.color] || '',
     checklistSummary(task.checklist),
   ])
   return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -70,7 +74,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -85,6 +89,7 @@ export const parseTasksCsv = text => {
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) task.estimated_minutes = Number(cells[iEstimate])
+    if (iColor >= 0 && cells[iColor]) task.color = colorLabelToValue[cells[iColor].trim()] || ''
     tasks.push(task)
   })
   return { tasks, errors }
@@ -165,7 +170,7 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 
 export const eventsToCsv = events => {
   const rows = events.map(event => [
@@ -179,6 +184,7 @@ export const eventsToCsv = events => {
     event.description,
     event.link_url,
     event.estimated_minutes ?? '',
+    colorValueToLabel[event.color] || '',
     checklistSummary(event.checklist),
   ])
   return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -191,7 +197,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -206,12 +212,13 @@ export const parseEventsCsv = text => {
     if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) event.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) event.estimated_minutes = Number(cells[iEstimate])
+    if (iColor >= 0 && cells[iColor]) event.color = colorLabelToValue[cells[iColor].trim()] || ''
     events.push(event)
   })
   return { events, errors }
 }
 
-const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
+const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월' }
 
 export const todosToCsv = todos => {
@@ -226,6 +233,7 @@ export const todosToCsv = todos => {
     todo.memo,
     todo.link_url,
     todo.estimated_minutes ?? '',
+    colorValueToLabel[todo.color] || '',
     checklistSummary(todo.checklist),
   ])
   return [todoHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -240,7 +248,7 @@ export const parseTodosCsv = text => {
   if (!rows.length) return { todos: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
   const todos = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -254,12 +262,13 @@ export const parseTodosCsv = text => {
     if (iMemo >= 0 && cells[iMemo]) todo.memo = cells[iMemo]
     if (iLink >= 0 && cells[iLink]) todo.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) todo.estimated_minutes = Number(cells[iEstimate])
+    if (iColor >= 0 && cells[iColor]) todo.color = colorLabelToValue[cells[iColor].trim()] || ''
     todos.push(todo)
   })
   return { todos, errors }
 }
 
-const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 금액(원)', '체크리스트']
+const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 금액(원)', '색상', '체크리스트']
 
 export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => {
   const rows = logs.map(log => [
@@ -273,6 +282,7 @@ export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => {
     log.link_url,
     log.billable ? 'Y' : '',
     log.billable && hourlyRate != null ? Math.round((log.duration_minutes || 0) / 60 * hourlyRate) : '',
+    colorValueToLabel[log.color] || '',
     checklistSummary(log.checklist),
   ])
   return [workLogHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -285,7 +295,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTags = col('태그'), iLink = col('링크')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTags = col('태그'), iLink = col('링크'), iColor = col('색상')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -297,6 +307,7 @@ export const parseWorkLogsCsv = text => {
     if (iPriority >= 0 && cells[iPriority]) log.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iLink >= 0 && cells[iLink]) log.link_url = cells[iLink].trim()
+    if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''
     logs.push(log)
   })
   return { logs, errors }

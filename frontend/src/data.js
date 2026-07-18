@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-csv-color-column',
+    timestamp: '2026-07-18T17:38:33+09:00',
+    description: '업무/일정/할 일/업무 기록의 색상(`color`)은 편집 화면에서 지정하고 목록·간트차트·캘린더에 표시되지만, CSV 내보내기/가져오기에는 반영되지 않아 CSV로 내보낸 뒤 다시 가져오면 색상 지정이 사라졌습니다. 4종 CSV export/import 함수 모두에 "색상" 열을 추가해 다른 필드(우선순위, 예상 소요시간 등)와 동일하게 왕복되도록 맞췄습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-worklog-csv-link-column',
     timestamp: '2026-07-18T17:29:42+09:00',
     description: '업무 기록(Work Log) CSV 내보내기/가져오기가 "관련 링크"(`link_url`) 값을 포함하지 않아, 업무/일정/할 일 CSV에는 이미 있는 링크 열이 업무 기록에서만 누락됐습니다. `workLogsToCsv`/`parseWorkLogsCsv`에 "링크" 열을 추가해 다른 항목들과 동일하게 왕복 처리되도록 맞췄습니다(`frontend/src/csv.js`).',
