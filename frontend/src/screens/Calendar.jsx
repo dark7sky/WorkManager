@@ -280,6 +280,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     </div> : null}
     {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
       {attachments.map(item => <div key={item.id} className="checklist-editor-item">
+        {item.content_type?.startsWith('image/') ? <img className="attachment-thumb" src={api.eventAttachmentDownloadUrl(event.id, item.id)} alt=""/> : null}
         <a href={api.eventAttachmentDownloadUrl(event.id, item.id)} target="_blank" rel="noopener noreferrer">{item.filename}</a>
         <span className="muted"> {formatAttachmentSize(item.size_bytes)}</span>
         <button type="button" className="text-button" onClick={() => removeAttachment(item.id)}>삭제</button>

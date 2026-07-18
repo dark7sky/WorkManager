@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-attachment-image-thumbnail',
+    timestamp: '2026-07-18T18:05:22+09:00',
+    description: '업무/일정/할 일/업무 기록의 첨부파일 목록은 이미지 파일을 올려도 파일명 링크로만 표시되어 내용을 확인하려면 매번 새 창에서 열어야 했습니다. 첨부파일 응답에 이미 포함되어 있던 content_type을 활용해 이미지(image/*) 첨부파일에는 작은 미리보기 썸네일을 함께 표시하도록 4종 첨부파일 목록에 모두 추가했습니다(`frontend/src/screens/Calendar.jsx`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-18-calendar-agenda-postpone',
     timestamp: '2026-07-18T17:52:10+09:00',
     description: '업무(Tasks)의 지연 업무 행과 오늘 화면의 할 일/업무 기록 행에는 모두 한 번에 하루 미루는 "하루 미루기" 버튼이 있었지만, 캘린더의 모바일 일정 목록(agenda) 행에는 이 버튼이 없어 일정을 미루려면 일정을 열어 수정 폼까지 들어가야 했습니다. 이미 존재하는 `postponeEvent`(시작·종료 시각을 유지한 채 하루씩 미루는 로직)를 재사용해 agenda 행에도 "하루 미루기" 버튼을 추가했습니다(`frontend/src/screens/Calendar.jsx`).',

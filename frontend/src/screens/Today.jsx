@@ -109,6 +109,7 @@ function TodoAttachments({ todoId }) {
   return <div className="checklist-editor" onClick={event => event.stopPropagation()}>
     <span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
     {attachments.map(item => <div key={item.id} className="checklist-editor-item">
+      {item.content_type?.startsWith('image/') ? <img className="attachment-thumb" src={api.todoAttachmentDownloadUrl(todoId, item.id)} alt=""/> : null}
       <a href={api.todoAttachmentDownloadUrl(todoId, item.id)} target="_blank" rel="noopener noreferrer">{item.filename}</a>
       <span className="muted"> {formatSize(item.size_bytes)}</span>
       <button type="button" className="text-button" onClick={() => remove(item.id)}>삭제</button>
@@ -198,6 +199,7 @@ function WorkLogAttachments({ logId }) {
   return <div className="checklist-editor" onClick={event => event.stopPropagation()}>
     <span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
     {attachments.map(item => <div key={item.id} className="checklist-editor-item">
+      {item.content_type?.startsWith('image/') ? <img className="attachment-thumb" src={api.workLogAttachmentDownloadUrl(logId, item.id)} alt=""/> : null}
       <a href={api.workLogAttachmentDownloadUrl(logId, item.id)} target="_blank" rel="noopener noreferrer">{item.filename}</a>
       <span className="muted"> {formatSize(item.size_bytes)}</span>
       <button type="button" className="text-button" onClick={() => remove(item.id)}>삭제</button>
