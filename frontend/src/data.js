@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-performance-timeline-csv-estimated-minutes',
+    timestamp: '2026-07-18T17:29:40+09:00',
+    description: '성과(Performance) 화면의 활동 타임라인 CSV 내보내기가 예상 소요 시간(`estimated_minutes`)을 포함하지 않아, 업무/일정/할 일 CSV 내보내기에는 이미 있는 값이 기간 보고서에서는 누락됐습니다. 백엔드 `/api/achievements`의 `timeline` 항목에 `estimated_minutes`를 추가하고, `timelineToCsv`에 "예상 소요(분)" 열을 추가했습니다(`backend/app/main.py`, `frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-report-estimated-minutes-column',
     timestamp: '2026-07-18T17:24:13+09:00',
     description: 'PDF/인쇄용 보고서(업무·일정·할 일)에 예상 소요 시간(`estimated_minutes`) 열이 없어, 이미 CSV 내보내기와 폼에는 있는 값이 보고서에서는 누락됐습니다. `tasksToPrintableReport`/`eventsToPrintableReport`/`todosToPrintableReport`에 "예상 소요시간" 열을 추가했습니다(`frontend/src/taskReport.js`, `frontend/src/eventReport.js`, `frontend/src/todoReport.js`).',

@@ -2146,10 +2146,10 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     all_tasks = rows("tasks", user, tags=wanted)
     active = [x for x in all_tasks if x.get("status") != "done"]
     timeline = []
-    timeline.extend({"type": "task", "type_label": "완료 업무", "id": x["id"], "date": (x.get("completed_at") or x.get("updated_at") or "")[:10], "title": x["title"], "tags": x.get("tags", [])} for x in tasks)
-    timeline.extend({"type": "work_log", "type_label": "업무 기록", "id": x["id"], "date": x["log_date"], "content": x["content"], "tags": x.get("tags", [])} for x in logs)
-    timeline.extend({"type": "event", "type_label": "일정", "id": x["id"], "date": x["start_at"][:10], "title": x["title"], "tags": x.get("tags", [])} for x in events)
-    timeline.extend({"type": "todo", "type_label": "완료 Todo", "id": x["id"], "date": x["todo_date"], "title": x["title"], "tags": x.get("tags", [])} for x in todos)
+    timeline.extend({"type": "task", "type_label": "완료 업무", "id": x["id"], "date": (x.get("completed_at") or x.get("updated_at") or "")[:10], "title": x["title"], "tags": x.get("tags", []), "estimated_minutes": x.get("estimated_minutes")} for x in tasks)
+    timeline.extend({"type": "work_log", "type_label": "업무 기록", "id": x["id"], "date": x["log_date"], "content": x["content"], "tags": x.get("tags", []), "estimated_minutes": x.get("estimated_minutes")} for x in logs)
+    timeline.extend({"type": "event", "type_label": "일정", "id": x["id"], "date": x["start_at"][:10], "title": x["title"], "tags": x.get("tags", []), "estimated_minutes": x.get("estimated_minutes")} for x in events)
+    timeline.extend({"type": "todo", "type_label": "완료 Todo", "id": x["id"], "date": x["todo_date"], "title": x["title"], "tags": x.get("tags", []), "estimated_minutes": x.get("estimated_minutes")} for x in todos)
     timeline.sort(key=lambda x: x["date"], reverse=True)
     available_tags = sorted({tag for group in (tasks, logs, events, todos, all_tasks) for item in group for tag in item.get("tags", [])}, key=str.lower)
     by_tag = {}

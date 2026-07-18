@@ -35,14 +35,14 @@ test('taskCsvFilename uses the requested date', () => {
 
 test('timelineToCsv exports report timeline rows', () => {
   const csv = timelineToCsv([
-    { date: '2026-07-06', type: 'task', type_label: '완료 업무', title: '보고서, 검토', tags: ['분기'] },
+    { date: '2026-07-06', type: 'task', type_label: '완료 업무', title: '보고서, 검토', tags: ['분기'], estimated_minutes: 90 },
     { date: '2026-07-05', type: 'work_log', type_label: '업무 기록', content: '회의 진행', tags: [] },
   ])
 
   assert.equal(csv, [
-    '날짜,구분,제목,태그',
-    '2026-07-06,완료 업무,"보고서, 검토",분기',
-    '2026-07-05,업무 기록,회의 진행,',
+    '날짜,구분,제목,태그,예상 소요(분)',
+    '2026-07-06,완료 업무,"보고서, 검토",분기,90',
+    '2026-07-05,업무 기록,회의 진행,,',
   ].join('\n'))
 })
 

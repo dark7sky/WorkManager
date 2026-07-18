@@ -957,6 +957,8 @@ class ApiTests(unittest.TestCase):
         self.assertGreaterEqual(breakdown["Reporting"]["completed_tasks"], 1)
         self.assertIn("(태그 없음)", breakdown)
         self.assertEqual(breakdown["(태그 없음)"]["tracked_minutes"], 15)
+        timeline_task = next(x for x in report.json()["timeline"] if x["type"] == "task" and x["title"] == "tagged task")
+        self.assertEqual(timeline_task["estimated_minutes"], 30)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

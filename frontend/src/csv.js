@@ -90,7 +90,7 @@ export const parseTasksCsv = text => {
   return { tasks, errors }
 }
 
-const timelineHeaders = ['날짜', '구분', '제목', '태그']
+const timelineHeaders = ['날짜', '구분', '제목', '태그', '예상 소요(분)']
 
 export const timelineToCsv = items => {
   const rows = items.map(item => [
@@ -98,6 +98,7 @@ export const timelineToCsv = items => {
     item.type_label || item.type,
     item.title || item.content,
     (item.tags || []).join('; '),
+    item.estimated_minutes ?? '',
   ])
   return [timelineHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 }
