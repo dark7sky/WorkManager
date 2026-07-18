@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-audit-log-pdf-report',
+    timestamp: '2026-07-18T23:05:00+09:00',
+    description: '업무/일정/오늘 화면은 목록을 CSV뿐 아니라 인쇄용 PDF 보고서로도 내보낼 수 있었지만, 감사 로그 화면에는 CSV 내보내기만 있고 PDF 보고서 버튼이 없었습니다. 다른 화면과 동일한 인쇄 보고서 패턴으로 `frontend/src/auditLogReport.js`를 추가하고 감사 로그 화면(`frontend/src/screens/AuditLog.jsx`)에 PDF 버튼을 연결했습니다.',
+  },
+  {
     id: '2026-07-18-task-complete-dependency-guard',
     timestamp: '2026-07-18T22:56:21+09:00',
     description: '업무 화면은 선행 업무가 끝나지 않은 업무에 "대기" 배지를 보여줬지만, 실제로 완료 처리(보드 드래그, 진행률 100%, 일괄 완료 처리)하는 것은 막지 않아 배지가 그저 참고용이었습니다. 세 가지 완료 경로 모두에서 선행 업무가 남아 있으면 확인 대화상자를 띄워 실수로 완료 처리하는 것을 방지하도록 했습니다(`frontend/src/screens/Tasks.jsx`).',
