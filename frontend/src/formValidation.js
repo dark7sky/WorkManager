@@ -15,3 +15,15 @@ export function validateEventForm(data) {
   }
   return errors
 }
+
+export function validateTodoForm(data) {
+  const errors = {}
+  if (!String(data.title || '').trim()) errors.title = 'Todo 내용을 입력하세요.'
+  return errors
+}
+
+export function validateLogForm(data) {
+  const errors = {}
+  if (!String(data.content || '').trim()) errors.content = '업무 기록 내용을 입력하세요.'
+  return errors
+}

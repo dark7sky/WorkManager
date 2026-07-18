@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { validateEventForm, validateTaskForm } from './formValidation.js'
+import { validateEventForm, validateLogForm, validateTaskForm, validateTodoForm } from './formValidation.js'
 
 test('flags empty title', () => {
   const errors = validateTaskForm({ title: '  ', start_date: '', due_date: '' })
@@ -39,5 +39,25 @@ test('event form flags end time before or equal to start time', () => {
 
 test('event form passes valid input with no errors', () => {
   const errors = validateEventForm({ title: '회의', start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
+  assert.deepEqual(errors, {})
+})
+
+test('todo form flags empty title', () => {
+  const errors = validateTodoForm({ title: '   ' })
+  assert.equal(errors.title, 'Todo 내용을 입력하세요.')
+})
+
+test('todo form passes valid input with no errors', () => {
+  const errors = validateTodoForm({ title: '보고서 작성' })
+  assert.deepEqual(errors, {})
+})
+
+test('log form flags empty content', () => {
+  const errors = validateLogForm({ content: '' })
+  assert.equal(errors.content, '업무 기록 내용을 입력하세요.')
+})
+
+test('log form passes valid input with no errors', () => {
+  const errors = validateLogForm({ content: '회의 진행' })
   assert.deepEqual(errors, {})
 })

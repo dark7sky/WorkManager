@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-today-quick-entry-inline-validation',
+    timestamp: '2026-07-18T13:32:21+09:00',
+    description: '업무(Task)와 일정(Event) 작성 폼에는 빈 제목을 저장하려 하면 빨간 테두리와 함께 안내 문구가 즉시 표시되는 인라인 검증이 있었지만, 오늘 화면의 Todo·업무 기록 빠른 입력 폼은 빈 값 입력 시 아무 안내 없이 조용히 무시되기만 했습니다. 동일한 인라인 검증 패턴(`invalid` 스타일, `aria-invalid`, `field-error` 메시지)을 Todo·업무 기록 빠른 입력에도 적용했습니다(`frontend/src/formValidation.js`의 `validateTodoForm`/`validateLogForm`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-18-event-estimated-minutes',
     timestamp: '2026-07-18T13:27:17+09:00',
     description: '업무(Task)와 할 일(Todo)은 모두 "예상 소요 시간(분)" 필드를 지원해 계획 시간을 기록할 수 있었지만, 일정(Calendar Event)에는 동일한 필드가 없어 회의·작업 시간을 계획 단위로 잡아도 예상 소요 시간을 남길 방법이 없었습니다. 일정 작성/수정 폼에 "예상 소요 시간(분)" 입력을 추가하고, 목록·복제 시에도 값이 유지되도록 했습니다(`backend/app/main.py`, `backend/app/db.py`, `frontend/src/screens/Calendar.jsx`, `frontend/src/eventDuplicate.js`).',
