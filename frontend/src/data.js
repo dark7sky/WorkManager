@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-performance-todo-goal',
+    timestamp: '2026-07-18T12:32:17+09:00',
+    description: '성과 화면의 "기간 목표" 트래커는 완료 업무 수와 기록 시간만 목표로 설정할 수 있었고, 이미 통계에 포함돼 있던 완료한 오늘 할 일 수(completed_todos)는 목표 대상에서 빠져 있었습니다. 완료 할 일 목표를 추가해 다른 두 지표와 동일하게 목표 저장·진행률 막대·달성률 표시가 되도록 했습니다(`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-18-calendar-event-postpone',
     timestamp: '2026-07-18T12:30:41+09:00',
     description: '업무·할 일·업무 기록에는 개별 항목을 하루 미루는 버튼이 있었지만 일정(Calendar)은 여러 개를 선택한 일괄 연기만 가능하고 일정 하나를 바로 미루는 버튼이 없어 드래그 없이는 일정을 하루씩 옮길 수 없었습니다. 일정 수정 모달에 "하루 미루기" 버튼을 추가해 다른 화면과 동일하게 단일 일정도 즉시 하루 연기할 수 있도록 했습니다(`frontend/src/screens/Calendar.jsx`).',
