@@ -28,6 +28,12 @@ export function ganttDragDates(mode, task, { grabDay, dropDay, windowStartIso })
     if (due === task.due_date) return null
     return { start_date: task.start_date, due_date: due }
   }
+  if (mode === 'resize-start') {
+    let start = addDays(windowStartIso, dropDay)
+    if (start > task.due_date) start = task.due_date
+    if (start === task.start_date) return null
+    return { start_date: start, due_date: task.due_date }
+  }
   return null
 }
 
@@ -62,6 +68,11 @@ export function ganttDragPreview(mode, { left, width }, { grabDay, dropDay }, da
   if (mode === 'resize-end') {
     const right = Math.max(left, Math.min(days - 1, dropDay))
     return { left, width: right - left + 1 }
+  }
+  if (mode === 'resize-start') {
+    const right = left + width - 1
+    const newLeft = Math.max(0, Math.min(right, dropDay))
+    return { left: newLeft, width: right - newLeft + 1 }
   }
   return { left, width }
 }

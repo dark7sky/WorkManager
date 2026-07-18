@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-gantt-resize-start',
+    timestamp: '2026-07-18T22:38:20+09:00',
+    description: '업무(Gantt) 화면의 막대는 오른쪽 끝을 끌어 마감일(기간)만 조절할 수 있고, 시작일을 바꾸려면 항상 편집 폼을 열어야 했습니다. 막대 왼쪽 끝에도 크기 조절 핸들을 추가해 시작일을 마감일 이전으로 직접 드래그로 조절할 수 있도록 했습니다(`frontend/src/ganttDrag.js`의 `resize-start` 모드, `frontend/src/screens/Tasks.jsx`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-report-link-column',
     timestamp: '2026-07-18T22:35:20+09:00',
     description: '업무·일정·할 일·업무 기록의 인쇄용(PDF) 보고서에는 CSV와 달리 "관련 링크(link_url)" 항목이 빠져 있어, 저장된 링크가 있는 항목도 인쇄물에서는 확인할 수 없었습니다. 네 가지 보고서 생성 함수(`tasksToPrintableReport`/`eventsToPrintableReport`/`todosToPrintableReport`/`workLogsToPrintableReport`)에 "링크" 열을 추가하고 클릭 가능한 링크로 표시하도록 했습니다(`frontend/src/*Report.js`), 테스트 추가.',
