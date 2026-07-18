@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-search-escape-clear',
+    timestamp: '2026-07-19T03:45:02+09:00',
+    description: '`/` 키로 검색창에 포커스한 뒤에는 `Esc` 키로 빠져나갈 방법이 없었습니다. 업무/일정/오늘/감사 로그 화면의 검색창에서 `Esc`를 누르면 검색어를 지우고 포커스를 벗어나도록 개선했습니다(단축키 안내 목록에도 반영). (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/AuditLog.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',
+  },
+  {
     id: '2026-07-19-search-focus-shortcut',
     timestamp: '2026-07-19T03:42:00+09:00',
     description: '업무/일정/오늘/감사 로그 화면마다 검색창이 있지만 마우스로 직접 클릭해야만 입력할 수 있었습니다. `/` 키를 누르면 입력 중인 다른 필드가 아닐 때 현재 화면의 검색창에 바로 포커스가 이동하도록 단축키를 추가했습니다(단축키 안내 목록에도 반영). (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',

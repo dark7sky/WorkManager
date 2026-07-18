@@ -54,7 +54,7 @@ export default function AuditLog({ focus }) {
   }
   return <><Header title="감사 로그" subtitle="업무 공간에서 발생한 주요 변경 이력을 확인하세요."/><div className="content audit-page">
     <div className="toolbar audit-toolbar">
-      <div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="작업, 대상, 변경 내용 검색" /></div>
+      <div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Escape'){setQuery('');e.target.blur()}}} placeholder="작업, 대상, 변경 내용 검색" /></div>
       <label className="filter-select"><Filter/><span>대상</span><select value={entity} onChange={e=>setEntity(e.target.value)}><option value="all">전체</option>{entities.map(value=><option key={value} value={value}>{entityLabels[value] || value}</option>)}</select></label>
       <div className="date-range"><input aria-label="시작일" type="date" value={dateStart} onChange={e=>setDateStart(e.target.value)}/><span>–</span><input aria-label="종료일" type="date" value={dateEnd} onChange={e=>setDateEnd(e.target.value)}/>{(dateStart||dateEnd)?<button type="button" className="text-button" onClick={()=>{setDateStart('');setDateEnd('')}}>초기화</button>:null}</div>
       <button type="button" className="text-button" onClick={printReport} disabled={!shown.length}><FileText/> PDF</button>
