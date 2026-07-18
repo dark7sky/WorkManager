@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-report-link-column',
+    timestamp: '2026-07-18T22:35:20+09:00',
+    description: '업무·일정·할 일·업무 기록의 인쇄용(PDF) 보고서에는 CSV와 달리 "관련 링크(link_url)" 항목이 빠져 있어, 저장된 링크가 있는 항목도 인쇄물에서는 확인할 수 없었습니다. 네 가지 보고서 생성 함수(`tasksToPrintableReport`/`eventsToPrintableReport`/`todosToPrintableReport`/`workLogsToPrintableReport`)에 "링크" 열을 추가하고 클릭 가능한 링크로 표시하도록 했습니다(`frontend/src/*Report.js`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-todo-log-ics-import',
     timestamp: '2026-07-18T22:34:32+09:00',
     description: 'ICS 가져오기(import)가 업무·일정에만 있고 할 일·업무 기록에는 없어, ICS로 내보낸(export) 할 일/기록을 다시 불러올 방법이 없었습니다. `icsToTodos`/`icsToLogs` 파서를 추가하고(`frontend/src/ics.js`), 오늘 화면의 할 일/업무 기록 영역에 "ICS 가져오기" 버튼을 추가했습니다(`frontend/src/screens/Today.jsx`), 테스트 추가.',

@@ -54,3 +54,11 @@ test('eventsToPrintableReport shows estimated minutes column', () => {
   assert.match(html, /<th>예상 소요시간<\/th>/)
   assert.match(html, /<td>45분<\/td>/)
 })
+
+test('eventsToPrintableReport shows link column', () => {
+  const html = eventsToPrintableReport([
+    { title: '링크 일정', start_at: '2026-07-07T10:00:00', tags: [], link_url: 'https://example.com' },
+  ])
+  assert.match(html, /<th>링크<\/th>/)
+  assert.match(html, /<a href="https:\/\/example\.com">https:\/\/example\.com<\/a>/)
+})

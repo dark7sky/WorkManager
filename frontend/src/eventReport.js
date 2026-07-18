@@ -7,6 +7,7 @@ const escapeHtml = value => String(value ?? '')
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : '-'
 const estimateSummary = minutes => minutes ? `${Number(minutes)}분` : '-'
+const linkCell = url => url ? `<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>` : '-'
 
 const formatWhen = event => {
   const start = new Date(event.start_at || event.start)
@@ -25,6 +26,7 @@ export const eventsToPrintableReport = (events, { title = 'WorkManager 일정 �
       <td>${escapeHtml((event.tags || []).join(', '))}</td>
       <td>${escapeHtml(checklistSummary(event.checklist))}</td>
       <td>${escapeHtml(estimateSummary(event.estimated_minutes))}</td>
+      <td>${linkCell(event.link_url)}</td>
     </tr>`).join('')
 
   return `<!doctype html>
@@ -52,8 +54,8 @@ export const eventsToPrintableReport = (events, { title = 'WorkManager 일정 �
   </header>
   <p class="summary">총 ${events.length}개 일정</p>
   <table>
-    <thead><tr><th>일정</th><th>일시</th><th>장소</th><th>태그</th><th>체크리스트</th><th>예상 소요시간</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="6">표시할 일정이 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>일정</th><th>일시</th><th>장소</th><th>태그</th><th>체크리스트</th><th>예상 소요시간</th><th>링크</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="7">표시할 일정이 없습니다.</td></tr>'}</tbody>
   </table>
 </body>
 </html>`

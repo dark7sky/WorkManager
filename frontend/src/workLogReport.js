@@ -6,6 +6,7 @@ const escapeHtml = value => String(value ?? '')
   .replaceAll("'", '&#39;')
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : '-'
+const linkCell = url => url ? `<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>` : '-'
 
 export const workLogsToPrintableReport = (logs, taskTitleById, hourlyRate, { generatedAt = new Date().toISOString(), title = 'WorkManager 업무 기록 보고서' } = {}) => {
   const totalMinutes = logs.reduce((sum, log) => sum + Number(log.duration_minutes || 0), 0)
@@ -18,6 +19,7 @@ export const workLogsToPrintableReport = (logs, taskTitleById, hourlyRate, { gen
       <td>${log.billable ? '가능' : '불가'}</td>
       <td>${escapeHtml((log.tags || []).join(', '))}</td>
       <td>${escapeHtml(checklistSummary(log.checklist))}</td>
+      <td>${linkCell(log.link_url)}</td>
     </tr>`).join('')
 
   return `<!doctype html>
@@ -44,8 +46,8 @@ export const workLogsToPrintableReport = (logs, taskTitleById, hourlyRate, { gen
   </header>
   <p class="summary">총 ${logs.length}건 · 총 ${totalMinutes}분${hourlyRate ? ` · 청구 가능 ${billableMinutes}분` : ''}</p>
   <table>
-    <thead><tr><th>내용</th><th>시각</th><th>소요 시간</th><th>연결 업무</th><th>청구 가능</th><th>태그</th><th>체크리스트</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="7">표시할 업무 기록이 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>내용</th><th>시각</th><th>소요 시간</th><th>연결 업무</th><th>청구 가능</th><th>태그</th><th>체크리스트</th><th>링크</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="8">표시할 업무 기록이 없습니다.</td></tr>'}</tbody>
   </table>
 </body>
 </html>`

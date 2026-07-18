@@ -27,3 +27,11 @@ test('workLogsToPrintableReport shows checklist completion summary', () => {
   assert.match(html, /<td>1\/1<\/td>/)
   assert.match(html, /<th>체크리스트<\/th>/)
 })
+
+test('workLogsToPrintableReport shows link column', () => {
+  const html = workLogsToPrintableReport([
+    { content: '링크 기록', log_time: '10:00', duration_minutes: 10, billable: false, tags: [], link_url: 'https://example.com' },
+  ], new Map(), null)
+  assert.match(html, /<th>링크<\/th>/)
+  assert.match(html, /<a href="https:\/\/example\.com">https:\/\/example\.com<\/a>/)
+})

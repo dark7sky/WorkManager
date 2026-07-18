@@ -54,3 +54,13 @@ test('tasksToPrintableReport shows estimated minutes column', () => {
   assert.match(html, /<th>예상 소요시간<\/th>/)
   assert.match(html, /<td>90분<\/td>/)
 })
+
+test('tasksToPrintableReport shows link column', () => {
+  const html = tasksToPrintableReport([
+    { title: '링크 업무', status: 'todo', priority: 'normal', tags: [], link_url: 'https://example.com' },
+    { title: '링크 없음', status: 'todo', priority: 'normal', tags: [] },
+  ], { todayIso: '2026-07-07' })
+
+  assert.match(html, /<th>링크<\/th>/)
+  assert.match(html, /<a href="https:\/\/example\.com">https:\/\/example\.com<\/a>/)
+})
