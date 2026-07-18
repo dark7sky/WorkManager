@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-today-row-arrow-navigation',
+    timestamp: '2026-07-19T03:58:01+09:00',
+    description: '오늘 화면의 할 일·업무 기록 목록은 업무(간트) 화면과 달리 키보드로 행 사이를 이동할 수 없었습니다. 각 항목의 "수정" 버튼에 포커스된 상태에서 `↑`/`↓` 키로 이전·다음 행으로 바로 이동하도록 업무 화면과 동일한 키보드 탐색을 추가했습니다. (`frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-19-task-row-arrow-navigation',
     timestamp: '2026-07-19T03:54:10+09:00',
     description: '업무 관리(간트) 화면에서 업무 목록을 훑어보려면 매번 마우스로 각 행을 클릭해야 했습니다. 업무 제목에 포커스된 상태에서 `↑`/`↓` 키로 이전·다음 업무 행으로 바로 이동할 수 있도록 키보드 탐색을 추가했습니다(단축키 안내 목록에도 반영). (`frontend/src/rowNavigation.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`, 테스트 `frontend/src/rowNavigation.test.js`)',
