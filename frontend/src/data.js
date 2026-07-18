@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-event-csv-link',
+    timestamp: '2026-07-18T12:21:34+09:00',
+    description: '할 일(Todo) CSV 내보내기/가져오기에는 "링크" 열이 있었지만, 업무(Task)와 일정(Event)은 둘 다 관련 링크(link_url) 필드를 갖고 있음에도 CSV에는 반영되지 않아 백업·복원 시 링크가 누락됐습니다. 업무·일정 CSV 내보내기·가져오기에 "링크" 열을 추가해 할 일과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-worklog-csv-priority',
     timestamp: '2026-07-18T12:17:34+09:00',
     description: '업무 기록(Work Log)에 우선순위 필드가 추가된 이후에도 CSV 내보내기/가져오기에는 반영되지 않아, 업무·일정·할 일 CSV와 달리 우선순위를 백업하거나 일괄로 가져올 수 없었습니다. 업무 기록 CSV 내보내기·가져오기에 "우선순위" 열을 추가해 다른 항목들과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',

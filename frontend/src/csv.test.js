@@ -19,8 +19,8 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
   ], '2026-07-07')
 
   assert.equal(csv, [
-    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,체크리스트',
-    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",1/2',
+    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,링크,체크리스트',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",,1/2',
   ].join('\n'))
 })
 
@@ -101,9 +101,9 @@ test('eventsToCsv exports event rows with labels and escaping', () => {
   ])
 
   assert.equal(csv, [
-    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모,체크리스트',
-    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,높음,3층 회의실,내부,"분기 계획\n검토",',
-    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,낮음,,,,',
+    '제목,시작,종료,종일 여부,우선순위,장소,태그,메모,링크,체크리스트',
+    '"회의, 기획",2026-07-13T10:00:00,2026-07-13T11:00:00,N,높음,3층 회의실,내부,"분기 계획\n검토",,',
+    '휴가,2026-07-14T00:00:00,2026-07-15T00:00:00,Y,낮음,,,,,',
   ].join('\n'))
 })
 
@@ -369,4 +369,18 @@ test('checklist summary column reports done/total across all four CSV exports an
 
   const { tasks } = parseTasksCsv(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'))
   assert.equal(tasks[0].checklist, undefined)
+})
+
+test('tasksToCsv and parseTasksCsv round-trip the link column', () => {
+  const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, link_url: 'https://example.com/doc' }], '2026-07-18')
+  assert.match(csv, /,https:\/\/example\.com\/doc,$/m)
+  const { tasks } = parseTasksCsv(csv)
+  assert.equal(tasks[0].link_url, 'https://example.com/doc')
+})
+
+test('eventsToCsv and parseEventsCsv round-trip the link column', () => {
+  const csv = eventsToCsv([{ title: '일정', start_at: '2026-07-18T09:00:00', link_url: 'https://example.com/doc' }])
+  assert.match(csv, /,https:\/\/example\.com\/doc,$/m)
+  const { events } = parseEventsCsv(csv)
+  assert.equal(events[0].link_url, 'https://example.com/doc')
 })

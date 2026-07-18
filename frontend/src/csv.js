@@ -10,7 +10,7 @@ const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
 
-const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '체크리스트']
+const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '링크', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -36,6 +36,7 @@ export const tasksToCsv = (tasks, todayIso) => {
     task.category,
     (task.tags || []).join('; '),
     task.description,
+    task.link_url,
     checklistSummary(task.checklist),
   ])
   return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -69,7 +70,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -82,6 +83,7 @@ export const parseTasksCsv = text => {
     if (iDueTime >= 0 && cells[iDueTime]) task.due_time = cells[iDueTime].trim()
     if (iTags >= 0 && cells[iTags]) task.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
+    if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
     tasks.push(task)
   })
   return { tasks, errors }
@@ -161,7 +163,7 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '체크리스트']
+const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '체크리스트']
 
 export const eventsToCsv = events => {
   const rows = events.map(event => [
@@ -173,6 +175,7 @@ export const eventsToCsv = events => {
     event.location,
     (event.tags || []).join('; '),
     event.description,
+    event.link_url,
     checklistSummary(event.checklist),
   ])
   return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -185,7 +188,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -198,6 +201,7 @@ export const parseEventsCsv = text => {
     if (iLocation >= 0 && cells[iLocation]) event.location = cells[iLocation].trim()
     if (iTags >= 0 && cells[iTags]) event.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]
+    if (iLink >= 0 && cells[iLink]) event.link_url = cells[iLink].trim()
     events.push(event)
   })
   return { events, errors }
