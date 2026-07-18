@@ -56,6 +56,7 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
     const id=Number(e.dataTransfer.getData('text/plain'))
     const task=tasks.find(t=>t.id===id)
     if(!task||!onStatusChange||task.status===columnStatus)return
+    if(columnStatus==='done'&&!confirmIncompleteDeps(task))return
     await onStatusChange(task,columnStatus)
   }
   const reminders=useMemo(()=>summarizeDueReminders(tasks,todayIso,2),[tasks,todayIso])
@@ -95,9 +96,10 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
   const startBarDrag=(e,t,mode)=>{if(!t.start_date||!t.due_date||!onReschedule)return;e.preventDefault();e.stopPropagation();const track=e.currentTarget.closest('.timeline-cells');if(!track)return;const rect=track.getBoundingClientRect(),day=dayAtOffset(e.clientX-rect.left,rect.width,zoomDays);dragRef.current=rect;e.currentTarget.setPointerCapture?.(e.pointerId);setDrag({id:t.id,mode,grabDay:day,dropDay:day})}
   const moveBarDrag=e=>{if(!drag||!dragRef.current)return;const day=dayAtOffset(e.clientX-dragRef.current.left,dragRef.current.width,zoomDays);if(day!==drag.dropDay)setDrag(d=>d?{...d,dropDay:day}:d)}
   const endBarDrag=async(e,t)=>{if(!drag||drag.id!==t.id)return;const dates=ganttDragDates(drag.mode,t,{grabDay:drag.grabDay,dropDay:drag.dropDay,windowStartIso:viewStartIso});setDrag(null);dragRef.current=null;if(dates)await onReschedule(t,dates)}
-  const saveProgress=async t=>{const value=Number(draft[t.id]??t.progress);if(value===t.progress)return;const ok=await onProgress(t,value);if(ok)setDraft(x=>{const n={...x};delete n[t.id];return n})}
+  const confirmIncompleteDeps=t=>{const blockers=taskBlockingDependencies(t,tasks);return !blockers.length||window.confirm(`선행 업무(${blockers.map(x=>x.title).join(', ')})가 아직 완료되지 않았습니다. 그래도 완료 처리할까요?`)}
+  const saveProgress=async t=>{const value=Number(draft[t.id]??t.progress);if(value===t.progress)return;if(value===100&&!confirmIncompleteDeps(t)){setDraft(x=>{const n={...x};delete n[t.id];return n});return}const ok=await onProgress(t,value);if(ok)setDraft(x=>{const n={...x};delete n[t.id];return n})}
   const clampProgress=v=>Math.min(100,Math.max(0,Math.round(v)||0))
-  const bulkComplete=async()=>{const ok=await onBulkComplete([...selected]);if(ok)clearSelected()}
+  const bulkComplete=async()=>{const blocked=[...selected].map(id=>tasks.find(t=>t.id===id)).filter(t=>t&&taskBlockingDependencies(t,tasks).length);if(blocked.length&&!window.confirm(`선택한 업무 중 ${blocked.length}개는 선행 업무가 끝나지 않았습니다. 그래도 완료 처리할까요?`))return;const ok=await onBulkComplete([...selected]);if(ok)clearSelected()}
   const bulkDelete=()=>{onBulkDelete([...selected]);clearSelected()}
   const bulkAddTag=async()=>{const tag=bulkTag.trim();if(!tag)return;const ok=await onBulkAddTag([...selected],tag);if(ok)setBulkTag('')}
   const bulkPostpone=async()=>{const days=Number(bulkPostponeDays);if(!days)return;const ok=await onBulkPostpone([...selected],days);if(ok)clearSelected()}

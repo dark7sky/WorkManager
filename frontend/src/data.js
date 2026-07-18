@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-complete-dependency-guard',
+    timestamp: '2026-07-18T22:56:21+09:00',
+    description: '업무 화면은 선행 업무가 끝나지 않은 업무에 "대기" 배지를 보여줬지만, 실제로 완료 처리(보드 드래그, 진행률 100%, 일괄 완료 처리)하는 것은 막지 않아 배지가 그저 참고용이었습니다. 세 가지 완료 경로 모두에서 선행 업무가 남아 있으면 확인 대화상자를 띄워 실수로 완료 처리하는 것을 방지하도록 했습니다(`frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-18-ai-recommend-events',
     timestamp: '2026-07-18T22:49:08+09:00',
     description: 'AI 도우미의 "오늘 할 일 추천"이 업무와 할 일만 고려하고 다가오는 일정(회의·약속)은 무시했습니다. `ai.recommendations`가 일정도 받아 시작 시각 기준으로 후보에 포함하도록 고치고(`backend/app/ai.py`, `backend/app/main.py`), 추천 목록 화면에 일정 항목 라벨과 시작 시각을 표시했습니다(`frontend/src/screens/AIAssistant.jsx`), 테스트 추가.',
