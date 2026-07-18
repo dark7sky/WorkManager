@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-alert-snooze',
+    timestamp: '2026-07-19T03:58:00+09:00',
+    description: '업무/일정/할 일 마감 알림은 한 번 뜨고 나면 다시 알려줄 방법이 없어, 확인 못 하고 지나치면 놓치기 쉬웠습니다. 알림에 "10분 후 다시 알림" 버튼을 추가해 눌러두면 10분 뒤 같은 알림이 다시 표시되도록 했습니다. (`frontend/src/notificationSnooze.js`, `App.jsx`, `public/sw.js`)',
+  },
+  {
     id: '2026-07-19-task-due-alert',
     timestamp: '2026-07-19T03:47:00+09:00',
     description: '일정과 할 일은 마감/예정 시간이 다가오면 기기 알림을 보내주었지만, 업무(Task)는 마감 시간이 있어도 별도 알림이 없었습니다. 업무도 마감 시간 전에 동일한 방식으로 알림을 받을 수 있도록 추가하고, 설정 화면에서 알림 시점(5/10/15/30분 전)을 선택할 수 있게 했습니다. (`frontend/src/taskAlerts.js`, `App.jsx`, `screens/Settings.jsx`)',

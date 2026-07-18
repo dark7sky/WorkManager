@@ -34,3 +34,17 @@ self.addEventListener('fetch', event => {
     return response
   })))
 })
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+  if (event.action === 'snooze') {
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      list.forEach(client => client.postMessage({ type: 'wm-snooze-alert', tag: event.notification.tag }))
+    }))
+    return
+  }
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    if (list.length) return list[0].focus()
+    return self.clients.openWindow('/')
+  }))
+})
