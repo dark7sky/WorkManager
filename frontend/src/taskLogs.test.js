@@ -33,3 +33,10 @@ test('taskEstimateOverrun flags actual time exceeding the estimate', () => {
   assert.deepEqual(taskEstimateOverrun(60, 60), { overMinutes: 0, isOver: false })
   assert.deepEqual(taskEstimateOverrun(60, 30), { overMinutes: -30, isOver: false })
 })
+
+test('taskEstimateOverrun works directly on a single work log record (estimated_minutes vs duration_minutes)', () => {
+  const overLog = { estimated_minutes: 30, duration_minutes: 45 }
+  assert.deepEqual(taskEstimateOverrun(overLog.estimated_minutes, overLog.duration_minutes), { overMinutes: 15, isOver: true })
+  const noDurationYet = { estimated_minutes: 30, duration_minutes: null }
+  assert.equal(taskEstimateOverrun(noDurationYet.estimated_minutes, noDurationYet.duration_minutes).isOver, false)
+})

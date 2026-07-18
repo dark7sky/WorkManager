@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-today-worklog-estimate-overrun',
+    timestamp: '2026-07-19T04:10:35+09:00',
+    description: '업무 화면에서는 예상 소요 시간을 초과하면 초과 배지가 표시되지만, 오늘 화면의 업무 기록은 예상·실제 시간을 각각 표시할 뿐 초과 여부를 알려주지 않았습니다. 업무 기록에도 동일한 초과 배지를 추가했습니다. (`frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-19-today-hide-completed-todos',
     timestamp: '2026-07-19T04:09:33+09:00',
     description: '오늘 화면의 할 일 목록에서 완료된 항목을 계속 보고 있어야 했습니다. 우선순위 필터 옆에 "완료 항목 숨기기" 체크박스를 추가해 완료된 할 일을 목록에서 감출 수 있게 했습니다. (`frontend/src/todaySearch.js`, `frontend/src/screens/Today.jsx`)',
