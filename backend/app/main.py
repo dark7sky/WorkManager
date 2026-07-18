@@ -2388,4 +2388,4 @@ def ai_apply(payload: dict = Body(...), user=Depends(require_user)):
 
 @app.get("/api/ai/recommendations")
 def ai_recommendations(limit: int = 5, user=Depends(require_user)):
-    return {"items": ai.recommendations(rows("tasks", user), rows("todos", user), rows("work_logs", user, "ORDER BY created_at DESC LIMIT 30"), max(1, min(limit, 20))), "source": "local-rules"}
+    return {"items": ai.recommendations(rows("tasks", user), rows("todos", user), rows("work_logs", user, "ORDER BY created_at DESC LIMIT 30"), rows("events", user), max(1, min(limit, 20))), "source": "local-rules"}

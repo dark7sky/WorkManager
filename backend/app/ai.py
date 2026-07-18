@@ -637,7 +637,7 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         return {"items": items}
 
 
-def recommendations(tasks: list[dict], todos: list[dict], logs: list[dict], limit: int = 5) -> list[dict]:
+def recommendations(tasks: list[dict], todos: list[dict], logs: list[dict], events: list[dict] = None, limit: int = 5) -> list[dict]:
     today = date.today().isoformat()
     priority = {"high": 0, "normal": 1, "low": 2}
     active_tasks = [t for t in tasks if t.get("status") != "done" and int(t.get("progress") or 0) < 100]
@@ -646,6 +646,8 @@ def recommendations(tasks: list[dict], todos: list[dict], logs: list[dict], limi
     recent_task_ids = {log.get("task_id") for log in logs[:30] if log.get("task_id")}
     active_todos = [t for t in todos if not t.get("completed")]
     active_todos.sort(key=lambda t: (t.get("todo_date") or "9999-12-31", priority.get(t.get("priority"), 1)))
+    upcoming_events = [e for e in (events or []) if (e.get("start_at") or "")[:10] >= today]
+    upcoming_events.sort(key=lambda e: (e.get("start_at") or "9999-12-31", priority.get(e.get("priority"), 1)))
     candidates = []
     for task in active_tasks:
         overdue = bool(task.get("due_date") and task["due_date"] < today)
@@ -673,6 +675,15 @@ def recommendations(tasks: list[dict], todos: list[dict], logs: list[dict], limi
         sort_key = (todo.get("todo_date") or "9999-12-31", priority.get(todo.get("priority"), 1))
         candidates.append((sort_key, {"entity": "todo", "todo_id": todo["id"], "title": todo["title"], "reason": reason,
                        "due_date": todo.get("todo_date")}))
+    for event in upcoming_events:
+        start_date = (event.get("start_at") or "")[:10]
+        if start_date == today:
+            reason = "오늘 예정된 일정입니다"
+        else:
+            reason = "다가오는 일정입니다"
+        sort_key = (event.get("start_at") or "9999-12-31", priority.get(event.get("priority"), 1))
+        candidates.append((sort_key, {"entity": "event", "event_id": event["id"], "title": event["title"], "reason": reason,
+                       "start_at": event.get("start_at")}))
     candidates.sort(key=lambda c: c[0])
     return [item for _, item in candidates[:max(0, limit)]]
 

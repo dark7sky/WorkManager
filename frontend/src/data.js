@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-ai-recommend-events',
+    timestamp: '2026-07-18T22:49:08+09:00',
+    description: 'AI 도우미의 "오늘 할 일 추천"이 업무와 할 일만 고려하고 다가오는 일정(회의·약속)은 무시했습니다. `ai.recommendations`가 일정도 받아 시작 시각 기준으로 후보에 포함하도록 고치고(`backend/app/ai.py`, `backend/app/main.py`), 추천 목록 화면에 일정 항목 라벨과 시작 시각을 표시했습니다(`frontend/src/screens/AIAssistant.jsx`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-event-duplicate-link-checklist',
     timestamp: '2026-07-18T22:45:57+09:00',
     description: '일정(Calendar)을 복제하면 업무·할 일·업무 기록과 달리 링크·첨부 링크·체크리스트·종일 여부가 모두 사라졌습니다(우선순위·예상 소요시간만 복사됨). `buildEventDuplicatePayload`가 `link_url`/`links`/`checklist`(완료 여부는 초기화)/`google_is_all_day`도 함께 복사하도록 고쳐 다른 항목들과 동일하게 동작합니다(`frontend/src/eventDuplicate.js`), 테스트 추가.',
