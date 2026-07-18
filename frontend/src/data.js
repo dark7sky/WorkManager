@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-csv-estimate',
+    timestamp: '2026-07-18T12:24:34+09:00',
+    description: '할 일(Todo) CSV 내보내기/가져오기에는 "예상 소요시간(분)" 열이 있었지만, 업무(Task)도 동일한 예상 소요 시간 필드(estimated_minutes)와 초과 배지 기능을 갖고 있음에도 CSV에는 반영되지 않아 백업·복원 시 예상 소요 시간이 유실됐습니다. 업무 CSV 내보내기·가져오기에 "예상 소요시간(분)" 열을 추가해 할 일과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-task-event-csv-link',
     timestamp: '2026-07-18T12:21:34+09:00',
     description: '할 일(Todo) CSV 내보내기/가져오기에는 "링크" 열이 있었지만, 업무(Task)와 일정(Event)은 둘 다 관련 링크(link_url) 필드를 갖고 있음에도 CSV에는 반영되지 않아 백업·복원 시 링크가 누락됐습니다. 업무·일정 CSV 내보내기·가져오기에 "링크" 열을 추가해 할 일과 동일하게 왕복되도록 했습니다(`frontend/src/csv.js`).',

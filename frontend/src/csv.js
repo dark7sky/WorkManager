@@ -10,7 +10,7 @@ const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
 
-const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '링크', '체크리스트']
+const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -37,6 +37,7 @@ export const tasksToCsv = (tasks, todayIso) => {
     (task.tags || []).join('; '),
     task.description,
     task.link_url,
+    task.estimated_minutes ?? '',
     checklistSummary(task.checklist),
   ])
   return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -70,7 +71,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -84,6 +85,7 @@ export const parseTasksCsv = text => {
     if (iTags >= 0 && cells[iTags]) task.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
+    if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) task.estimated_minutes = Number(cells[iEstimate])
     tasks.push(task)
   })
   return { tasks, errors }

@@ -19,8 +19,8 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
   ], '2026-07-07')
 
   assert.equal(csv, [
-    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,링크,체크리스트',
-    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",,1/2',
+    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,링크,예상 소요시간(분),체크리스트',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",,,1/2',
   ].join('\n'))
 })
 
@@ -373,9 +373,16 @@ test('checklist summary column reports done/total across all four CSV exports an
 
 test('tasksToCsv and parseTasksCsv round-trip the link column', () => {
   const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, link_url: 'https://example.com/doc' }], '2026-07-18')
-  assert.match(csv, /,https:\/\/example\.com\/doc,$/m)
+  assert.match(csv, /,https:\/\/example\.com\/doc,,$/m)
   const { tasks } = parseTasksCsv(csv)
   assert.equal(tasks[0].link_url, 'https://example.com/doc')
+})
+
+test('tasksToCsv and parseTasksCsv round-trip the estimated minutes column', () => {
+  const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, estimated_minutes: 90 }], '2026-07-18')
+  assert.match(csv, /,90,$/m)
+  const { tasks } = parseTasksCsv(csv)
+  assert.equal(tasks[0].estimated_minutes, 90)
 })
 
 test('eventsToCsv and parseEventsCsv round-trip the link column', () => {
