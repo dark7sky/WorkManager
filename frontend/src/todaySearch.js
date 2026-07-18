@@ -21,6 +21,11 @@ export const filterTodosByPriority = (todos, priority = 'all') => {
   return todos.filter(todo => (todo.priority || 'normal') === priority)
 }
 
+export const filterLogsByPriority = (logs, priority = 'all') => {
+  if (priority === 'all') return logs
+  return logs.filter(log => (log.priority || 'normal') === priority)
+}
+
 export const filterLogsByBillable = (logs, billable = 'all') => {
   if (billable === 'all') return logs
   if (billable === 'billable') return logs.filter(log => !!log.billable)

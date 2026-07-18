@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from './todaySearch.js'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByPriority, filterLogsByBillable } from './todaySearch.js'
 
 const todos = [
   { id: 1, title: '보고서 작성', priority: 'high' },
@@ -69,6 +69,18 @@ test('filterTodosByPriority matches an explicit priority', () => {
 
 test('filterTodosByPriority treats a missing priority as normal', () => {
   assert.deepEqual(filterTodosByPriority(todos, 'normal').map(t => t.id), [3])
+})
+
+test('filterLogsByPriority returns all logs when priority is all', () => {
+  const priorityLogs = [{ id: 1, content: '보고서', priority: 'high' }, { id: 2, content: '통화' }]
+  assert.equal(filterLogsByPriority(priorityLogs, 'all').length, 2)
+  assert.equal(filterLogsByPriority(priorityLogs).length, 2)
+})
+
+test('filterLogsByPriority matches an explicit priority and treats missing as normal', () => {
+  const priorityLogs = [{ id: 1, content: '보고서', priority: 'high' }, { id: 2, content: '통화' }]
+  assert.deepEqual(filterLogsByPriority(priorityLogs, 'high').map(l => l.id), [1])
+  assert.deepEqual(filterLogsByPriority(priorityLogs, 'normal').map(l => l.id), [2])
 })
 
 test('filterLogsByBillable returns all logs when billable is all', () => {

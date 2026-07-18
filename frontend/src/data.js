@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-worklog-priority-filter',
+    timestamp: '2026-07-19T04:25:00+09:00',
+    description: '오늘 화면의 업무 기록 목록은 할 일·업무와 달리 우선순위로 필터링할 수 없었습니다. 청구 가능 필터 옆에 우선순위 필터를 추가하고 필터 프리셋 저장/적용에도 반영했습니다. (`frontend/src/todaySearch.js`, `frontend/src/logFilterPresets.js`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-19-calendar-arrow-navigation',
     timestamp: '2026-07-19T04:05:00+09:00',
     description: '캘린더 화면은 월/주/년 전환 버튼을 마우스로만 클릭할 수 있어 다른 화면(업무·오늘)의 키보드 탐색과 일관성이 없었습니다. `←`/`→` 키로 이전·다음 달(주/년)로 이동하고, `T` 키로 오늘로 바로 이동하도록 추가했습니다. (`frontend/src/screens/Calendar.jsx`)',

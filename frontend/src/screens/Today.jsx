@@ -6,7 +6,7 @@ import { api } from '../api'
 import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from '../workLogTimer'
 import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from '../todoPins'
 import { loadLogSort, loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, saveLogSort, togglePinnedLog } from '../logPins'
-import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByBillable } from '../todaySearch'
+import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterLogsByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
@@ -311,6 +311,7 @@ export default function Today(props) {
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
   const [logBillableFilter, setLogBillableFilter] = useState('all')
+  const [logPriorityFilter, setLogPriorityFilter] = useState('all')
   const [todoSort, setTodoSortState] = useState(() => loadTodoSort())
   const [logSort, setLogSortState] = useState(() => loadLogSort())
   const setTodoSort = value => { setTodoSortState(value); saveTodoSort(value) }
@@ -320,8 +321,8 @@ export default function Today(props) {
   const saveTodoFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildTodoFilterPreset({ name, query, selectedTags, priority: todoPriorityFilter }); const next = addTodoFilterPreset(todoFilterPresets, preset); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
   const deleteTodoFilterPreset = () => { const name = window.prompt('삭제할 필터 이름을 입력하세요.'); const match = todoFilterPresets.find(p => p.name === name); if (!match) return; const next = removeTodoFilterPreset(todoFilterPresets, match.id); setTodoFilterPresets(next); saveTodoFilterPresets(next) }
   const [logFilterPresets, setLogFilterPresets] = useState(() => loadLogFilterPresets())
-  const applyLogFilterPreset = id => { const preset = logFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setLogBillableFilter(preset.billable) }
-  const saveLogFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildLogFilterPreset({ name, query, selectedTags, billable: logBillableFilter }); const next = addLogFilterPreset(logFilterPresets, preset); setLogFilterPresets(next); saveLogFilterPresets(next) }
+  const applyLogFilterPreset = id => { const preset = logFilterPresets.find(p => p.id === id); if (!preset) return; setQuery(preset.query); setSelectedTags(preset.selectedTags); setLogBillableFilter(preset.billable); setLogPriorityFilter(preset.priority || 'all') }
+  const saveLogFilterPreset = () => { const name = window.prompt('필터 이름을 입력하세요.'); if (!name) return; const preset = buildLogFilterPreset({ name, query, selectedTags, billable: logBillableFilter, priority: logPriorityFilter }); const next = addLogFilterPreset(logFilterPresets, preset); setLogFilterPresets(next); saveLogFilterPresets(next) }
   const deleteLogFilterPreset = () => { const name = window.prompt('삭제할 필터 이름을 입력하세요.'); const match = logFilterPresets.find(p => p.name === name); if (!match) return; const next = removeLogFilterPreset(logFilterPresets, match.id); setLogFilterPresets(next); saveLogFilterPresets(next) }
   const [tagSuggestions, setTagSuggestions] = useState({})
   const [timer, setTimer] = useState(() => loadWorkLogTimer())
@@ -411,7 +412,7 @@ export default function Today(props) {
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
   const shownTodos = orderTodosByPin(filterTodosByPriority(filterTodosByQuery(todos.filter(matches), query), todoPriorityFilter), pinnedTodoIds, todoSort)
   const completedTodos = shownTodos.filter(todo => todo.completed)
-  const shownLogs = orderLogsByPin(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), pinnedLogIds, logSort)
+  const shownLogs = orderLogsByPin(filterLogsByPriority(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), logPriorityFilter), pinnedLogIds, logSort)
   const todayKey = now.toLocaleDateString('en-CA')
   const overlappingNewLog = useMemo(() => findOverlappingWorkLogs(todayKey, logTime, logMinutes, logs, null), [todayKey, logTime, logMinutes, logs])
   const editingLog = edit?.type === 'log' ? logs.find(l => l.id === edit.id) : null
@@ -680,6 +681,7 @@ export default function Today(props) {
       <section className="log-panel">
         <div className="section-title"><div><h2>오늘 한 일</h2><p>작은 성과도 기록해 두세요.</p></div><Clock3/></div>
         <select aria-label="청구 가능 필터" value={logBillableFilter} onChange={event => setLogBillableFilter(event.target.value)}><option value="all">전체</option><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select>
+        <select aria-label="업무 기록 우선순위 필터" value={logPriorityFilter} onChange={event => setLogPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
         <select aria-label="업무 기록 정렬" value={logSort} onChange={event => setLogSort(event.target.value)}><option value="none">기본순</option><option value="time">시각순</option><option value="duration">소요 시간순</option><option value="content">내용순</option></select>
         <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}</div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}

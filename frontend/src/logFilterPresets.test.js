@@ -20,13 +20,19 @@ test('loadLogFilterPresets returns empty array on malformed JSON', () => {
   assert.deepEqual(loadLogFilterPresets(storage), [])
 })
 
-test('buildLogFilterPreset trims name and defaults billable to all', () => {
+test('buildLogFilterPreset trims name and defaults billable/priority to all', () => {
   const preset = buildLogFilterPreset({ name: '  청구 가능 업무  ', query: 'client-x', selectedTags: ['client-x'] })
   assert.equal(preset.name, '청구 가능 업무')
   assert.equal(preset.billable, 'all')
+  assert.equal(preset.priority, 'all')
   assert.equal(preset.query, 'client-x')
   assert.deepEqual(preset.selectedTags, ['client-x'])
   assert.ok(preset.id.startsWith('lflt-'))
+})
+
+test('buildLogFilterPreset keeps an explicit priority', () => {
+  const preset = buildLogFilterPreset({ name: '우선순위 높음', priority: 'high' })
+  assert.equal(preset.priority, 'high')
 })
 
 test('addLogFilterPreset rejects unnamed presets and replaces same-name presets', () => {

@@ -14,12 +14,13 @@ export const saveLogFilterPresets = (presets, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(presets))
 }
 
-export const buildLogFilterPreset = ({ name, query, selectedTags, billable }) => ({
+export const buildLogFilterPreset = ({ name, query, selectedTags, billable, priority }) => ({
   id: `lflt-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   query: String(query || ''),
   selectedTags: Array.isArray(selectedTags) ? selectedTags : [],
   billable: billable || 'all',
+  priority: priority || 'all',
 })
 
 export const addLogFilterPreset = (presets, preset) => {
