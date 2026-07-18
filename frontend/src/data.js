@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-calendar-agenda-postpone',
+    timestamp: '2026-07-18T17:52:10+09:00',
+    description: '업무(Tasks)의 지연 업무 행과 오늘 화면의 할 일/업무 기록 행에는 모두 한 번에 하루 미루는 "하루 미루기" 버튼이 있었지만, 캘린더의 모바일 일정 목록(agenda) 행에는 이 버튼이 없어 일정을 미루려면 일정을 열어 수정 폼까지 들어가야 했습니다. 이미 존재하는 `postponeEvent`(시작·종료 시각을 유지한 채 하루씩 미루는 로직)를 재사용해 agenda 행에도 "하루 미루기" 버튼을 추가했습니다(`frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-18-template-estimated-minutes',
     timestamp: '2026-07-18T17:47:37+09:00',
     description: '업무/일정/할 일/업무 기록 생성 폼에는 모두 예상 소요 시간(분) 입력란이 있지만, 4종 템플릿(저장된 프리셋) 모두 이 값을 저장·복원하지 않아 템플릿을 불러오면 예상 소요 시간이 매번 비어 있었습니다. 네 템플릿 모듈과 각 폼의 템플릿 저장/적용 로직에 예상 소요 시간 저장·복원을 추가했습니다(`frontend/src/taskTemplates.js`, `frontend/src/eventTemplates.js`, `frontend/src/todoTemplates.js`, `frontend/src/logTemplates.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
