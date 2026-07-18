@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-attachment-drag-drop',
+    timestamp: '2026-07-18T13:16:18+09:00',
+    description: '업무·일정·오늘의 할 일·업무 기록에서 첨부파일을 추가하려면 항상 "파일 선택" 버튼을 눌러 탐색기를 여는 방법뿐이었습니다. 네 곳의 첨부파일 영역 모두에 드래그 앤 드롭 업로드를 추가해, 파일을 끌어다 놓기만 해도 바로 첨부되도록 했습니다(`frontend/src/fileDrop.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-18-performance-event-goal',
     timestamp: '2026-07-18T12:34:26+09:00',
     description: '성과 화면의 "기간 목표" 트래커는 완료 업무·기록 시간·완료 할 일 목표만 지원했고, 이미 통계 카드에 표시되던 일정 수(stats.events)는 목표 대상에서 빠져 있었습니다. 일정 목표를 추가해 다른 지표와 동일하게 목표 저장·진행률 막대·달성률 표시가 되도록 했습니다(`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',

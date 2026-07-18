@@ -23,6 +23,7 @@ import { normalizedLinks } from '../taskFormPayload'
 import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingEvents } from '../eventOverlap'
 import { validateEventForm } from '../formValidation'
+import { dropZoneHandlers } from '../fileDrop'
 import { api } from '../api'
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토']
@@ -156,9 +157,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     api.eventAttachments(event.id).then(res => { if (!cancelled) setAttachments(res.items || []) }).catch(() => {})
     return () => { cancelled = true }
   }, [event?.id])
-  const uploadAttachment = async e => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
+  const uploadAttachmentFile = async file => {
     if (!file) return
     setAttachmentError('')
     setUploadingAttachment(true)
@@ -171,6 +170,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       setUploadingAttachment(false)
     }
   }
+  const uploadAttachment = e => { const file = e.target.files?.[0]; e.target.value = ''; uploadAttachmentFile(file) }
   const removeAttachment = async id => {
     try {
       await api.deleteEventAttachment(event.id, id)
@@ -281,7 +281,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
         <span className="muted"> {formatAttachmentSize(item.size_bytes)}</span>
         <button type="button" className="text-button" onClick={() => removeAttachment(item.id)}>삭제</button>
       </div>)}
-      <div className="checklist-editor-add"><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : null}</div>
+      <div className="checklist-editor-add file-dropzone" {...dropZoneHandlers(uploadAttachmentFile)}><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : <span className="muted">또는 파일을 끌어다 놓으세요</span>}</div>
       {attachmentError ? <p className="form-error" role="alert">{attachmentError}</p> : null}
     </div> : null}
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>

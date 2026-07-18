@@ -13,6 +13,7 @@ import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCs
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
 import { todoIcsFilename, todosToIcs, logIcsFilename, logsToIcs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
+import { dropZoneHandlers } from '../fileDrop'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { formatDuration } from '../performanceReport'
 import { moveChecklistItem, normalizedChecklist, normalizedLinks } from '../taskFormPayload'
@@ -87,9 +88,7 @@ function TodoAttachments({ todoId }) {
     api.todoAttachments(todoId).then(res => { if (!cancelled) setAttachments(res.items || []) }).catch(() => {})
     return () => { cancelled = true }
   }, [todoId])
-  const upload = async e => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
+  const uploadFile = async file => {
     if (!file) return
     setError('')
     setUploading(true)
@@ -98,6 +97,7 @@ function TodoAttachments({ todoId }) {
       setAttachments(current => [...current, item])
     } catch (err) { setError(err.message) } finally { setUploading(false) }
   }
+  const upload = e => { const file = e.target.files?.[0]; e.target.value = ''; uploadFile(file) }
   const remove = async id => {
     try {
       await api.deleteTodoAttachment(todoId, id)
@@ -112,7 +112,7 @@ function TodoAttachments({ todoId }) {
       <span className="muted"> {formatSize(item.size_bytes)}</span>
       <button type="button" className="text-button" onClick={() => remove(item.id)}>삭제</button>
     </div>)}
-    <div className="checklist-editor-add"><input type="file" disabled={uploading} onChange={upload}/>{uploading ? <span className="muted">업로드 중…</span> : null}</div>
+    <div className="checklist-editor-add file-dropzone" {...dropZoneHandlers(uploadFile)}><input type="file" disabled={uploading} onChange={upload}/>{uploading ? <span className="muted">업로드 중…</span> : <span className="muted">또는 파일을 끌어다 놓으세요</span>}</div>
     {error ? <p className="form-error" role="alert">{error}</p> : null}
   </div>
 }
@@ -177,9 +177,7 @@ function WorkLogAttachments({ logId }) {
     api.workLogAttachments(logId).then(res => { if (!cancelled) setAttachments(res.items || []) }).catch(() => {})
     return () => { cancelled = true }
   }, [logId])
-  const upload = async e => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
+  const uploadFile = async file => {
     if (!file) return
     setError('')
     setUploading(true)
@@ -188,6 +186,7 @@ function WorkLogAttachments({ logId }) {
       setAttachments(current => [...current, item])
     } catch (err) { setError(err.message) } finally { setUploading(false) }
   }
+  const upload = e => { const file = e.target.files?.[0]; e.target.value = ''; uploadFile(file) }
   const remove = async id => {
     try {
       await api.deleteWorkLogAttachment(logId, id)
@@ -202,7 +201,7 @@ function WorkLogAttachments({ logId }) {
       <span className="muted"> {formatSize(item.size_bytes)}</span>
       <button type="button" className="text-button" onClick={() => remove(item.id)}>삭제</button>
     </div>)}
-    <div className="checklist-editor-add"><input type="file" disabled={uploading} onChange={upload}/>{uploading ? <span className="muted">업로드 중…</span> : null}</div>
+    <div className="checklist-editor-add file-dropzone" {...dropZoneHandlers(uploadFile)}><input type="file" disabled={uploading} onChange={upload}/>{uploading ? <span className="muted">업로드 중…</span> : <span className="muted">또는 파일을 끌어다 놓으세요</span>}</div>
     {error ? <p className="form-error" role="alert">{error}</p> : null}
   </div>
 }

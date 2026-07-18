@@ -5,6 +5,7 @@ import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklis
 import { validateTaskForm } from '../formValidation'
 import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
+import { dropZoneHandlers } from '../fileDrop'
 import TagsInput from './TagsInput'
 
 export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
@@ -112,9 +113,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     return () => { cancelled = true }
   }, [task?.id])
 
-  const uploadAttachment = async e => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
+  const uploadAttachmentFile = async file => {
     if (!file) return
     setAttachmentError('')
     setUploadingAttachment(true)
@@ -127,6 +126,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       setUploadingAttachment(false)
     }
   }
+  const uploadAttachment = e => { const file = e.target.files?.[0]; e.target.value = ''; uploadAttachmentFile(file) }
   const removeAttachment = async id => {
     try {
       await api.deleteTaskAttachment(task.id, id)
@@ -298,7 +298,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
         <span className="muted"> {formatAttachmentSize(item.size_bytes)}</span>
         <button type="button" className="text-button" onClick={() => removeAttachment(item.id)}>삭제</button>
       </div>)}
-      <div className="checklist-editor-add"><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : null}</div>
+      <div className="checklist-editor-add file-dropzone" {...dropZoneHandlers(uploadAttachmentFile)}><input ref={attachmentInputRef} type="file" disabled={uploadingAttachment} onChange={uploadAttachment}/>{uploadingAttachment ? <span className="muted">업로드 중…</span> : <span className="muted">또는 파일을 끌어다 놓으세요</span>}</div>
       <p className="muted">파일당 최대 5MB, 업무당 최대 20개까지 첨부할 수 있습니다.</p>
       {attachmentError ? <p className="form-error" role="alert">{attachmentError}</p> : null}
     </div> : null}
