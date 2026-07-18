@@ -1211,6 +1211,19 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(cleared.json()["estimated_minutes"])
         self.assertEqual(a.post("/api/events", json={"title": "bad estimate", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00", "estimated_minutes": -5}).status_code, 422)
 
+    def test_work_log_estimated_minutes_is_persisted_and_validated(self):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "planning review", "log_date": "2026-07-06", "estimated_minutes": 45})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["estimated_minutes"], 45)
+        patched = a.patch(f"/api/work_logs/{log.json()['id']}", json={"estimated_minutes": 30})
+        self.assertEqual(patched.status_code, 200, patched.text)
+        self.assertEqual(patched.json()["estimated_minutes"], 30)
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"estimated_minutes": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["estimated_minutes"])
+        self.assertEqual(a.post("/api/work_logs", json={"content": "bad estimate", "log_date": "2026-07-06", "estimated_minutes": -5}).status_code, 422)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_ai_apply_expands_recurring_event_into_one_row_per_occurrence(self, *_):

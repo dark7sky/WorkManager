@@ -11,6 +11,7 @@ export const buildLogDuplicatePayload = log => ({
   billable: !!log?.billable,
   priority: log?.priority || 'normal',
   checklist: Array.isArray(log?.checklist) ? log.checklist.map(item => ({ ...item, done: false })) : [],
+  estimated_minutes: log?.estimated_minutes || null,
 })
 
 export const buildTaskFromLogPayload = log => ({

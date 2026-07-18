@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-estimated-minutes',
+    timestamp: '2026-07-18T17:22:40+09:00',
+    description: '업무·일정·할 일에는 있던 예상 소요 시간(`estimated_minutes`) 필드가 업무 기록(work_logs)에는 없어, 실제 소요 시간(`duration_minutes`)만 기록하고 계획 대비 실적을 비교할 수 없었습니다. 업무 기록 등록/수정 폼과 CSV 내보내기·가져오기, 복제 기능에 예상 소요 시간을 추가했습니다 (`backend/app/main.py`의 `WorkLogPayload`, `backend/app/db.py`, `frontend/src/screens/Today.jsx`, `frontend/src/csv.js`, `frontend/src/logDuplicate.js`).',
+  },
+  {
     id: '2026-07-18-ai-parses-event-todo-estimate-checklist',
     timestamp: '2026-07-18T17:17:25+09:00',
     description: 'AI 빠른 입력(자연어 파싱)이 예상 소요 시간(`estimated_minutes`)과 체크리스트(`checklist`) 추출을 업무(Task)에만 적용하고 있었습니다. 두 필드는 이미 일정(Event)과 할 일(Todo)에도 폼·CSV·배지로 지원되고 있었지만, 로컬 규칙 기반 파서와 원격 AI 프롬프트가 업무 항목에 대해서만 이를 채우고 있어 "1시간 회의 예상" 같은 입력에서 값이 누락됐습니다. `rule_parse`의 일정·할 일 분기에도 동일한 추출 로직을 추가하고, 원격 AI 시스템 프롬프트 설명도 세 항목 모두를 포함하도록 갱신했습니다(`backend/app/ai.py`, 테스트는 `backend/tests/test_ai.py`).',
