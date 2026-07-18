@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-worklog-bulk-priority',
+    timestamp: '2026-07-18T12:14:54+09:00',
+    description: '업무(Tasks)·일정(Event)·할 일(Todo)은 여러 개를 선택했을 때 일괄로 우선순위를 바꾸는 기능이 있었지만, 업무 기록(Work Log)에는 개별 우선순위 필드만 있고 선택 항목 일괄 변경 기능이 빠져 있었습니다. Today 화면의 업무 기록 일괄 작업 바에 할 일과 동일한 방식으로 "우선순위 변경" 폼을 추가했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-18-worklog-row-postpone',
     timestamp: '2026-07-18T12:09:56+09:00',
     description: '할 일(Todo)은 각 행에 "하루 미루기" 버튼이 있어 하나만 골라 바로 연기할 수 있었지만, 업무 기록(Work Log)은 여러 개를 선택해야 하는 일괄 연기 기능만 있어 기록 하나의 날짜만 바로잡으려 해도 항상 다중 선택 과정을 거쳐야 했습니다. Today 화면의 업무 기록 행에도 할 일과 동일한 방식으로 개별 "하루 미루기" 버튼을 추가했습니다(이미 있던 `postponeLogDate` 헬퍼 재사용, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
