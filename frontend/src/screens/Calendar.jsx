@@ -83,12 +83,13 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setPrefill(filled)
     setPrefillKey(k => k + 1)
     setTags(filled.tags)
+    setChecklist(filled.checklist)
   }
   const saveAsTemplate = () => {
     const data = new FormData(formRef.current)
     const name = window.prompt('템플릿 이름을 입력하세요.', data.get('title') || '')
     if (!name) return
-    const template = buildEventTemplate({ name, title: data.get('title'), location: data.get('location'), color: data.get('color'), tags })
+    const template = buildEventTemplate({ name, title: data.get('title'), location: data.get('location'), color: data.get('color'), priority: data.get('priority'), tags, checklist })
     const next = addEventTemplate(templates, template)
     setTemplates(next)
     saveEventTemplates(next)

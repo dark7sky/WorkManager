@@ -2,6 +2,10 @@ const STORAGE_KEY = 'wm-event-templates'
 const NAME_LIMIT = 100
 const TITLE_LIMIT = 300
 const TAG_LIMIT = 50
+const CHECKLIST_LIMIT = 50
+const CHECKLIST_TEXT_LIMIT = 300
+
+const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 export const loadEventTemplates = (storage = localStorage) => {
   try {
@@ -16,13 +20,18 @@ export const saveEventTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildEventTemplate = ({ name, title, location, color, tags }) => ({
+export const buildEventTemplate = ({ name, title, location, color, tags, priority, checklist }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
   location: String(location || '').trim().slice(0, TITLE_LIMIT),
   color: color || '',
+  priority: priority || '',
   tags: (Array.isArray(tags) ? tags : []).slice(0, TAG_LIMIT),
+  checklist: (Array.isArray(checklist) ? checklist : [])
+    .filter(i => i && String(i.text || '').trim())
+    .slice(0, CHECKLIST_LIMIT)
+    .map(i => ({ id: genId(), text: String(i.text).trim().slice(0, CHECKLIST_TEXT_LIMIT), done: false })),
 })
 
 export const addEventTemplate = (templates, template) => {
@@ -36,5 +45,7 @@ export const applyEventTemplate = template => ({
   title: template.title,
   location: template.location,
   color: template.color,
+  priority: template.priority,
   tags: template.tags,
+  checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
 })

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-event-template-priority-checklist',
+    timestamp: '2026-07-18T17:46:23+09:00',
+    description: '업무/할 일 템플릿은 저장·적용 시 우선순위와 체크리스트를 함께 보관했지만, 일정 템플릿은 제목/장소/색상/태그만 저장하고 우선순위와 체크리스트를 저장하지 않아 템플릿으로 저장한 일정을 다시 불러오면 해당 정보가 사라졌습니다. 일정 템플릿에도 우선순위·체크리스트 저장/복원을 추가해 세 템플릿 기능의 동작을 통일했습니다(`frontend/src/eventTemplates.js`, `frontend/src/screens/Calendar.jsx`, 테스트는 `frontend/src/eventTemplates.test.js`).',
+  },
+  {
     id: '2026-07-18-task-row-color-swatch',
     timestamp: '2026-07-18T17:45:12+09:00',
     description: '할 일/업무 기록 목록에는 색상 지정 시 행 왼쪽에 색상 표시선이 나타나지만, 업무(간트) 목록에서는 같은 색상 필드가 간트 바 색상에만 반영되고 행 자체에는 표시되지 않았습니다. 업무 목록의 각 행에도 동일한 색상 표시선을 추가해 화면 간 표시 방식을 통일했습니다(`frontend/src/screens/Tasks.jsx`).',

@@ -61,5 +61,21 @@ test('removeEventTemplate filters out the matching id only', () => {
 
 test('applyEventTemplate maps template fields onto a draft', () => {
   const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', location: '회의실 A', color: 'blue', tags: ['정기'] })
-  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', tags: ['정기'] })
+  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], checklist: [] })
+})
+
+test('buildEventTemplate captures priority and checklist like task/todo templates', () => {
+  const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', priority: 'high', checklist: [{ text: '자료 준비' }, { text: '  ' }] })
+  assert.equal(template.priority, 'high')
+  assert.equal(template.checklist.length, 1)
+  assert.equal(template.checklist[0].text, '자료 준비')
+  assert.equal(template.checklist[0].done, false)
+})
+
+test('applyEventTemplate restores priority and a fresh checklist copy', () => {
+  const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', priority: 'high', checklist: [{ text: '자료 준비' }] })
+  const applied = applyEventTemplate(template)
+  assert.equal(applied.priority, 'high')
+  assert.deepEqual(applied.checklist.map(i => i.text), ['자료 준비'])
+  assert.notEqual(applied.checklist[0].id, template.checklist[0].id)
 })
