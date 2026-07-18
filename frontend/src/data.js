@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-checklist-csv-round-trip',
+    timestamp: '2026-07-18T22:30:22+09:00',
+    description: '업무·일정·할 일·업무 기록 CSV의 "체크리스트" 열은 완료/전체 개수만 보여주는 요약("2/3")이라 다시 가져오기(import) 시 체크리스트 항목이 전혀 복원되지 않았습니다. "체크리스트" 열 형식을 각 항목의 완료 여부를 담은 "[x] 항목1; [ ] 항목2" 형태로 바꾸고, 네 가지 CSV 가져오기(`parseTasksCsv`/`parseEventsCsv`/`parseTodosCsv`/`parseWorkLogsCsv`)가 이 열을 읽어 체크리스트를 복원하도록 했습니다(`frontend/src/csv.js`), 테스트 추가.',
+  },
+  {
     id: '2026-07-18-worklog-csv-task-link-import',
     timestamp: '2026-07-18T22:25:23+09:00',
     description: '업무 기록(Work Log) CSV를 내보내면 "연결 업무" 열에 연결된 업무(#ID)가 표시되었지만, 그 CSV를 다시 가져올 때는 이 값이 읽히지 않아 업무 연결이 항상 사라지는 문제가 있었습니다. `parseWorkLogsCsv`가 "연결 업무" 열에서 업무 ID(#숫자)를 읽어 `task_id`를 복원하도록 수정했습니다(`frontend/src/csv.js`).',

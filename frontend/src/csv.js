@@ -8,7 +8,16 @@ const taskStatusLabels = {
 
 const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
-const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
+const checklistSummary = checklist => checklist?.length ? checklist.map(item => `[${item.done ? 'x' : ' '}] ${item.text}`).join('; ') : ''
+
+const parseChecklistCell = cell => {
+  if (!cell) return undefined
+  const items = cell.split(';').map(part => {
+    const m = part.trim().match(/^\[([ xX])\]\s*(.*)$/)
+    return m ? { text: m[2].trim(), done: m[1].trim().toLowerCase() === 'x' } : null
+  }).filter(item => item && item.text)
+  return items.length ? items : undefined
+}
 
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
@@ -74,7 +83,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -90,6 +99,7 @@ export const parseTasksCsv = text => {
     if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) task.estimated_minutes = Number(cells[iEstimate])
     if (iColor >= 0 && cells[iColor]) task.color = colorLabelToValue[cells[iColor].trim()] || ''
+    if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) task.checklist = c }
     tasks.push(task)
   })
   return { tasks, errors }
@@ -197,7 +207,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -213,6 +223,7 @@ export const parseEventsCsv = text => {
     if (iLink >= 0 && cells[iLink]) event.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) event.estimated_minutes = Number(cells[iEstimate])
     if (iColor >= 0 && cells[iColor]) event.color = colorLabelToValue[cells[iColor].trim()] || ''
+    if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) event.checklist = c }
     events.push(event)
   })
   return { events, errors }
@@ -248,7 +259,7 @@ export const parseTodosCsv = text => {
   if (!rows.length) return { todos: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const todos = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -263,6 +274,7 @@ export const parseTodosCsv = text => {
     if (iLink >= 0 && cells[iLink]) todo.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) todo.estimated_minutes = Number(cells[iEstimate])
     if (iColor >= 0 && cells[iColor]) todo.color = colorLabelToValue[cells[iColor].trim()] || ''
+    if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) todo.checklist = c }
     todos.push(todo)
   })
   return { todos, errors }
@@ -295,7 +307,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iColor = col('색상')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iColor = col('색상'), iChecklist = col('체크리스트')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -310,6 +322,7 @@ export const parseWorkLogsCsv = text => {
     if (iLink >= 0 && cells[iLink]) log.link_url = cells[iLink].trim()
     if (iBillable >= 0 && cells[iBillable]) log.billable = cells[iBillable].trim().toUpperCase() === 'Y'
     if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''
+    if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) log.checklist = c }
     logs.push(log)
   })
   return { logs, errors }

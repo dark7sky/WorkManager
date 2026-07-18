@@ -19,8 +19,18 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
 
   assert.equal(csv, [
     '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,태그,메모,링크,예상 소요시간(분),색상,체크리스트',
-    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,,1/2',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,,[x] a; [ ] b',
   ].join('\n'))
+})
+
+test('tasksToCsv and parseTasksCsv round-trip the checklist column', () => {
+  const csv = tasksToCsv([
+    { title: '기획안', status: 'todo', checklist: [{ text: '초안 작성', done: true }, { text: '검토 요청', done: false }] },
+  ], '2026-07-07')
+
+  const { tasks, errors } = parseTasksCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(tasks[0].checklist, [{ text: '초안 작성', done: true }, { text: '검토 요청', done: false }])
 })
 
 test('tasksToCsv guards spreadsheet formulas', () => {
@@ -147,6 +157,15 @@ test('parseEventsCsv defaults end to start and skips rows missing title or start
   assert.deepEqual(errors, ['2행: 제목이 없어 건너뜀', '4행: 시작 일시가 없어 건너뜀'])
 })
 
+test('eventsToCsv and parseEventsCsv round-trip the checklist column', () => {
+  const csv = eventsToCsv([
+    { title: '행사 준비', start_at: '2026-07-18T09:00:00', checklist: [{ text: '장소 예약', done: true }, { text: '초대장 발송', done: false }] },
+  ])
+  const { events, errors } = parseEventsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(events[0].checklist, [{ text: '장소 예약', done: true }, { text: '초대장 발송', done: false }])
+})
+
 test('parseEventsCsv returns nothing for empty input', () => {
   assert.deepEqual(parseEventsCsv(''), { events: [], errors: [] })
 })
@@ -269,6 +288,15 @@ test('todosToCsv and parseTodosCsv round-trip memo, link, time, and estimated mi
   }])
 })
 
+test('todosToCsv and parseTodosCsv round-trip the checklist column', () => {
+  const csv = todosToCsv([
+    { title: '이사 준비', completed: false, priority: 'normal', todo_date: '2026-07-13', tags: [], checklist: [{ text: '박스 포장', done: true }, { text: '업체 예약', done: false }] },
+  ])
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(todos[0].checklist, [{ text: '박스 포장', done: true }, { text: '업체 예약', done: false }])
+})
+
 test('parseTodosCsv skips rows without a title and reports the row number', () => {
   const csv = '제목,우선순위\n,high\n두 번째 할 일,normal\n'
   const { todos, errors } = parseTodosCsv(csv)
@@ -376,6 +404,15 @@ test('workLogsToCsv and parseWorkLogsCsv round-trip the billable column', () => 
   assert.equal(logs[1].billable, undefined)
 })
 
+test('workLogsToCsv and parseWorkLogsCsv round-trip the checklist column', () => {
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-14', content: '점검', duration_minutes: 30, task_id: null, tags: [], checklist: [{ text: '로그 확인', done: true }, { text: '보고서 작성', done: false }] },
+  ], new Map())
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(logs[0].checklist, [{ text: '로그 확인', done: true }, { text: '보고서 작성', done: false }])
+})
+
 test('workLogCsvFilename uses the requested date', () => {
   assert.equal(workLogCsvFilename('2026-07-14'), 'workmanager-work-logs-2026-07-14.csv')
 })
@@ -422,16 +459,16 @@ test('parseWorkLogsCsv returns nothing for empty input', () => {
   assert.deepEqual(parseWorkLogsCsv(''), { logs: [], errors: [] })
 })
 
-test('checklist summary column reports done/total across all four CSV exports and is ignored on import', () => {
+test('checklist column exports each item with its done state across all four CSV exports and round-trips on import', () => {
   const checklist = [{ text: 'a', done: true }, { text: 'b', done: false }, { text: 'c', done: true }]
 
-  assert.match(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'), /,2\/3$/m)
-  assert.match(eventsToCsv([{ title: '일정', start_at: '2026-07-18T09:00:00', checklist }]), /,2\/3$/m)
-  assert.match(todosToCsv([{ title: '할 일', completed: false, checklist }]), /,2\/3$/m)
-  assert.match(workLogsToCsv([{ log_date: '2026-07-18', content: '기록', checklist }], new Map()), /,2\/3$/m)
+  assert.match(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'), /,\[x\] a; \[ \] b; \[x\] c$/m)
+  assert.match(eventsToCsv([{ title: '일정', start_at: '2026-07-18T09:00:00', checklist }]), /,\[x\] a; \[ \] b; \[x\] c$/m)
+  assert.match(todosToCsv([{ title: '할 일', completed: false, checklist }]), /,\[x\] a; \[ \] b; \[x\] c$/m)
+  assert.match(workLogsToCsv([{ log_date: '2026-07-18', content: '기록', checklist }], new Map()), /,\[x\] a; \[ \] b; \[x\] c$/m)
 
   const { tasks } = parseTasksCsv(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'))
-  assert.equal(tasks[0].checklist, undefined)
+  assert.deepEqual(tasks[0].checklist, checklist)
 })
 
 test('tasksToCsv and parseTasksCsv round-trip the link column', () => {
