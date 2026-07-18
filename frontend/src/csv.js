@@ -10,7 +10,7 @@ const priorityValueToLabel = { low: '낮음', normal: '보통', high: '높음' }
 
 const checklistSummary = checklist => checklist?.length ? `${checklist.filter(item => item.done).length}/${checklist.length}` : ''
 
-const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '분류', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
+const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -33,7 +33,6 @@ export const tasksToCsv = (tasks, todayIso) => {
     task.due_date,
     task.due_time,
     `${Number(task.progress || 0)}%`,
-    task.category,
     (task.tags || []).join('; '),
     task.description,
     task.link_url,

@@ -11,7 +11,6 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
       start_date: '2026-07-06',
       due_date: '2026-07-06',
       progress: 25,
-      category: '기획',
       tags: ['분기', '고객'],
       description: '첫 줄\n둘째 줄',
       checklist: [{ text: 'a', done: true }, { text: 'b', done: false }],
@@ -19,8 +18,8 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
   ], '2026-07-07')
 
   assert.equal(csv, [
-    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,분류,태그,메모,링크,예상 소요시간(분),체크리스트',
-    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,기획,분기; 고객,"첫 줄\n둘째 줄",,,1/2',
+    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,태그,메모,링크,예상 소요시간(분),체크리스트',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,1/2',
   ].join('\n'))
 })
 
@@ -154,8 +153,8 @@ test('parseEventsCsv returns nothing for empty input', () => {
 
 test('parseTasksCsv reads back an exported task row', () => {
   const csv = [
-    '제목,상태,우선순위,시작일,기한,진행률,분류,태그,메모',
-    '"보고서, 검토",지연,high,2026-07-06,2026-07-10,25%,기획,분기; 고객,"첫 줄\n둘째 줄"',
+    '제목,상태,우선순위,시작일,기한,진행률,태그,메모',
+    '"보고서, 검토",지연,high,2026-07-06,2026-07-10,25%,분기; 고객,"첫 줄\n둘째 줄"',
   ].join('\n')
 
   const { tasks, errors } = parseTasksCsv(csv)

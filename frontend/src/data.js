@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-csv-category-column',
+    timestamp: '2026-07-18T13:23:00+09:00',
+    description: '업무 CSV 내보내기에 "분류" 열이 항상 포함되어 있었지만, 업무에는 분류(category) 필드 자체가 없어(백엔드·업무 작성 폼 어디에도 없음) 이 열은 항상 빈 값으로 내보내지고 가져오기 시에도 무시되는 죽은 열이었습니다. 혼동을 없애기 위해 "분류" 열을 CSV 내보내기에서 제거했습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-18-attachment-drag-drop',
     timestamp: '2026-07-18T13:16:18+09:00',
     description: '업무·일정·오늘의 할 일·업무 기록에서 첨부파일을 추가하려면 항상 "파일 선택" 버튼을 눌러 탐색기를 여는 방법뿐이었습니다. 네 곳의 첨부파일 영역 모두에 드래그 앤 드롭 업로드를 추가해, 파일을 끌어다 놓기만 해도 바로 첨부되도록 했습니다(`frontend/src/fileDrop.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
