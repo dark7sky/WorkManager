@@ -298,9 +298,9 @@ test('workLogsToCsv exports work log rows with linked task title and escaping', 
   ], new Map([[5, '보고서 작성']]))
 
   assert.equal(csv, [
-    '날짜,내용,소요 시간(분),예상 소요시간(분),우선순위,연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
-    '2026-07-14,"회의, 진행",30,,높음,#5 보고서 작성,분기,Y,,',
-    '2026-07-13,문서 정리,,,,,,,,',
+    '날짜,내용,소요 시간(분),예상 소요시간(분),우선순위,연결 업무,태그,링크,청구 가능,청구 금액(원),체크리스트',
+    '2026-07-14,"회의, 진행",30,,높음,#5 보고서 작성,분기,,Y,,',
+    '2026-07-13,문서 정리,,,,,,,,,',
   ].join('\n'))
 })
 
@@ -311,9 +311,9 @@ test('workLogsToCsv computes billable amount when an hourly rate is given', () =
   ], new Map(), 40000)
 
   assert.equal(csv, [
-    '날짜,내용,소요 시간(분),예상 소요시간(분),우선순위,연결 업무,태그,청구 가능,청구 금액(원),체크리스트',
-    '2026-07-14,개발,90,,,,,Y,60000,',
-    '2026-07-14,내부 회의,60,,,,,,,',
+    '날짜,내용,소요 시간(분),예상 소요시간(분),우선순위,연결 업무,태그,링크,청구 가능,청구 금액(원),체크리스트',
+    '2026-07-14,개발,90,,,,,,Y,60000,',
+    '2026-07-14,내부 회의,60,,,,,,,,',
   ].join('\n'))
 })
 
@@ -346,6 +346,21 @@ test('workLogsToCsv and parseWorkLogsCsv round-trip the estimated minutes column
     log_date: '2026-07-14',
     duration_minutes: 30,
     estimated_minutes: 60,
+  }])
+})
+
+test('workLogsToCsv and parseWorkLogsCsv round-trip the link column', () => {
+  const csv = workLogsToCsv([
+    { log_date: '2026-07-14', content: '자료 정리', duration_minutes: 20, task_id: null, tags: [], link_url: 'https://example.com/log' },
+  ], new Map())
+
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.deepEqual(logs, [{
+    content: '자료 정리',
+    log_date: '2026-07-14',
+    duration_minutes: 20,
+    link_url: 'https://example.com/log',
   }])
 })
 
