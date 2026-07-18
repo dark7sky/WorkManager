@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-backup-comments-attachments',
+    timestamp: '2026-07-18T22:16:00+09:00',
+    description: '설정 화면의 "JSON 내보내기/백업에서 복원" 기능이 업무·일정·할 일·업무 기록 본문만 백업하고, 각 항목에 달린 댓글과 첨부파일(이미지 포함)은 백업 파일에 전혀 포함되지 않아 복원 시 조용히 사라지는 문제가 있었습니다. `/api/export`가 8개 댓글·첨부 테이블(task/event/todo/work_log × comments/attachments)도 함께 내려받도록 하고, `/api/import`가 부모 항목이 새 ID로 재생성된 뒤 댓글·첨부의 외래키를 새 ID로 매핑해 함께 복원하도록 했습니다. 설정 화면의 가져오기 미리보기에도 댓글·첨부 건수를 표시합니다(`backend/app/main.py`, `frontend/src/screens/Settings.jsx`).',
+  },
+  {
     id: '2026-07-18-task-ics-import',
     timestamp: '2026-07-18T22:07:00+09:00',
     description: '캘린더 화면은 ICS 파일을 가져와 일정으로 등록할 수 있었지만, 업무(Tasks) 화면에는 ICS 가져오기 기능이 없어 마감일이 있는 외부 캘린더 항목(예: 종일 마감 이벤트)을 업무로 옮기려면 수동으로 다시 입력해야 했습니다. ICS의 VEVENT를 업무(제목/마감일/마감 시각/메모)로 변환하는 `icsToTasks`를 추가하고, 업무 화면 툴바에 "ICS 가져오기" 버튼과 파일 입력을 추가했습니다. 종료 시각이 없는 종일 일정도 업무로는 가져올 수 있도록 `parseIcs`가 DTEND 없는 종일(VALUE=DATE) 이벤트를 보존하게 하고, 캘린더 쪽 가져오기는 기존처럼 종료 시각이 있는 이벤트만 사용하도록 필터를 추가했습니다(`frontend/src/ics.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`).',

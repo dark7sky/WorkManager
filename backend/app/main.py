@@ -1818,12 +1818,23 @@ def resolve_event_conflict(item_id: int, payload: dict = Body(...), user=Depends
     return result
 
 
+CHILD_TABLES = {
+    "task_comments": ("tasks", "task_id"), "task_attachments": ("tasks", "task_id"),
+    "event_comments": ("events", "event_id"), "event_attachments": ("events", "event_id"),
+    "todo_comments": ("todos", "todo_id"), "todo_attachments": ("todos", "todo_id"),
+    "work_log_comments": ("work_logs", "work_log_id"), "work_log_attachments": ("work_logs", "work_log_id"),
+}
+
+
 @app.get("/api/export")
 def export_data(user=Depends(require_user)):
-    return {"version": 1, "exported_at": now(),
+    data = {"version": 1, "exported_at": now(),
             "tasks": rows("tasks", user), "events": rows("events", user),
             "todos": rows("todos", user), "work_logs": rows("work_logs", user),
             "feature_requests": rows("feature_requests", user)}
+    for child_table in CHILD_TABLES:
+        data[child_table] = rows(child_table, user)
+    return data
 
 
 IMPORT_TABLES = ("tasks", "events", "todos", "work_logs")
@@ -1833,7 +1844,7 @@ def _import_rows(payload):
     if not isinstance(payload, dict) or payload.get("version") != 1:
         raise HTTPException(422, "지원하지 않는 백업 파일 형식입니다. /api/export로 내려받은 version 1 파일이 필요합니다.")
     result = {}
-    for table in IMPORT_TABLES:
+    for table in (*IMPORT_TABLES, *CHILD_TABLES):
         items = payload.get(table) or []
         if not isinstance(items, list) or not all(isinstance(x, dict) for x in items):
             raise HTTPException(422, f"{table} 항목이 올바른 목록이 아닙니다")
@@ -1852,8 +1863,8 @@ def _normalize_import_row(table, index, raw):
 @app.post("/api/import/preview")
 def import_preview(payload: dict = Body(...), user=Depends(require_user)):
     data = _import_rows(payload)
-    for table, items in data.items():
-        for i, raw in enumerate(items):
+    for table in IMPORT_TABLES:
+        for i, raw in enumerate(data[table]):
             _normalize_import_row(table, i, raw)
     with connection() as c:
         existing = {t: c.execute(f"SELECT COUNT(*) n FROM {t} WHERE user_id=? AND deleted_at IS NULL", (user,)).fetchone()["n"]
@@ -1870,9 +1881,10 @@ def import_data(payload: dict = Body(...), user=Depends(require_user)):
         raise HTTPException(422, "mode must be merge or replace")
     data = _import_rows(payload.get("data") or {})
     timestamp = now()
-    normalized = {table: [_normalize_import_row(table, i, raw) for i, raw in enumerate(items)]
-                  for table, items in data.items()}
-    task_id_map, pending_links, counts = {}, [], {t: 0 for t in IMPORT_TABLES}
+    normalized = {table: [_normalize_import_row(table, i, raw) for i, raw in enumerate(data[table])]
+                  for table in IMPORT_TABLES}
+    id_maps = {t: {} for t in IMPORT_TABLES}
+    pending_links, counts = [], {t: 0 for t in (*IMPORT_TABLES, *CHILD_TABLES)}
     # One transaction: any bad row rolls the whole import back.
     with connection() as c:
         if mode == "replace":
@@ -1904,23 +1916,38 @@ def import_data(payload: dict = Body(...), user=Depends(require_user)):
                     item["local_uid"] = str(uuid.uuid4())
                     item["sync_state"] = "clean"
                 if table == "work_logs" and item.get("task_id") is not None:
-                    item["task_id"] = task_id_map.get(raw.get("task_id"))
+                    item["task_id"] = id_maps["tasks"].get(raw.get("task_id"))
                 cols = list(item)
                 cur = c.execute(f"INSERT INTO {table} ({','.join(cols)}) VALUES ({','.join('?' for _ in cols)})",
                                 [item[x] for x in cols])
                 counts[table] += 1
-                if table == "tasks":
-                    task_id_map[raw.get("id")] = cur.lastrowid
-                    if links[0] is not None or links[1]:
-                        pending_links.append((cur.lastrowid, links[0], links[1]))
+                id_maps[table][raw.get("id")] = cur.lastrowid
+                if table == "tasks" and (links[0] is not None or links[1]):
+                    pending_links.append((cur.lastrowid, links[0], links[1]))
             if table == "tasks":
                 # Second pass: children can precede parents in the export, so
                 # remap hierarchy/dependencies only after every task exists.
+                task_id_map = id_maps["tasks"]
                 for new_id, old_parent, old_deps in pending_links:
                     mapped_parent = task_id_map.get(old_parent)
                     mapped_deps = sorted({task_id_map[d] for d in json.loads(old_deps or "[]") if d in task_id_map})
                     c.execute("UPDATE tasks SET parent_id=?,dependency_ids=? WHERE id=?",
                               (mapped_parent, json.dumps(mapped_deps), new_id))
+        for child_table, (parent_table, fk_col) in CHILD_TABLES.items():
+            cols = ["body", "created_at", "edited_at"] if child_table.endswith("_comments") else \
+                   ["filename", "content_type", "size_bytes", "data_base64", "created_at"]
+            for raw in data[child_table]:
+                new_parent = id_maps[parent_table].get(raw.get(fk_col))
+                if new_parent is None:
+                    continue
+                values = {k: raw.get(k) for k in cols if k in raw}
+                values.setdefault("created_at", timestamp)
+                values["user_id"] = user
+                values[fk_col] = new_parent
+                insert_cols = list(values)
+                c.execute(f"INSERT INTO {child_table} ({','.join(insert_cols)}) VALUES ({','.join('?' for _ in insert_cols)})",
+                          [values[x] for x in insert_cols])
+                counts[child_table] += 1
     audit(user, "import", "backup", metadata={"mode": mode, **counts})
     return {"ok": True, "mode": mode, "imported": counts}
 

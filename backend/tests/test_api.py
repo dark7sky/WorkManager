@@ -1633,15 +1633,22 @@ class ApiTests(unittest.TestCase):
         a.post("/api/events", json={"title": "복원 일정", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"})
         a.post("/api/todos", json={"title": "복원 할 일", "todo_date": "2026-08-01"})
         a.post("/api/work_logs", json={"content": "복원 기록", "log_date": "2026-08-01", "task_id": child["id"]})
+        a.post(f"/api/tasks/{child['id']}/comments", json={"body": "복원 댓글"})
+        a.post(f"/api/tasks/{child['id']}/attachments", files={"file": ("note.txt", b"backup me", "text/plain")})
         exported = a.get("/api/export").json()
+        self.assertEqual(len(exported["task_comments"]), 1)
+        self.assertEqual(len(exported["task_attachments"]), 1)
 
         preview = a.post("/api/import/preview", json=exported)
         self.assertEqual(preview.status_code, 200, preview.text)
         self.assertGreaterEqual(preview.json()["importable"]["tasks"], 2)
+        self.assertEqual(preview.json()["importable"]["task_comments"], 1)
 
         result = a.post("/api/import", json={"mode": "replace", "data": exported})
         self.assertEqual(result.status_code, 200, result.text)
         self.assertGreaterEqual(result.json()["imported"]["tasks"], 2)
+        self.assertEqual(result.json()["imported"]["task_comments"], 1)
+        self.assertEqual(result.json()["imported"]["task_attachments"], 1)
 
         tasks = {t["title"]: t for t in a.get("/api/tasks").json()}
         restored_parent, restored_child = tasks["복원 부모"], tasks["복원 자식"]
@@ -1652,6 +1659,10 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(logs[0]["task_id"], restored_child["id"])
         events = a.get("/api/events").json()
         self.assertEqual(events[0]["title"], "복원 일정")
+        restored_comments = a.get(f"/api/tasks/{restored_child['id']}/comments").json()["items"]
+        self.assertEqual(restored_comments[0]["body"], "복원 댓글")
+        restored_attachments = a.get(f"/api/tasks/{restored_child['id']}/attachments").json()["items"]
+        self.assertEqual(restored_attachments[0]["filename"], "note.txt")
 
         merged = a.post("/api/import", json={"mode": "merge", "data": exported})
         self.assertEqual(merged.status_code, 200, merged.text)
