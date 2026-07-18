@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-19-search-focus-shortcut',
+    timestamp: '2026-07-19T03:42:00+09:00',
+    description: '업무/일정/오늘/감사 로그 화면마다 검색창이 있지만 마우스로 직접 클릭해야만 입력할 수 있었습니다. `/` 키를 누르면 입력 중인 다른 필드가 아닐 때 현재 화면의 검색창에 바로 포커스가 이동하도록 단축키를 추가했습니다(단축키 안내 목록에도 반영). (`frontend/src/App.jsx`, `frontend/src/components/KeyboardShortcuts.jsx`)',
+  },
+  {
     id: '2026-07-19-worklog-overlap-warning',
     timestamp: '2026-07-19T04:05:00+09:00',
     description: '캘린더 일정은 시간이 겹치면 경고를 보여주지만, 업무 기록(오늘 한 일)은 같은 시각에 이미 다른 기록이 있어도 알림 없이 저장되어 이중 기록을 인지하지 못하는 경우가 있었습니다. 업무 기록 작성/수정 폼에도 같은 날짜·시각에 겹치는 기록이 있으면 제목을 알려주는 경고 문구를 표시하도록 했습니다(막지는 않고 안내만 함, `frontend/src/workLogOverlap.js`, `frontend/src/screens/Today.jsx`, 테스트 `frontend/src/workLogOverlap.test.js`).',
