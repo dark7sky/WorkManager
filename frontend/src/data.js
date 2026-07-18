@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-18-task-row-color-swatch',
+    timestamp: '2026-07-18T17:45:12+09:00',
+    description: '할 일/업무 기록 목록에는 색상 지정 시 행 왼쪽에 색상 표시선이 나타나지만, 업무(간트) 목록에서는 같은 색상 필드가 간트 바 색상에만 반영되고 행 자체에는 표시되지 않았습니다. 업무 목록의 각 행에도 동일한 색상 표시선을 추가해 화면 간 표시 방식을 통일했습니다(`frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-18-csv-color-column',
     timestamp: '2026-07-18T17:38:33+09:00',
     description: '업무/일정/할 일/업무 기록의 색상(`color`)은 편집 화면에서 지정하고 목록·간트차트·캘린더에 표시되지만, CSV 내보내기/가져오기에는 반영되지 않아 CSV로 내보낸 뒤 다시 가져오면 색상 지정이 사라졌습니다. 4종 CSV export/import 함수 모두에 "색상" 열을 추가해 다른 필드(우선순위, 예상 소요시간 등)와 동일하게 왕복되도록 맞췄습니다(`frontend/src/csv.js`).',
