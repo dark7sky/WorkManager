@@ -145,10 +145,23 @@ test('tasksToIcs omits X-WM-ESTIMATE-MINUTES when task has no estimate', () => {
   assert.doesNotMatch(ics, /X-WM-ESTIMATE-MINUTES/)
 })
 
+test('tasksToIcs and icsToTasks round-trip link_url', () => {
+  const ics = tasksToIcs([{ id: 12, title: '기획 승인', due_date: '2026-07-20', link_url: 'https://example.com/doc' }])
+  assert.match(ics, /URL:https:\/\/example\.com\/doc/)
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks[0].link_url, 'https://example.com/doc')
+})
+
 test('eventsToIcs and parseIcs round-trip estimated_minutes', () => {
   const ics = eventsToIcs([{ id: 1, title: '회의', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', estimated_minutes: 60 }])
   const parsed = parseIcs(ics)
   assert.equal(parsed[0].estimated_minutes, 60)
+})
+
+test('eventsToIcs and parseIcs round-trip link_url', () => {
+  const ics = eventsToIcs([{ id: 2, title: '회의', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', link_url: 'https://example.com/meet' }])
+  const parsed = parseIcs(ics)
+  assert.equal(parsed[0].link_url, 'https://example.com/meet')
 })
 
 test('tasksToIcs omits PRIORITY when task has no priority', () => {
@@ -194,11 +207,25 @@ test('todosToIcs and icsToTodos round-trip estimated_minutes', () => {
   assert.equal(todos[0].estimated_minutes, 15)
 })
 
+test('todosToIcs and icsToTodos round-trip link_url', () => {
+  const ics = todosToIcs([{ id: 8, title: '장보기', todo_date: '2026-07-20', link_url: 'https://example.com/list' }])
+  assert.match(ics, /URL:https:\/\/example\.com\/list/)
+  const todos = icsToTodos(ics)
+  assert.equal(todos[0].link_url, 'https://example.com/list')
+})
+
 test('logsToIcs and icsToLogs round-trip estimated_minutes', () => {
   const ics = logsToIcs([{ id: 5, content: '보고서 작성', log_date: '2026-07-20', estimated_minutes: 120 }])
   assert.match(ics, /X-WM-ESTIMATE-MINUTES:120/)
   const logs = icsToLogs(ics)
   assert.equal(logs[0].estimated_minutes, 120)
+})
+
+test('logsToIcs and icsToLogs round-trip link_url', () => {
+  const ics = logsToIcs([{ id: 9, content: '보고서 작성', log_date: '2026-07-20', link_url: 'https://example.com/report' }])
+  assert.match(ics, /URL:https:\/\/example\.com\/report/)
+  const logs = icsToLogs(ics)
+  assert.equal(logs[0].link_url, 'https://example.com/report')
 })
 
 test('logsToIcs and icsToLogs round-trip priority', () => {

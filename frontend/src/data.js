@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ics-link-url-roundtrip',
+    timestamp: '2026-07-21T01:40:00+09:00',
+    description: '업무/할 일/일정/업무 기록의 링크(link_url)가 ICS 내보내기/가져오기에서 누락되던 문제를 수정했습니다. 표준 iCalendar URL 필드로 왕복 보존됩니다. (`frontend/src/ics.js`)',
+  },
+  {
     id: '2026-07-21-ics-estimate-roundtrip',
     timestamp: '2026-07-21T01:35:00+09:00',
     description: '업무/할 일/일정/업무 기록의 예상 소요 시간(estimated_minutes)이 ICS 내보내기/가져오기에서 누락되던 문제를 수정했습니다. X-WM-ESTIMATE-MINUTES 확장 속성으로 왕복 보존됩니다. (`frontend/src/ics.js`)',
