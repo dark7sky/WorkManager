@@ -27,6 +27,7 @@ export const LOG_SORT_COMPARATORS = {
   duration: (a, b) => (b.duration_minutes || 0) - (a.duration_minutes || 0),
   content: (a, b) => (a.content || '').localeCompare(b.content || '', 'ko'),
   priority: (a, b) => (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1),
+  manual: () => 0,
 }
 export const DEFAULT_LOG_SORT = 'none'
 const LOG_SORT_STORAGE_KEY = 'wm-log-sort'
@@ -44,9 +45,10 @@ export const saveLogSort = (sortBy, storage = localStorage) => {
   storage.setItem(LOG_SORT_STORAGE_KEY, sortBy)
 }
 
-export const orderLogsByPin = (logs, pinnedIds, sortBy = DEFAULT_LOG_SORT) =>
+export const orderLogsByPin = (logs, pinnedIds, sortBy = DEFAULT_LOG_SORT, manualOrder = {}) =>
   [...logs].sort((a, b) => {
     const pinDiff = (pinnedIds.has(b.id) ? 1 : 0) - (pinnedIds.has(a.id) ? 1 : 0)
     if (pinDiff !== 0) return pinDiff
+    if (sortBy === 'manual') return (manualOrder[a.id] ?? Number.MAX_SAFE_INTEGER) - (manualOrder[b.id] ?? Number.MAX_SAFE_INTEGER)
     return (LOG_SORT_COMPARATORS[sortBy] || LOG_SORT_COMPARATORS[DEFAULT_LOG_SORT])(a, b)
   })

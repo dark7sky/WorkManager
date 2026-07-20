@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-log-manual-order',
+    timestamp: '2026-07-21T07:36:08+09:00',
+    description: '오늘 할 일 목록에는 드래그로 순서를 직접 정할 수 있는 "직접 정렬"이 있었지만 업무 기록(work log) 목록에는 없어 두 목록의 정렬 기능이 비대칭이었습니다. 업무 기록 정렬에도 "직접 정렬"을 추가하고 드래그 앤 드롭으로 재배열한 순서를 기기에 저장하도록 했습니다 (`frontend/src/logOrder.js`, `frontend/src/logPins.js`, `frontend/src/screens/Today.jsx`, 테스트 `frontend/src/logOrder.test.js`, `frontend/src/logPins.test.js`).',
+  },
+  {
     id: '2026-07-21-todo-manual-order',
     timestamp: '2026-07-21T07:35:00+09:00',
     description: '오늘 할 일 목록은 우선순위·제목·시간 정렬만 지원해, 사용자가 원하는 순서로 직접 배치할 수 없었습니다(업무 화면의 간트 드래그 정렬과 비대칭). 정렬 방식에 "직접 정렬"을 추가하고 항목을 드래그 앤 드롭으로 재배열하면 순서가 기기에 저장되도록 했습니다 (`frontend/src/todoOrder.js`, `frontend/src/todoPins.js`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`, 테스트 `frontend/src/todoOrder.test.js`, `frontend/src/todoPins.test.js`).',

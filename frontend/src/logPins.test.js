@@ -67,6 +67,16 @@ test('orderLogsByPin sorts high priority before normal and low when sortBy is "p
   assert.deepEqual(orderLogsByPin(logs, new Set(), 'priority').map(l => l.id), [2, 3, 1])
 })
 
+test('orderLogsByPin sorts by manualOrder map when sortBy is "manual"', () => {
+  const logs = [{ id: 1 }, { id: 2 }, { id: 3 }]
+  assert.deepEqual(orderLogsByPin(logs, new Set(), 'manual', { 2: 0, 3: 1, 1: 2 }).map(l => l.id), [2, 3, 1])
+})
+
+test('orderLogsByPin keeps pinned logs above manual order', () => {
+  const logs = [{ id: 1 }, { id: 2 }]
+  assert.deepEqual(orderLogsByPin(logs, new Set([2]), 'manual', { 1: 0, 2: 1 }).map(l => l.id), [2, 1])
+})
+
 test('loadLogSort defaults to "none" and round-trips through saveLogSort', () => {
   const storage = new MemoryStorage()
   assert.equal(loadLogSort(storage), 'none')
