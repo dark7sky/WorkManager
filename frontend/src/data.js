@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-bulk-duplicate-optimistic',
+    timestamp: '2026-07-21T01:06:46+09:00',
+    description: '업무를 여러 개 한 번에 복제하면 일정/할 일/업무 기록과 달리 전체 목록을 다시 불러오느라 반응이 느렸습니다. 업무 일괄 복제도 다른 화면과 동일하게 즉시 화면에 반영되도록 맞췄습니다. (`frontend/src/App.jsx`)',
+  },
+  {
     id: '2026-07-21-bulk-delete-undo',
     timestamp: '2026-07-21T01:03:06+09:00',
     description: '업무/할 일/일정/업무 기록을 여러 개 한 번에 삭제할 때는 항목을 하나씩 지울 때와 달리 "실행 취소"가 없었습니다. 4개 화면의 일괄 삭제에 모두 실행 취소 액션을 추가해 삭제 직후 휴지통에서 복원할 수 있게 했습니다. (`frontend/src/App.jsx`)',
