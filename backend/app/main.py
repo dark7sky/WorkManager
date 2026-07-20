@@ -2304,10 +2304,10 @@ def today(tags: str | None = None, user=Depends(require_user)):
     tomorrow = (date.today() + timedelta(days=1)).isoformat()
     wanted = (tags or "").split(",")
     return {"date": day,
-            "tasks": rows("tasks", user, "WHERE (start_date IS NULL OR start_date<=?) AND (due_date IS NULL OR due_date>=?) AND status!='done' ORDER BY priority,due_date", (day, day), wanted),
-            "events": rows("events", user, "WHERE start_at<? AND end_at>? ORDER BY start_at", (tomorrow + "T00:00:00", day + "T00:00:00"), wanted),
-            "todos": rows("todos", user, "WHERE todo_date=? ORDER BY completed,(todo_time IS NULL),todo_time,id", (day,), wanted),
-            "work_logs": rows("work_logs", user, "WHERE log_date=? ORDER BY (log_time IS NULL),log_time,created_at DESC", (day,), wanted)}
+            "tasks": rows("tasks", user, "WHERE archived_at IS NULL AND (start_date IS NULL OR start_date<=?) AND (due_date IS NULL OR due_date>=?) AND status!='done' ORDER BY priority,due_date", (day, day), wanted),
+            "events": rows("events", user, "WHERE archived_at IS NULL AND start_at<? AND end_at>? ORDER BY start_at", (tomorrow + "T00:00:00", day + "T00:00:00"), wanted),
+            "todos": rows("todos", user, "WHERE archived_at IS NULL AND todo_date=? ORDER BY completed,(todo_time IS NULL),todo_time,id", (day,), wanted),
+            "work_logs": rows("work_logs", user, "WHERE archived_at IS NULL AND log_date=? ORDER BY (log_time IS NULL),log_time,created_at DESC", (day,), wanted)}
 
 
 def report_range(start_date, end_date):

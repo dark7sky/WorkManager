@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-today-excludes-archived',
+    timestamp: '2026-07-20T20:34:48+09:00',
+    description: '업무·할 일·일정·업무 기록을 보관해도 오늘 화면(`/api/today`)에는 계속 표시되는 문제가 있었습니다. 보관 기능이 목록 화면에서는 숨기지만 오늘 화면 API 쿼리에는 보관 여부 조건이 빠져 있었기 때문입니다. 오늘 화면이 4개 항목 모두에서 보관된 데이터를 제외하도록 고쳤습니다. (`backend/app/main.py`, `backend/tests/test_api.py`)',
+  },
+  {
     id: '2026-07-20-event-log-archiving',
     timestamp: '2026-07-20T20:31:50+09:00',
     description: '업무·할 일에만 있던 보관 기능이 일정과 업무 기록에는 없어, 지난 일정이나 오래된 기록을 정리할 방법이 삭제(휴지통 이동)뿐이었습니다. 일정 수정 폼과 오늘 화면의 기록 목록에 "보관" 버튼과 보관/보관 해제 API를 추가하고, 설정 화면의 보관함을 일정용/업무 기록용까지 총 4개로 늘렸습니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`, `frontend/src/api.js`)',

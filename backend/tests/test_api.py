@@ -1532,6 +1532,32 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_archived_items_are_excluded_from_today_endpoint(self, *_):
+        from datetime import date
+        a = self.client(self.token_a)
+        today = date.today().isoformat()
+        task = a.post("/api/tasks", json={"title": "archived today task", "due_date": today}).json()
+        todo = a.post("/api/todos", json={"title": "archived today todo", "todo_date": today}).json()
+        event = a.post("/api/events", json={"title": "archived today event",
+                                             "start_at": f"{today}T09:00:00", "end_at": f"{today}T10:00:00"}).json()
+        log = a.post("/api/work_logs", json={"content": "archived today log", "log_date": today}).json()
+        before = a.get("/api/today").json()
+        self.assertIn(task["id"], [t["id"] for t in before["tasks"]])
+        self.assertIn(todo["id"], [t["id"] for t in before["todos"]])
+        self.assertIn(event["id"], [e["id"] for e in before["events"]])
+        self.assertIn(log["id"], [l["id"] for l in before["work_logs"]])
+        a.post(f"/api/tasks/{task['id']}/archive")
+        a.post(f"/api/todos/{todo['id']}/archive")
+        a.post(f"/api/events/{event['id']}/archive")
+        a.post(f"/api/work_logs/{log['id']}/archive")
+        after = a.get("/api/today").json()
+        self.assertNotIn(task["id"], [t["id"] for t in after["tasks"]])
+        self.assertNotIn(todo["id"], [t["id"] for t in after["todos"]])
+        self.assertNotIn(event["id"], [e["id"] for e in after["events"]])
+        self.assertNotIn(log["id"], [l["id"] for l in after["work_logs"]])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         default_todo = a.post("/api/todos", json={"title": "default priority"}).json()
