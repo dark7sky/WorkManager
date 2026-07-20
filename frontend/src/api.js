@@ -59,6 +59,7 @@ export const api = {
   me: () => request('/auth/me', { suppressAuthEvent: true }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   sessions: () => request('/auth/sessions'), revokeSession: id => request(`/auth/sessions/${id}`,{method:'DELETE'}),
+  revokeOtherSessions: () => request('/auth/sessions/revoke-others', { method: 'POST' }),
   startDemo: () => request('/auth/demo', { method: 'POST', suppressAuthEvent: true }),
   tasks: () => request('/tasks'), events: () => request('/events'), today: () => request('/today'),
   createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),

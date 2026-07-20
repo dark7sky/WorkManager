@@ -106,6 +106,19 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const revokeOtherSessions = async () => {
+    setBusy('session-others')
+    try {
+      const res = await api.revokeOtherSessions()
+      setSessions(list => (list || []).filter(s => s.current))
+      notify(`다른 세션 ${res.count}개를 로그아웃했습니다.`)
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
   const select = async id => {
     setBusy('select')
     try {
@@ -415,7 +428,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         </div>}
       </section>
       <section className="settings-card">
-        <div className="settings-heading"><span><Smartphone /></span><div><h2>활성 세션</h2><p>현재 로그인된 세션 목록입니다. 낯선 세션은 로그아웃할 수 있습니다.</p></div></div>
+        <div className="settings-heading"><span><Smartphone /></span><div><h2>활성 세션</h2><p>현재 로그인된 세션 목록입니다. 낯선 세션은 로그아웃할 수 있습니다.</p></div>{sessions && sessions.filter(s => !s.current).length > 0 ? <button className="secondary" disabled={busy === 'session-others'} onClick={revokeOtherSessions}>{busy === 'session-others' ? <LoaderCircle className="spin" /> : null} 다른 세션 모두 로그아웃</button> : null}</div>
         {!sessions ? <div className="skeleton lines" /> : sessions.length ? <ul className="error-log-list session-list">{sessions.map(s => <li key={s.id}><time>{new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.last_seen_at * 1000))}</time><div><strong>{s.current ? '현재 세션' : '다른 세션'}</strong><p>생성: {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.created_at * 1000))} · 만료: {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short', hour12: false }).format(new Date(s.expires_at * 1000))}</p></div>{!s.current ? <button className="secondary" disabled={busy === `session-${s.id}`} onClick={() => revokeSession(s.id)}>로그아웃</button> : null}</li>)}</ul> : <p className="empty-state">활성 세션이 없습니다.</p>}
       </section>
       <section className="settings-card">

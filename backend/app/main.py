@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from . import ai, google_calendar
-from .auth import DEMO_SESSION_TTL, _hash, create_session, list_sessions, require_user, revoke_session, revoke_session_by_id, session_user_id
+from .auth import DEMO_SESSION_TTL, _hash, create_session, list_sessions, require_user, revoke_session, revoke_session_by_id, revoke_other_sessions, session_user_id
 from .db import DEMO_USER_ID, connection, decode_json_array, init_db, row_dict, upsert_google_user
 
 app = FastAPI(title="WorkManager API", version="2.0.0")
@@ -224,6 +224,13 @@ def revoke_session_endpoint(session_id: str, user=Depends(require_user), wm_sess
         raise HTTPException(404, "세션을 찾을 수 없습니다")
     audit(user, "delete", "session", session_id, {})
     return {"ok": True}
+
+
+@app.post("/api/auth/sessions/revoke-others")
+def revoke_other_sessions_endpoint(user=Depends(require_user), wm_session: str | None = Cookie(default=None)):
+    count = revoke_other_sessions(user, wm_session)
+    audit(user, "delete", "session", "others", {"count": count})
+    return {"ok": True, "count": count}
 
 
 @app.get("/api/auth/config")

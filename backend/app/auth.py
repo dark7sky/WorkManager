@@ -58,6 +58,13 @@ def revoke_session_by_id(user_id, session_id):
     return cur.rowcount > 0
 
 
+def revoke_other_sessions(user_id, current_token):
+    current_hash = _hash(current_token) if current_token else None
+    with connection() as c:
+        cur = c.execute("DELETE FROM sessions WHERE user_id=? AND token_hash!=?", (user_id, current_hash))
+    return cur.rowcount
+
+
 def require_user(wm_session: str | None = Cookie(default=None)) -> str:
     if not wm_session:
         raise HTTPException(401, "로그인이 필요합니다")

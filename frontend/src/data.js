@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-revoke-other-sessions',
+    timestamp: '2026-07-21T01:01:01+09:00',
+    description: '설정 화면의 활성 세션 목록에서 다른 기기의 세션을 하나씩만 로그아웃할 수 있었습니다. "다른 세션 모두 로그아웃" 버튼을 추가해 현재 세션을 제외한 모든 세션을 한 번에 종료할 수 있게 했습니다. (`backend/app/auth.py`, `frontend/src/screens/Settings.jsx`)',
+  },
+  {
     id: '2026-07-20-archive-bulk-unarchive',
     timestamp: '2026-07-20T20:55:47+09:00',
     description: '보관함(업무/할 일/일정/업무 기록)에서 항목을 하나씩만 보관 해제할 수 있었습니다. 휴지통처럼 검색창과 전체 선택, 일괄 보관 해제 기능을 추가해 여러 항목을 한 번에 꺼낼 수 있게 했습니다. (`frontend/src/components/ArchiveSection.jsx`)',

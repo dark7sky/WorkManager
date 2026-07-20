@@ -144,6 +144,24 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(client_2.get("/api/auth/me").status_code, 401)
         self.assertEqual(client_1.get("/api/auth/me").status_code, 200)
 
+    def test_revoke_other_sessions_keeps_current_only(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                      ("sub-revoke-others", "sub-revoke-others", "revoke-others@example.com", "revoke-others@example.com", "2026-01-01", "2026-01-01"))
+        token_1, token_2, token_3 = (create_session("sub-revoke-others") for _ in range(3))
+        client_1, client_2, client_3 = self.client(token_1), self.client(token_2), self.client(token_3)
+        res = client_1.post("/api/auth/sessions/revoke-others")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["count"], 2)
+        self.assertEqual(client_1.get("/api/auth/me").status_code, 200)
+        self.assertEqual(client_2.get("/api/auth/me").status_code, 401)
+        self.assertEqual(client_3.get("/api/auth/me").status_code, 401)
+        remaining = client_1.get("/api/auth/sessions").json()["sessions"]
+        self.assertEqual(len(remaining), 1)
+        self.assertTrue(remaining[0]["current"])
+
     def test_sessions_are_scoped_per_user(self):
         from app.auth import _hash
         b_session_id = self.client(self.token_b).get("/api/auth/sessions").json()["sessions"][0]["id"]
