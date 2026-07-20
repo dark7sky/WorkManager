@@ -438,12 +438,14 @@ export default function Today(props) {
     setTodoTags(filled.tags)
     setTodoChecklist(filled.checklist)
     setTodoEstimate(filled.estimated_minutes || '')
+    setTodoColor(filled.color || '')
+    setTodoLink(filled.link_url || '')
   }
   const saveTodoTemplate = () => {
     if (!todoDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', todoDraft.trim())
     if (!name) return
-    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags, checklist: todoChecklist, estimated_minutes: todoEstimate })
+    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags, checklist: todoChecklist, estimated_minutes: todoEstimate, color: todoColor, link_url: todoLink })
     const next = addTodoTemplate(todoTemplates, template)
     setTodoTemplates(next)
     saveTodoTemplates(next)
@@ -467,12 +469,14 @@ export default function Today(props) {
     setLogMinutes(filled.duration_minutes)
     setLogEstimate(filled.estimated_minutes || '')
     setLogPriority(filled.priority)
+    setLogLink(filled.link_url || '')
+    setLogLinks(filled.links || [])
   }
   const saveLogTpl = () => {
     if (!logDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', logDraft.trim())
     if (!name) return
-    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate, priority: logPriority })
+    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate, priority: logPriority, link_url: logLink, links: logLinks })
     const next = addLogTemplate(logTemplates, template)
     setLogTemplates(next)
     saveLogTemplates(next)

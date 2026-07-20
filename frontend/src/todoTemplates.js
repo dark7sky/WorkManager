@@ -20,7 +20,7 @@ export const saveTodoTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildTodoTemplate = ({ name, title, priority, recurrence_rule, tags, checklist, estimated_minutes }) => ({
+export const buildTodoTemplate = ({ name, title, priority, recurrence_rule, tags, checklist, estimated_minutes, color, link_url }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
@@ -32,6 +32,8 @@ export const buildTodoTemplate = ({ name, title, priority, recurrence_rule, tags
     .filter(i => i && String(i.text || '').trim())
     .slice(0, CHECKLIST_LIMIT)
     .map(i => ({ id: genId(), text: String(i.text).trim().slice(0, CHECKLIST_TEXT_LIMIT), done: false })),
+  color: color || '',
+  link_url: String(link_url || '').trim().slice(0, 2000),
 })
 
 export const addTodoTemplate = (templates, template) => {
@@ -48,4 +50,6 @@ export const applyTodoTemplate = template => ({
   tags: template.tags,
   estimated_minutes: template.estimated_minutes || '',
   checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
+  color: template.color || '',
+  link_url: template.link_url || '',
 })

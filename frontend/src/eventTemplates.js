@@ -20,7 +20,7 @@ export const saveEventTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildEventTemplate = ({ name, title, location, color, tags, priority, checklist, estimated_minutes }) => ({
+export const buildEventTemplate = ({ name, title, location, color, tags, priority, checklist, estimated_minutes, link_url, links }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   title: String(title || '').trim().slice(0, TITLE_LIMIT),
@@ -33,6 +33,8 @@ export const buildEventTemplate = ({ name, title, location, color, tags, priorit
     .filter(i => i && String(i.text || '').trim())
     .slice(0, CHECKLIST_LIMIT)
     .map(i => ({ id: genId(), text: String(i.text).trim().slice(0, CHECKLIST_TEXT_LIMIT), done: false })),
+  link_url: String(link_url || '').trim().slice(0, 2000),
+  links: (Array.isArray(links) ? links : []).slice(0, 50),
 })
 
 export const addEventTemplate = (templates, template) => {
@@ -50,4 +52,6 @@ export const applyEventTemplate = template => ({
   tags: template.tags,
   estimated_minutes: template.estimated_minutes || '',
   checklist: (Array.isArray(template.checklist) ? template.checklist : []).map(i => ({ id: genId(), text: i.text, done: false })),
+  link_url: template.link_url || '',
+  links: (Array.isArray(template.links) ? template.links : []).map(i => ({ ...i, id: genId() })),
 })

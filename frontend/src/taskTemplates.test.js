@@ -112,6 +112,19 @@ test('applyTaskTemplate carries the template checklist with reset done state and
   assert.notEqual(result.checklist[0].id, template.checklist[0].id)
 })
 
+test('buildTaskTemplate and applyTaskTemplate round-trip color, link_url, and links', () => {
+  const links = [{ id: 'x', url: 'https://example.com', label: '참고' }]
+  const template = buildTaskTemplate({ name: '이름', title: '제목', color: 'blue', link_url: 'https://a.com', links })
+  assert.equal(template.color, 'blue')
+  assert.equal(template.link_url, 'https://a.com')
+  assert.equal(template.links.length, 1)
+  const result = applyTaskTemplate(template, '2026-07-10')
+  assert.equal(result.color, 'blue')
+  assert.equal(result.link_url, 'https://a.com')
+  assert.equal(result.links[0].url, 'https://example.com')
+  assert.notEqual(result.links[0].id, links[0].id)
+})
+
 test('durationDaysBetween computes whole days and floors negative spans to zero', () => {
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-13'), 3)
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-10'), 0)

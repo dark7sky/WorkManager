@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-template-link-color',
+    timestamp: '2026-07-20T19:53:16+09:00',
+    description: '업무/일정/할 일/기록 템플릿을 저장하고 불러올 때 색상과 관련 링크(및 첨부 링크 목록)가 함께 저장되지 않아, 템플릿을 적용해도 색상·링크를 매번 다시 입력해야 했습니다. 4가지 템플릿 모두 색상·관련 링크·첨부 링크를 저장/복원하도록 맞췄습니다. (`frontend/src/taskTemplates.js`, `frontend/src/eventTemplates.js`, `frontend/src/todoTemplates.js`, `frontend/src/logTemplates.js`)',
+  },
+  {
     id: '2026-07-20-code-splitting',
     timestamp: '2026-07-20T15:52:10+09:00',
     description: '전체 화면 코드가 하나의 JS 번들(755KB)로 합쳐져 있어 첫 접속 시 불필요한 화면 코드까지 모두 내려받아야 했습니다. 화면별 컴포넌트(오늘/업무/캘린더/성과/AI/감사 로그/변경 이력/설정)를 지연 로딩하도록 분리해 최초 진입 번들을 289KB로 줄이고, 각 화면은 처음 이동할 때만 내려받도록 했습니다. (`frontend/src/App.jsx`)',

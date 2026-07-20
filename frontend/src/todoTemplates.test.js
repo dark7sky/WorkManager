@@ -61,7 +61,16 @@ test('removeTodoTemplate filters out the matching id only', () => {
 
 test('applyTodoTemplate maps template fields onto a draft', () => {
   const template = buildTodoTemplate({ name: '아침 루틴', title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'] })
-  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'], estimated_minutes: '', checklist: [] })
+  assert.deepEqual(applyTodoTemplate(template), { title: '메일 확인', priority: 'high', recurrence_rule: 'daily', tags: ['루틴'], estimated_minutes: '', checklist: [], color: '', link_url: '' })
+})
+
+test('buildTodoTemplate and applyTodoTemplate round-trip color and link_url', () => {
+  const template = buildTodoTemplate({ name: '아침 루틴', title: '메일 확인', color: 'green', link_url: 'https://a.com' })
+  assert.equal(template.color, 'green')
+  assert.equal(template.link_url, 'https://a.com')
+  const applied = applyTodoTemplate(template)
+  assert.equal(applied.color, 'green')
+  assert.equal(applied.link_url, 'https://a.com')
 })
 
 test('buildTodoTemplate and applyTodoTemplate carry the estimate', () => {

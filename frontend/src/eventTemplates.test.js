@@ -61,7 +61,17 @@ test('removeEventTemplate filters out the matching id only', () => {
 
 test('applyEventTemplate maps template fields onto a draft', () => {
   const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', location: '회의실 A', color: 'blue', tags: ['정기'] })
-  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], estimated_minutes: '', checklist: [] })
+  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], estimated_minutes: '', checklist: [], link_url: '', links: [] })
+})
+
+test('buildEventTemplate and applyEventTemplate round-trip link_url and links', () => {
+  const links = [{ id: 'x', url: 'https://example.com', label: '참고' }]
+  const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', link_url: 'https://a.com', links })
+  assert.equal(template.link_url, 'https://a.com')
+  const applied = applyEventTemplate(template)
+  assert.equal(applied.link_url, 'https://a.com')
+  assert.equal(applied.links[0].url, 'https://example.com')
+  assert.notEqual(applied.links[0].id, links[0].id)
 })
 
 test('buildEventTemplate and applyEventTemplate carry the estimate', () => {

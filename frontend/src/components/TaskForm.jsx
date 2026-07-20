@@ -64,6 +64,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setStartTimeVal(filled.start_time ?? startTimeVal)
     setDueDateVal(filled.due_date ?? dueDateVal)
     setDueTimeVal(filled.due_time ?? dueTimeVal)
+    setLinks(filled.links || [])
   }
 
   const saveAsTemplate = () => {
@@ -79,6 +80,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       durationDays: durationDaysBetween(data.get('start_date'), data.get('due_date')),
       checklist,
       estimated_minutes: data.get('estimated_minutes'),
+      color: data.get('color'),
+      link_url: data.get('link_url'),
+      links,
     })
     const next = addTaskTemplate(templates, template)
     setTemplates(next)
@@ -271,9 +275,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={prefill?.estimated_minutes ?? task?.estimated_minutes ?? ''}/></label>
-    <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={task?.link_url ?? ''}/></label>
+    <label className="span-2" key={`link-url-${prefillKey}`}>관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={prefill?.link_url ?? task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>
-    <label>색상<select name="color" defaultValue={task?.color || ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
+    <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? task?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option></select></label>
     {recurrenceRule ? <label key={`recurrence-end-${prefillKey}`}>반복 종료일<input name="recurrence_end_date" type="date" className={fieldErrors.recurrence_end_date ? 'invalid' : ''} aria-invalid={fieldErrors.recurrence_end_date ? 'true' : 'false'} defaultValue={task?.recurrence_end_date ?? ''}/>{fieldErrors.recurrence_end_date ? <small className="field-error" role="alert">{fieldErrors.recurrence_end_date}</small> : null}</label> : null}
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>

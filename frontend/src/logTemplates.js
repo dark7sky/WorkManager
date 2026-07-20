@@ -3,6 +3,8 @@ const NAME_LIMIT = 100
 const CONTENT_LIMIT = 500
 const TAG_LIMIT = 50
 
+const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+
 export const loadLogTemplates = (storage = localStorage) => {
   try {
     const parsed = JSON.parse(storage.getItem(STORAGE_KEY) || '[]')
@@ -16,7 +18,7 @@ export const saveLogTemplates = (templates, storage = localStorage) => {
   storage.setItem(STORAGE_KEY, JSON.stringify(templates))
 }
 
-export const buildLogTemplate = ({ name, content, tags, color, duration_minutes, estimated_minutes, priority }) => ({
+export const buildLogTemplate = ({ name, content, tags, color, duration_minutes, estimated_minutes, priority, link_url, links }) => ({
   id: `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
   name: String(name || '').trim().slice(0, NAME_LIMIT),
   content: String(content || '').trim().slice(0, CONTENT_LIMIT),
@@ -25,6 +27,8 @@ export const buildLogTemplate = ({ name, content, tags, color, duration_minutes,
   duration_minutes: duration_minutes || '',
   estimated_minutes: estimated_minutes || '',
   priority: priority || 'normal',
+  link_url: String(link_url || '').trim().slice(0, 2000),
+  links: (Array.isArray(links) ? links : []).slice(0, 50),
 })
 
 export const addLogTemplate = (templates, template) => {
@@ -41,4 +45,6 @@ export const applyLogTemplate = template => ({
   duration_minutes: template.duration_minutes,
   estimated_minutes: template.estimated_minutes || '',
   priority: template.priority || 'normal',
+  link_url: template.link_url || '',
+  links: (Array.isArray(template.links) ? template.links : []).map(i => ({ ...i, id: genId() })),
 })

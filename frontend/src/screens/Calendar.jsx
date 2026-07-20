@@ -84,12 +84,13 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setPrefillKey(k => k + 1)
     setTags(filled.tags)
     setChecklist(filled.checklist)
+    setLinks(filled.links || [])
   }
   const saveAsTemplate = () => {
     const data = new FormData(formRef.current)
     const name = window.prompt('템플릿 이름을 입력하세요.', data.get('title') || '')
     if (!name) return
-    const template = buildEventTemplate({ name, title: data.get('title'), location: data.get('location'), color: data.get('color'), priority: data.get('priority'), tags, checklist, estimated_minutes: data.get('estimated_minutes') })
+    const template = buildEventTemplate({ name, title: data.get('title'), location: data.get('location'), color: data.get('color'), priority: data.get('priority'), tags, checklist, estimated_minutes: data.get('estimated_minutes'), link_url: data.get('link_url'), links })
     const next = addEventTemplate(templates, template)
     setTemplates(next)
     saveEventTemplates(next)
@@ -243,7 +244,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
     <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange} className={fieldErrors.end_at ? 'invalid' : ''} aria-invalid={fieldErrors.end_at ? 'true' : 'false'}/>{fieldErrors.end_at ? <small className="field-error" role="alert">{fieldErrors.end_at}</small> : null}</label>
     <label className="span-2" key={`location-${prefillKey}`}>장소<input name="location" defaultValue={prefill?.location ?? event?.location ?? ''}/></label>
-    <label className="span-2">관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={event?.link_url ?? ''}/></label>
+    <label className="span-2" key={`link-url-${prefillKey}`}>관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={prefill?.link_url ?? event?.link_url ?? ''}/></label>
     <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? event?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? event?.priority ?? ''}><option value="">보통</option><option value="low">낮음</option><option value="high">중요</option></select></label>
     <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 60" defaultValue={prefill?.estimated_minutes ?? event?.estimated_minutes ?? ''}/></label>
