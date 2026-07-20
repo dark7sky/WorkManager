@@ -252,6 +252,38 @@ test('icsToLogs sets log_time and duration_minutes for a timed VEVENT', () => {
   assert.equal(logs[0].duration_minutes, 45)
 })
 
+test('tasksToIcs and icsToTasks round-trip color', () => {
+  const ics = tasksToIcs([{ id: 13, title: '기획 승인', due_date: '2026-07-20', color: '#ff8800' }])
+  assert.match(ics, /X-WM-COLOR:#ff8800/)
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks[0].color, '#ff8800')
+})
+
+test('tasksToIcs omits X-WM-COLOR when task has no color', () => {
+  const ics = tasksToIcs([{ id: 14, title: '기획 승인', due_date: '2026-07-20' }])
+  assert.doesNotMatch(ics, /X-WM-COLOR/)
+})
+
+test('eventsToIcs and parseIcs round-trip color', () => {
+  const ics = eventsToIcs([{ id: 3, title: '회의', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', color: '#00aaff' }])
+  const parsed = parseIcs(ics)
+  assert.equal(parsed[0].color, '#00aaff')
+})
+
+test('todosToIcs and icsToTodos round-trip color', () => {
+  const ics = todosToIcs([{ id: 9, title: '장보기', todo_date: '2026-07-20', color: '#22cc55' }])
+  assert.match(ics, /X-WM-COLOR:#22cc55/)
+  const todos = icsToTodos(ics)
+  assert.equal(todos[0].color, '#22cc55')
+})
+
+test('logsToIcs and icsToLogs round-trip color', () => {
+  const ics = logsToIcs([{ id: 6, content: '보고서 작성', log_date: '2026-07-20', color: '#9933ff' }])
+  assert.match(ics, /X-WM-COLOR:#9933ff/)
+  const logs = icsToLogs(ics)
+  assert.equal(logs[0].color, '#9933ff')
+})
+
 test('parseIcs handles multiple VEVENTs and folded lines', () => {
   const ics = 'BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:회의 A\nDTSTART:20260706T010000Z\nDTEND:20260706T020000Z\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:회의 B\nDTSTART:20260707T030000Z\nDTEND:20260707T040000Z\nEND:VEVENT\nEND:VCALENDAR'
   const parsed = parseIcs(ics)

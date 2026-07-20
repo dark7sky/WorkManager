@@ -36,6 +36,7 @@ export const eventsToIcs = events => {
     if (priorityToIcs[event.priority]) lines.push(`PRIORITY:${priorityToIcs[event.priority]}`)
     if (event.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${event.estimated_minutes}`)
     if (event.link_url) lines.push(`URL:${escapeIcsText(event.link_url)}`)
+    if (event.color) lines.push(`X-WM-COLOR:${event.color}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -69,6 +70,7 @@ export const tasksToIcs = tasks => {
     if (priorityToIcs[task.priority]) lines.push(`PRIORITY:${priorityToIcs[task.priority]}`)
     if (task.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${task.estimated_minutes}`)
     if (task.link_url) lines.push(`URL:${escapeIcsText(task.link_url)}`)
+    if (task.color) lines.push(`X-WM-COLOR:${task.color}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -97,6 +99,7 @@ export const todosToIcs = todos => {
     if (priorityToIcs[todo.priority]) lines.push(`PRIORITY:${priorityToIcs[todo.priority]}`)
     if (todo.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${todo.estimated_minutes}`)
     if (todo.link_url) lines.push(`URL:${escapeIcsText(todo.link_url)}`)
+    if (todo.color) lines.push(`X-WM-COLOR:${todo.color}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -124,6 +127,7 @@ export const logsToIcs = logs => {
     if (priorityToIcs[log.priority]) lines.push(`PRIORITY:${priorityToIcs[log.priority]}`)
     if (log.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${log.estimated_minutes}`)
     if (log.link_url) lines.push(`URL:${escapeIcsText(log.link_url)}`)
+    if (log.color) lines.push(`X-WM-COLOR:${log.color}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -165,13 +169,14 @@ export const parseIcs = text => {
     else if (key === 'PRIORITY') current.priority = priorityFromIcs[Number(value)]
     else if (key === 'X-WM-ESTIMATE-MINUTES') current.estimated_minutes = Number(value) || undefined
     else if (key === 'URL') current.link_url = value
+    else if (key === 'X-WM-COLOR') current.color = value
   }
   return events.filter(e => e.start_at && (e.end_at || e.start_all_day))
 }
 
 const stripPrefix = (title, prefix) => title.startsWith(prefix) ? title.slice(prefix.length) : title
 
-export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url }) => {
+export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
   const date = new Date(start_at)
   const task = { title: stripPrefix(title, '[업무] '), due_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) task.due_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
@@ -179,10 +184,11 @@ export const icsToTasks = text => parseIcs(text).map(({ title, description, star
   if (priority) task.priority = priority
   if (estimated_minutes) task.estimated_minutes = estimated_minutes
   if (link_url) task.link_url = link_url
+  if (color) task.color = color
   return task
 })
 
-export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url }) => {
+export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
   const date = new Date(start_at)
   const todo = { title: stripPrefix(title, '[할 일] '), todo_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) todo.todo_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
@@ -190,10 +196,11 @@ export const icsToTodos = text => parseIcs(text).map(({ title, description, star
   if (priority) todo.priority = priority
   if (estimated_minutes) todo.estimated_minutes = estimated_minutes
   if (link_url) todo.link_url = link_url
+  if (color) todo.color = color
   return todo
 })
 
-export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day, priority, estimated_minutes, link_url }) => {
+export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
   const date = new Date(start_at)
   const log = { content: stripPrefix(title, '[기록] '), log_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) {
@@ -203,5 +210,6 @@ export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, 
   if (priority) log.priority = priority
   if (estimated_minutes) log.estimated_minutes = estimated_minutes
   if (link_url) log.link_url = link_url
+  if (color) log.color = color
   return log
 })
