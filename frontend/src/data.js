@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-performance-tag-filter-reset',
+    timestamp: '2026-07-21T07:05:00+09:00',
+    description: '성과 화면의 태그 필터에 "필터 초기화" 버튼을 추가했습니다. 이전에는 업무/일정/할 일/감사 로그 화면과 달리 선택한 태그 칩을 하나씩 다시 눌러야만 필터를 해제할 수 있었습니다. (`frontend/src/screens/Performance.jsx`)',
+  },
+  {
     id: '2026-07-21-comment-maxlength',
     timestamp: '2026-07-21T07:02:00+09:00',
     description: '업무/일정/할 일/업무 기록의 댓글 입력창에 백엔드와 동일한 2000자 제한을 적용했습니다. 이전에는 등록 시점에서야 글자수 초과 오류를 알 수 있었습니다. (`frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`)',
