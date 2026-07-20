@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-google-callback-rate-limit',
+    timestamp: '2026-07-21T07:06:00+09:00',
+    description: 'Google 로그인 콜백(`/api/auth/google/callback`)에 요청 빈도 제한을 추가했습니다. 다른 인증/동기화 엔드포인트와 달리 이 경로만 제한이 없어 토큰 교환 API 남용이나 허용 이메일 목록 무차별 대입 시도에 노출되어 있었습니다. (`backend/app/main.py`)',
+  },
+  {
     id: '2026-07-21-performance-tag-filter-reset',
     timestamp: '2026-07-21T07:05:00+09:00',
     description: '성과 화면의 태그 필터에 "필터 초기화" 버튼을 추가했습니다. 이전에는 업무/일정/할 일/감사 로그 화면과 달리 선택한 태그 칩을 하나씩 다시 눌러야만 필터를 해제할 수 있었습니다. (`frontend/src/screens/Performance.jsx`)',

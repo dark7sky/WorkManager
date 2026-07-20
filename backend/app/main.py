@@ -266,6 +266,7 @@ def google_start(request: Request):
 
 @app.get("/api/auth/google/callback", name="google_callback")
 async def google_callback(request: Request, code: str, state: str):
+    enforce_rate(request.client.host if request.client else "unknown", "google-callback", 20, 3600)
     if not secrets.compare_digest(state, request.cookies.get("google_oauth_state", "")):
         raise HTTPException(400, "Invalid OAuth state")
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", str(request.url_for("google_callback")))

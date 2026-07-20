@@ -91,6 +91,15 @@ class ApiTests(unittest.TestCase):
         with patch.dict(os.environ, {"GOOGLE_ALLOWED_EMAIL": "someone-else@example.com"}):
             self.assertEqual(self.client(token).get("/api/auth/me").status_code, 200)
 
+    def test_google_callback_is_rate_limited(self):
+        client = TestClient(self.app)
+        for _ in range(20):
+            response = client.get("/api/auth/google/callback", params={"code": "x", "state": "bad"}, follow_redirects=False)
+            self.assertEqual(response.status_code, 400, response.text)
+        limited = client.get("/api/auth/google/callback", params={"code": "x", "state": "bad"}, follow_redirects=False)
+        self.assertEqual(limited.status_code, 429, limited.text)
+        self.assertIn("Retry-After", limited.headers)
+
     def test_validation_rejects_bad_domain_values(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/tasks", json={"title": "x", "status": "invalid"}).status_code, 422)
