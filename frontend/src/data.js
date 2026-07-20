@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-todo-overlap-warning',
+    timestamp: '2026-07-20T14:57:01+09:00',
+    description: '업무 기록·일정에는 같은 시간대 중복 경고가 있었지만 오늘 할 일에는 없어 시간을 지정한 할 일끼리 겹쳐도 알아채기 어려웠습니다. 할 일 추가/수정 폼에도 같은 시간대 중복 경고를 추가했습니다. (`frontend/src/todoOverlap.js`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-20-worklog-timer-pause-resume',
     timestamp: '2026-07-20T14:55:55+09:00',
     description: '오늘 화면의 업무 기록 타이머는 시작·중지만 가능해 자리를 비우면 실제 작업하지 않은 시간까지 기록에 포함됐습니다. 타이머에 "일시정지/재개" 버튼을 추가해 멈춘 구간을 제외하고 정확한 소요 시간만 기록되도록 했습니다. (`frontend/src/workLogTimer.js`, `frontend/src/screens/Today.jsx`)',
