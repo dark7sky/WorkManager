@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-activity-streak',
+    timestamp: '2026-07-20T15:32:34+09:00',
+    description: '성과 화면의 일별 활동 추이에 연속 활동일(스트릭) 표시를 추가했습니다. 오늘까지 이어진 현재 연속 일수와 선택한 기간 내 최고 연속 일수를 함께 보여줍니다. (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`)',
+  },
+  {
     id: '2026-07-20-list-endpoint-pagination',
     timestamp: '2026-07-20T15:26:15+09:00',
     description: '업무/일정/할 일/업무 기록 목록 API가 항상 전체 데이터를 반환해, 데이터가 많아질수록 응답이 느려질 여지가 있었습니다. 목록 조회 API에 `limit`/`offset` 파라미터를 추가해 필요할 때 페이지 단위로 가져올 수 있도록 했습니다(기본 동작은 기존과 동일하게 전체 반환). (`backend/app/main.py`)',

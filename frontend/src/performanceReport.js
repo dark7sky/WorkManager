@@ -36,6 +36,17 @@ export const dailyActivityTrend = (timeline, start, end) => {
   return days
 }
 
+export const activityStreak = (days, todayIso = isoDay(new Date())) => {
+  if (!days || !days.length) return { current: 0, best: 0 }
+  let best = 0, run = 0
+  days.forEach(d => { run = d.count > 0 ? run + 1 : 0; best = Math.max(best, run) })
+  let current = 0
+  if (days[days.length - 1].date === todayIso) {
+    for (let i = days.length - 1; i >= 0 && days[i].count > 0; i--) current++
+  }
+  return { current, best }
+}
+
 export const performanceReportMarkdown = (data, { start, end, tags = [], summary = null, generatedAt }) => {
   const stats = data?.summary || {}
   const items = data?.timeline || []

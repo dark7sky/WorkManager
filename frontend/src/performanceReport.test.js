@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, loadPerformanceGoal, savePerformanceGoal, goalProgress } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress } from './performanceReport.js'
 
 test('formatDuration: formats minutes as hours/minutes in Korean', () => {
   assert.strictEqual(formatDuration(0), '0분')
@@ -286,6 +286,23 @@ test('dailyActivityTrend: returns empty array for invalid or missing range', () 
 
 test('dailyActivityTrend: returns empty array when the range spans more than 62 days', () => {
   assert.deepEqual(dailyActivityTrend([], '2026-01-01', '2026-12-31'), [])
+})
+
+test('activityStreak: counts current streak only when it reaches today, and tracks best streak across gaps', () => {
+  const days = [
+    { date: '2026-07-15', count: 2 }, { date: '2026-07-16', count: 1 }, { date: '2026-07-17', count: 0 },
+    { date: '2026-07-18', count: 1 }, { date: '2026-07-19', count: 1 }, { date: '2026-07-20', count: 3 },
+  ]
+  assert.deepEqual(activityStreak(days, '2026-07-20'), { current: 3, best: 3 })
+})
+
+test('activityStreak: current streak is 0 when the range does not end on today (no activity today yet)', () => {
+  const days = [{ date: '2026-07-18', count: 1 }, { date: '2026-07-19', count: 1 }]
+  assert.deepEqual(activityStreak(days, '2026-07-20'), { current: 0, best: 2 })
+})
+
+test('activityStreak: returns zeros for empty input', () => {
+  assert.deepEqual(activityStreak([], '2026-07-20'), { current: 0, best: 0 })
 })
 
 test('loadPerformanceGoal: returns nulls for missing key', () => {
