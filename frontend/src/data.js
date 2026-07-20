@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ics-import-prefix-dedup',
+    timestamp: '2026-07-21T01:22:00+09:00',
+    description: 'ICS로 내보낸 업무/할 일/업무 기록을 다시 가져오면 "[업무] ", "[할 일] ", "[기록] " 접두어가 제목에 그대로 남아 재가져오기를 반복할 때마다 접두어가 중복되었습니다. 가져오기 시 내보내기 접두어를 자동으로 제거하도록 수정했습니다. (`frontend/src/ics.js`)',
+  },
+  {
     id: '2026-07-21-ics-priority-roundtrip',
     timestamp: '2026-07-21T01:20:00+09:00',
     description: 'ICS 내보내기에 우선순위가 빠져 있어 다른 캘린더 앱으로 내보내거나 가져올 때 업무/할 일/일정/업무 기록의 우선순위 정보가 사라졌습니다. 표준 iCalendar PRIORITY 필드로 우선순위를 함께 내보내고, 가져오기 시에도 복원하도록 수정했습니다. (`frontend/src/ics.js`)',

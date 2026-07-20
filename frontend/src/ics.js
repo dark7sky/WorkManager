@@ -159,9 +159,11 @@ export const parseIcs = text => {
   return events.filter(e => e.start_at && (e.end_at || e.start_all_day))
 }
 
+const stripPrefix = (title, prefix) => title.startsWith(prefix) ? title.slice(prefix.length) : title
+
 export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority }) => {
   const date = new Date(start_at)
-  const task = { title, due_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  const task = { title: stripPrefix(title, '[업무] '), due_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) task.due_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
   if (description) task.description = description
   if (priority) task.priority = priority
@@ -170,7 +172,7 @@ export const icsToTasks = text => parseIcs(text).map(({ title, description, star
 
 export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority }) => {
   const date = new Date(start_at)
-  const todo = { title, todo_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  const todo = { title: stripPrefix(title, '[할 일] '), todo_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) todo.todo_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
   if (description) todo.memo = description
   if (priority) todo.priority = priority
@@ -179,7 +181,7 @@ export const icsToTodos = text => parseIcs(text).map(({ title, description, star
 
 export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day, priority }) => {
   const date = new Date(start_at)
-  const log = { content: title, log_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
+  const log = { content: stripPrefix(title, '[기록] '), log_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) {
     log.log_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
     if (end_at) log.duration_minutes = Math.round((new Date(end_at) - date) / 60000)

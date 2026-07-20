@@ -109,14 +109,21 @@ test('parseIcs keeps all-day VEVENTs even without a DTEND', () => {
   assert.equal(parsed[0].end_at, undefined)
 })
 
-test('icsToTasks round-trips an all-day task VEVENT exported by tasksToIcs', () => {
+test('icsToTasks round-trips an all-day task VEVENT exported by tasksToIcs, stripping the export prefix', () => {
   const ics = tasksToIcs([{ id: 5, title: '기획 승인', description: '검토 필요', due_date: '2026-07-20' }])
   const tasks = icsToTasks(ics)
   assert.equal(tasks.length, 1)
-  assert.equal(tasks[0].title, '[업무] 기획 승인')
+  assert.equal(tasks[0].title, '기획 승인')
   assert.equal(tasks[0].due_date, '2026-07-20')
   assert.equal(tasks[0].due_time, undefined)
   assert.equal(tasks[0].description, '검토 필요')
+})
+
+test('re-importing an exported task ICS does not double the [업무] prefix', () => {
+  const first = icsToTasks(tasksToIcs([{ id: 5, title: '기획 승인', due_date: '2026-07-20' }]))
+  const reExported = tasksToIcs([{ id: 5, title: first[0].title, due_date: first[0].due_date }])
+  const second = icsToTasks(reExported)
+  assert.equal(second[0].title, '기획 승인')
 })
 
 test('tasksToIcs and icsToTasks round-trip priority', () => {
@@ -138,11 +145,11 @@ test('icsToTasks sets due_time for a timed VEVENT', () => {
   assert.equal(tasks[0].due_time, '15:00')
 })
 
-test('icsToTodos round-trips an all-day todo VEVENT exported by todosToIcs', () => {
+test('icsToTodos round-trips an all-day todo VEVENT exported by todosToIcs, stripping the export prefix', () => {
   const ics = todosToIcs([{ id: 3, title: '장보기', memo: '우유 사기', todo_date: '2026-07-20' }])
   const todos = icsToTodos(ics)
   assert.equal(todos.length, 1)
-  assert.equal(todos[0].title, '[할 일] 장보기')
+  assert.equal(todos[0].title, '장보기')
   assert.equal(todos[0].todo_date, '2026-07-20')
   assert.equal(todos[0].todo_time, undefined)
   assert.equal(todos[0].memo, '우유 사기')
@@ -169,11 +176,11 @@ test('logsToIcs and icsToLogs round-trip priority', () => {
   assert.equal(logs[0].priority, 'normal')
 })
 
-test('icsToLogs round-trips an all-day log VEVENT exported by logsToIcs', () => {
+test('icsToLogs round-trips an all-day log VEVENT exported by logsToIcs, stripping the export prefix', () => {
   const ics = logsToIcs([{ id: 2, content: '보고서 작성', log_date: '2026-07-20' }])
   const logs = icsToLogs(ics)
   assert.equal(logs.length, 1)
-  assert.equal(logs[0].content, '[기록] 보고서 작성')
+  assert.equal(logs[0].content, '보고서 작성')
   assert.equal(logs[0].log_date, '2026-07-20')
   assert.equal(logs[0].log_time, undefined)
 })
