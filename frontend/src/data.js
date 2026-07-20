@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-worklog-linked-task-open',
+    timestamp: '2026-07-21T07:31:00+09:00',
+    description: '오늘 한 일(업무 기록)에서 연결된 업무 배지(#번호 업무명)는 텍스트로만 표시되어, 해당 업무를 보려면 업무 화면에서 직접 찾아야 했습니다. 일정 화면에서 마감 업무 배지를 누르면 업무 편집창이 열리는 것과 달리 업무 기록에는 이 연결이 없었습니다. 배지를 버튼으로 바꿔 누르면 연결된 업무의 수정 창이 바로 열리도록 했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-21-yearly-recurrence',
     timestamp: '2026-07-21T07:41:00+09:00',
     description: '업무/할 일/일정 모두 매일·매주·격주·매월 반복만 지원해, 연 1회 반복되는 항목(연간 계약 갱신, 연례 평가, 라이선스 갱신 등)은 반복 설정 없이 매번 새로 만들어야 했습니다. 반복 규칙에 "매년"(yearly, 1년 간격)을 추가해 업무 폼·오늘 할 일 빠른 추가/수정·일정 등록 폼의 반복 선택지와 AI 어시스턴트(로컬 규칙 파싱/원격 프롬프트 모두)에서 사용할 수 있고, CSV 내보내기/가져오기에도 반영됩니다 (`backend/app/main.py`, `backend/app/ai.py`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Tasks.jsx`, `frontend/src/eventRecurrence.js`, `frontend/src/csv.js`, 테스트 `backend/tests/test_api.py`, `frontend/src/eventRecurrence.test.js`).',
