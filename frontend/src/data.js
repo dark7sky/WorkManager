@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-todo-archiving',
+    timestamp: '2026-07-20T20:26:00+09:00',
+    description: '방금 추가된 업무 보관 기능이 업무에만 연결되어 있어, 할 일 목록에는 완료했지만 삭제하기는 애매한 항목을 정리할 방법이 여전히 없었습니다. 할 일에도 같은 "보관" 버튼과 보관/보관 해제 API를 추가하고, 설정 화면의 보관함을 업무용/할 일용 두 개로 나눴습니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`, `frontend/src/api.js`)',
+  },
+  {
     id: '2026-07-20-task-archiving',
     timestamp: '2026-07-20T20:17:04+09:00',
     description: '완료했지만 삭제하기는 애매한 업무를 정리할 방법이 없어, 업무 목록이 오래된 항목으로 계속 늘어났습니다. 업무별로 "보관" 버튼을 눌러 목록에서 숨기고, 설정 화면의 보관함에서 언제든 다시 꺼낼 수 있도록 했습니다. 휴지통(소프트 삭제)과는 별개로 유지됩니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/api.js`)',

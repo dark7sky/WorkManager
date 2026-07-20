@@ -73,6 +73,8 @@ export const api = {
   todos: () => request('/todos'),
   createTodo: data => request('/todos',json('POST',data)), updateTodo: (id,data) => request(`/todos/${id}`,json('PATCH',data)), deleteTodo: id => request(`/todos/${id}`,{method:'DELETE'}),
   skipTodoRecurrence: id => request(`/todos/${id}/skip-recurrence`,{method:'POST'}),
+  archivedTodos: () => request('/todos/archived'),
+  archiveTodo: id => request(`/todos/${id}/archive`,{method:'POST'}), unarchiveTodo: id => request(`/todos/${id}/unarchive`,{method:'POST'}),
   aiPreview: text => request('/ai/parse',json('POST',{text})), aiApply: data => request('/ai/apply',json('POST',data)), aiRecommendations: (limit=5) => request(`/ai/recommendations?limit=${limit}`), aiStatus: () => request('/ai/status'),
   aiSettings: provider => request(`/settings/ai${provider ? `?provider=${encodeURIComponent(provider)}` : ''}`), saveAiSettings: data => request('/settings/ai',json('PUT',data)),
   testAiSettings: () => request('/settings/ai/test',json('POST',{})),

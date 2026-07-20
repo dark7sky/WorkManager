@@ -188,12 +188,13 @@ def init_db():
             _add_column(c, "google_sync_state", name, definition)
         for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT", "priority": "TEXT NOT NULL DEFAULT 'normal'", "link_url": "TEXT", "recurrence_end_date": "TEXT", "memo": "TEXT",
                                   "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
-                                  "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER"}.items():
+                                  "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT"}.items():
             _add_column(c, "todos", name, definition)
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_archived ON tasks(user_id,archived_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_todos_archived ON todos(user_id,archived_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_events_user_start ON events(user_id,start_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_todos_user_date ON todos(user_id,todo_date)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_date ON work_logs(user_id,log_date)")
