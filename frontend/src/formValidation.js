@@ -4,6 +4,10 @@ export function validateTaskForm(data) {
   if (data.start_date && data.due_date && data.due_date < data.start_date) {
     errors.due_date = '완료 예정일은 시작일보다 빠를 수 없습니다.'
   }
+  const baseDate = data.due_date || data.start_date
+  if (data.recurrence_rule && data.recurrence_end_date && baseDate && data.recurrence_end_date < baseDate) {
+    errors.recurrence_end_date = '반복 종료일은 시작일/완료 예정일보다 빠를 수 없습니다.'
+  }
   return errors
 }
 
@@ -19,6 +23,9 @@ export function validateEventForm(data) {
 export function validateTodoForm(data) {
   const errors = {}
   if (!String(data.title || '').trim()) errors.title = 'Todo 내용을 입력하세요.'
+  if (data.recurrence_rule && data.recurrence_end_date && data.todo_date && data.recurrence_end_date < data.todo_date) {
+    errors.recurrence_end_date = '반복 종료일은 날짜보다 빠를 수 없습니다.'
+  }
   return errors
 }
 

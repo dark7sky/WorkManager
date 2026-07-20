@@ -339,6 +339,74 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["start_date"], "2026-07-01")
             self.assertEqual(updated["due_date"], "2026-08-01")
 
+    def test_update_item_rejects_recurrence_end_date_before_due_date(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            task = create_item("tasks", {"title": "recurring work", "due_date": "2026-08-01"}, "sub-a")
+            with self.assertRaisesRegex(Exception, "recurrence_end_date"):
+                update_item("tasks", task["id"], {"recurrence_rule": "daily", "recurrence_end_date": "2026-07-01"}, "sub-a")
+
+    def test_update_item_repairs_invalid_legacy_recurrence_end_date_on_unrelated_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,recurrence_rule,recurrence_end_date,created_at,updated_at)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy recurring", "", "doing", "normal", 10, "2026-08-01", "2026-08-01",
+                     "Dana", "none", "none", "[]", "daily", "2026-07-01", "2026-07-08T10:11:08", "2026-07-08T10:11:08"))
+                task_id = cur.lastrowid
+
+            # A pre-existing invalid recurrence_end_date must self-heal on an unrelated edit
+            # instead of permanently 422ing every future save of this task.
+            updated = update_item("tasks", task_id, {"title": "legacy recurring saved"}, "sub-a")
+            self.assertEqual(updated["title"], "legacy recurring saved")
+            self.assertIsNone(updated["recurrence_end_date"])
+
+    def test_update_item_rejects_todo_recurrence_end_date_before_todo_date(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            todo = create_item("todos", {"title": "recurring todo", "todo_date": "2026-08-01"}, "sub-a")
+            with self.assertRaisesRegex(Exception, "recurrence_end_date"):
+                update_item("todos", todo["id"], {"recurrence_rule": "daily", "recurrence_end_date": "2026-07-01"}, "sub-a")
+
+    def test_update_item_repairs_invalid_legacy_todo_recurrence_end_date_on_unrelated_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,completed,tags,recurrence_rule,recurrence_end_date,created_at)
+                    VALUES(?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "legacy recurring todo", "2026-08-01", 0, "[]", "daily", "2026-07-01", "2026-07-08T10:11:08"))
+                todo_id = cur.lastrowid
+
+            updated = update_item("todos", todo_id, {"title": "legacy recurring todo saved"}, "sub-a")
+            self.assertEqual(updated["title"], "legacy recurring todo saved")
+            self.assertIsNone(updated["recurrence_end_date"])
+
     def test_update_item_repairs_invalid_legacy_task_json_arrays_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

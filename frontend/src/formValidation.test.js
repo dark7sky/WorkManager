@@ -24,6 +24,21 @@ test('allows equal start and due date', () => {
   assert.deepEqual(errors, {})
 })
 
+test('flags recurrence end date before due date', () => {
+  const errors = validateTaskForm({ title: '업무', due_date: '2026-07-10', recurrence_rule: 'daily', recurrence_end_date: '2026-07-05' })
+  assert.equal(errors.recurrence_end_date, '반복 종료일은 시작일/완료 예정일보다 빠를 수 없습니다.')
+})
+
+test('allows recurrence end date on or after due date', () => {
+  const errors = validateTaskForm({ title: '업무', due_date: '2026-07-10', recurrence_rule: 'daily', recurrence_end_date: '2026-07-10' })
+  assert.deepEqual(errors, {})
+})
+
+test('ignores recurrence end date when no recurrence rule set', () => {
+  const errors = validateTaskForm({ title: '업무', due_date: '2026-07-10', recurrence_end_date: '2026-07-05' })
+  assert.deepEqual(errors, {})
+})
+
 test('event form flags empty title', () => {
   const errors = validateEventForm({ title: ' ', start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
   assert.equal(errors.title, '일정 제목을 입력하세요.')
@@ -49,6 +64,16 @@ test('todo form flags empty title', () => {
 
 test('todo form passes valid input with no errors', () => {
   const errors = validateTodoForm({ title: '보고서 작성' })
+  assert.deepEqual(errors, {})
+})
+
+test('todo form flags recurrence end date before todo date', () => {
+  const errors = validateTodoForm({ title: '보고서 작성', todo_date: '2026-07-10', recurrence_rule: 'weekly', recurrence_end_date: '2026-07-05' })
+  assert.equal(errors.recurrence_end_date, '반복 종료일은 날짜보다 빠를 수 없습니다.')
+})
+
+test('todo form allows recurrence end date on or after todo date', () => {
+  const errors = validateTodoForm({ title: '보고서 작성', todo_date: '2026-07-10', recurrence_rule: 'weekly', recurrence_end_date: '2026-07-10' })
   assert.deepEqual(errors, {})
 })
 

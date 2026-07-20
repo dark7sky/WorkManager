@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-recurrence-end-date-validation',
+    timestamp: '2026-07-20T15:18:00+09:00',
+    description: '업무·할 일의 반복 종료일을 시작일/완료 예정일보다 이전으로 설정해도 저장은 되지만 다음 회차가 조용히 생성되지 않는 문제가 있었습니다. 반복 종료일이 기준일보다 빠르면 저장 시점에 바로 안내하도록 입력 검증을 추가했습니다. (`frontend/src/formValidation.js`, `backend/app/main.py`)',
+  },
+  {
     id: '2026-07-20-recurrence-spawn-field-parity',
     timestamp: '2026-07-20T15:07:00+09:00',
     description: '반복 업무·할 일을 완료해 다음 회차가 자동 생성될 때 예상 소요 시간, 관련 링크, 색상, 첨부 링크, 체크리스트가 모두 누락되고 있었습니다. 다음 회차 생성 시 이 필드들을 그대로 이어받도록 하고, 체크리스트는 복제 기능과 동일하게 완료 표시를 초기화하도록 했습니다. (`backend/app/main.py` `spawn_recurring_task`/`spawn_recurring_todo`)',

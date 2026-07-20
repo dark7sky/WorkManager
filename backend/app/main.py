@@ -391,6 +391,9 @@ class TaskPayload(StrictPayload):
             raise ValueError("due_date must not be before start_date")
         if self.approval_status not in (None, "none") and self.status not in (None, "done"):
             raise ValueError("approval_status requires a completed task")
+        base_date = self.due_date or self.start_date
+        if self.recurrence_end_date and base_date and self.recurrence_end_date < base_date:
+            raise ValueError("recurrence_end_date must not be before start_date/due_date")
         return self
 
 
@@ -491,6 +494,12 @@ class TodoPayload(StrictPayload):
     @classmethod
     def links_well_formed(cls, value):
         return _clean_links(value)
+
+    @model_validator(mode="after")
+    def recurrence_end_after_todo_date(self):
+        if self.recurrence_end_date and self.todo_date and self.recurrence_end_date < self.todo_date:
+            raise ValueError("recurrence_end_date must not be before todo_date")
+        return self
 
 
 class WorkLogPayload(StrictPayload):
@@ -1018,6 +1027,10 @@ def update_item(table, item_id, data, user_id):
             due_unchanged = data.get("due_date", existing["due_date"]) == existing["due_date"]
             if effective_start and effective_due and effective_due < effective_start and start_unchanged and due_unchanged:
                 data["start_date"], data["due_date"] = effective_due, effective_start
+            effective_recurrence_end = data.get("recurrence_end_date", existing["recurrence_end_date"])
+            effective_base_date = data.get("due_date", existing["due_date"]) or data.get("start_date", existing["start_date"])
+            if "recurrence_end_date" not in data and effective_recurrence_end and effective_base_date and effective_recurrence_end < effective_base_date:
+                data["recurrence_end_date"] = None
             normalized_parent_id = normalize_legacy_optional_task_id(existing["parent_id"])
             if normalized_parent_id != existing["parent_id"] and "parent_id" not in data:
                 data["parent_id"] = normalized_parent_id
@@ -1065,6 +1078,11 @@ def update_item(table, item_id, data, user_id):
                 anchor = date.fromisoformat(anchor_value)
                 data["recurrence_anchor_day"] = anchor.day
                 data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+        if table == "todos":
+            effective_recurrence_end = data.get("recurrence_end_date", existing["recurrence_end_date"])
+            effective_todo_date = data.get("todo_date", existing["todo_date"])
+            if "recurrence_end_date" not in data and effective_recurrence_end and effective_todo_date and effective_recurrence_end < effective_todo_date:
+                data["recurrence_end_date"] = None
         # Validate cross-field date ordering using the merged resource.
         merged = merged_resource_for_validation(table, existing, data)
         try:
