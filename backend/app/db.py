@@ -167,7 +167,7 @@ def init_db():
             "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'", "estimated_minutes": "INTEGER",
             "link_url": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "recurrence_end_date": "TEXT",
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
-            "start_time": "TEXT", "due_time": "TEXT",
+            "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
         for name, definition in {
@@ -193,6 +193,7 @@ def init_db():
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_archived ON tasks(user_id,archived_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_events_user_start ON events(user_id,start_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_todos_user_date ON todos(user_id,todo_date)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_date ON work_logs(user_id,log_date)")

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-task-archiving',
+    timestamp: '2026-07-20T20:17:04+09:00',
+    description: '완료했지만 삭제하기는 애매한 업무를 정리할 방법이 없어, 업무 목록이 오래된 항목으로 계속 늘어났습니다. 업무별로 "보관" 버튼을 눌러 목록에서 숨기고, 설정 화면의 보관함에서 언제든 다시 꺼낼 수 있도록 했습니다. 휴지통(소프트 삭제)과는 별개로 유지됩니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/api.js`)',
+  },
+  {
     id: '2026-07-20-ai-request-history',
     timestamp: '2026-07-20T20:08:13+09:00',
     description: 'AI 도우미 화면에서 이전에 분석 요청한 문장을 다시 확인하거나 재사용할 방법이 없어, 결과가 만족스럽지 않으면 매번 처음부터 다시 입력해야 했습니다. 최근 분석 요청 최대 8건을 브라우저에 저장해 칩 형태로 보여주고, 클릭하면 입력창에 바로 채워 재분석할 수 있도록 했습니다. (`frontend/src/aiHistory.js`, `frontend/src/screens/AIAssistant.jsx`)',

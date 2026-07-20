@@ -63,6 +63,8 @@ export const api = {
   tasks: () => request('/tasks'), events: () => request('/events'), today: () => request('/today'),
   createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),
   skipTaskRecurrence: id => request(`/tasks/${id}/skip-recurrence`,{method:'POST'}),
+  archivedTasks: () => request('/tasks/archived'),
+  archiveTask: id => request(`/tasks/${id}/archive`,{method:'POST'}), unarchiveTask: id => request(`/tasks/${id}/unarchive`,{method:'POST'}),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
   updateEventSeries: (groupId,fromStartAt,data) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,json('PATCH',data)),
   deleteEventSeries: (groupId,fromStartAt) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,{method:'DELETE'}),

@@ -1127,10 +1127,18 @@ def _soft_delete_event(item_id: int, user: str) -> bool:
     return False
 
 
+@app.get("/api/tasks/archived")
+def archived_tasks(user=Depends(require_user)):
+    with connection() as c:
+        return [row_dict(r) for r in c.execute(
+            "SELECT * FROM tasks WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC", (user,)).fetchall()]
+
+
 for _table in CONFIG:
     def list_endpoint(tags: str | None = None, limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), table=_table, user=Depends(require_user)):
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
-        items = rows(table, user, f"ORDER BY {order} DESC", tags=(tags or "").split(","))
+        where = "WHERE archived_at IS NULL " if table == "tasks" else ""
+        items = rows(table, user, f"{where}ORDER BY {order} DESC", tags=(tags or "").split(","))
         if limit is not None:
             items = items[offset:offset + limit]
         comment_table = {"tasks": "task_comments", "todos": "todo_comments", "work_logs": "work_log_comments", "events": "event_comments"}.get(table)
@@ -1806,6 +1814,28 @@ def purge_trash(older_than_days: int = 30, user=Depends(require_user)):
             counts[table] = cur.rowcount
     audit(user, "purge", "trash", metadata={"older_than_days": older_than_days, "counts": counts})
     return {"ok": True, "purged": counts}
+
+
+@app.post("/api/tasks/{item_id}/archive")
+def archive_task(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL AND archived_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        c.execute("UPDATE tasks SET archived_at=? WHERE id=? AND user_id=?", (now(), item_id, user))
+    audit(user, "archive", "tasks", item_id)
+    return rows("tasks", user, "WHERE id=?", (item_id,))[0]
+
+
+@app.post("/api/tasks/{item_id}/unarchive")
+def unarchive_task(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL AND archived_at IS NOT NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Archived item not found")
+        c.execute("UPDATE tasks SET archived_at=NULL WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "unarchive", "tasks", item_id)
+    return rows("tasks", user, "WHERE id=?", (item_id,))[0]
 
 
 @app.get("/api/google/status")
