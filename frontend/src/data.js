@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-calendar-loading-indicator',
+    timestamp: '2026-07-21T01:12:40+09:00',
+    description: '업무/오늘 화면과 달리 캘린더 화면은 데이터를 불러오는 중에도 아무 표시가 없었습니다. 다른 화면과 동일하게 "동기화 중…" 표시를 추가했습니다. (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`)',
+  },
+  {
     id: '2026-07-21-task-bulk-duplicate-optimistic',
     timestamp: '2026-07-21T01:06:46+09:00',
     description: '업무를 여러 개 한 번에 복제하면 일정/할 일/업무 기록과 달리 전체 목록을 다시 불러오느라 반응이 느렸습니다. 업무 일괄 복제도 다른 화면과 동일하게 즉시 화면에 반영되도록 맞췄습니다. (`frontend/src/App.jsx`)',
