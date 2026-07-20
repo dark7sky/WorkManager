@@ -281,6 +281,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_task_yearly_spawns_one_year_later(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "annual review", "start_date": "2026-07-06",
+                                           "due_date": "2026-07-06", "recurrence_rule": "yearly"}).json()
+        first = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
+        self.assertIn("next_recurrence_id", first)
+        children = [x for x in a.get("/api/tasks").json() if x.get("parent_id") == task["id"]]
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0]["due_date"], "2027-07-06")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_stops_spawning_past_recurrence_end_date(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-06",

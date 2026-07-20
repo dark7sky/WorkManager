@@ -283,7 +283,7 @@ class TaskUpdateValidationTests(unittest.TestCase):
                 cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
                     assignee_name,approval_status,schedule_approval_status,tags,recurrence_rule,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     ("sub-a", "legacy recurrence edit", "", "todo", "normal", 0, None, None,
-                     "", "none", "none", "[]", "yearly", "2026-07-08T10:05:27", "2026-07-08T10:05:27"))
+                     "", "none", "none", "[]", "annually", "2026-07-08T10:05:27", "2026-07-08T10:05:27"))
                 task_id = cur.lastrowid
 
             updated = update_item("tasks", task_id, {"title": "legacy recurrence edit saved"}, "sub-a")

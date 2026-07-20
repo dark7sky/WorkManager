@@ -230,7 +230,7 @@ export const parseEventsCsv = text => {
 }
 
 const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
-const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월' }
+const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년' }
 
 export const todosToCsv = todos => {
   const rows = todos.map(todo => [
@@ -252,7 +252,7 @@ export const todosToCsv = todos => {
 
 export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
 
-const todoRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly' }
+const todoRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly' }
 
 export const parseTodosCsv = text => {
   const rows = parseCsvRows(text.replace(/^﻿/, ''))

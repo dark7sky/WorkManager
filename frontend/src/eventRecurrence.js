@@ -9,6 +9,7 @@ function advance(date, rule) {
   else if (rule === 'weekly') next.setDate(next.getDate() + 7)
   else if (rule === 'biweekly') next.setDate(next.getDate() + 14)
   else if (rule === 'monthly') next.setMonth(next.getMonth() + 1)
+  else if (rule === 'yearly') next.setFullYear(next.getFullYear() + 1)
   return next
 }
 

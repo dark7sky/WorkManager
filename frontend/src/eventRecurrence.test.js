@@ -31,6 +31,11 @@ test('expands daily occurrences', () => {
   assert.deepEqual(result.map(e => e.start_at.slice(0, 10)), ['2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16'])
 })
 
+test('expands yearly occurrences', () => {
+  const result = expandRecurringEvent(basePayload, 'yearly', '2028-07-13')
+  assert.deepEqual(result.map(e => e.start_at.slice(0, 10)), ['2026-07-13', '2027-07-13', '2028-07-13'])
+})
+
 test('caps at 52 occurrences for a far-future until date', () => {
   const result = expandRecurringEvent(basePayload, 'daily', '2030-01-01')
   assert.equal(result.length, 52)
