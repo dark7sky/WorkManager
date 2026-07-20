@@ -10,7 +10,7 @@ from typing import Literal
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import Body, Cookie, Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
+from fastapi import Body, Cookie, Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
@@ -1128,9 +1128,11 @@ def _soft_delete_event(item_id: int, user: str) -> bool:
 
 
 for _table in CONFIG:
-    def list_endpoint(tags: str | None = None, table=_table, user=Depends(require_user)):
+    def list_endpoint(tags: str | None = None, limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), table=_table, user=Depends(require_user)):
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
         items = rows(table, user, f"ORDER BY {order} DESC", tags=(tags or "").split(","))
+        if limit is not None:
+            items = items[offset:offset + limit]
         comment_table = {"tasks": "task_comments", "todos": "todo_comments", "work_logs": "work_log_comments", "events": "event_comments"}.get(table)
         if comment_table and items:
             fk = {"task_comments": "task_id", "todo_comments": "todo_id", "work_log_comments": "work_log_id", "event_comments": "event_id"}[comment_table]

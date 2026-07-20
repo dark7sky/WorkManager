@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-list-endpoint-pagination',
+    timestamp: '2026-07-20T15:26:15+09:00',
+    description: '업무/일정/할 일/업무 기록 목록 API가 항상 전체 데이터를 반환해, 데이터가 많아질수록 응답이 느려질 여지가 있었습니다. 목록 조회 API에 `limit`/`offset` 파라미터를 추가해 필요할 때 페이지 단위로 가져올 수 있도록 했습니다(기본 동작은 기존과 동일하게 전체 반환). (`backend/app/main.py`)',
+  },
+  {
     id: '2026-07-20-task-overlap-warning',
     timestamp: '2026-07-20T15:20:40+09:00',
     description: '일정/할 일/업무 기록에는 기간이 겹치는 항목이 있으면 경고가 떴지만, 업무만 예외였습니다. 업무 폼에서 시작일·완료 예정일(및 시각)이 다른 업무의 기간과 겹치면 경고 문구를 표시하도록 했습니다. (`frontend/src/taskOverlap.js`, `frontend/src/components/TaskForm.jsx`)',

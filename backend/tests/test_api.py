@@ -46,6 +46,20 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(b.delete(f"/api/tasks/{item_id}").status_code, 404)
         self.assertEqual(a.get(f"/api/tasks/{item_id}").json()["title"], "A private task")
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_list_endpoint_supports_limit_and_offset(self, *_):
+        a = self.client(self.token_a)
+        titles = [f"paginated todo {i}" for i in range(5)]
+        for title in titles:
+            self.assertEqual(a.post("/api/todos", json={"title": title, "todo_date": "2026-08-01"}).status_code, 200)
+        full = a.get("/api/todos").json()
+        self.assertGreaterEqual(len(full), 5)
+        page = a.get("/api/todos?limit=2&offset=1").json()
+        self.assertEqual(len(page), 2)
+        self.assertEqual(page, full[1:3])
+        self.assertEqual(a.get("/api/todos?limit=0").status_code, 422)
+
     def test_local_password_login_is_removed(self):
         response = TestClient(self.app).post("/api/auth/login", json={"user_id": "admin", "password": "password"})
         self.assertEqual(response.status_code, 404)
