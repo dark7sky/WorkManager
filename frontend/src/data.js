@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-ai-priority-estimate',
+    timestamp: '2026-07-21T07:45:13+09:00',
+    description: 'Todo 빠른 입력에는 우선순위·예상 소요 시간을 AI가 채워주는 기능이 없어 업무 양식에서만 쓸 수 있었습니다. Todo 빠른 입력에도 "AI 우선순위·예상시간 추천" 버튼을 추가해 입력한 제목을 분석해 우선순위와 예상 소요 시간을 바로 채울 수 있도록 했습니다 (`frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-task-form-ai-priority-estimate',
     timestamp: '2026-07-21T08:02:00+09:00',
     description: '업무 등록/수정 양식에서는 제목만으로 우선순위와 예상 소요 시간을 AI가 추정해주는 기능이 없어 자연어 빠른 입력에서만 이 기능을 쓸 수 있었습니다. 업무 양식에 "AI 우선순위·예상시간 추천" 버튼을 추가해 제목·메모를 분석한 결과로 우선순위와 예상 소요 시간 입력란을 바로 채울 수 있도록 했습니다 (`frontend/src/components/TaskForm.jsx`).',

@@ -589,6 +589,17 @@ export default function Today(props) {
     finally { setSaving('') }
   }
   const recommendationButtons = (key, tags, setTags) => (tagSuggestions[key] || []).map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)
+  const recommendTodoEstimate = async () => {
+    if (!todoDraft.trim()) return
+    setSaving('estimate-todo')
+    try {
+      const result = await api.aiPreview(todoDraft)
+      const item = result.items?.[0]?.data || {}
+      if (item.estimated_minutes) setTodoEstimate(String(item.estimated_minutes))
+      if (item.priority) setTodoPriority(item.priority)
+    } catch { /* leave fields unchanged on failure */ }
+    finally { setSaving('') }
+  }
   const exportTodos = () => {
     const csv = `﻿${todosToCsv(shownTodos)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
@@ -686,7 +697,7 @@ export default function Today(props) {
           <div className="checklist-editor"><span className="dependency-picker-label">체크리스트{todoChecklist.length ? ` (${todoChecklist.filter(i => i.done).length}/${todoChecklist.length})` : ''}</span>{todoChecklist.map((item, index) => <div key={item.id} className="checklist-editor-item"><button type="button" className="text-button" onClick={() => toggleTodoChecklistItem(item.id)} aria-label={`${item.text} 완료 상태 변경`}>{item.done ? <Check aria-hidden="true"/> : <Square aria-hidden="true"/>}</button><span className={item.done ? 'checklist-done-text' : ''}>{item.text}</span><button type="button" className="text-button" disabled={index === 0} onClick={() => shiftTodoChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button><button type="button" className="text-button" disabled={index === todoChecklist.length - 1} onClick={() => shiftTodoChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button><button type="button" className="text-button" onClick={() => removeTodoChecklistItem(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="text" value={todoChecklistText} placeholder="세부 항목 추가" onChange={e => setTodoChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTodoChecklistItem() } }}/><button type="button" className="text-button" onClick={addTodoChecklistItem}>추가</button></div></div>
           <input className="link-input" value={todoMemo} onChange={event => setTodoMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/>
           <select aria-label="색상" value={todoColor} onChange={event => setTodoColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select>
-          <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}</div>
+          <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}<button type="button" className="text-button" disabled={saving === 'estimate-todo'} onClick={recommendTodoEstimate}>AI 우선순위·예상시간 추천</button></div>
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
