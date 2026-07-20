@@ -133,6 +133,24 @@ test('tasksToIcs and icsToTasks round-trip priority', () => {
   assert.equal(tasks[0].priority, 'high')
 })
 
+test('tasksToIcs and icsToTasks round-trip estimated_minutes', () => {
+  const ics = tasksToIcs([{ id: 10, title: '기획 승인', due_date: '2026-07-20', estimated_minutes: 90 }])
+  assert.match(ics, /X-WM-ESTIMATE-MINUTES:90/)
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks[0].estimated_minutes, 90)
+})
+
+test('tasksToIcs omits X-WM-ESTIMATE-MINUTES when task has no estimate', () => {
+  const ics = tasksToIcs([{ id: 11, title: '기획 승인', due_date: '2026-07-20' }])
+  assert.doesNotMatch(ics, /X-WM-ESTIMATE-MINUTES/)
+})
+
+test('eventsToIcs and parseIcs round-trip estimated_minutes', () => {
+  const ics = eventsToIcs([{ id: 1, title: '회의', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', estimated_minutes: 60 }])
+  const parsed = parseIcs(ics)
+  assert.equal(parsed[0].estimated_minutes, 60)
+})
+
 test('tasksToIcs omits PRIORITY when task has no priority', () => {
   const ics = tasksToIcs([{ id: 6, title: '기획 승인', due_date: '2026-07-20' }])
   assert.doesNotMatch(ics, /PRIORITY:/)
@@ -167,6 +185,20 @@ test('todosToIcs and icsToTodos round-trip priority', () => {
   assert.match(ics, /PRIORITY:9/)
   const todos = icsToTodos(ics)
   assert.equal(todos[0].priority, 'low')
+})
+
+test('todosToIcs and icsToTodos round-trip estimated_minutes', () => {
+  const ics = todosToIcs([{ id: 4, title: '장보기', todo_date: '2026-07-20', estimated_minutes: 15 }])
+  assert.match(ics, /X-WM-ESTIMATE-MINUTES:15/)
+  const todos = icsToTodos(ics)
+  assert.equal(todos[0].estimated_minutes, 15)
+})
+
+test('logsToIcs and icsToLogs round-trip estimated_minutes', () => {
+  const ics = logsToIcs([{ id: 5, content: '보고서 작성', log_date: '2026-07-20', estimated_minutes: 120 }])
+  assert.match(ics, /X-WM-ESTIMATE-MINUTES:120/)
+  const logs = icsToLogs(ics)
+  assert.equal(logs[0].estimated_minutes, 120)
 })
 
 test('logsToIcs and icsToLogs round-trip priority', () => {

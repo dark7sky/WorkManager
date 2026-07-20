@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ics-estimate-roundtrip',
+    timestamp: '2026-07-21T01:35:00+09:00',
+    description: '업무/할 일/일정/업무 기록의 예상 소요 시간(estimated_minutes)이 ICS 내보내기/가져오기에서 누락되던 문제를 수정했습니다. X-WM-ESTIMATE-MINUTES 확장 속성으로 왕복 보존됩니다. (`frontend/src/ics.js`)',
+  },
+  {
     id: '2026-07-21-ics-import-prefix-dedup',
     timestamp: '2026-07-21T01:22:00+09:00',
     description: 'ICS로 내보낸 업무/할 일/업무 기록을 다시 가져오면 "[업무] ", "[할 일] ", "[기록] " 접두어가 제목에 그대로 남아 재가져오기를 반복할 때마다 접두어가 중복되었습니다. 가져오기 시 내보내기 접두어를 자동으로 제거하도록 수정했습니다. (`frontend/src/ics.js`)',
