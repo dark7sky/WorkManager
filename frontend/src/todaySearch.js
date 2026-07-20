@@ -3,7 +3,8 @@ export const filterTodosByQuery = (todos, query = '') => {
   if (!q) return todos
   return todos.filter(todo => {
     const checklistText = (todo.checklist || []).map(item => item?.text || '').join(' ')
-    return `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+    const attachmentText = (todo.attachment_names || []).join(' ')
+    return `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
   })
 }
 
@@ -12,7 +13,8 @@ export const filterLogsByQuery = (logs, query = '') => {
   if (!q) return logs
   return logs.filter(log => {
     const checklistText = (log.checklist || []).map(item => item?.text || '').join(' ')
-    return `${log.content || ''} ${(log.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+    const attachmentText = (log.attachment_names || []).join(' ')
+    return `${log.content || ''} ${(log.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
   })
 }
 

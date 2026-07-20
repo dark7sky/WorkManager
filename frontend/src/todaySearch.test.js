@@ -58,6 +58,16 @@ test('filterLogsByQuery matches by checklist item text', () => {
   assert.deepEqual(filterLogsByQuery(withChecklist, '롤백').map(l => l.id), [3])
 })
 
+test('filterTodosByQuery matches by attachment filename', () => {
+  const withAttachment = [...todos, { id: 5, title: '계약서 검토', attachment_names: ['contract_v2.pdf'] }]
+  assert.deepEqual(filterTodosByQuery(withAttachment, 'contract_v2').map(t => t.id), [5])
+})
+
+test('filterLogsByQuery matches by attachment filename', () => {
+  const withAttachment = [...logs, { id: 4, content: '분석 자료 첨부', attachment_names: ['report.xlsx'] }]
+  assert.deepEqual(filterLogsByQuery(withAttachment, 'report.xlsx').map(l => l.id), [4])
+})
+
 test('filterTodosByPriority returns all todos when priority is all', () => {
   assert.equal(filterTodosByPriority(todos, 'all').length, 3)
   assert.equal(filterTodosByPriority(todos).length, 3)

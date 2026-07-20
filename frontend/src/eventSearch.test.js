@@ -35,6 +35,11 @@ test('filterEventsByQuery matches by checklist item text', () => {
   assert.deepEqual(filterEventsByQuery(withChecklist, '배너 인쇄').map(e => e.id), [5])
 })
 
+test('filterEventsByQuery matches by attachment filename', () => {
+  const withAttachment = [...events, { id: 6, title: '분기 결산', attachment_names: ['Q3_budget_final.xlsx'] }]
+  assert.deepEqual(filterEventsByQuery(withAttachment, 'Q3_budget').map(e => e.id), [6])
+})
+
 test('filterEventsByPriority returns all events for "all"', () => {
   assert.equal(filterEventsByPriority(events, 'all').length, 4)
   assert.equal(filterEventsByPriority(events).length, 4)

@@ -3,7 +3,8 @@ export const filterEventsByQuery = (events, query = '') => {
   if (!q) return events
   return events.filter(event => {
     const checklistText = (event.checklist || []).map(item => item?.text || '').join(' ')
-    return `${event.title || ''} ${event.location || ''} ${event.description || ''} ${(event.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+    const attachmentText = (event.attachment_names || []).join(' ')
+    return `${event.title || ''} ${event.location || ''} ${event.description || ''} ${(event.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
   })
 }
 

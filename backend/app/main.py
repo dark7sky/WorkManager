@@ -1145,8 +1145,12 @@ for _table in CONFIG:
             with connection() as c:
                 counts = dict(c.execute(
                     f"SELECT {fk}, COUNT(*) FROM {attachment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
+                names = {}
+                for row in c.execute(f"SELECT {fk} AS item_id, filename FROM {attachment_table} WHERE user_id=?", (user,)):
+                    names.setdefault(row["item_id"], []).append(row["filename"])
             for item in items:
                 item["attachment_count"] = counts.get(item["id"], 0)
+                item["attachment_names"] = names.get(item["id"], [])
         return items
 
     def get_endpoint(item_id: int, table=_table, user=Depends(require_user)):

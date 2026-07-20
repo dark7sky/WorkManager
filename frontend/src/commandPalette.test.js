@@ -71,3 +71,16 @@ test('searchItems matches event/todo/log checklist item text', () => {
   assert.equal(searchItems('박스 포장', withChecklist)[0]?.id, 21)
   assert.equal(searchItems('문서 백업', withChecklist)[0]?.id, 22)
 })
+
+test('searchItems matches attachment filename across all four tables', () => {
+  const withAttachments = {
+    tasks: [{ id: 30, title: '출시 준비', tags: [], attachment_names: ['release_plan.docx'] }],
+    events: [{ id: 31, title: '워크숍', tags: [], attachment_names: ['banner.png'] }],
+    todos: [{ id: 32, title: '이사 준비', tags: [], attachment_names: ['checklist.pdf'] }],
+    work_logs: [{ id: 33, content: '주간 정리', tags: [], attachment_names: ['summary.xlsx'] }],
+  }
+  assert.equal(searchItems('release_plan', withAttachments)[0]?.id, 30)
+  assert.equal(searchItems('banner.png', withAttachments)[0]?.id, 31)
+  assert.equal(searchItems('checklist.pdf', withAttachments)[0]?.id, 32)
+  assert.equal(searchItems('summary', withAttachments)[0]?.id, 33)
+})

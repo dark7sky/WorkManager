@@ -435,7 +435,9 @@ class ApiTests(unittest.TestCase):
         a.post(f"/api/tasks/{with_attachment['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
         listed_tasks = {t["id"]: t for t in a.get("/api/tasks").json()}
         self.assertEqual(listed_tasks[with_attachment["id"]]["attachment_count"], 1)
+        self.assertEqual(listed_tasks[with_attachment["id"]]["attachment_names"], ["a.txt"])
         self.assertEqual(listed_tasks[without_attachment["id"]]["attachment_count"], 0)
+        self.assertEqual(listed_tasks[without_attachment["id"]]["attachment_names"], [])
         b_task = b.post("/api/tasks", json={"title": "other user task"}).json()
         b.post(f"/api/tasks/{b_task['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
         self.assertNotIn(b_task["id"], {t["id"] for t in a.get("/api/tasks").json()})
@@ -450,6 +452,7 @@ class ApiTests(unittest.TestCase):
         a.post(f"/api/work_logs/{log['id']}/attachments", files={"file": ("b.txt", b"hi", "text/plain")})
         listed_logs = {l["id"]: l for l in a.get("/api/work_logs").json()}
         self.assertEqual(listed_logs[log["id"]]["attachment_count"], 2)
+        self.assertCountEqual(listed_logs[log["id"]]["attachment_names"], ["a.txt", "b.txt"])
 
         event = a.post("/api/events", json={"title": "event with attachment", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00"}).json()
         a.post(f"/api/events/{event['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})

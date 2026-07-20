@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-attachment-filename-search',
+    timestamp: '2026-07-20T15:19:32+09:00',
+    description: '업무/일정/오늘 할 일/업무 기록의 검색이 첨부파일 이름은 대상에서 빠져 있어, 파일명으로 문서를 찾으려면 항목을 일일이 열어봐야 했습니다. 목록 조회 시 첨부파일 이름 목록을 함께 내려주고(`attachment_names`), 화면 검색과 전역 명령 팔레트 검색 모두 첨부파일명을 대상에 포함하도록 했습니다. (`backend/app/main.py`, `frontend/src/taskFilters.js`, `frontend/src/eventSearch.js`, `frontend/src/todaySearch.js`, `frontend/src/commandPalette.js`)',
+  },
+  {
     id: '2026-07-20-recurrence-end-date-validation',
     timestamp: '2026-07-20T15:18:00+09:00',
     description: '업무·할 일의 반복 종료일을 시작일/완료 예정일보다 이전으로 설정해도 저장은 되지만 다음 회차가 조용히 생성되지 않는 문제가 있었습니다. 반복 종료일이 기준일보다 빠르면 저장 시점에 바로 안내하도록 입력 검증을 추가했습니다. (`frontend/src/formValidation.js`, `backend/app/main.py`)',

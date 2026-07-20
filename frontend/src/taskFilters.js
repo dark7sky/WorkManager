@@ -31,7 +31,8 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
   const q = query.trim().toLowerCase()
   return tasks.filter(task => {
     const checklistText = (task.checklist || []).map(item => item?.text || '').join(' ')
-    const matchesQuery = !q || `${task.title} ${task.description || ''} ${(task.tags || []).join(' ')} ${checklistText}`.toLowerCase().includes(q)
+    const attachmentText = (task.attachment_names || []).join(' ')
+    const matchesQuery = !q || `${task.title} ${task.description || ''} ${(task.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
     const matchesStatus = status === 'all'
       || (status === 'overdue'
         ? isTaskOverdue(task, todayIso)

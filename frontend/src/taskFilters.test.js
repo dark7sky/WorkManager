@@ -44,6 +44,21 @@ test('filterTasks matches query text against checklist item text', () => {
   assert.deepEqual(shown.map(task => task.id), [5])
 })
 
+test('filterTasks matches query text against attachment filename', () => {
+  const withAttachment = [
+    ...tasks,
+    { id: 6, title: '예산안 검토', status: 'todo', due_date: '2026-07-10', progress: 0, priority: 'normal', tags: [], attachment_names: ['Q3_budget_final.xlsx'] },
+  ]
+  const shown = filterTasks(withAttachment, {
+    query: 'Q3_budget',
+    status: 'all',
+    selectedTags: [],
+    todayIso: '2026-07-07',
+  })
+
+  assert.deepEqual(shown.map(task => task.id), [6])
+})
+
 test('filterTasks narrows active tasks by priority', () => {
   const shown = filterTasks(tasks, {
     query: '',
