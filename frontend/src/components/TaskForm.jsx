@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
@@ -6,6 +7,7 @@ import { validateTaskForm } from '../formValidation'
 import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import { dropZoneHandlers } from '../fileDrop'
+import { findOverlappingTasks } from '../taskOverlap'
 import TagsInput from './TagsInput'
 
 export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
@@ -42,6 +44,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const dependencyOptions = taskDependencyOptions(tasks, task?.id)
   const [dependencyFilter, setDependencyFilter] = useState('')
   const dependentTasks = directDependentTasks(tasks, task?.id)
+  const [startDateVal, setStartDateVal] = useState(() => initialTaskDateValue(task, 'start_date', today))
+  const [startTimeVal, setStartTimeVal] = useState(() => task?.start_time ?? '')
+  const [dueDateVal, setDueDateVal] = useState(() => initialTaskDateValue(task, 'due_date', today))
+  const [dueTimeVal, setDueTimeVal] = useState(() => task?.due_time ?? '')
+  const overlapping = useMemo(() => findOverlappingTasks(startDateVal, startTimeVal, dueDateVal, dueTimeVal, tasks, task?.id ?? null), [startDateVal, startTimeVal, dueDateVal, dueTimeVal, tasks, task])
 
   const [prefillKey, setPrefillKey] = useState(0)
   const applyTemplate = id => {
@@ -53,6 +60,10 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setTags(filled.tags)
     setRecurrenceRule(filled.recurrence_rule || '')
     setChecklist(filled.checklist || [])
+    setStartDateVal(filled.start_date ?? startDateVal)
+    setStartTimeVal(filled.start_time ?? startTimeVal)
+    setDueDateVal(filled.due_date ?? dueDateVal)
+    setDueTimeVal(filled.due_time ?? dueTimeVal)
   }
 
   const saveAsTemplate = () => {
@@ -93,6 +104,10 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setLinkUrlText('')
     setLinkLabelText('')
     setRecurrenceRule(task?.recurrence_rule || '')
+    setStartDateVal(initialTaskDateValue(task, 'start_date', today))
+    setStartTimeVal(task?.start_time ?? '')
+    setDueDateVal(initialTaskDateValue(task, 'due_date', today))
+    setDueTimeVal(task?.due_time ?? '')
   }, [task?.id, task?.tags, task?.checklist, task?.links, task?.recurrence_rule])
 
   useEffect(() => {
@@ -248,10 +263,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
     </div> : null}
     <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'} defaultValue={prefill?.title ?? task?.title ?? ''}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
-    <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)}/></label>
-    <label key={`start-time-${prefillKey}`}>시작 시각<input name="start_time" type="time" defaultValue={prefill?.start_time ?? task?.start_time ?? ''}/></label>
-    <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" className={fieldErrors.due_date ? 'invalid' : ''} aria-invalid={fieldErrors.due_date ? 'true' : 'false'} defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)}/>{fieldErrors.due_date ? <small className="field-error" role="alert">{fieldErrors.due_date}</small> : null}</label>
-    <label key={`due-time-${prefillKey}`}>완료 예정 시각<input name="due_time" type="time" defaultValue={prefill?.due_time ?? task?.due_time ?? ''}/></label>
+    <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)} onChange={e => setStartDateVal(e.target.value)}/></label>
+    <label key={`start-time-${prefillKey}`}>시작 시각<input name="start_time" type="time" defaultValue={prefill?.start_time ?? task?.start_time ?? ''} onChange={e => setStartTimeVal(e.target.value)}/></label>
+    <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" className={fieldErrors.due_date ? 'invalid' : ''} aria-invalid={fieldErrors.due_date ? 'true' : 'false'} defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)} onChange={e => setDueDateVal(e.target.value)}/>{fieldErrors.due_date ? <small className="field-error" role="alert">{fieldErrors.due_date}</small> : null}</label>
+    <label key={`due-time-${prefillKey}`}>완료 예정 시각<input name="due_time" type="time" defaultValue={prefill?.due_time ?? task?.due_time ?? ''} onChange={e => setDueTimeVal(e.target.value)}/></label>
+    {overlapping.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 기간에 이미 업무가 있습니다: {overlapping.map(t => t.title).join(', ')}</p> : null}
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
     <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
     <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 120" defaultValue={prefill?.estimated_minutes ?? task?.estimated_minutes ?? ''}/></label>

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-task-overlap-warning',
+    timestamp: '2026-07-20T15:20:40+09:00',
+    description: '일정/할 일/업무 기록에는 기간이 겹치는 항목이 있으면 경고가 떴지만, 업무만 예외였습니다. 업무 폼에서 시작일·완료 예정일(및 시각)이 다른 업무의 기간과 겹치면 경고 문구를 표시하도록 했습니다. (`frontend/src/taskOverlap.js`, `frontend/src/components/TaskForm.jsx`)',
+  },
+  {
     id: '2026-07-20-attachment-filename-search',
     timestamp: '2026-07-20T15:19:32+09:00',
     description: '업무/일정/오늘 할 일/업무 기록의 검색이 첨부파일 이름은 대상에서 빠져 있어, 파일명으로 문서를 찾으려면 항목을 일일이 열어봐야 했습니다. 목록 조회 시 첨부파일 이름 목록을 함께 내려주고(`attachment_names`), 화면 검색과 전역 명령 팔레트 검색 모두 첨부파일명을 대상에 포함하도록 했습니다. (`backend/app/main.py`, `frontend/src/taskFilters.js`, `frontend/src/eventSearch.js`, `frontend/src/todaySearch.js`, `frontend/src/commandPalette.js`)',
