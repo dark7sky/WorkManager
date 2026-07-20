@@ -158,6 +158,7 @@ def init_db():
         _add_column(c, "work_logs", "checklist", "TEXT NOT NULL DEFAULT '[]'")
         _add_column(c, "work_logs", "priority", "TEXT")
         _add_column(c, "work_logs", "estimated_minutes", "INTEGER")
+        _add_column(c, "work_logs", "archived_at", "TEXT")
         _add_column(c, "task_comments", "edited_at", "TEXT")
         for name, definition in {
             "recurrence_rule": "TEXT", "parent_id": "INTEGER", "dependency_ids": "TEXT NOT NULL DEFAULT '[]'",
@@ -179,7 +180,7 @@ def init_db():
             "local_uid": "TEXT", "google_is_series_master": "INTEGER NOT NULL DEFAULT 0",
             "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT", "color": "TEXT",
             "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
-            "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER",
+            "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")
@@ -195,6 +196,8 @@ def init_db():
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_archived ON tasks(user_id,archived_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_todos_archived ON todos(user_id,archived_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_events_archived ON events(user_id,archived_at)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_work_logs_archived ON work_logs(user_id,archived_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_events_user_start ON events(user_id,start_at)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_todos_user_date ON todos(user_id,todo_date)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_date ON work_logs(user_id,log_date)")

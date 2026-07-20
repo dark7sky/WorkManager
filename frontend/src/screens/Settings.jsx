@@ -443,6 +443,8 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       <TagManager notify={notify} onDataChanged={onDataChanged} onTagClick={onNavigateToTag} />
       <ArchiveSection notify={notify} onDataChanged={onDataChanged} entity="task" />
       <ArchiveSection notify={notify} onDataChanged={onDataChanged} entity="todo" />
+      <ArchiveSection notify={notify} onDataChanged={onDataChanged} entity="event" />
+      <ArchiveSection notify={notify} onDataChanged={onDataChanged} entity="work_log" />
       <TrashSection notify={notify} onDataChanged={onDataChanged} />
       {error ? <p className="inline-error">{error} <button onClick={load}>다시 시도</button></p> : null}
       <p className="muted app-version">WorkManager v{__APP_VERSION__}</p>

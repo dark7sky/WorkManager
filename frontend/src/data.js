@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-event-log-archiving',
+    timestamp: '2026-07-20T20:31:50+09:00',
+    description: '업무·할 일에만 있던 보관 기능이 일정과 업무 기록에는 없어, 지난 일정이나 오래된 기록을 정리할 방법이 삭제(휴지통 이동)뿐이었습니다. 일정 수정 폼과 오늘 화면의 기록 목록에 "보관" 버튼과 보관/보관 해제 API를 추가하고, 설정 화면의 보관함을 일정용/업무 기록용까지 총 4개로 늘렸습니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`, `frontend/src/api.js`)',
+  },
+  {
     id: '2026-07-20-todo-archiving',
     timestamp: '2026-07-20T20:26:00+09:00',
     description: '방금 추가된 업무 보관 기능이 업무에만 연결되어 있어, 할 일 목록에는 완료했지만 삭제하기는 애매한 항목을 정리할 방법이 여전히 없었습니다. 할 일에도 같은 "보관" 버튼과 보관/보관 해제 API를 추가하고, 설정 화면의 보관함을 업무용/할 일용 두 개로 나눴습니다. (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/components/ArchiveSection.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Settings.jsx`, `frontend/src/App.jsx`, `frontend/src/api.js`)',

@@ -1500,6 +1500,38 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_archive_event_hides_from_list_and_unarchive_restores_it(self, *_):
+        a = self.client(self.token_a)
+        event = a.post("/api/events", json={"title": "stale event", "start_at": "2026-07-06T12:00:00", "end_at": "2026-07-06T13:00:00"}).json()
+        archived = a.post(f"/api/events/{event['id']}/archive").json()
+        self.assertIsNotNone(archived["archived_at"])
+        self.assertNotIn(event["id"], [e["id"] for e in a.get("/api/events").json()])
+        self.assertIn(event["id"], [e["id"] for e in a.get("/api/events/archived").json()])
+        self.assertEqual(a.post(f"/api/events/{event['id']}/archive").status_code, 404)
+        unarchived = a.post(f"/api/events/{event['id']}/unarchive").json()
+        self.assertIsNone(unarchived["archived_at"])
+        self.assertIn(event["id"], [e["id"] for e in a.get("/api/events").json()])
+        self.assertNotIn(event["id"], [e["id"] for e in a.get("/api/events/archived").json()])
+        self.assertEqual(a.post(f"/api/events/{event['id']}/unarchive").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_archive_work_log_hides_from_list_and_unarchive_restores_it(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "stale log"}).json()
+        archived = a.post(f"/api/work_logs/{log['id']}/archive").json()
+        self.assertIsNotNone(archived["archived_at"])
+        self.assertNotIn(log["id"], [l["id"] for l in a.get("/api/work_logs").json()])
+        self.assertIn(log["id"], [l["id"] for l in a.get("/api/work_logs/archived").json()])
+        self.assertEqual(a.post(f"/api/work_logs/{log['id']}/archive").status_code, 404)
+        unarchived = a.post(f"/api/work_logs/{log['id']}/unarchive").json()
+        self.assertIsNone(unarchived["archived_at"])
+        self.assertIn(log["id"], [l["id"] for l in a.get("/api/work_logs").json()])
+        self.assertNotIn(log["id"], [l["id"] for l in a.get("/api/work_logs/archived").json()])
+        self.assertEqual(a.post(f"/api/work_logs/{log['id']}/unarchive").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_priority_defaults_and_carries_to_recurrence_spawn(self, *_):
         a = self.client(self.token_a)
         default_todo = a.post("/api/todos", json={"title": "default priority"}).json()
