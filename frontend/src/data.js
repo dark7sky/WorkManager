@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-worklog-timer-pause-resume',
+    timestamp: '2026-07-20T14:55:55+09:00',
+    description: '오늘 화면의 업무 기록 타이머는 시작·중지만 가능해 자리를 비우면 실제 작업하지 않은 시간까지 기록에 포함됐습니다. 타이머에 "일시정지/재개" 버튼을 추가해 멈춘 구간을 제외하고 정확한 소요 시간만 기록되도록 했습니다. (`frontend/src/workLogTimer.js`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-20-quickcapture-result-arrow-nav',
     timestamp: '2026-07-20T14:47:59+09:00',
     description: '업무·오늘 화면 목록에는 방향키(↑/↓)로 항목 간 이동이 가능했지만, 빠른 입력(Ctrl/⌘+K) 검색 결과 목록은 지원하지 않았습니다. 화면 이동·검색 결과 버튼에도 동일한 방향키 이동을 추가했습니다. (`frontend/src/components/QuickCapture.jsx`)',

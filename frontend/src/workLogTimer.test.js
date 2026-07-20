@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { clearWorkLogTimer, elapsedMinutes, formatElapsed, loadWorkLogTimer, startTimeString, startWorkLogTimer } from './workLogTimer.js'
+import { clearWorkLogTimer, elapsedMinutes, formatElapsed, formatTimerElapsed, loadWorkLogTimer, pauseWorkLogTimer, resumeWorkLogTimer, startTimeString, startWorkLogTimer, timerElapsedMinutes, timerElapsedMs } from './workLogTimer.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -60,4 +60,43 @@ test('startTimeString renders local HH:MM for the timer start', () => {
 
 test('startTimeString returns empty string for an invalid start time', () => {
   assert.equal(startTimeString('not-a-date'), '')
+})
+
+test('pauseWorkLogTimer marks the timer paused and resumeWorkLogTimer clears it', () => {
+  const storage = new MemoryStorage()
+  startWorkLogTimer(3, storage)
+  const paused = pauseWorkLogTimer(storage)
+  assert.ok(paused.pausedAt)
+  assert.deepEqual(loadWorkLogTimer(storage), paused)
+  const resumed = resumeWorkLogTimer(storage)
+  assert.equal(resumed.pausedAt, null)
+  assert.ok(resumed.totalPausedMs >= 0)
+})
+
+test('pauseWorkLogTimer is a no-op when already paused or missing', () => {
+  const storage = new MemoryStorage()
+  assert.equal(pauseWorkLogTimer(storage), null)
+  startWorkLogTimer(null, storage)
+  const paused = pauseWorkLogTimer(storage)
+  assert.deepEqual(pauseWorkLogTimer(storage), paused)
+})
+
+test('resumeWorkLogTimer is a no-op when already running or missing', () => {
+  const storage = new MemoryStorage()
+  assert.equal(resumeWorkLogTimer(storage), null)
+  const running = startWorkLogTimer(null, storage)
+  assert.deepEqual(resumeWorkLogTimer(storage), running)
+})
+
+test('timerElapsedMs excludes paused time and freezes while paused', () => {
+  const timer = { startedAt: '2026-07-13T10:00:00+09:00', pausedAt: '2026-07-13T10:10:00+09:00', totalPausedMs: 0 }
+  assert.equal(timerElapsedMs(timer, new Date('2026-07-13T10:30:00+09:00')), 10 * 60000)
+  const resumedTimer = { startedAt: '2026-07-13T10:00:00+09:00', pausedAt: null, totalPausedMs: 5 * 60000 }
+  assert.equal(timerElapsedMs(resumedTimer, new Date('2026-07-13T10:20:00+09:00')), 15 * 60000)
+})
+
+test('timerElapsedMinutes and formatTimerElapsed round-trip through pause/resume', () => {
+  const timer = { startedAt: '2026-07-13T10:00:00+09:00', pausedAt: null, totalPausedMs: 3 * 60000 }
+  assert.equal(timerElapsedMinutes(timer, new Date('2026-07-13T10:13:00+09:00')), 10)
+  assert.equal(formatTimerElapsed(timer, new Date('2026-07-13T10:13:00+09:00')), '00:10:00')
 })
