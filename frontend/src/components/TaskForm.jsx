@@ -306,11 +306,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
       {comments.map(item => <div key={item.id} className="checklist-editor-item">
         {editingCommentId === item.id
-          ? <input type="text" className="inline-edit" autoFocus value={editingCommentText} onChange={e => setEditingCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditComment(item.id) } if (e.key === 'Escape') setEditingCommentId(null) }} onBlur={() => saveEditComment(item.id)}/>
+          ? <input type="text" className="inline-edit" autoFocus maxLength={2000} value={editingCommentText} onChange={e => setEditingCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditComment(item.id) } if (e.key === 'Escape') setEditingCommentId(null) }} onBlur={() => saveEditComment(item.id)}/>
           : <span onClick={() => beginEditComment(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
         <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
       </div>)}
-      <div className="checklist-editor-add"><input type="text" value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+      <div className="checklist-editor-add"><input type="text" maxLength={2000} value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
       {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
     </div> : null}
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>

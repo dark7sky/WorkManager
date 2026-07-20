@@ -75,11 +75,11 @@ function TodoComments({ todoId }) {
     <span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
     {comments.map(item => <div key={item.id} className="checklist-editor-item">
       {editingId === item.id
-        ? <input type="text" className="inline-edit" autoFocus value={editingText} onChange={e => setEditingText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(item.id) } if (e.key === 'Escape') setEditingId(null) }} onBlur={() => saveEdit(item.id)}/>
+        ? <input type="text" className="inline-edit" autoFocus maxLength={2000} value={editingText} onChange={e => setEditingText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(item.id) } if (e.key === 'Escape') setEditingId(null) }} onBlur={() => saveEdit(item.id)}/>
         : <span onClick={() => beginEdit(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
       <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
     </div>)}
-    <div className="checklist-editor-add"><input type="text" value={text} placeholder="댓글을 입력하세요" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+    <div className="checklist-editor-add"><input type="text" maxLength={2000} value={text} placeholder="댓글을 입력하세요" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
     {error ? <p className="form-error" role="alert">{error}</p> : null}
   </div>
 }
@@ -165,11 +165,11 @@ function WorkLogComments({ logId }) {
     <span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
     {comments.map(item => <div key={item.id} className="checklist-editor-item">
       {editingId === item.id
-        ? <input type="text" className="inline-edit" autoFocus value={editingText} onChange={e => setEditingText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(item.id) } if (e.key === 'Escape') setEditingId(null) }} onBlur={() => saveEdit(item.id)}/>
+        ? <input type="text" className="inline-edit" autoFocus maxLength={2000} value={editingText} onChange={e => setEditingText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(item.id) } if (e.key === 'Escape') setEditingId(null) }} onBlur={() => saveEdit(item.id)}/>
         : <span onClick={() => beginEdit(item)}>{item.body}<span className="muted"> · {new Date(item.created_at).toLocaleString('ko-KR')}{item.edited_at ? ' (수정됨)' : ''}</span></span>}
       <button type="button" className="text-button" onClick={() => removeComment(item.id)}>삭제</button>
     </div>)}
-    <div className="checklist-editor-add"><input type="text" value={text} placeholder="댓글을 입력하세요" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
+    <div className="checklist-editor-add"><input type="text" maxLength={2000} value={text} placeholder="댓글을 입력하세요" onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
     {error ? <p className="form-error" role="alert">{error}</p> : null}
   </div>
 }
