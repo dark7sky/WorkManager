@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-manual-order',
+    timestamp: '2026-07-21T07:35:00+09:00',
+    description: '오늘 할 일 목록은 우선순위·제목·시간 정렬만 지원해, 사용자가 원하는 순서로 직접 배치할 수 없었습니다(업무 화면의 간트 드래그 정렬과 비대칭). 정렬 방식에 "직접 정렬"을 추가하고 항목을 드래그 앤 드롭으로 재배열하면 순서가 기기에 저장되도록 했습니다 (`frontend/src/todoOrder.js`, `frontend/src/todoPins.js`, `frontend/src/screens/Today.jsx`, `frontend/src/styles.css`, 테스트 `frontend/src/todoOrder.test.js`, `frontend/src/todoPins.test.js`).',
+  },
+  {
     id: '2026-07-21-worklog-linked-task-open',
     timestamp: '2026-07-21T07:31:00+09:00',
     description: '오늘 한 일(업무 기록)에서 연결된 업무 배지(#번호 업무명)는 텍스트로만 표시되어, 해당 업무를 보려면 업무 화면에서 직접 찾아야 했습니다. 일정 화면에서 마감 업무 배지를 누르면 업무 편집창이 열리는 것과 달리 업무 기록에는 이 연결이 없었습니다. 배지를 버튼으로 바꿔 누르면 연결된 업무의 수정 창이 바로 열리도록 했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/styles.css`).',

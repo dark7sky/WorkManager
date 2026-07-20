@@ -89,3 +89,13 @@ test('loadTodoSort falls back to the default for an unknown stored value', () =>
   storage.setItem('wm-todo-sort', 'bogus')
   assert.equal(loadTodoSort(storage), 'priority')
 })
+
+test('orderTodosByPin sorts by manualOrder map when sortBy is "manual"', () => {
+  const todos = [{ id: 1 }, { id: 2 }, { id: 3 }]
+  assert.deepEqual(orderTodosByPin(todos, new Set(), 'manual', { 2: 0, 3: 1, 1: 2 }).map(t => t.id), [2, 3, 1])
+})
+
+test('orderTodosByPin keeps pinned todos above manual order', () => {
+  const todos = [{ id: 1 }, { id: 2 }]
+  assert.deepEqual(orderTodosByPin(todos, new Set([2]), 'manual', { 1: 0, 2: 1 }).map(t => t.id), [2, 1])
+})
