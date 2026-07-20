@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-archive-bulk-unarchive',
+    timestamp: '2026-07-20T20:55:47+09:00',
+    description: '보관함(업무/할 일/일정/업무 기록)에서 항목을 하나씩만 보관 해제할 수 있었습니다. 휴지통처럼 검색창과 전체 선택, 일괄 보관 해제 기능을 추가해 여러 항목을 한 번에 꺼낼 수 있게 했습니다. (`frontend/src/components/ArchiveSection.jsx`)',
+  },
+  {
     id: '2026-07-20-audit-log-pagination',
     timestamp: '2026-07-20T20:58:00+09:00',
     description: '감사 로그(Audit Log) 화면이 최신 200건으로 고정되어 그 이전 이력은 조회 방법이 없었습니다. `/api/audit-logs`에 `offset` 페이지네이션을 추가하고, 화면에 "더 보기" 버튼을 넣어 필요한 만큼 과거 이력을 계속 불러올 수 있게 했습니다. (`backend/app/main.py`, `frontend/src/screens/AuditLog.jsx`, `frontend/src/api.js`)',
