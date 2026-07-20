@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-filter-reset-button',
+    timestamp: '2026-07-21T06:18:35+09:00',
+    description: '업무 화면에만 있던 "필터 초기화" 버튼을 일정, 오늘의 할 일/업무 기록 목록에도 추가했습니다. 검색어·태그·우선순위 등 필터가 하나라도 적용되면 버튼이 나타나 한 번에 초기 상태로 되돌릴 수 있습니다. (`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-21-ics-checklist-roundtrip',
     timestamp: '2026-07-21T01:40:35+09:00',
     description: '업무/할 일/일정/업무 기록의 체크리스트가 ICS 내보내기/가져오기에서 사라지던 문제를 수정했습니다. `X-WM-CHECKLIST` 커스텀 필드(JSON)로 항목과 완료 여부까지 그대로 왕복 보존됩니다. (`frontend/src/ics.js`, `frontend/src/screens/Calendar.jsx`)',
