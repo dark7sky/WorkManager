@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-offline-banner',
+    timestamp: '2026-07-20T15:44:22+09:00',
+    description: '설치형 앱(PWA)에서 네트워크가 끊겨도 별도 안내 없이 저장이 실패해 사용자가 원인을 알기 어려웠습니다. 오프라인 상태가 되면 화면 상단에 "오프라인 상태입니다" 배너를 표시해 변경 사항이 저장되지 않을 수 있음을 바로 알 수 있도록 했습니다. (`frontend/src/networkStatus.js`, `frontend/src/components/AppShell.jsx`)',
+  },
+  {
     id: '2026-07-20-period-comparison',
     timestamp: '2026-07-20T15:33:26+09:00',
     description: '성과 화면 통계에 직전 동일 기간 대비 증감(▲/▼, %)을 표시했습니다. 완료 업무·기록 시간·완료 할 일·일정 지표에서 확인할 수 있습니다. (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`)',
