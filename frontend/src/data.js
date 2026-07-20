@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-ai-request-history',
+    timestamp: '2026-07-20T20:08:13+09:00',
+    description: 'AI 도우미 화면에서 이전에 분석 요청한 문장을 다시 확인하거나 재사용할 방법이 없어, 결과가 만족스럽지 않으면 매번 처음부터 다시 입력해야 했습니다. 최근 분석 요청 최대 8건을 브라우저에 저장해 칩 형태로 보여주고, 클릭하면 입력창에 바로 채워 재분석할 수 있도록 했습니다. (`frontend/src/aiHistory.js`, `frontend/src/screens/AIAssistant.jsx`)',
+  },
+  {
     id: '2026-07-20-template-link-color',
     timestamp: '2026-07-20T19:53:16+09:00',
     description: '업무/일정/할 일/기록 템플릿을 저장하고 불러올 때 색상과 관련 링크(및 첨부 링크 목록)가 함께 저장되지 않아, 템플릿을 적용해도 색상·링크를 매번 다시 입력해야 했습니다. 4가지 템플릿 모두 색상·관련 링크·첨부 링크를 저장/복원하도록 맞췄습니다. (`frontend/src/taskTemplates.js`, `frontend/src/eventTemplates.js`, `frontend/src/todoTemplates.js`, `frontend/src/logTemplates.js`)',
