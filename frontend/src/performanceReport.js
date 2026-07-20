@@ -36,6 +36,26 @@ export const dailyActivityTrend = (timeline, start, end) => {
   return days
 }
 
+export const previousPeriodRange = (start, end) => {
+  if (!start || !end || start > end) return [null, null]
+  const s = new Date(`${start}T00:00:00`), e = new Date(`${end}T00:00:00`)
+  const dayCount = Math.round((e - s) / 86400000) + 1
+  const prevEnd = new Date(s); prevEnd.setDate(prevEnd.getDate() - 1)
+  const prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - dayCount + 1)
+  return [isoDay(prevStart), isoDay(prevEnd)]
+}
+
+export const periodComparison = (current, previous) => {
+  const metrics = [['completed_tasks', 'taskDelta'], ['tracked_minutes', 'minutesDelta'], ['completed_todos', 'todoDelta'], ['events', 'eventsDelta']]
+  const result = {}
+  metrics.forEach(([key, out]) => {
+    const cur = Number(current?.[key]) || 0, prev = Number(previous?.[key]) || 0
+    const percent = prev ? Math.round((cur - prev) / prev * 100) : (cur ? 100 : 0)
+    result[out] = { current: cur, previous: prev, diff: cur - prev, percent }
+  })
+  return result
+}
+
 export const activityStreak = (days, todayIso = isoDay(new Date())) => {
   if (!days || !days.length) return { current: 0, best: 0 }
   let best = 0, run = 0

@@ -3,7 +3,7 @@ import { CalendarRange, CheckCircle2, Clipboard, Clock3, Download, LoaderCircle,
 import Header from '../components/Header'
 import { api } from '../api'
 import { TagChips, TagFilter } from '../components/TagsInput'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress } from '../performanceReport'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison } from '../performanceReport'
 import { timelineToCsv, timelineCsvFilename } from '../csv'
 import { billableWorkLogs, workLogsToPrintableInvoice, invoiceFilename } from '../invoiceReport'
 
@@ -16,6 +16,7 @@ export default function Performance({ notify, onDataChanged }) {
   const [selected, setSelected] = useState([])
   const [knownTags, setKnownTags] = useState([])
   const [data, setData] = useState(null)
+  const [prevData, setPrevData] = useState(null)
   const [reportLoading, setReportLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState('')
   const [summary, setSummary] = useState(null)
@@ -39,6 +40,16 @@ export default function Performance({ notify, onDataChanged }) {
       .finally(() => { if (!controller.signal.aborted) setReportLoading(false) })
     return () => controller.abort()
   }, [dates[0], dates[1], selectedKey, invalidRange, notify, refreshKey])
+
+  const [prevStart, prevEnd] = useMemo(() => previousPeriodRange(dates[0], dates[1]), [dates[0], dates[1]])
+  useEffect(() => {
+    if (invalidRange || !prevStart || !prevEnd) { setPrevData(null); return undefined }
+    const controller = new AbortController()
+    api.achievements(prevStart, prevEnd, selected, controller.signal)
+      .then(result => setPrevData(result))
+      .catch(error => { if (error.name !== 'AbortError') setPrevData(null) })
+    return () => controller.abort()
+  }, [prevStart, prevEnd, selectedKey, invalidRange, refreshKey])
 
   const choosePreset = value => { setPreset(value); if (value !== 'custom') setDates(getRange(value)) }
   const runSummary = async () => {
@@ -143,13 +154,16 @@ export default function Performance({ notify, onDataChanged }) {
   }, [goalDraft, notify])
 
   const items = data?.timeline || [], stats = data?.summary || {}
-  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간'], [Clock3, formatDuration(stats.billable_minutes), '청구 가능 시간'], ...(stats.billable_amount != null ? [[Wallet, `${Math.round(stats.billable_amount).toLocaleString('ko-KR')}원`, '청구 예상 금액']] : []), [Clock3, formatDuration(stats.estimated_minutes), '완료 업무 예상 소요 시간'], [CalendarRange, stats.events || 0, '일정'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일']], [stats])
+  const statItems = useMemo(() => [[CheckCircle2, stats.completed_tasks || 0, '완료 업무', 'taskDelta'], [Clock3, stats.work_logs || 0, '업무 기록'], [Clock3, formatDuration(stats.tracked_minutes), '기록된 소요 시간', 'minutesDelta'], [Clock3, formatDuration(stats.billable_minutes), '청구 가능 시간'], ...(stats.billable_amount != null ? [[Wallet, `${Math.round(stats.billable_amount).toLocaleString('ko-KR')}원`, '청구 예상 금액']] : []), [Clock3, formatDuration(stats.estimated_minutes), '완료 업무 예상 소요 시간'], [CalendarRange, stats.events || 0, '일정', 'eventsDelta'], [Target, stats.active_tasks || 0, '진행 중 업무'], [CheckCircle2, stats.completed_todos || 0, '완료한 오늘 할 일', 'todoDelta']], [stats])
   const tagBreakdown = data?.tag_breakdown || []
   const maxTagMinutes = Math.max(1, ...tagBreakdown.map(t => t.tracked_minutes))
   const trend = useMemo(() => dailyActivityTrend(items, dates[0], dates[1]), [items, dates])
   const maxTrendCount = Math.max(1, ...trend.map(d => d.count))
   const streak = useMemo(() => activityStreak(trend), [trend])
   const progress = useMemo(() => goalProgress(stats, goal), [stats, goal])
+  const comparison = useMemo(() => prevData ? periodComparison(stats, prevData.summary || {}) : null, [stats, prevData])
+  const deltaLabel = delta => !delta ? '' : `${delta.diff > 0 ? '▲' : delta.diff < 0 ? '▼' : '–'} ${Math.abs(delta.percent)}%`
+  const deltaClass = delta => !delta || delta.diff === 0 ? '' : delta.diff > 0 ? 'delta-up' : 'delta-down'
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
     <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button>{data && billableWorkLogs(data.work_logs || []).length ? <button type="button" className="secondary" disabled={reportLoading || invalidRange} onClick={printInvoice}><Wallet size={17}/> 청구서 PDF</button> : null}</section>
@@ -170,7 +184,7 @@ export default function Performance({ notify, onDataChanged }) {
       </form>
     </div>
     {reportLoading && !data ? <div className="ai-empty"><LoaderCircle className="spin"/> 기록을 모으는 중입니다.</div> : <>
-      <section className="performance-stats">{statItems.map(([Icon, value, label]) => <div key={label}><Icon/><strong>{value}</strong><span>{label}</span></div>)}</section>
+      <section className="performance-stats">{statItems.map(([Icon, value, label, deltaKey]) => <div key={label}><Icon/><strong>{value}</strong><span>{label}</span>{deltaKey && comparison ? <small className={`stat-delta ${deltaClass(comparison[deltaKey])}`} title="직전 동일 기간 대비">{deltaLabel(comparison[deltaKey])}</small> : null}</div>)}</section>
       <section className="performance-timeline goal-tracker"><h2>기간 목표</h2>
         <form className="preset-form" onSubmit={saveGoal}>
           <label>완료 업무 목표 <input type="number" min="1" placeholder="예: 20" value={goalDraft.taskGoal} onChange={e => setGoalDraft(d => ({ ...d, taskGoal: e.target.value }))}/></label>

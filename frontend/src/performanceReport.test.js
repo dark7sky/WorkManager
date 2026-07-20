@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison } from './performanceReport.js'
 
 test('formatDuration: formats minutes as hours/minutes in Korean', () => {
   assert.strictEqual(formatDuration(0), '0분')
@@ -303,6 +303,27 @@ test('activityStreak: current streak is 0 when the range does not end on today (
 
 test('activityStreak: returns zeros for empty input', () => {
   assert.deepEqual(activityStreak([], '2026-07-20'), { current: 0, best: 0 })
+})
+
+test('previousPeriodRange: returns the immediately preceding period of equal length', () => {
+  assert.deepEqual(previousPeriodRange('2026-07-01', '2026-07-10'), ['2026-06-21', '2026-06-30'])
+  assert.deepEqual(previousPeriodRange('2026-07-20', '2026-07-20'), ['2026-07-19', '2026-07-19'])
+})
+
+test('previousPeriodRange: returns nulls for invalid range', () => {
+  assert.deepEqual(previousPeriodRange('', ''), [null, null])
+  assert.deepEqual(previousPeriodRange('2026-07-10', '2026-07-01'), [null, null])
+})
+
+test('periodComparison: computes diff and percent change per metric', () => {
+  const current = { completed_tasks: 12, tracked_minutes: 300, completed_todos: 5, events: 4 }
+  const previous = { completed_tasks: 10, tracked_minutes: 200, completed_todos: 5, events: 0 }
+  assert.deepEqual(periodComparison(current, previous), {
+    taskDelta: { current: 12, previous: 10, diff: 2, percent: 20 },
+    minutesDelta: { current: 300, previous: 200, diff: 100, percent: 50 },
+    todoDelta: { current: 5, previous: 5, diff: 0, percent: 0 },
+    eventsDelta: { current: 4, previous: 0, diff: 4, percent: 100 },
+  })
 })
 
 test('loadPerformanceGoal: returns nulls for missing key', () => {

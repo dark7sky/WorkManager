@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-period-comparison',
+    timestamp: '2026-07-20T15:33:26+09:00',
+    description: '성과 화면 통계에 직전 동일 기간 대비 증감(▲/▼, %)을 표시했습니다. 완료 업무·기록 시간·완료 할 일·일정 지표에서 확인할 수 있습니다. (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`)',
+  },
+  {
     id: '2026-07-20-activity-streak',
     timestamp: '2026-07-20T15:32:34+09:00',
     description: '성과 화면의 일별 활동 추이에 연속 활동일(스트릭) 표시를 추가했습니다. 오늘까지 이어진 현재 연속 일수와 선택한 기간 내 최고 연속 일수를 함께 보여줍니다. (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`)',
