@@ -284,6 +284,40 @@ test('logsToIcs and icsToLogs round-trip color', () => {
   assert.equal(logs[0].color, '#9933ff')
 })
 
+test('tasksToIcs and icsToTasks round-trip checklist', () => {
+  const checklist = [{ id: 'a', text: '검토', done: false }, { id: 'b', text: '승인', done: true }]
+  const ics = tasksToIcs([{ id: 15, title: '기획 승인', due_date: '2026-07-20', checklist }])
+  assert.match(ics, /X-WM-CHECKLIST:/)
+  const tasks = icsToTasks(ics)
+  assert.deepEqual(tasks[0].checklist, checklist)
+})
+
+test('tasksToIcs omits X-WM-CHECKLIST when task has no checklist', () => {
+  const ics = tasksToIcs([{ id: 16, title: '기획 승인', due_date: '2026-07-20' }])
+  assert.doesNotMatch(ics, /X-WM-CHECKLIST/)
+})
+
+test('eventsToIcs and parseIcs round-trip checklist', () => {
+  const checklist = [{ id: 'c', text: '자료 준비', done: false }]
+  const ics = eventsToIcs([{ id: 4, title: '회의', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', checklist }])
+  const parsed = parseIcs(ics)
+  assert.deepEqual(parsed[0].checklist, checklist)
+})
+
+test('todosToIcs and icsToTodos round-trip checklist', () => {
+  const checklist = [{ id: 'd', text: '우유', done: false }]
+  const ics = todosToIcs([{ id: 10, title: '장보기', todo_date: '2026-07-20', checklist }])
+  const todos = icsToTodos(ics)
+  assert.deepEqual(todos[0].checklist, checklist)
+})
+
+test('logsToIcs and icsToLogs round-trip checklist', () => {
+  const checklist = [{ id: 'e', text: '초안 작성', done: true }]
+  const ics = logsToIcs([{ id: 7, content: '보고서 작성', log_date: '2026-07-20', checklist }])
+  const logs = icsToLogs(ics)
+  assert.deepEqual(logs[0].checklist, checklist)
+})
+
 test('parseIcs handles multiple VEVENTs and folded lines', () => {
   const ics = 'BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:회의 A\nDTSTART:20260706T010000Z\nDTEND:20260706T020000Z\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:회의 B\nDTSTART:20260707T030000Z\nDTEND:20260707T040000Z\nEND:VEVENT\nEND:VCALENDAR'
   const parsed = parseIcs(ics)

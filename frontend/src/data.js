@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ics-checklist-roundtrip',
+    timestamp: '2026-07-21T01:40:35+09:00',
+    description: '업무/할 일/일정/업무 기록의 체크리스트가 ICS 내보내기/가져오기에서 사라지던 문제를 수정했습니다. `X-WM-CHECKLIST` 커스텀 필드(JSON)로 항목과 완료 여부까지 그대로 왕복 보존됩니다. (`frontend/src/ics.js`, `frontend/src/screens/Calendar.jsx`)',
+  },
+  {
     id: '2026-07-21-ics-color-roundtrip',
     timestamp: '2026-07-21T01:37:36+09:00',
     description: '업무/할 일/일정/업무 기록의 색상(color)이 ICS 내보내기/가져오기에서 누락되던 문제를 수정했습니다. `X-WM-COLOR` 커스텀 필드로 왕복 보존됩니다. 또한 캘린더 화면의 ICS 가져오기가 우선순위·예상 소요시간·링크·색상을 무시하고 있던 것을 발견해 함께 수정했습니다 — 내보낸 ICS를 다시 가져와도 이제 모든 필드가 그대로 유지됩니다. (`frontend/src/ics.js`, `frontend/src/screens/Calendar.jsx`)',

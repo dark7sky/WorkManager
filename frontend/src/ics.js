@@ -37,6 +37,7 @@ export const eventsToIcs = events => {
     if (event.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${event.estimated_minutes}`)
     if (event.link_url) lines.push(`URL:${escapeIcsText(event.link_url)}`)
     if (event.color) lines.push(`X-WM-COLOR:${event.color}`)
+    if (event.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(event.checklist))}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -71,6 +72,7 @@ export const tasksToIcs = tasks => {
     if (task.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${task.estimated_minutes}`)
     if (task.link_url) lines.push(`URL:${escapeIcsText(task.link_url)}`)
     if (task.color) lines.push(`X-WM-COLOR:${task.color}`)
+    if (task.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(task.checklist))}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -100,6 +102,7 @@ export const todosToIcs = todos => {
     if (todo.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${todo.estimated_minutes}`)
     if (todo.link_url) lines.push(`URL:${escapeIcsText(todo.link_url)}`)
     if (todo.color) lines.push(`X-WM-COLOR:${todo.color}`)
+    if (todo.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(todo.checklist))}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -128,6 +131,7 @@ export const logsToIcs = logs => {
     if (log.estimated_minutes) lines.push(`X-WM-ESTIMATE-MINUTES:${log.estimated_minutes}`)
     if (log.link_url) lines.push(`URL:${escapeIcsText(log.link_url)}`)
     if (log.color) lines.push(`X-WM-COLOR:${log.color}`)
+    if (log.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(log.checklist))}`)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -170,13 +174,14 @@ export const parseIcs = text => {
     else if (key === 'X-WM-ESTIMATE-MINUTES') current.estimated_minutes = Number(value) || undefined
     else if (key === 'URL') current.link_url = value
     else if (key === 'X-WM-COLOR') current.color = value
+    else if (key === 'X-WM-CHECKLIST') { try { const parsed = JSON.parse(value); if (Array.isArray(parsed)) current.checklist = parsed } catch { /* ignore malformed checklist */ } }
   }
   return events.filter(e => e.start_at && (e.end_at || e.start_all_day))
 }
 
 const stripPrefix = (title, prefix) => title.startsWith(prefix) ? title.slice(prefix.length) : title
 
-export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
+export const icsToTasks = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color, checklist }) => {
   const date = new Date(start_at)
   const task = { title: stripPrefix(title, '[업무] '), due_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) task.due_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
@@ -185,10 +190,11 @@ export const icsToTasks = text => parseIcs(text).map(({ title, description, star
   if (estimated_minutes) task.estimated_minutes = estimated_minutes
   if (link_url) task.link_url = link_url
   if (color) task.color = color
+  if (checklist) task.checklist = checklist
   return task
 })
 
-export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
+export const icsToTodos = text => parseIcs(text).map(({ title, description, start_at, start_all_day, priority, estimated_minutes, link_url, color, checklist }) => {
   const date = new Date(start_at)
   const todo = { title: stripPrefix(title, '[할 일] '), todo_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) todo.todo_time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
@@ -197,10 +203,11 @@ export const icsToTodos = text => parseIcs(text).map(({ title, description, star
   if (estimated_minutes) todo.estimated_minutes = estimated_minutes
   if (link_url) todo.link_url = link_url
   if (color) todo.color = color
+  if (checklist) todo.checklist = checklist
   return todo
 })
 
-export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day, priority, estimated_minutes, link_url, color }) => {
+export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, start_all_day, priority, estimated_minutes, link_url, color, checklist }) => {
   const date = new Date(start_at)
   const log = { content: stripPrefix(title, '[기록] '), log_date: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` }
   if (!start_all_day) {
@@ -211,5 +218,6 @@ export const icsToLogs = text => parseIcs(text).map(({ title, start_at, end_at, 
   if (estimated_minutes) log.estimated_minutes = estimated_minutes
   if (link_url) log.link_url = link_url
   if (color) log.color = color
+  if (checklist) log.checklist = checklist
   return log
 })
