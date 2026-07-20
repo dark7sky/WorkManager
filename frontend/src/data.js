@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-bulk-delete-undo',
+    timestamp: '2026-07-21T01:03:06+09:00',
+    description: '업무/할 일/일정/업무 기록을 여러 개 한 번에 삭제할 때는 항목을 하나씩 지울 때와 달리 "실행 취소"가 없었습니다. 4개 화면의 일괄 삭제에 모두 실행 취소 액션을 추가해 삭제 직후 휴지통에서 복원할 수 있게 했습니다. (`frontend/src/App.jsx`)',
+  },
+  {
     id: '2026-07-21-revoke-other-sessions',
     timestamp: '2026-07-21T01:01:01+09:00',
     description: '설정 화면의 활성 세션 목록에서 다른 기기의 세션을 하나씩만 로그아웃할 수 있었습니다. "다른 세션 모두 로그아웃" 버튼을 추가해 현재 세션을 제외한 모든 세션을 한 번에 종료할 수 있게 했습니다. (`backend/app/auth.py`, `frontend/src/screens/Settings.jsx`)',
