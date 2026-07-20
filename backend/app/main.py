@@ -319,6 +319,10 @@ def _clean_checklist(value):
     return cleaned
 
 
+def _reset_checklist(value):
+    return [{**item, "done": False} for item in (value or [])]
+
+
 class TaskPayload(StrictPayload):
     title: str | None = Field(None, min_length=1, max_length=300)
     description: str | None = Field(None, max_length=20000)
@@ -865,10 +869,12 @@ def spawn_recurring_task(task, user_id):
                          (timestamp, task["id"], user_id)).rowcount:
             return None
         cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,start_time,due_time,tags,
-          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at,
+          estimated_minutes,link_url,checklist,color,links) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
            start_date, due_date, task.get("start_time"), task.get("due_time"), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
-           task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp))
+           task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp,
+           task.get("estimated_minutes"), task.get("link_url"), json.dumps(_reset_checklist(task.get("checklist")), ensure_ascii=False), task.get("color"), json.dumps(task.get("links") or [], ensure_ascii=False)))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
     return next_id
@@ -893,9 +899,10 @@ def spawn_recurring_todo(todo, user_id):
         if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
-        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,todo_time,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,estimated_minutes,created_at)
-          VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?)""",
-          (user_id, todo["title"], next_date, todo.get("todo_time"), json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), todo.get("estimated_minutes"), timestamp))
+        cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,todo_time,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,estimated_minutes,created_at,
+          checklist,color,links) VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          (user_id, todo["title"], next_date, todo.get("todo_time"), json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), todo.get("estimated_minutes"), timestamp,
+           json.dumps(_reset_checklist(todo.get("checklist")), ensure_ascii=False), todo.get("color"), json.dumps(todo.get("links") or [], ensure_ascii=False)))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id

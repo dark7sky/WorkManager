@@ -239,6 +239,26 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_task_spawn_carries_estimate_link_color_checklist_and_resets_checklist(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={
+            "title": "weekly review", "start_date": "2026-07-06", "due_date": "2026-07-06",
+            "recurrence_rule": "weekly", "estimated_minutes": 45, "link_url": "https://example.com",
+            "color": "purple", "links": [{"url": "https://example.com/doc", "label": "doc"}],
+            "checklist": [{"text": "prep agenda", "done": True}],
+        }).json()
+        a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100})
+        child = next(x for x in a.get("/api/tasks").json() if x.get("parent_id") == task["id"])
+        self.assertEqual(child["estimated_minutes"], 45)
+        self.assertEqual(child["link_url"], "https://example.com")
+        self.assertEqual(child["color"], "purple")
+        self.assertEqual(len(child["links"]), 1)
+        self.assertEqual(child["links"][0]["url"], "https://example.com/doc")
+        self.assertEqual(len(child["checklist"]), 1)
+        self.assertFalse(child["checklist"][0]["done"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_reopening_a_done_task_is_not_reverted_by_stale_progress_field(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "finished task"}).json()
@@ -1588,6 +1608,23 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(cleared.status_code, 200, cleared.text)
         self.assertIsNone(cleared.json()["estimated_minutes"])
         self.assertEqual(a.post("/api/todos", json={"title": "bad estimate", "todo_date": "2026-07-06", "estimated_minutes": -5}).status_code, 422)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_todo_spawn_carries_color_links_and_resets_checklist(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={
+            "title": "recurring todo", "todo_date": "2026-07-06", "recurrence_rule": "daily",
+            "color": "green", "links": [{"url": "https://example.com/doc", "label": "doc"}],
+            "checklist": [{"text": "step one", "done": True}],
+        }).json()
+        completed = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
+        spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
+        self.assertEqual(spawned["color"], "green")
+        self.assertEqual(len(spawned["links"]), 1)
+        self.assertEqual(spawned["links"][0]["url"], "https://example.com/doc")
+        self.assertEqual(len(spawned["checklist"]), 1)
+        self.assertFalse(spawned["checklist"][0]["done"])
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

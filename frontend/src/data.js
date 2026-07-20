@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-recurrence-spawn-field-parity',
+    timestamp: '2026-07-20T15:07:00+09:00',
+    description: '반복 업무·할 일을 완료해 다음 회차가 자동 생성될 때 예상 소요 시간, 관련 링크, 색상, 첨부 링크, 체크리스트가 모두 누락되고 있었습니다. 다음 회차 생성 시 이 필드들을 그대로 이어받도록 하고, 체크리스트는 복제 기능과 동일하게 완료 표시를 초기화하도록 했습니다. (`backend/app/main.py` `spawn_recurring_task`/`spawn_recurring_todo`)',
+  },
+  {
     id: '2026-07-20-todo-overlap-warning',
     timestamp: '2026-07-20T14:57:01+09:00',
     description: '업무 기록·일정에는 같은 시간대 중복 경고가 있었지만 오늘 할 일에는 없어 시간을 지정한 할 일끼리 겹쳐도 알아채기 어려웠습니다. 할 일 추가/수정 폼에도 같은 시간대 중복 경고를 추가했습니다. (`frontend/src/todoOverlap.js`, `frontend/src/screens/Today.jsx`)',
