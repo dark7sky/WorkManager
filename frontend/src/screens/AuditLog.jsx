@@ -28,6 +28,8 @@ export default function AuditLog({ focus }) {
   const [query,setQuery] = useState(()=>focus?.query||''), [entity,setEntity] = useState(()=>focus?.entity||'all')
   const [dateStart,setDateStart] = useState(''), [dateEnd,setDateEnd] = useState('')
   const invalidRange = dateStart && dateEnd && dateStart > dateEnd
+  const filtersActive = query || entity !== 'all' || dateStart || dateEnd
+  const resetFilters = () => { setQuery(''); setEntity('all'); setDateStart(''); setDateEnd('') }
   const load = async () => {
     if (invalidRange) return
     setLoading(true); setError('')
@@ -72,7 +74,8 @@ export default function AuditLog({ focus }) {
     <div className="toolbar audit-toolbar">
       <div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Escape'){setQuery('');e.target.blur()}}} aria-label="감사 로그 검색" placeholder="작업, 대상, 변경 내용 검색" /></div>
       <label className="filter-select"><Filter/><span>대상</span><select value={entity} onChange={e=>setEntity(e.target.value)}><option value="all">전체</option>{entities.map(value=><option key={value} value={value}>{entityLabels[value] || value}</option>)}</select></label>
-      <div className="date-range"><input aria-label="시작일" type="date" value={dateStart} onChange={e=>setDateStart(e.target.value)}/><span>–</span><input aria-label="종료일" type="date" value={dateEnd} onChange={e=>setDateEnd(e.target.value)}/>{(dateStart||dateEnd)?<button type="button" className="text-button" onClick={()=>{setDateStart('');setDateEnd('')}}>초기화</button>:null}</div>
+      <div className="date-range"><input aria-label="시작일" type="date" value={dateStart} onChange={e=>setDateStart(e.target.value)}/><span>–</span><input aria-label="종료일" type="date" value={dateEnd} onChange={e=>setDateEnd(e.target.value)}/></div>
+      {filtersActive?<button type="button" className="text-button" onClick={resetFilters}>필터 초기화</button>:null}
       <button type="button" className="text-button" onClick={printReport} disabled={!shown.length}><FileText/> PDF</button>
       <button type="button" className="text-button" onClick={exportShown} disabled={!shown.length}><Download/> CSV 내보내기</button>
     </div>

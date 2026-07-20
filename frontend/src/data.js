@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-audit-log-filter-reset',
+    timestamp: '2026-07-21T06:46:00+09:00',
+    description: '감사 로그 화면에 다른 화면과 동일한 "필터 초기화" 버튼을 추가했습니다. 검색어, 대상 유형, 기간 필터가 하나라도 적용되면 버튼이 나타나 한 번에 초기화할 수 있습니다. (`frontend/src/screens/AuditLog.jsx`)',
+  },
+  {
     id: '2026-07-21-filter-reset-button',
     timestamp: '2026-07-21T06:18:35+09:00',
     description: '업무 화면에만 있던 "필터 초기화" 버튼을 일정, 오늘의 할 일/업무 기록 목록에도 추가했습니다. 검색어·태그·우선순위 등 필터가 하나라도 적용되면 버튼이 나타나 한 번에 초기 상태로 되돌릴 수 있습니다. (`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`)',
