@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ai-recommendations-rate-limit',
+    timestamp: '2026-07-21T07:06:03+09:00',
+    description: 'AI 오늘 할 일 추천(`GET /api/ai/recommendations`)에 요청 빈도 제한을 추가했습니다. 다른 AI 엔드포인트(태그 추천, 기간 요약, 프로젝트 제안 등)는 모두 제한이 있었지만 이 경로만 빠져 있어 무제한 반복 호출이 가능했습니다. (`backend/app/main.py`)',
+  },
+  {
     id: '2026-07-21-google-callback-rate-limit',
     timestamp: '2026-07-21T07:06:00+09:00',
     description: 'Google 로그인 콜백(`/api/auth/google/callback`)에 요청 빈도 제한을 추가했습니다. 다른 인증/동기화 엔드포인트와 달리 이 경로만 제한이 없어 토큰 교환 API 남용이나 허용 이메일 목록 무차별 대입 시도에 노출되어 있었습니다. (`backend/app/main.py`)',

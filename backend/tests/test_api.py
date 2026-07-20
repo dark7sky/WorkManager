@@ -100,6 +100,19 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(limited.status_code, 429, limited.text)
         self.assertIn("Retry-After", limited.headers)
 
+    def test_ai_recommendations_endpoint_is_rate_limited(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT OR IGNORE INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                       ("sub-rl", "sub-rl", "rl@example.com", "rl@example.com", "2026-01-01", "2026-01-01"))
+        client = self.client(create_session("sub-rl"))
+        for _ in range(20):
+            self.assertEqual(client.get("/api/ai/recommendations").status_code, 200)
+        limited = client.get("/api/ai/recommendations")
+        self.assertEqual(limited.status_code, 429, limited.text)
+        self.assertIn("Retry-After", limited.headers)
+
     def test_validation_rejects_bad_domain_values(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/tasks", json={"title": "x", "status": "invalid"}).status_code, 422)
