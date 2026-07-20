@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-audit-log-pagination',
+    timestamp: '2026-07-20T20:58:00+09:00',
+    description: '감사 로그(Audit Log) 화면이 최신 200건으로 고정되어 그 이전 이력은 조회 방법이 없었습니다. `/api/audit-logs`에 `offset` 페이지네이션을 추가하고, 화면에 "더 보기" 버튼을 넣어 필요한 만큼 과거 이력을 계속 불러올 수 있게 했습니다. (`backend/app/main.py`, `frontend/src/screens/AuditLog.jsx`, `frontend/src/api.js`)',
+  },
+  {
     id: '2026-07-20-audit-log-order-tiebreak',
     timestamp: '2026-07-20T20:43:00+09:00',
     description: '감사 로그(Audit Log) 목록 조회가 초 단위 정밀도인 `created_at`만으로 정렬되어, 같은 초에 여러 작업이 기록되면 최신 항목이 순서에서 밀려나거나 목록에서 아예 빠질 수 있는 문제가 있었습니다. `/api/audit-logs` 정렬에 `id DESC`를 보조 기준으로 추가해 항상 결정적인 최신순 정렬이 되도록 고쳤습니다. (`backend/app/main.py`)',

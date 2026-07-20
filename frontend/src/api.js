@@ -91,7 +91,7 @@ export const api = {
   wipeData: confirm => request('/data/wipe',json('POST',{confirm})),
   tags: () => request('/tags'),
   renameTag: (from,to) => request('/tags/rename',json('POST',{from,to})),
-  auditLogs: (limit=100, start='', end='') => request(`/audit-logs?limit=${limit}${start?`&start=${start}`:''}${end?`&end=${end}`:''}`),
+  auditLogs: (limit=100, start='', end='', offset=0) => request(`/audit-logs?limit=${limit}&offset=${offset}${start?`&start=${start}`:''}${end?`&end=${end}`:''}`),
   diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),
   restoreTrash: (table,id) => request(`/${encodeURIComponent(table)}/${id}/restore`,{method:'POST'}),

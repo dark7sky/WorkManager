@@ -384,6 +384,22 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_audit_logs_support_offset_pagination(self, *_):
+        a = self.client(self.token_a)
+        for i in range(3):
+            a.post("/api/tasks", json={"title": f"paged task {i}"})
+        first_page = a.get("/api/audit-logs?limit=2&offset=0")
+        self.assertEqual(first_page.status_code, 200, first_page.text)
+        self.assertEqual(len(first_page.json()["items"]), 2)
+        second_page = a.get("/api/audit-logs?limit=2&offset=2")
+        self.assertEqual(second_page.status_code, 200, second_page.text)
+        first_ids = {x["id"] for x in first_page.json()["items"]}
+        second_ids = {x["id"] for x in second_page.json()["items"]}
+        self.assertTrue(second_ids)
+        self.assertFalse(first_ids & second_ids)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_comments_are_user_scoped_and_persisted(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         task = a.post("/api/tasks", json={"title": "task with comments"}).json()

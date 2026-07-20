@@ -20,8 +20,11 @@ const metadataText = metadata => {
   return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
 }
 
+const PAGE_SIZE = 200
+
 export default function AuditLog({ focus }) {
   const [logs,setLogs] = useState([]), [loading,setLoading] = useState(true), [error,setError] = useState('')
+  const [loadingMore,setLoadingMore] = useState(false), [hasMore,setHasMore] = useState(false)
   const [query,setQuery] = useState(()=>focus?.query||''), [entity,setEntity] = useState(()=>focus?.entity||'all')
   const [dateStart,setDateStart] = useState(''), [dateEnd,setDateEnd] = useState('')
   const invalidRange = dateStart && dateEnd && dateStart > dateEnd
@@ -29,12 +32,25 @@ export default function AuditLog({ focus }) {
     if (invalidRange) return
     setLoading(true); setError('')
     try {
-      const result = await api.auditLogs(200, dateStart, dateEnd)
-      setLogs(result.items || [])
+      const result = await api.auditLogs(PAGE_SIZE, dateStart, dateEnd, 0)
+      const items = result.items || []
+      setLogs(items); setHasMore(items.length === PAGE_SIZE)
     } catch(e) {
       setError(e.message)
     } finally {
       setLoading(false)
+    }
+  }
+  const loadMore = async () => {
+    setLoadingMore(true)
+    try {
+      const result = await api.auditLogs(PAGE_SIZE, dateStart, dateEnd, logs.length)
+      const items = result.items || []
+      setLogs(prev=>[...prev,...items]); setHasMore(items.length === PAGE_SIZE)
+    } catch(e) {
+      setError(e.message)
+    } finally {
+      setLoadingMore(false)
     }
   }
   useEffect(()=>{ load() },[dateStart,dateEnd])
@@ -61,14 +77,17 @@ export default function AuditLog({ focus }) {
       <button type="button" className="text-button" onClick={exportShown} disabled={!shown.length}><Download/> CSV 내보내기</button>
     </div>
     <section className="audit-panel" aria-labelledby="audit-title">
-      <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>{dateStart||dateEnd?'선택한 기간의 ':''}최대 200개의 최신 변경을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>
+      <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>{dateStart||dateEnd?'선택한 기간의 ':''}최근 변경 이력을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>
       {invalidRange?<p className="inline-error">종료일은 시작일 이후여야 합니다.</p>:null}
-      {loading?<div className="audit-state"><LoaderCircle className="spin"/> 불러오는 중…</div>:error?<div className="audit-state error" role="alert">{error} <button onClick={load}>다시 시도</button></div>:shown.length?<ol className="audit-list">
+      {loading?<div className="audit-state"><LoaderCircle className="spin"/> 불러오는 중…</div>:error?<div className="audit-state error" role="alert">{error} <button onClick={load}>다시 시도</button></div>:shown.length?<>
+      <ol className="audit-list">
         {shown.map(log=><li key={log.id}>
           <time dateTime={log.created_at}>{formatTimestamp(log.created_at)}</time>
           <div><strong>{actionLabels[log.action] || log.action}</strong><span>{entityLabels[log.entity_type] || log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ''}</span>{metadataText(log.metadata)?<p>{metadataText(log.metadata)}</p>:null}</div>
         </li>)}
-      </ol>:<p className="empty-state">조건에 맞는 감사 로그가 없습니다.</p>}
+      </ol>
+      {hasMore?<div className="audit-load-more"><button type="button" className="text-button" onClick={loadMore} disabled={loadingMore}>{loadingMore?<><LoaderCircle className="spin"/> 불러오는 중…</>:'더 보기'}</button></div>:null}
+      </>:<p className="empty-state">조건에 맞는 감사 로그가 없습니다.</p>}
     </section>
   </div></>
 }
