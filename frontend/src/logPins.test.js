@@ -62,6 +62,11 @@ test('orderLogsByPin sorts by content when sortBy is "content"', () => {
   assert.deepEqual(orderLogsByPin(logs, new Set(), 'content').map(l => l.id), [2, 1])
 })
 
+test('orderLogsByPin sorts high priority before normal and low when sortBy is "priority"', () => {
+  const logs = [{ id: 1, priority: 'low' }, { id: 2, priority: 'high' }, { id: 3, priority: 'normal' }]
+  assert.deepEqual(orderLogsByPin(logs, new Set(), 'priority').map(l => l.id), [2, 3, 1])
+})
+
 test('loadLogSort defaults to "none" and round-trips through saveLogSort', () => {
   const storage = new MemoryStorage()
   assert.equal(loadLogSort(storage), 'none')

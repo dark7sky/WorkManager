@@ -19,11 +19,14 @@ export const togglePinnedLog = (pinnedIds, logId) => {
   return next
 }
 
+const priorityRank = { high: 0, normal: 1, low: 2 }
+
 export const LOG_SORT_COMPARATORS = {
   none: () => 0,
   time: (a, b) => (a.log_time || '').localeCompare(b.log_time || ''),
   duration: (a, b) => (b.duration_minutes || 0) - (a.duration_minutes || 0),
   content: (a, b) => (a.content || '').localeCompare(b.content || '', 'ko'),
+  priority: (a, b) => (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1),
 }
 export const DEFAULT_LOG_SORT = 'none'
 const LOG_SORT_STORAGE_KEY = 'wm-log-sort'
