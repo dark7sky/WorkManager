@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Clock3, History, LoaderCircle, Send, Lightbulb, ListTodo, Sparkles } from 'lucide-react'
+import { Clock3, History, LoaderCircle, Send, Lightbulb, ListTodo, Sparkles, X } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import { changelogUpdates } from '../data'
-import { countPendingFeatureRequests, featureRequestStatusLabel } from '../featureRequests'
+import { addOwnFeatureRequestId, countPendingFeatureRequests, featureRequestStatusLabel, isOwnFeatureRequestId } from '../featureRequests'
 import { changelogSummaryCacheKey, groupChangelogByMonth, splitChangelogByAge } from '../changelogSummary'
 
 const SUMMARY_CACHE_KEY = 'workmanager:changelog-summary-cache'
 const loadSummaryCache = () => { try { return JSON.parse(localStorage.getItem(SUMMARY_CACHE_KEY) || '{}') } catch { return {} } }
+const OWN_REQUEST_KEY = 'workmanager:my-feature-requests'
+const loadOwnRequestIds = () => { try { return JSON.parse(localStorage.getItem(OWN_REQUEST_KEY) || '[]') } catch { return [] } }
 
 const formatTimestamp = value => {
   const parsed = value ? new Date(value) : null
@@ -35,6 +37,7 @@ export default function Changelog({ notify, publicMode = false }) {
   const [saving, setSaving] = useState(false)
   const [periodSummaries, setPeriodSummaries] = useState(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
+  const [ownRequestIds, setOwnRequestIds] = useState(loadOwnRequestIds)
   const load = useCallback(async () => {
     setLoading(true)
     try {
@@ -80,12 +83,24 @@ export default function Changelog({ notify, publicMode = false }) {
     if (!content) return
     setSaving(true)
     try {
-      await api.createFeatureRequest(content)
+      const created = await api.createFeatureRequest(content)
+      setOwnRequestIds(ids => {
+        const next = addOwnFeatureRequestId(ids, created.id)
+        localStorage.setItem(OWN_REQUEST_KEY, JSON.stringify(next))
+        return next
+      })
       setText('')
       await load()
       notify?.('요청사항을 Codex 개선 큐에 추가했습니다.')
     } catch (error) { notify?.(error.message, 'error') }
     finally { setSaving(false) }
+  }
+  const cancelRequest = async id => {
+    try {
+      await api.updateFeatureRequest(id, 'dismissed')
+      await load()
+      notify?.('요청을 취소했습니다.')
+    } catch (error) { notify?.(error.message, 'error') }
   }
   const pendingCount = countPendingFeatureRequests(requests)
   const content = <div className={`content changelog-page ${publicMode ? 'public-changelog-content' : ''}`}>
@@ -98,7 +113,11 @@ export default function Changelog({ notify, publicMode = false }) {
       </form> : null}
       <div className="feature-request-list" aria-live="polite">
         {loading ? <p className="empty-state">요청 불러오는 중.</p> : requests.length ? requests.map(item => <article key={item.id} className={`feature-request ${item.status}`}>
-          <div><strong>{ultraTone(item.content)}</strong><time dateTime={item.created_at}>요청일 {formatTimestamp(item.created_at)}</time></div><span className="request-status">{featureRequestStatusLabel[item.status] || item.status}</span>
+          <div><strong>{ultraTone(item.content)}</strong><time dateTime={item.created_at}>요청일 {formatTimestamp(item.created_at)}</time></div>
+          <div className="feature-request-actions">
+            <span className="request-status">{featureRequestStatusLabel[item.status] || item.status}</span>
+            {!publicMode && item.status === 'pending' && isOwnFeatureRequestId(ownRequestIds, item.id) ? <button type="button" className="feature-request-cancel" title="요청 취소" onClick={() => cancelRequest(item.id)}><X aria-hidden="true"/> 취소</button> : null}
+          </div>
         </article>) : <p className="empty-state">대기 요청 없음.</p>}
       </div>
     </section>

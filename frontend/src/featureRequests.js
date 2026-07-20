@@ -11,3 +11,10 @@ export const countPendingFeatureRequests = requests => requests.filter(item => i
 
 export const replaceFeatureRequestStatus = (requests, updated) =>
   requests.map(item => item.id === updated.id ? { ...item, ...updated } : item)
+
+export const OWN_FEATURE_REQUEST_LIMIT = 200
+
+export const addOwnFeatureRequestId = (ids, id) =>
+  ids.includes(id) ? ids : [...ids, id].slice(-OWN_FEATURE_REQUEST_LIMIT)
+
+export const isOwnFeatureRequestId = (ids, id) => ids.includes(id)

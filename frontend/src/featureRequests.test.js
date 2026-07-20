@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { countPendingFeatureRequests, featureRequestStatusLabel, replaceFeatureRequestStatus } from './featureRequests.js'
+import { addOwnFeatureRequestId, countPendingFeatureRequests, featureRequestStatusLabel, isOwnFeatureRequestId, OWN_FEATURE_REQUEST_LIMIT, replaceFeatureRequestStatus } from './featureRequests.js'
 
 test('countPendingFeatureRequests counts only pending requests', () => {
   assert.equal(countPendingFeatureRequests([
@@ -24,4 +24,22 @@ test('replaceFeatureRequestStatus updates one request without dropping local fie
   assert.equal(updated[1].status, 'done')
   assert.equal(updated[1].completed_at, '2026-07-07T19:03:34+09:00')
   assert.equal(featureRequestStatusLabel.done, '완료')
+})
+
+test('addOwnFeatureRequestId appends new ids and skips duplicates', () => {
+  assert.deepEqual(addOwnFeatureRequestId([1, 2], 3), [1, 2, 3])
+  assert.deepEqual(addOwnFeatureRequestId([1, 2], 2), [1, 2])
+})
+
+test('addOwnFeatureRequestId caps the tracked id list', () => {
+  const ids = Array.from({ length: OWN_FEATURE_REQUEST_LIMIT }, (_, i) => i)
+  const next = addOwnFeatureRequestId(ids, 99999)
+  assert.equal(next.length, OWN_FEATURE_REQUEST_LIMIT)
+  assert.equal(next[next.length - 1], 99999)
+  assert.equal(next[0], 1)
+})
+
+test('isOwnFeatureRequestId reflects membership', () => {
+  assert.equal(isOwnFeatureRequestId([1, 2, 3], 2), true)
+  assert.equal(isOwnFeatureRequestId([1, 2, 3], 5), false)
 })

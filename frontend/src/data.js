@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-feature-request-cancel',
+    timestamp: '2026-07-21T07:20:00+09:00',
+    description: '개선 요청(변경 이력 화면) 목록에 "취소" 버튼을 추가했습니다. 서버에는 사용자가 자신의 요청 상태를 바꾸는 API가 이미 있었지만 UI에서 호출하는 곳이 없어, 잘못 등록했거나 더 이상 필요 없는 대기 중 요청을 취소할 방법이 없었습니다. (`frontend/src/screens/Changelog.jsx`, `frontend/src/featureRequests.js`)',
+  },
+  {
     id: '2026-07-21-ai-recommendations-rate-limit',
     timestamp: '2026-07-21T07:06:03+09:00',
     description: 'AI 오늘 할 일 추천(`GET /api/ai/recommendations`)에 요청 빈도 제한을 추가했습니다. 다른 AI 엔드포인트(태그 추천, 기간 요약, 프로젝트 제안 등)는 모두 제한이 있었지만 이 경로만 빠져 있어 무제한 반복 호출이 가능했습니다. (`backend/app/main.py`)',
