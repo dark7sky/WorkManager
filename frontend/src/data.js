@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-code-splitting',
+    timestamp: '2026-07-20T15:52:10+09:00',
+    description: '전체 화면 코드가 하나의 JS 번들(755KB)로 합쳐져 있어 첫 접속 시 불필요한 화면 코드까지 모두 내려받아야 했습니다. 화면별 컴포넌트(오늘/업무/캘린더/성과/AI/감사 로그/변경 이력/설정)를 지연 로딩하도록 분리해 최초 진입 번들을 289KB로 줄이고, 각 화면은 처음 이동할 때만 내려받도록 했습니다. (`frontend/src/App.jsx`)',
+  },
+  {
     id: '2026-07-20-offline-banner',
     timestamp: '2026-07-20T15:44:22+09:00',
     description: '설치형 앱(PWA)에서 네트워크가 끊겨도 별도 안내 없이 저장이 실패해 사용자가 원인을 알기 어려웠습니다. 오프라인 상태가 되면 화면 상단에 "오프라인 상태입니다" 배너를 표시해 변경 사항이 저장되지 않을 수 있음을 바로 알 수 있도록 했습니다. (`frontend/src/networkStatus.js`, `frontend/src/components/AppShell.jsx`)',
