@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-search-input-aria-label',
+    timestamp: '2026-07-21T01:14:21+09:00',
+    description: '업무/감사 로그 화면의 검색창에 접근성 라벨(aria-label)이 빠져 있어 스크린리더 사용자가 입력 목적을 알기 어려웠습니다. 캘린더/오늘 화면과 동일하게 라벨을 추가했습니다. (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/AuditLog.jsx`)',
+  },
+  {
     id: '2026-07-21-calendar-loading-indicator',
     timestamp: '2026-07-21T01:12:40+09:00',
     description: '업무/오늘 화면과 달리 캘린더 화면은 데이터를 불러오는 중에도 아무 표시가 없었습니다. 다른 화면과 동일하게 "동기화 중…" 표시를 추가했습니다. (`frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`)',
