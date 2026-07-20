@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-form-ai-priority-estimate',
+    timestamp: '2026-07-21T08:02:00+09:00',
+    description: '업무 등록/수정 양식에서는 제목만으로 우선순위와 예상 소요 시간을 AI가 추정해주는 기능이 없어 자연어 빠른 입력에서만 이 기능을 쓸 수 있었습니다. 업무 양식에 "AI 우선순위·예상시간 추천" 버튼을 추가해 제목·메모를 분석한 결과로 우선순위와 예상 소요 시간 입력란을 바로 채울 수 있도록 했습니다 (`frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-21-log-manual-order',
     timestamp: '2026-07-21T07:36:08+09:00',
     description: '오늘 할 일 목록에는 드래그로 순서를 직접 정할 수 있는 "직접 정렬"이 있었지만 업무 기록(work log) 목록에는 없어 두 목록의 정렬 기능이 비대칭이었습니다. 업무 기록 정렬에도 "직접 정렬"을 추가하고 드래그 앤 드롭으로 재배열한 순서를 기기에 저장하도록 했습니다 (`frontend/src/logOrder.js`, `frontend/src/logPins.js`, `frontend/src/screens/Today.jsx`, 테스트 `frontend/src/logOrder.test.js`, `frontend/src/logPins.test.js`).',
