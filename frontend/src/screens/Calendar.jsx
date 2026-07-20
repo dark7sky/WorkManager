@@ -310,7 +310,7 @@ function ConflictPanel({ event, onResolved, notify }) {
   return <div className="conflict-panel"><AlertTriangle/><div><strong>Google 캘린더와 변경 사항이 충돌했습니다.</strong><p>WorkManager: {event.title}<br/>Google: {remote.title || remote.summary || '제목 없음'}</p><span><button className="secondary" disabled={!!busy} onClick={() => resolve('remote')}>Google 버전 사용</button><button className="primary" disabled={!!busy} onClick={() => resolve('local')}>WorkManager 버전 사용</button></span></div></div>
 }
 
-export default function Calendar({ events, tasks = [], loading, onOpenTask, onCreate, onUpdate, onDelete, onBulkDelete, onBulkAddTag, onBulkPostpone, onBulkPriority, onBulkColor, onBulkDuplicate, onArchive, onDataChanged, onViewHistory, notify }) {
+export default function Calendar({ events, tasks = [], loading, onOpenTask, onCreate, onUpdate, onDelete, onBulkDelete, onBulkAddTag, onBulkPostpone, onBulkPriority, onBulkColor, onBulkDuplicate, onArchive, onDataChanged, onViewHistory, focusTag, notify }) {
   const postponeEvent = async e => { const patch = postponeEventDates(e); if (!patch) return false; const ok = await onUpdate(e, patch, false); if (ok) close(); return ok }
   const [cursor, setCursor] = useState(() => new Date())
   const [view, setView] = useState('month')
@@ -332,6 +332,7 @@ export default function Calendar({ events, tasks = [], loading, onOpenTask, onCr
     return () => document.removeEventListener('keydown', onKey)
   }, [view, editing, newDate, deleting])
   const [selectedTags, setSelectedTags] = useState([])
+  useEffect(()=>{if(!focusTag)return;setSelectedTags([focusTag.tag])},[focusTag])
   const [query, setQuery] = useState('')
   const [priority, setPriority] = useState('all')
   const [eventFilterPresets, setEventFilterPresets] = useState(() => loadEventFilterPresets())

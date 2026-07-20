@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { ExternalLink, LoaderCircle, Pencil, Tags, Trash2 } from 'lucide-react'
 import { api } from '../api'
+import { pickTagTarget } from '../tagTarget'
+
+const tagTargetLabel = item => pickTagTarget(item.tables).label
 
 export default function TagManager({ notify, onDataChanged, onTagClick }) {
   const [items, setItems] = useState(null)
@@ -37,7 +40,7 @@ export default function TagManager({ notify, onDataChanged, onTagClick }) {
           </form>
         : <span key={item.tag} className="tag-manager-chip">
             <button type="button" title={`업무 ${item.tables.tasks} · 일정 ${item.tables.events} · 할 일 ${item.tables.todos} · 기록 ${item.tables.work_logs}`} onClick={() => { setEditing(item.tag); setDraft(item.tag) }}>#{item.tag}<b>{item.total}</b><Pencil size={12} aria-hidden="true" /></button>
-            {onTagClick ? <button type="button" title="이 태그로 업무 화면 이동" onClick={() => onTagClick(item.tag)}><ExternalLink size={12} aria-hidden="true" /></button> : null}
+            {onTagClick ? <button type="button" title={`이 태그로 ${tagTargetLabel(item)} 화면 이동`} onClick={() => onTagClick(item)}><ExternalLink size={12} aria-hidden="true" /></button> : null}
           </span>)}
     </div>}
   </section>

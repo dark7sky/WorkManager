@@ -230,7 +230,7 @@ export default function Today(props) {
     onAddTodo, onUpdateTodo, onToggleTodo, onDeleteTodo, onDuplicateTodo, onArchiveTodo, onPromoteTodo, onSkipTodoRecurrence, onClearCompletedTodos, onCarryOverTodos, onImportTodos, onPostponeTodo,
     onBulkCompleteTodo, onBulkDeleteTodo, onBulkAddTagTodo, onBulkPostponeTodo, onBulkPriorityTodo, onBulkColorTodo, onBulkDuplicateTodo,
     onAddLog, onUpdateLog, onDeleteLog, onDuplicateLog, onPromoteLog, onPostponeLog, onArchiveLog, onImportLogs, onToggleTask, goAI, onViewHistoryTodo, onViewHistoryLog,
-    onBulkDeleteLog, onBulkAddTagLog, onBulkPostponeLog, onBulkPriorityLog, onBulkColorLog, onBulkDuplicateLog, notify,
+    onBulkDeleteLog, onBulkAddTagLog, onBulkPostponeLog, onBulkPriorityLog, onBulkColorLog, onBulkDuplicateLog, focusTag, notify,
   } = props
   const todoImportInputRef = useRef(null)
   const logImportInputRef = useRef(null)
@@ -310,6 +310,7 @@ export default function Today(props) {
   const [editLogChecklistText, setEditLogChecklistText] = useState('')
   const [saving, setSaving] = useState('')
   const [selectedTags, setSelectedTags] = useState([])
+  useEffect(()=>{if(!focusTag)return;setSelectedTags([focusTag.tag])},[focusTag])
   const [query, setQuery] = useState('')
   const [todoPriorityFilter, setTodoPriorityFilter] = useState('all')
   const [hideCompletedTodos, setHideCompletedTodos] = useState(false)

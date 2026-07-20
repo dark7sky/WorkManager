@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-tag-manager-smart-navigation',
+    timestamp: '2026-07-21T01:33:45+09:00',
+    description: '태그 관리에서 화면 이동 버튼이 항상 업무 화면으로만 이동하던 문제를 수정했습니다. 이제 태그가 가장 많이 쓰인 항목(업무/일정/할 일/업무 기록)에 맞춰 업무·캘린더·오늘 화면 중 알맞은 곳으로 이동하고 해당 화면의 태그 필터가 자동 적용됩니다. (`frontend/src/tagTarget.js`, `frontend/src/components/TagManager.jsx`, `frontend/src/App.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`)',
+  },
+  {
     id: '2026-07-21-ics-link-url-roundtrip',
     timestamp: '2026-07-21T01:40:00+09:00',
     description: '업무/할 일/일정/업무 기록의 링크(link_url)가 ICS 내보내기/가져오기에서 누락되던 문제를 수정했습니다. 표준 iCalendar URL 필드로 왕복 보존됩니다. (`frontend/src/ics.js`)',
