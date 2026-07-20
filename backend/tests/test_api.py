@@ -999,6 +999,19 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_achievement_summary_excludes_archived_tasks_from_active_count(self, *_):
+        a = self.client(self.token_a)
+        report_before = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        active_before = report_before.json()["summary"]["active_tasks"]
+        task = a.post("/api/tasks", json={"title": "stale unfinished project", "progress": 40}).json()
+        report_with_task = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        self.assertEqual(report_with_task.json()["summary"]["active_tasks"], active_before + 1)
+        a.post(f"/api/tasks/{task['id']}/archive")
+        report_after_archive = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        self.assertEqual(report_after_archive.json()["summary"]["active_tasks"], active_before)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_duration_minutes_is_persisted_and_summed_in_report(self, *_):
         a = self.client(self.token_a)
         log = a.post("/api/work_logs", json={"content": "focused work", "log_date": "2026-07-06", "duration_minutes": 90})

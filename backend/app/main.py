@@ -2164,7 +2164,7 @@ def audit_log_list(limit: int = 100, start: str = None, end: str = None, user=De
     if end:
         clauses.append("created_at<=?"); args.append(end + "T23:59:59")
     where = ("WHERE " + " AND ".join(clauses) + " ") if clauses else ""
-    items = rows("audit_logs", user, f"{where}ORDER BY created_at DESC LIMIT ?", (*args, max(1, min(limit, 500))))
+    items = rows("audit_logs", user, f"{where}ORDER BY created_at DESC, id DESC LIMIT ?", (*args, max(1, min(limit, 500))))
     for item in items:
         item["metadata"] = json.loads(item.get("metadata") or "{}")
     return {"items": items}
@@ -2332,7 +2332,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     logs = rows("work_logs", user, "WHERE log_date BETWEEN ? AND ? ORDER BY log_date DESC", (start, end), wanted)
     events = rows("events", user, "WHERE start_at<? AND end_at>? ORDER BY start_at", (end_next + "T00:00:00", start + "T00:00:00"), wanted)
     todos = rows("todos", user, "WHERE completed=1 AND todo_date BETWEEN ? AND ? ORDER BY todo_date DESC", (start, end), wanted)
-    all_tasks = rows("tasks", user, tags=wanted)
+    all_tasks = rows("tasks", user, "WHERE archived_at IS NULL", tags=wanted)
     active = [x for x in all_tasks if x.get("status") != "done"]
     timeline = []
     timeline.extend({"type": "task", "type_label": "완료 업무", "id": x["id"], "date": (x.get("completed_at") or x.get("updated_at") or "")[:10], "title": x["title"], "tags": x.get("tags", []), "estimated_minutes": x.get("estimated_minutes")} for x in tasks)

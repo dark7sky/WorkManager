@@ -12,6 +12,16 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-audit-log-order-tiebreak',
+    timestamp: '2026-07-20T20:43:00+09:00',
+    description: '감사 로그(Audit Log) 목록 조회가 초 단위 정밀도인 `created_at`만으로 정렬되어, 같은 초에 여러 작업이 기록되면 최신 항목이 순서에서 밀려나거나 목록에서 아예 빠질 수 있는 문제가 있었습니다. `/api/audit-logs` 정렬에 `id DESC`를 보조 기준으로 추가해 항상 결정적인 최신순 정렬이 되도록 고쳤습니다. (`backend/app/main.py`)',
+  },
+  {
+    id: '2026-07-20-achievements-excludes-archived',
+    timestamp: '2026-07-20T20:39:00+09:00',
+    description: '성과(업적) 화면의 "진행 중 업무 수"·"평균 진행률" 통계가 보관한 업무까지 계속 활성 업무로 집계하는 문제가 있었습니다. `/api/achievements`가 전체 업무 목록을 조회할 때 보관 여부 조건이 빠져 있었기 때문입니다. 다른 목록 화면들처럼 보관된 업무를 활성 업무 집계에서 제외하도록 고쳤습니다. (`backend/app/main.py`, `backend/tests/test_api.py`)',
+  },
+  {
     id: '2026-07-20-today-excludes-archived',
     timestamp: '2026-07-20T20:34:48+09:00',
     description: '업무·할 일·일정·업무 기록을 보관해도 오늘 화면(`/api/today`)에는 계속 표시되는 문제가 있었습니다. 보관 기능이 목록 화면에서는 숨기지만 오늘 화면 API 쿼리에는 보관 여부 조건이 빠져 있었기 때문입니다. 오늘 화면이 4개 항목 모두에서 보관된 데이터를 제외하도록 고쳤습니다. (`backend/app/main.py`, `backend/tests/test_api.py`)',
