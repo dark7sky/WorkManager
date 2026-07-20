@@ -119,6 +119,18 @@ test('icsToTasks round-trips an all-day task VEVENT exported by tasksToIcs', () 
   assert.equal(tasks[0].description, '검토 필요')
 })
 
+test('tasksToIcs and icsToTasks round-trip priority', () => {
+  const ics = tasksToIcs([{ id: 5, title: '기획 승인', due_date: '2026-07-20', priority: 'high' }])
+  assert.match(ics, /PRIORITY:1/)
+  const tasks = icsToTasks(ics)
+  assert.equal(tasks[0].priority, 'high')
+})
+
+test('tasksToIcs omits PRIORITY when task has no priority', () => {
+  const ics = tasksToIcs([{ id: 6, title: '기획 승인', due_date: '2026-07-20' }])
+  assert.doesNotMatch(ics, /PRIORITY:/)
+})
+
 test('icsToTasks sets due_time for a timed VEVENT', () => {
   const ics = tasksToIcs([{ id: 9, title: '시간 있음', due_date: '2026-07-20', due_time: '15:00' }])
   const tasks = icsToTasks(ics)
@@ -141,6 +153,20 @@ test('icsToTodos sets todo_time for a timed VEVENT', () => {
   const todos = icsToTodos(ics)
   assert.equal(todos[0].todo_date, '2026-07-20')
   assert.equal(todos[0].todo_time, '09:30')
+})
+
+test('todosToIcs and icsToTodos round-trip priority', () => {
+  const ics = todosToIcs([{ id: 3, title: '장보기', todo_date: '2026-07-20', priority: 'low' }])
+  assert.match(ics, /PRIORITY:9/)
+  const todos = icsToTodos(ics)
+  assert.equal(todos[0].priority, 'low')
+})
+
+test('logsToIcs and icsToLogs round-trip priority', () => {
+  const ics = logsToIcs([{ id: 2, content: '보고서 작성', log_date: '2026-07-20', priority: 'normal' }])
+  assert.match(ics, /PRIORITY:5/)
+  const logs = icsToLogs(ics)
+  assert.equal(logs[0].priority, 'normal')
 })
 
 test('icsToLogs round-trips an all-day log VEVENT exported by logsToIcs', () => {

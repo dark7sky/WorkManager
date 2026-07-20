@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ics-priority-roundtrip',
+    timestamp: '2026-07-21T01:20:00+09:00',
+    description: 'ICS 내보내기에 우선순위가 빠져 있어 다른 캘린더 앱으로 내보내거나 가져올 때 업무/할 일/일정/업무 기록의 우선순위 정보가 사라졌습니다. 표준 iCalendar PRIORITY 필드로 우선순위를 함께 내보내고, 가져오기 시에도 복원하도록 수정했습니다. (`frontend/src/ics.js`)',
+  },
+  {
     id: '2026-07-21-search-input-aria-label',
     timestamp: '2026-07-21T01:14:21+09:00',
     description: '업무/감사 로그 화면의 검색창에 접근성 라벨(aria-label)이 빠져 있어 스크린리더 사용자가 입력 목적을 알기 어려웠습니다. 캘린더/오늘 화면과 동일하게 라벨을 추가했습니다. (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/AuditLog.jsx`)',
