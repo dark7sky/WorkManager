@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-20-quickcapture-result-arrow-nav',
+    timestamp: '2026-07-20T14:47:59+09:00',
+    description: '업무·오늘 화면 목록에는 방향키(↑/↓)로 항목 간 이동이 가능했지만, 빠른 입력(Ctrl/⌘+K) 검색 결과 목록은 지원하지 않았습니다. 화면 이동·검색 결과 버튼에도 동일한 방향키 이동을 추가했습니다. (`frontend/src/components/QuickCapture.jsx`)',
+  },
+  {
     id: '2026-07-19-today-worklog-estimate-overrun',
     timestamp: '2026-07-19T04:10:35+09:00',
     description: '업무 화면에서는 예상 소요 시간을 초과하면 초과 배지가 표시되지만, 오늘 화면의 업무 기록은 예상·실제 시간을 각각 표시할 뿐 초과 여부를 알려주지 않았습니다. 업무 기록에도 동일한 초과 배지를 추가했습니다. (`frontend/src/screens/Today.jsx`)',

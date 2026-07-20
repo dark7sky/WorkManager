@@ -3,6 +3,7 @@ import { ArrowRight, CornerDownLeft, LoaderCircle, Search } from 'lucide-react'
 import Modal from './Modal'
 import { api } from '../api'
 import { searchItems, searchScreens } from '../commandPalette'
+import { nextRowIndex } from '../rowNavigation'
 
 const ACTION_LABELS = { create: '새 항목 등록', update: '기존 항목 수정' }
 const ENTITY_LABELS = { task: '업무', event: '일정', todo: '오늘 할 일', work_log: '업무 기록' }
@@ -21,6 +22,16 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
   if (!open) return null
 
   const go = page => { onNavigate?.(page); onClose() }
+
+  const onResultKeyDown = e => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
+    const rows = [...e.currentTarget.closest('.palette-results').querySelectorAll('.palette-result-btn')]
+    const idx = rows.indexOf(e.currentTarget)
+    const nextIdx = nextRowIndex(rows.length, idx, e.key)
+    if (nextIdx == null || nextIdx === idx) return
+    e.preventDefault()
+    rows[nextIdx]?.focus()
+  }
 
   const analyze = async e => {
     e.preventDefault()
@@ -67,10 +78,10 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     </> : null}
     {!items && (screenMatches.length || itemMatches.length) ? <div className="palette-results">
       {screenMatches.length ? <div className="palette-group"><small>화면 이동</small>
-        {screenMatches.map(screen => <button type="button" key={screen.id} onClick={() => go(screen.id)}><ArrowRight size={14} aria-hidden="true"/><span>{screen.label}</span></button>)}
+        {screenMatches.map(screen => <button type="button" className="palette-result-btn" key={screen.id} onClick={() => go(screen.id)} onKeyDown={onResultKeyDown}><ArrowRight size={14} aria-hidden="true"/><span>{screen.label}</span></button>)}
       </div> : null}
       {itemMatches.length ? <div className="palette-group"><small>검색 결과</small>
-        {itemMatches.map(result => <button type="button" key={`${result.type}-${result.id}`} onClick={() => go(result.page)}><em>{RESULT_TYPE_LABELS[result.type]}</em><span>{result.title}</span>{result.detail ? <small>{result.detail}</small> : null}</button>)}
+        {itemMatches.map(result => <button type="button" className="palette-result-btn" key={`${result.type}-${result.id}`} onClick={() => go(result.page)} onKeyDown={onResultKeyDown}><em>{RESULT_TYPE_LABELS[result.type]}</em><span>{result.title}</span>{result.detail ? <small>{result.detail}</small> : null}</button>)}
       </div> : null}
     </div> : null}
     {!items ? <p className="muted quick-capture-hint">입력하면 기존 항목·화면을 바로 찾고, 분석을 누르면 자연어로 업무·일정·할 일·기록을 만듭니다. 어디서든 Ctrl/⌘+K.</p> : null}
