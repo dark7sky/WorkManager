@@ -491,6 +491,7 @@ class TodoPayload(StrictPayload):
     links: list[dict] | None = Field(None, max_length=50)
     todo_time: str | None = Field(None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     checklist: list[dict] | None = Field(None, max_length=200)
+    custom_fields: list[dict] | None = Field(None, max_length=50)
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
 
     @field_validator("recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes", mode="before")
@@ -521,6 +522,11 @@ class TodoPayload(StrictPayload):
     @classmethod
     def links_well_formed(cls, value):
         return _clean_links(value)
+
+    @field_validator("custom_fields")
+    @classmethod
+    def custom_fields_well_formed(cls, value):
+        return _clean_custom_fields(value)
 
     @model_validator(mode="after")
     def recurrence_end_after_todo_date(self):
@@ -605,7 +611,7 @@ MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "w
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links", "custom_fields"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes"}, "updated_at"),
-    "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "estimated_minutes"}, None),
+    "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "custom_fields", "estimated_minutes"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes"}, None),
 }
 
@@ -974,9 +980,9 @@ def spawn_recurring_todo(todo, user_id):
                          (timestamp, todo["id"], user_id)).rowcount:
             return None
         cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,todo_time,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,estimated_minutes,created_at,
-          checklist,color,links) VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          checklist,color,links,custom_fields) VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, todo["title"], next_date, todo.get("todo_time"), json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), todo.get("estimated_minutes"), timestamp,
-           json.dumps(_reset_checklist(todo.get("checklist")), ensure_ascii=False), todo.get("color"), json.dumps(todo.get("links") or [], ensure_ascii=False)))
+           json.dumps(_reset_checklist(todo.get("checklist")), ensure_ascii=False), todo.get("color"), json.dumps(todo.get("links") or [], ensure_ascii=False), json.dumps(todo.get("custom_fields") or [], ensure_ascii=False)))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id

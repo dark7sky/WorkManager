@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-custom-fields',
+    timestamp: '2026-07-21T15:44:38+09:00',
+    description: '업무(Task)에는 고객사명·계약번호 같은 항목을 담을 수 있는 사용자 정의 필드가 있었지만, 오늘 화면의 할 일(Todo)에는 같은 기능이 없어 메모에 억지로 적어야 했습니다. 할 일에도 라벨/값 형태의 사용자 정의 필드를 추가하고 수정 화면에서 추가·삭제할 수 있도록 했습니다(`backend/app/db.py`, `backend/app/main.py`의 `TodoPayload.custom_fields`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-session-device-label',
     timestamp: '2026-07-21T15:43:04+09:00',
     description: '설정 화면의 활성 세션 목록에 "현재 세션"/"다른 세션"이라는 표시만 있어 여러 기기로 로그인했을 때 어떤 세션이 어느 브라우저·기기인지 구분할 방법이 없었습니다. 로그인 시 User-Agent를 저장해 "Chrome · Windows", "Safari · iPhone"처럼 브라우저·기기 라벨을 함께 보여주도록 했습니다(`backend/app/auth.py`의 `_describe_user_agent`, `backend/app/db.py`, `frontend/src/screens/Settings.jsx`).',
