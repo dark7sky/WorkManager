@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-bulk-promote-worklog',
+    timestamp: '2026-07-21T19:55:00+09:00',
+    description: '할 일 목록에는 여러 개를 선택해 한 번에 "업무로 전환"하는 일괄 작업 버튼이 있었지만, 오늘 한 일(업무 기록) 목록에는 항목별 전환 버튼만 있고 일괄 전환 기능이 빠져 있었습니다. 업무 기록 선택 도구모음에도 동일한 "업무로 전환" 일괄 작업 버튼을 추가했습니다(`frontend/src/App.jsx`의 `onBulkPromoteLog`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-per-item-reminder-lead-time',
     timestamp: '2026-07-21T19:30:00+09:00',
     description: '업무/일정/할 일의 마감·시작 알림은 설정 화면의 전역 알림 시점(분 전)만 따랐는데, 항목별로 미리 알림받고 싶은 시간이 다른 경우 대응할 수 없었습니다. 각 항목에 선택적 "알림 시점(분 전)" 필드를 추가해 지정된 경우 전역 설정 대신 그 값을 우선 적용하도록 했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/taskAlerts.js`/`eventAlerts.js`/`todoAlerts.js`, 업무/일정/할 일 입력 폼).',
