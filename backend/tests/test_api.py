@@ -1426,6 +1426,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_billing_vat_included_setting_persists_and_appears_in_achievements(self, *_):
+        a = self.client(self.token_b)
+        self.assertFalse(a.get("/api/settings/workflow").json()["billing_vat_included"])
+        saved = a.put("/api/settings/workflow", json={"billing_vat_included": True})
+        self.assertEqual(saved.status_code, 200, saved.text)
+        self.assertTrue(saved.json()["billing_vat_included"])
+        summary = a.get("/api/achievements", params={"start_date": "2026-09-01", "end_date": "2026-09-01"})
+        self.assertTrue(summary.json()["summary"]["billing_vat_included"])
+        cleared = a.put("/api/settings/workflow", json={"billing_vat_included": False})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertFalse(cleared.json()["billing_vat_included"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_time_is_persisted_validated_and_orders_today_endpoint(self, *_):
         from datetime import date
         a = self.client(self.token_a)

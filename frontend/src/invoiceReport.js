@@ -21,10 +21,17 @@ export const invoiceTotals = (logs, hourlyRate) => {
 
 export const defaultInvoiceNumber = (start, end) => `INV-${String(start || '').replaceAll('-', '')}-${String(end || '').replaceAll('-', '')}`
 
-export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, bizRegNumber, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
+export const vatBreakdown = amount => {
+  const supplyAmount = Math.round(Number(amount) || 0)
+  const vatAmount = Math.round(supplyAmount * 0.1)
+  return { supplyAmount, vatAmount, totalAmount: supplyAmount + vatAmount }
+}
+
+export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, bizRegNumber, vatIncluded, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
   const billable = billableWorkLogs(logs)
   const { minutes, amount } = invoiceTotals(logs, hourlyRate)
   const number = invoiceNumber || defaultInvoiceNumber(start, end)
+  const { supplyAmount, vatAmount, totalAmount } = vatBreakdown(amount)
   const rows = billable.map(log => `<tr>
       <td>${escapeHtml(log.log_date || '-')}</td>
       <td><strong>${escapeHtml(log.content || '')}</strong>${(log.tags || []).length ? `<small>${escapeHtml(log.tags.join(', '))}</small>` : ''}</td>
@@ -64,7 +71,9 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clien
     <thead><tr><th>날짜</th><th>내용</th><th>시간</th><th>적용 시급</th></tr></thead>
     <tbody>${rows || '<tr><td colspan="4">청구 가능한 업무 기록이 없습니다.</td></tr>'}</tbody>
   </table>
-  <p class="totals">청구 가능 시간 합계: ${formatMinutesAsHours(minutes)}시간${(hourlyRate || amount) ? `<br>청구 금액 합계: <strong>${formatWon(amount)}원</strong>` : ''}</p>
+  <p class="totals">청구 가능 시간 합계: ${formatMinutesAsHours(minutes)}시간${(hourlyRate || amount) ? (vatIncluded
+    ? `<br>공급가액: ${formatWon(supplyAmount)}원<br>부가세(10%): ${formatWon(vatAmount)}원<br>합계금액: <strong>${formatWon(totalAmount)}원</strong>`
+    : `<br>청구 금액 합계: <strong>${formatWon(amount)}원</strong>`) : ''}</p>
 </body>
 </html>`
 }

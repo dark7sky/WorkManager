@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { billableWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename, defaultInvoiceNumber } from './invoiceReport.js'
+import { billableWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename, defaultInvoiceNumber, vatBreakdown } from './invoiceReport.js'
 
 const logs = [
   { log_date: '2026-07-01', content: '<고객> 미팅', duration_minutes: 90, billable: true, tags: ['고객사'] },
@@ -93,4 +93,27 @@ test('workLogsToPrintableInvoice shows the derived invoice number by default', (
 test('workLogsToPrintableInvoice honors an explicit invoice number override', () => {
   const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', invoiceNumber: '<CUSTOM>-001' })
   assert.match(html, /청구서 번호: &lt;CUSTOM&gt;-001/)
+})
+
+test('vatBreakdown computes 10% VAT on top of the supply amount', () => {
+  assert.deepEqual(vatBreakdown(120000), { supplyAmount: 120000, vatAmount: 12000, totalAmount: 132000 })
+})
+
+test('vatBreakdown rounds and treats missing amount as zero', () => {
+  assert.deepEqual(vatBreakdown(null), { supplyAmount: 0, vatAmount: 0, totalAmount: 0 })
+  assert.deepEqual(vatBreakdown(99), { supplyAmount: 99, vatAmount: 10, totalAmount: 109 })
+})
+
+test('workLogsToPrintableInvoice shows VAT breakdown when vatIncluded is set', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', hourlyRate: 60000, vatIncluded: true })
+  assert.match(html, /공급가액: 120,000원/)
+  assert.match(html, /부가세\(10%\): 12,000원/)
+  assert.match(html, /합계금액: <strong>132,000원<\/strong>/)
+  assert.doesNotMatch(html, /청구 금액 합계:/)
+})
+
+test('workLogsToPrintableInvoice keeps the single-line total when vatIncluded is not set', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', hourlyRate: 60000 })
+  assert.match(html, /청구 금액 합계: <strong>120,000원<\/strong>/)
+  assert.doesNotMatch(html, /공급가액:/)
 })

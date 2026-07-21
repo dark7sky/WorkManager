@@ -128,6 +128,12 @@ def load_billing_biz_reg_number_setting(user_id):
     return row["value"] if row else None
 
 
+def load_billing_vat_included_setting(user_id):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user_id, "billing_vat_included")).fetchone()
+    return row["value"] == "on" if row else False
+
+
 def _ics_escape(value):
     return str(value or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
@@ -657,6 +663,7 @@ class WorkflowSettingsPayload(StrictPayload):
     billing_hourly_rate: float | None = Field(None, ge=0, le=1000000)
     billing_client_name: str | None = Field(None, max_length=200)
     billing_biz_reg_number: str | None = Field(None, max_length=50)
+    billing_vat_included: bool | None = None
 
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
@@ -2717,6 +2724,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
                         "billing_hourly_rate": hourly_rate,
                         "billing_client_name": load_billing_client_name_setting(user),
                         "billing_biz_reg_number": load_billing_biz_reg_number_setting(user),
+                        "billing_vat_included": load_billing_vat_included_setting(user),
                         "billable_amount": billable_amount,
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
@@ -2767,7 +2775,7 @@ async def ai_settings_test(user=Depends(require_user)):
 @app.get("/api/settings/workflow")
 def workflow_settings(user=Depends(require_user)):
     approval_workflow_on = load_approval_workflow_setting(user)
-    return {"approval_workflow": approval_workflow_on, "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user), "billing_biz_reg_number": load_billing_biz_reg_number_setting(user)}
+    return {"approval_workflow": approval_workflow_on, "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user), "billing_biz_reg_number": load_billing_biz_reg_number_setting(user), "billing_vat_included": load_billing_vat_included_setting(user)}
 
 
 @app.put("/api/settings/workflow")
@@ -2815,7 +2823,15 @@ def workflow_settings_update(payload: dict = Body(...), user=Depends(require_use
                   ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
                           (user, "billing_biz_reg_number", biz_reg_number, now()))
         audit(user, "update", "settings", "billing_biz_reg_number", {"billing_biz_reg_number": biz_reg_number})
-    return {"approval_workflow": load_approval_workflow_setting(user), "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user), "billing_biz_reg_number": load_billing_biz_reg_number_setting(user)}
+    if "billing_vat_included" in value:
+        vat_included = value["billing_vat_included"]
+        stored_value = "on" if vat_included else "off"
+        with connection() as c:
+            c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+              ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                      (user, "billing_vat_included", stored_value, now()))
+        audit(user, "update", "settings", "billing_vat_included", {"billing_vat_included": vat_included})
+    return {"approval_workflow": load_approval_workflow_setting(user), "billing_hourly_rate": load_billing_hourly_rate_setting(user), "billing_client_name": load_billing_client_name_setting(user), "billing_biz_reg_number": load_billing_biz_reg_number_setting(user), "billing_vat_included": load_billing_vat_included_setting(user)}
 
 
 @app.get("/api/settings/calendar-feed")

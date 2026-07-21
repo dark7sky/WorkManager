@@ -326,6 +326,23 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const toggleBillingVat = async e => {
+    const newValue = e.target.checked
+    setBusy('billing-vat-save')
+    const previousValue = workflowSettings?.billing_vat_included ?? false
+    setWorkflowSettings(w => ({ ...w, billing_vat_included: newValue }))
+    try {
+      const result = await api.saveWorkflowSettings({ billing_vat_included: newValue })
+      setWorkflowSettings(result)
+      notify('부가세 표시 설정을 저장했습니다.')
+    } catch (e) {
+      notify(e.message, 'error')
+      setWorkflowSettings(w => ({ ...w, billing_vat_included: previousValue }))
+    } finally {
+      setBusy('')
+    }
+  }
+
   const rotateCalendarFeed = async () => {
     setBusy('feed-rotate')
     try {
@@ -433,6 +450,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         {workflowSettings ? <form className="integration-body" onSubmit={saveBillingHourlyRate}><label>시급 (원)<input type="number" min="0" step="1000" placeholder="예: 50000" value={billingRateDraft} disabled={busy === 'billing-rate-save'} onChange={e => setBillingRateDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-rate-save'}>{busy === 'billing-rate-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_hourly_rate != null ? `현재 시급: ${workflowSettings.billing_hourly_rate.toLocaleString('ko-KR')}원` : '시급을 설정하지 않으면 금액은 표시되지 않습니다.'}</small></form> : <div className="skeleton lines" />}
         {workflowSettings ? <form className="integration-body" onSubmit={saveBillingClientName}><label>청구 대상 이름<input type="text" maxLength={200} placeholder="예: (주)에이스컴퍼니" value={billingClientNameDraft} disabled={busy === 'billing-client-save'} onChange={e => setBillingClientNameDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-client-save'}>{busy === 'billing-client-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_client_name ? `청구서에 "${workflowSettings.billing_client_name}" 앞으로 표시됩니다.` : '설정하면 청구서 PDF 상단에 청구 대상으로 표시됩니다.'}</small></form> : null}
         {workflowSettings ? <form className="integration-body" onSubmit={saveBillingBizRegNumber}><label>사업자등록번호<input type="text" maxLength={50} placeholder="예: 123-45-67890" value={billingBizRegNumberDraft} disabled={busy === 'billing-biz-reg-save'} onChange={e => setBillingBizRegNumberDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-biz-reg-save'}>{busy === 'billing-biz-reg-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_biz_reg_number ? `청구서에 사업자등록번호 "${workflowSettings.billing_biz_reg_number}"가 표시됩니다.` : '설정하면 청구서 PDF 상단에 사업자등록번호로 표시됩니다.'}</small></form> : null}
+        {workflowSettings ? <div className="integration-body"><label><input type="checkbox" checked={workflowSettings.billing_vat_included ?? false} disabled={busy === 'billing-vat-save'} onChange={toggleBillingVat} /> <span>{workflowSettings.billing_vat_included ? '부가세 10% 표시 켜짐' : '부가세 10% 표시 꺼짐'}</span></label><small>{workflowSettings.billing_vat_included ? '청구서에 공급가액·부가세·합계금액을 나눠 표시합니다.' : '켜면 청구서에 공급가액과 부가세(10%)를 나눠 표시합니다.'}</small></div> : null}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><CalendarSync /></span><div><h2>캘린더 구독 피드</h2><p>Google·Apple·Outlook 캘린더에 구독 주소를 등록하면 업무 마감일과 일정이 자동으로 최신 상태를 유지합니다.</p></div><em className={`status-pill ${calendarFeed?.enabled ? 'online' : ''}`}>{calendarFeed?.enabled ? '켜짐' : '꺼짐'}</em></div>
