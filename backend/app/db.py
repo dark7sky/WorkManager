@@ -199,8 +199,9 @@ def init_db():
         for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT", "priority": "TEXT NOT NULL DEFAULT 'normal'", "link_url": "TEXT", "recurrence_end_date": "TEXT", "memo": "TEXT",
                                   "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
                                   "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
-                                  "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER"}.items():
+                                  "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER", "public_token": "TEXT"}.items():
             _add_column(c, "todos", name, definition)
+        c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_todos_public_token ON todos(public_token) WHERE public_token IS NOT NULL")
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")

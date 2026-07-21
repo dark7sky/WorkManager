@@ -6,6 +6,7 @@ const Today=lazy(()=>import('./screens/Today')),Tasks=lazy(()=>import('./screens
 const Changelog=lazy(()=>import('./screens/Changelog'))
 const PublicTask=lazy(()=>import('./screens/PublicTask'))
 const PublicEvent=lazy(()=>import('./screens/PublicEvent'))
+const PublicTodo=lazy(()=>import('./screens/PublicTodo'))
 const Performance=lazy(()=>import('./screens/Performance'))
 const AuditLog=lazy(()=>import('./screens/AuditLog'))
 const ScreenFallback=()=><div className="app-loading" role="status"><span className="brand-mark">W</span><span>불러오는 중…</span></div>
@@ -94,6 +95,7 @@ export default function App(){
  if(location.pathname.replace(/\/+$/,'')==='/changelog')return <Suspense fallback={<ScreenFallback/>}><Changelog publicMode/></Suspense>
  {const publicTaskMatch=location.pathname.match(/^\/public\/tasks\/([^/]+)\/?$/);if(publicTaskMatch)return <Suspense fallback={<ScreenFallback/>}><PublicTask token={publicTaskMatch[1]}/></Suspense>}
  {const publicEventMatch=location.pathname.match(/^\/public\/events\/([^/]+)\/?$/);if(publicEventMatch)return <Suspense fallback={<ScreenFallback/>}><PublicEvent token={publicEventMatch[1]}/></Suspense>}
+ {const publicTodoMatch=location.pathname.match(/^\/public\/todos\/([^/]+)\/?$/);if(publicTodoMatch)return <Suspense fallback={<ScreenFallback/>}><PublicTodo token={publicTodoMatch[1]}/></Suspense>}
  if(boot.loading)return <div className="app-loading" role="status"><span className="brand-mark">W</span><span>WorkManager를 준비하고 있습니다…</span></div>
  if(!user)return <Login error={boot.error} googleEnabled={boot.google} onRetry={bootstrap}/>
  const overdueTodos=overdueIncompleteTodos(allTodos,new Date().toLocaleDateString('en-CA'))

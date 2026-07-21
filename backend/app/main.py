@@ -2043,6 +2043,29 @@ def unshare_event(item_id: int, user=Depends(require_user)):
     return {"ok": True}
 
 
+@app.post("/api/todos/{item_id}/share")
+def share_todo(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT public_token FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        token = item["public_token"] or secrets.token_urlsafe(16)
+        c.execute("UPDATE todos SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+    audit(user, "share", "todos", item_id)
+    return {"public_token": token}
+
+
+@app.delete("/api/todos/{item_id}/share")
+def unshare_todo(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        c.execute("UPDATE todos SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "unshare", "todos", item_id)
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/archive")
 def archive_todo(item_id: int, user=Depends(require_user)):
     with connection() as c:
@@ -2391,6 +2414,18 @@ def public_event(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-event", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,description,location,start_at,end_at,tags,created_at,updated_at FROM events
+          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+    if not item:
+        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+    return row_dict(item)
+
+
+@app.get("/api/public/todos/{token}")
+def public_todo(token: str, request: Request):
+    """Public, read-only view of a todo shared via a share link. No auth required."""
+    enforce_rate(request.client.host if request.client else "unknown", "public-todo", 60, 60)
+    with connection() as c:
+        item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,created_at FROM todos
           WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")

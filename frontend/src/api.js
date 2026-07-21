@@ -84,6 +84,8 @@ export const api = {
   skipTodoRecurrence: id => request(`/todos/${id}/skip-recurrence`,{method:'POST'}),
   archivedTodos: (limit,offset=0) => request(`/todos/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveTodo: id => request(`/todos/${id}/archive`,{method:'POST'}), unarchiveTodo: id => request(`/todos/${id}/unarchive`,{method:'POST'}),
+  shareTodo: id => request(`/todos/${id}/share`,{method:'POST'}), unshareTodo: id => request(`/todos/${id}/share`,{method:'DELETE'}),
+  publicTodo: token => request(`/public/todos/${token}`, { suppressAuthEvent: true }),
   aiPreview: text => request('/ai/parse',json('POST',{text})), aiApply: data => request('/ai/apply',json('POST',data)), aiRecommendations: (limit=5) => request(`/ai/recommendations?limit=${limit}`), aiStatus: () => request('/ai/status'),
   aiSettings: provider => request(`/settings/ai${provider ? `?provider=${encodeURIComponent(provider)}` : ''}`), saveAiSettings: data => request('/settings/ai',json('PUT',data)),
   testAiSettings: () => request('/settings/ai/test',json('POST',{})),
