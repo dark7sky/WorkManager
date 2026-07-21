@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-global-search',
+    timestamp: '2026-07-21T20:02:54+09:00',
+    description: '업무/일정/할 일/업무 기록이 각 화면 안에서만 검색 가능해 다른 화면에 있는 항목을 찾으려면 화면을 옮겨 다녀야 했습니다. 사이드바 버튼과 단축키(Ctrl/⌘+/)로 여는 전체 검색 모달(`GlobalSearch.jsx`, `globalSearch.js`)을 추가해 네 항목을 한 번에 검색하고 결과를 클릭해 바로 열 수 있도록 했습니다(회귀 테스트 `globalSearch.test.js`).',
+  },
+  {
     id: '2026-07-21-invoice-number',
     timestamp: '2026-07-21T19:56:09+09:00',
     description: '업무 기록(Work log) 청구서 인쇄 기능(`invoiceReport.js`)에 청구서 번호가 없어 실제 거래 증빙으로 쓰기 어려웠습니다. 청구 기간에서 파생되는 청구서 번호(`defaultInvoiceNumber`, 예: INV-20260701-20260703)를 자동 생성해 청구서 상단에 표시하도록 `workLogsToPrintableInvoice`를 확장했습니다(회귀 테스트 `invoiceReport.test.js`).',
