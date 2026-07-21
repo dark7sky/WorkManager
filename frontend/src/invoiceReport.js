@@ -8,7 +8,7 @@ const escapeHtml = value => String(value ?? '')
 const formatMinutesAsHours = minutes => (Number(minutes || 0) / 60).toFixed(2)
 const formatWon = amount => Math.round(Number(amount || 0)).toLocaleString('ko-KR')
 
-export const billableWorkLogs = logs => (logs || []).filter(log => log?.billable)
+export const billableWorkLogs = logs => (logs || []).filter(log => log?.billable && !log?.invoiced_at)
 
 export const invoiceTotals = (logs, hourlyRate) => {
   const minutes = billableWorkLogs(logs).reduce((sum, log) => sum + Number(log.duration_minutes || 0), 0)

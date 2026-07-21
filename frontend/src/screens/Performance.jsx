@@ -129,6 +129,18 @@ export default function Performance({ notify, onDataChanged }) {
     win.focus(); win.print()
   }, [data, invalidRange, dates])
 
+  const markInvoiced = useCallback(async () => {
+    const pending = billableWorkLogs(data?.work_logs || [])
+    if (!pending.length) return
+    const now = new Date().toISOString()
+    try {
+      await Promise.all(pending.map(log => api.updateLog(log.id, { invoiced_at: now })))
+      notify(`업무 기록 ${pending.length}건을 청구 완료로 표시했습니다.`)
+      setRefreshKey(value => value + 1)
+      await onDataChanged?.()
+    } catch (error) { notify(error.message, 'error') }
+  }, [data, notify, onDataChanged])
+
   const saveCurrentPreset = useCallback(() => {
     if (!presetName.trim()) return
     const newPresets = saveReportPreset(localStorage, savedPresets, { name: presetName, preset, start: dates[0], end: dates[1], tags: selected })
@@ -170,7 +182,7 @@ export default function Performance({ notify, onDataChanged }) {
   const deltaClass = delta => !delta || delta.diff === 0 ? '' : delta.diff > 0 ? 'delta-up' : 'delta-down'
 
   return <><Header title="성과" subtitle="기간별 업무 기록을 모아보고, 평가 자료와 다음 행동으로 연결하세요."/><div className="content performance-page">
-    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button>{data && billableWorkLogs(data.work_logs || []).length ? <button type="button" className="secondary" disabled={reportLoading || invalidRange} onClick={printInvoice}><Wallet size={17}/> 청구서 PDF</button> : null}</section>
+    <section className="performance-toolbar" aria-label="조회 기간"><div className="view-switch">{PRESETS.map(([value, label]) => <button type="button" className={preset === value ? 'active' : ''} key={value} onClick={() => choosePreset(value)}>{label}</button>)}</div><div className="date-range"><input aria-label="시작일" type="date" value={dates[0]} onChange={event => { setPreset('custom'); setDates([event.target.value, dates[1]]) }}/><span>–</span><input aria-label="종료일" type="date" value={dates[1]} onChange={event => { setPreset('custom'); setDates([dates[0], event.target.value]) }}/></div><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportMarkdown}><Download size={17}/> Markdown 내보내기</button><button type="button" className="secondary" disabled={reportLoading || invalidRange || !data} onClick={exportCsv}><Download size={17}/> CSV 내보내기</button>{data && billableWorkLogs(data.work_logs || []).length ? <button type="button" className="secondary" disabled={reportLoading || invalidRange} onClick={printInvoice}><Wallet size={17}/> 청구서 PDF</button> : null}{data && billableWorkLogs(data.work_logs || []).length ? <button type="button" className="secondary" disabled={reportLoading || invalidRange} onClick={markInvoiced}><CheckCircle2 size={17}/> 청구 완료 표시</button> : null}</section>
     {invalidRange ? <p className="inline-error">종료일은 시작일 이후여야 합니다.</p> : null}
     <div className="performance-tag-filter"><TagFilter tags={knownTags} selected={selected} onChange={setSelected} colors={tagColors}/>{selected.length ? <button type="button" className="text-button" onClick={() => setSelected([])}>필터 초기화</button> : null}</div>
     <div className="report-presets">

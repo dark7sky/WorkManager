@@ -12,6 +12,11 @@ test('billableWorkLogs filters to billable rows only', () => {
   assert.equal(billableWorkLogs(logs).length, 2)
 })
 
+test('billableWorkLogs excludes already-invoiced rows to prevent double billing', () => {
+  const withInvoiced = [...logs, { log_date: '2026-07-04', content: '이미 청구됨', duration_minutes: 45, billable: true, invoiced_at: '2026-07-05T00:00:00+09:00', tags: [] }]
+  assert.equal(billableWorkLogs(withInvoiced).length, 2)
+})
+
 test('invoiceTotals sums billable minutes and computes amount from hourly rate', () => {
   const totals = invoiceTotals(logs, 60000)
   assert.equal(totals.minutes, 120)

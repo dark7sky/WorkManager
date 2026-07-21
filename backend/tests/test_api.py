@@ -1333,6 +1333,20 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(summary.json()["summary"]["billable_minutes"], 45)
         self.assertIsNone(summary.json()["summary"]["billable_amount"])
 
+    def test_work_log_invoiced_at_is_persisted_and_clearable(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "client work", "log_date": "2026-07-06", "duration_minutes": 90, "billable": True})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertIsNone(log.json()["invoiced_at"])
+        marked = a.patch(f"/api/work_logs/{log.json()['id']}", json={"invoiced_at": "2026-07-21T12:00:00"})
+        self.assertEqual(marked.status_code, 200, marked.text)
+        self.assertTrue(marked.json()["invoiced_at"])
+        fetched = a.get("/api/work_logs")
+        self.assertTrue(next(x for x in fetched.json() if x["id"] == log.json()["id"])["invoiced_at"])
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"invoiced_at": None})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["invoiced_at"])
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_billing_hourly_rate_setting_computes_billable_amount(self, *_):

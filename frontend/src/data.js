@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-work-log-invoiced-marking',
+    timestamp: '2026-07-21T21:50:00+09:00',
+    description: '청구 가능(`billable`) 업무 기록으로 청구서를 다시 발행하면 이전에 이미 청구한 시간이 중복으로 다시 잡혔습니다. 업무 기록에 `invoiced_at` 필드를 추가하고, 성과 화면에 "청구 완료 표시" 버튼(`frontend/src/screens/Performance.jsx`)을 추가해 청구서에 포함된 항목을 한 번에 청구 완료로 표시하면 다음 청구서 생성 시 자동으로 제외되도록 했습니다.',
+  },
+  {
     id: '2026-07-21-calendar-feed-reminder-alarms',
     timestamp: '2026-07-21T21:35:00+09:00',
     description: '업무/일정/할 일에 개별 알림 시점(`reminder_minutes_before`)을 설정해도 캘린더 구독(webcal) 피드와 .ics 내보내기에는 반영되지 않아, Google/Apple/Outlook 캘린더로 가져가면 알림 없이 조용히 등록됐습니다. `build_calendar_feed`(`backend/app/main.py`)와 내보내기 함수(`frontend/src/ics.js`의 `eventsToIcs`/`tasksToIcs`/`todosToIcs`)가 시간이 지정된 항목에 `VALARM`(`TRIGGER:-PT{n}M`) 블록을 추가하도록 했습니다.',
