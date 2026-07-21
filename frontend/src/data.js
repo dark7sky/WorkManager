@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-promote-subtask-button',
+    timestamp: '2026-07-21T11:25:03+09:00',
+    description: '하위 업무를 최상위로 옮기려면 매번 수정 화면을 열어 상위 업무 항목을 지워야 했습니다. Gantt 업무 목록의 하위 업무 행에 "최상위로" 버튼을 추가해 미루기·복제·보관과 같은 자리에서 한 번에 상위 업무 지정을 해제할 수 있도록 했습니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-worklog-form-ai-priority-estimate',
     timestamp: '2026-07-21T11:21:52+09:00',
     description: '업무 기록(오늘 한 일) 빠른 입력에는 우선순위·예상 소요 시간을 AI가 채워주는 기능이 없어 업무·Todo·일정 양식에서만 쓸 수 있었습니다. 업무 기록 입력에도 "AI 우선순위·예상시간 추천" 버튼을 추가해 입력한 내용을 분석해 우선순위와 예상 소요 시간을 바로 채울 수 있도록 했습니다 (`frontend/src/screens/Today.jsx`).',
