@@ -9,6 +9,7 @@ const formatMinutesAsHours = minutes => (Number(minutes || 0) / 60).toFixed(2)
 const formatWon = amount => Math.round(Number(amount || 0)).toLocaleString('ko-KR')
 
 export const billableWorkLogs = logs => (logs || []).filter(log => log?.billable && !log?.invoiced_at)
+export const invoicedWorkLogs = logs => (logs || []).filter(log => log?.billable && log?.invoiced_at)
 
 const logRate = (log, hourlyRate) => (log.hourly_rate_override != null ? Number(log.hourly_rate_override) : Number(hourlyRate) || 0)
 

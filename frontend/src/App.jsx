@@ -66,6 +66,7 @@ export default function App(){
  useEffect(()=>{const install=e=>{e.preventDefault();setInstallPrompt(e)},updated=()=>notify('새 버전이 준비되었습니다. 앱을 다시 열면 자동으로 적용됩니다.');addEventListener('beforeinstallprompt',install);addEventListener('workmanager:update-ready',updated);return()=>{removeEventListener('beforeinstallprompt',install);removeEventListener('workmanager:update-ready',updated);clearTimeout(toastTimer.current)}},[notify])
  useEffect(()=>{if(location.pathname.replace(/\/+$/,'')==='/changelog')return;const url=new URL(location.href);url.searchParams.set('page',page);history.replaceState(null,'',url);const pop=()=>{const p=new URLSearchParams(location.search).get('page');if(pages.includes(p))setPage(p)};addEventListener('popstate',pop);return()=>removeEventListener('popstate',pop)},[page])
  useEffect(()=>{const expired=()=>{setUser(null);setBoot(b=>({...b,error:'로그인 세션이 만료되었습니다. 다시 로그인해 주세요.'}))};window.addEventListener(AUTH_EXPIRED_EVENT,expired);return()=>window.removeEventListener(AUTH_EXPIRED_EVENT,expired)},[])
+ useEffect(()=>{const pending=overdueTaskCount+pendingApprovalTotal+conflictEventCount;document.title=pending?`(${pending}) WorkManager`:'WorkManager';return()=>{document.title='WorkManager'}},[overdueTaskCount,pendingApprovalTotal,conflictEventCount])
  useEffect(()=>{setModalDirty(false)},[modal])
  useEffect(()=>{if(!modalDirty)return;const warn=e=>{e.preventDefault();e.returnValue=''};addEventListener('beforeunload',warn);return()=>removeEventListener('beforeunload',warn)},[modalDirty])
  useEffect(()=>{if(user)refresh()},[user,refresh])

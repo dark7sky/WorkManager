@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { billableWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename, defaultInvoiceNumber, vatBreakdown } from './invoiceReport.js'
+import { billableWorkLogs, invoicedWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename, defaultInvoiceNumber, vatBreakdown } from './invoiceReport.js'
 
 const logs = [
   { log_date: '2026-07-01', content: '<고객> 미팅', duration_minutes: 90, billable: true, tags: ['고객사'] },
@@ -15,6 +15,13 @@ test('billableWorkLogs filters to billable rows only', () => {
 test('billableWorkLogs excludes already-invoiced rows to prevent double billing', () => {
   const withInvoiced = [...logs, { log_date: '2026-07-04', content: '이미 청구됨', duration_minutes: 45, billable: true, invoiced_at: '2026-07-05T00:00:00+09:00', tags: [] }]
   assert.equal(billableWorkLogs(withInvoiced).length, 2)
+})
+
+test('invoicedWorkLogs returns only already-invoiced billable rows', () => {
+  const withInvoiced = [...logs, { log_date: '2026-07-04', content: '이미 청구됨', duration_minutes: 45, billable: true, invoiced_at: '2026-07-05T00:00:00+09:00', tags: [] }]
+  const result = invoicedWorkLogs(withInvoiced)
+  assert.equal(result.length, 1)
+  assert.equal(result[0].content, '이미 청구됨')
 })
 
 test('invoiceTotals sums billable minutes and computes amount from hourly rate', () => {

@@ -12,6 +12,21 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-tab-title-pending-badge',
+    timestamp: '2026-07-22T08:41:00+09:00',
+    description: '사이드바에는 지연·승인 대기 업무, 캘린더 동기화 충돌 건수가 배지로 표시됐지만, 다른 탭을 보고 있을 때는 이 알림을 알아챌 방법이 없었습니다. `frontend/src/App.jsx`가 이미 계산된 지연/승인 대기/충돌 건수를 합산해 브라우저 탭 제목을 "(N) WorkManager" 형태로 표시하도록 했습니다.',
+  },
+  {
+    id: '2026-07-22-todo-log-unsaved-changes-guard',
+    timestamp: '2026-07-22T08:32:00+09:00',
+    description: '오늘 화면에서 Todo나 업무 기록을 목록에서 바로 수정하던 중 X 버튼이나 Esc 키를 누르거나 탭을 닫으면, 업무·일정 수정 창과 달리 경고 없이 변경 내용이 그대로 사라졌습니다. `frontend/src/screens/Today.jsx`에 수정 중 변경 여부(`editDirty`)를 추적해 취소 버튼·Esc 키에는 확인 창을, 탭 닫기·새로고침에는 `beforeunload` 가드를 적용해 업무·일정 수정 창과 동일한 보호를 제공하도록 했습니다.',
+  },
+  {
+    id: '2026-07-22-worklog-unmark-invoiced',
+    timestamp: '2026-07-22T08:20:00+09:00',
+    description: '업무 기록을 "청구 완료 표시"로 잘못 지정하거나 청구 범위를 정정해야 할 때 되돌릴 방법이 없어, CSV 가져오기로 우회하지 않는 한 청구 완료 상태를 취소할 수 없었습니다. 성과 화면에 "청구 완료 취소" 버튼을 추가해, 선택 기간 내 청구 완료된 업무 기록의 `invoiced_at`을 한 번에 비워 다시 청구 대상으로 되돌릴 수 있도록 했습니다 (`frontend/src/invoiceReport.js`의 `invoicedWorkLogs`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-22-tab-close-unsaved-changes-guard',
     timestamp: '2026-07-22T08:13:21+09:00',
     description: '업무나 일정 수정 창에서 저장하지 않은 채 탭을 닫거나 새로고침하면 경고 없이 작성 중이던 내용이 그대로 사라졌습니다. `frontend/src/App.jsx`와 `frontend/src/screens/Calendar.jsx`에 `beforeunload` 가드를 추가해, 수정 창이 열려 있고 변경사항이 남아 있을 때 브라우저가 이탈 확인 창을 띄우도록 했습니다.',
