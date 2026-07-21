@@ -76,6 +76,9 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const attachmentInputRef = useRef(null)
   const endTouchedRef = useRef(false)
   const formRef = useRef(null)
+  const estimateRef = useRef(null)
+  const priorityRef = useRef(null)
+  const [aiEstimating, setAiEstimating] = useState(false)
   const applyTemplate = id => {
     const template = templates.find(t => t.id === id)
     if (!template) return
@@ -206,6 +209,24 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     } catch (requestError) { setError(requestError.message) }
     finally { setSaving(false) }
   }
+  const recommendEstimate = async () => {
+    const data = new FormData(formRef.current)
+    const title = data.get('title')
+    if (!title) return
+    setAiEstimating(true)
+    setError('')
+    try {
+      const result = await api.aiPreview(`${title} ${data.get('description') || ''}`.trim())
+      const item = result.items?.[0]?.data || {}
+      if (item.estimated_minutes && estimateRef.current) estimateRef.current.value = item.estimated_minutes
+      if (item.priority && priorityRef.current) priorityRef.current.value = item.priority
+      if (!item.estimated_minutes && !item.priority) setError('예상 소요 시간/우선순위를 추정하지 못했습니다.')
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setAiEstimating(false)
+    }
+  }
   const addHour = value => {
     const d = new Date(value)
     if (Number.isNaN(d.getTime())) return value
@@ -246,8 +267,9 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <label className="span-2" key={`location-${prefillKey}`}>장소<input name="location" defaultValue={prefill?.location ?? event?.location ?? ''}/></label>
     <label className="span-2" key={`link-url-${prefillKey}`}>관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={prefill?.link_url ?? event?.link_url ?? ''}/></label>
     <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? event?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
-    <label key={`priority-${prefillKey}`}>우선순위<select name="priority" defaultValue={prefill?.priority ?? event?.priority ?? ''}><option value="">보통</option><option value="low">낮음</option><option value="high">중요</option></select></label>
-    <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 60" defaultValue={prefill?.estimated_minutes ?? event?.estimated_minutes ?? ''}/></label>
+    <label key={`priority-${prefillKey}`}>우선순위<select ref={priorityRef} name="priority" defaultValue={prefill?.priority ?? event?.priority ?? ''}><option value="">보통</option><option value="low">낮음</option><option value="high">중요</option></select></label>
+    <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input ref={estimateRef} name="estimated_minutes" type="number" min="0" step="5" placeholder="예: 60" defaultValue={prefill?.estimated_minutes ?? event?.estimated_minutes ?? ''}/></label>
+    <div className="span-2"><button type="button" className="text-button" disabled={aiEstimating} onClick={recommendEstimate}>AI 우선순위·예상시간 추천</button></div>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option><option value="yearly">매년</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     {event?.recurrence_group_id ? <label className="span-2"><input type="checkbox" checked={applyToSeries} onChange={e => setApplyToSeries(e.target.checked)}/> <span>이 일정과 이후 반복 일정에 모두 적용 (제목·장소·태그·색상 등)</span></label> : null}
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
