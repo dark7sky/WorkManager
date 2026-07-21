@@ -249,6 +249,24 @@ test('buildTaskDuplicatePayload copies attachment links', () => {
   assert.equal(payload.links[0].label, '기획서')
 })
 
+test('buildTaskPayload normalizes custom fields, dropping blank labels', () => {
+  const payload = buildTaskPayload({
+    ...baseData,
+    custom_fields: [{ id: '1', label: ' 고객사 ', value: ' Acme ' }, { id: '2', label: '   ', value: 'ignored' }],
+  }, { task: { id: 1 } })
+
+  assert.deepEqual(payload.custom_fields, [{ id: '1', label: '고객사', value: 'Acme' }])
+})
+
+test('buildTaskDuplicatePayload copies custom fields', () => {
+  const payload = buildTaskDuplicatePayload({
+    id: 1, title: '업무', custom_fields: [{ id: '1', label: '고객사', value: 'Acme' }],
+  })
+
+  assert.equal(payload.custom_fields[0].label, '고객사')
+  assert.equal(payload.custom_fields[0].value, 'Acme')
+})
+
 test('moveChecklistItem swaps a checklist item with its neighbor', () => {
   const items = [{ id: 'a', text: '첫번째' }, { id: 'b', text: '두번째' }, { id: 'c', text: '세번째' }]
 

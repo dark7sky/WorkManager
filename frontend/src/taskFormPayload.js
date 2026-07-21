@@ -75,6 +75,17 @@ export const normalizedLinks = items => {
   }
   return cleaned
 }
+export const normalizedCustomFields = items => {
+  const cleaned = []
+  for (const raw of Array.isArray(items) ? items : []) {
+    const label = trimField(raw?.label).slice(0, 100)
+    if (!label) continue
+    const value = trimField(raw?.value).slice(0, 500)
+    cleaned.push({ id: String(raw?.id || `${Date.now()}-${cleaned.length}`), label, value })
+    if (cleaned.length >= 50) break
+  }
+  return cleaned
+}
 const normalizedDependencyIds = (ids, excludeId) => {
   const cleaned = []
   const seen = new Set()
@@ -110,6 +121,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     link_url: normalizedLinkUrl(data.link_url),
     checklist: normalizedChecklist(data.checklist),
     links: normalizedLinks(data.links),
+    custom_fields: normalizedCustomFields(data.custom_fields),
     color: data.color || null,
     tags: normalizedTaskTags(tags),
   }
@@ -147,6 +159,7 @@ export const buildTaskDuplicatePayload = task => {
     link_url: normalizedLinkUrl(task?.link_url),
     checklist: normalizedChecklist(task?.checklist).map(item => ({ ...item, done: false })),
     links: normalizedLinks(task?.links),
+    custom_fields: normalizedCustomFields(task?.custom_fields),
     color: task?.color || null,
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),

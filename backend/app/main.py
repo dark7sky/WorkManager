@@ -315,6 +315,19 @@ def _clean_links(value):
     return cleaned
 
 
+def _clean_custom_fields(value):
+    if value is None:
+        return value
+    cleaned = []
+    for item in value:
+        label = str(item.get("label", "")).strip()[:100]
+        if not label:
+            continue
+        field_value = str(item.get("value", "")).strip()[:500]
+        cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "label": label, "value": field_value})
+    return cleaned
+
+
 def _clean_checklist(value):
     if value is None:
         return value
@@ -352,6 +365,7 @@ class TaskPayload(StrictPayload):
     link_url: str | None = Field(None, max_length=2000)
     checklist: list[dict] | None = Field(None, max_length=200)
     links: list[dict] | None = Field(None, max_length=50)
+    custom_fields: list[dict] | None = Field(None, max_length=50)
     color: str | None = None
 
     @field_validator("checklist")
@@ -363,6 +377,11 @@ class TaskPayload(StrictPayload):
     @classmethod
     def links_well_formed(cls, value):
         return _clean_links(value)
+
+    @field_validator("custom_fields")
+    @classmethod
+    def custom_fields_well_formed(cls, value):
+        return _clean_custom_fields(value)
 
     @field_validator("start_date", "due_date", "start_time", "due_time", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", mode="before")
     @classmethod
@@ -584,7 +603,7 @@ class WorkflowSettingsPayload(StrictPayload):
 
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
-    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links"}, "updated_at"),
+    "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links", "custom_fields"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "estimated_minutes"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes"}, None),
@@ -741,6 +760,8 @@ def normalize(table, data):
         result["checklist"] = json.dumps(result["checklist"], ensure_ascii=False)
     if "links" in result:
         result["links"] = json.dumps(result["links"], ensure_ascii=False)
+    if "custom_fields" in result:
+        result["custom_fields"] = json.dumps(result["custom_fields"], ensure_ascii=False)
     if "completed" in result:
         result["completed"] = int(result["completed"])
     if "billable" in result:
@@ -825,7 +846,7 @@ def validate_task_links(data, user_id, current_id=None):
 
 def merged_resource_for_validation(table, existing, data):
     merged = {k: existing[k] for k in CONFIG[table][0] if k in existing.keys()}
-    json_fields = {"tags", "dependency_ids", "recurrence", "checklist", "links"}
+    json_fields = {"tags", "dependency_ids", "recurrence", "checklist", "links", "custom_fields"}
     for key in json_fields & merged.keys():
         merged[key] = normalize_legacy_json_array_field(key, merged[key])
     merged.update({k: v for k, v in data.items() if k in CONFIG[table][0]})
@@ -918,11 +939,12 @@ def spawn_recurring_task(task, user_id):
             return None
         cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,start_time,due_time,tags,
           recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at,
-          estimated_minutes,link_url,checklist,color,links) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          estimated_minutes,link_url,checklist,color,links,custom_fields) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
            start_date, due_date, task.get("start_time"), task.get("due_time"), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
            task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp,
-           task.get("estimated_minutes"), task.get("link_url"), json.dumps(_reset_checklist(task.get("checklist")), ensure_ascii=False), task.get("color"), json.dumps(task.get("links") or [], ensure_ascii=False)))
+           task.get("estimated_minutes"), task.get("link_url"), json.dumps(_reset_checklist(task.get("checklist")), ensure_ascii=False), task.get("color"), json.dumps(task.get("links") or [], ensure_ascii=False),
+           json.dumps(task.get("custom_fields") or [], ensure_ascii=False)))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
     return next_id

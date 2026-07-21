@@ -52,6 +52,8 @@ def row_dict(row):
         item["checklist"] = decode_json_array(item["checklist"])
     if "links" in item:
         item["links"] = decode_json_array(item["links"])
+    if "custom_fields" in item:
+        item["custom_fields"] = decode_json_array(item["custom_fields"])
     if "completed" in item:
         item["completed"] = bool(item["completed"])
     return item
@@ -169,6 +171,7 @@ def init_db():
             "link_url": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "recurrence_end_date": "TEXT",
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
             "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT", "public_token": "TEXT",
+            "custom_fields": "TEXT NOT NULL DEFAULT '[]'",
         }.items():
             _add_column(c, "tasks", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_public_token ON tasks(public_token) WHERE public_token IS NOT NULL")

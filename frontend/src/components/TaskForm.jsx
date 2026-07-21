@@ -17,6 +17,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [tags, setTags] = useState(() => task?.tags || [])
   const [checklist, setChecklist] = useState(() => task?.checklist || [])
   const [links, setLinks] = useState(() => task?.links || [])
+  const [customFields, setCustomFields] = useState(() => task?.custom_fields || [])
+  const [customFieldLabelText, setCustomFieldLabelText] = useState('')
+  const [customFieldValueText, setCustomFieldValueText] = useState('')
   const [recurrenceRule, setRecurrenceRule] = useState(() => task?.recurrence_rule || '')
   const [checklistText, setChecklistText] = useState('')
   const [linkUrlText, setLinkUrlText] = useState('')
@@ -113,12 +116,15 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     setLinks(task?.links || [])
     setLinkUrlText('')
     setLinkLabelText('')
+    setCustomFields(task?.custom_fields || [])
+    setCustomFieldLabelText('')
+    setCustomFieldValueText('')
     setRecurrenceRule(task?.recurrence_rule || '')
     setStartDateVal(initialTaskDateValue(task, 'start_date', today))
     setStartTimeVal(task?.start_time ?? '')
     setDueDateVal(initialTaskDateValue(task, 'due_date', today))
     setDueTimeVal(task?.due_time ?? '')
-  }, [task?.id, task?.tags, task?.checklist, task?.links, task?.recurrence_rule])
+  }, [task?.id, task?.tags, task?.checklist, task?.links, task?.custom_fields, task?.recurrence_rule])
 
   useEffect(() => {
     setComments([])
@@ -240,6 +246,15 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   }
   const removeLink = id => setLinks(links.filter(item => item.id !== id))
 
+  const addCustomField = () => {
+    const label = customFieldLabelText.trim()
+    if (!label) return
+    setCustomFields([...customFields, { id: `${Date.now()}`, label, value: customFieldValueText.trim() }])
+    setCustomFieldLabelText('')
+    setCustomFieldValueText('')
+  }
+  const removeCustomField = id => setCustomFields(customFields.filter(item => item.id !== id))
+
   const recommend = async () => {
     const data = new FormData(formRef.current)
     setSaving(true)
@@ -284,6 +299,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     data.dependency_ids = formData.getAll('dependency_ids')
     data.checklist = checklist
     data.links = links
+    data.custom_fields = customFields
     const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
     if (Object.keys(errors).length) {
       setFieldErrors(errors)
@@ -341,6 +357,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
         <button type="button" className="text-button" onClick={() => removeLink(item.id)}>삭제</button>
       </div>)}
       <div className="checklist-editor-add"><input type="url" value={linkUrlText} placeholder="https://..." onChange={e => setLinkUrlText(e.target.value)}/><input type="text" value={linkLabelText} placeholder="이름 (선택)" onChange={e => setLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addLink}>추가</button></div>
+    </div>
+    <div className="span-2 checklist-editor"><span className="dependency-picker-label">사용자 정의 필드{customFields.length ? ` (${customFields.length})` : ''}</span>
+      {customFields.map(item => <div key={item.id} className="checklist-editor-item">
+        <span><strong>{item.label}</strong>{item.value ? `: ${item.value}` : ''}</span>
+        <button type="button" className="text-button" onClick={() => removeCustomField(item.id)}>삭제</button>
+      </div>)}
+      <div className="checklist-editor-add"><input type="text" maxLength={100} value={customFieldLabelText} placeholder="필드 이름 (예: 고객사)" onChange={e => setCustomFieldLabelText(e.target.value)}/><input type="text" maxLength={500} value={customFieldValueText} placeholder="값" onChange={e => setCustomFieldValueText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomField() } }}/><button type="button" className="text-button" onClick={addCustomField}>추가</button></div>
     </div>
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
       {comments.map(item => <div key={item.id} className="checklist-editor-item">

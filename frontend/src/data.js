@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-custom-fields',
+    timestamp: '2026-07-21T14:58:06+09:00',
+    description: '업무에 팀마다 다른 정보(고객사, 계약 번호, 프로젝트 코드 등)를 남길 방법이 없어 메모란에 섞어 적어야 했습니다. 업무 편집 폼에 이름/값 쌍의 "사용자 정의 필드"를 자유롭게 추가·삭제할 수 있도록 했고, 복제 시에도 함께 복사되며 Gantt 목록 행에 필드 개수 배지를 표시합니다 (`backend/app/db.py`, `backend/app/main.py`, `frontend/src/taskFormPayload.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-21-estimated-minutes-step-block-save',
     timestamp: '2026-07-21T14:42:52+09:00',
     description: '업무 편집 화면에서 예상 소요 시간이 5의 배수가 아닌 값(AI 추천, CSV 가져오기, 과거 데이터 등)으로 저장된 업무를 수정 후 저장하면 브라우저가 저장 버튼 클릭을 조용히 막아버리는 문제를 고쳤습니다. 입력창의 5분 단위 제한을 제거했습니다 (`frontend/src/components/TaskForm.jsx`).',

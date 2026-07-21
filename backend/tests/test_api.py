@@ -1492,6 +1492,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_custom_fields_are_persisted_and_blank_labels_dropped(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "with custom fields", "custom_fields": [
+            {"id": "1", "label": " 고객사 ", "value": " Acme "},
+            {"id": "2", "label": "   ", "value": "ignored"},
+        ]})
+        self.assertEqual(task.status_code, 200, task.text)
+        fields = task.json()["custom_fields"]
+        self.assertEqual(len(fields), 1)
+        self.assertEqual(fields[0]["label"], "고객사")
+        self.assertEqual(fields[0]["value"], "Acme")
+        task_id = task.json()["id"]
+        updated = a.patch(f"/api/tasks/{task_id}", json={"custom_fields": []})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["custom_fields"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_color_is_persisted_and_validated(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "colored task", "color": "green"})
