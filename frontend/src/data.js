@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-global-search-link-customfield-match',
+    timestamp: '2026-07-22T02:57:00+09:00',
+    description: '전역 검색(Ctrl+/)이 제목/본문/태그만 검색하고 참고 링크(link_url)와 사용자 정의 필드(custom_fields)는 무시해, 예를 들어 사용자 정의 필드에 "재무팀"을 적어둔 항목은 제목에 그 단어가 없으면 검색되지 않았습니다. `frontend/src/globalSearch.js`가 업무·일정·할 일·업무 기록 모두에서 링크 주소와 사용자 정의 필드의 이름/값도 함께 검색하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-22-global-search-tag-match',
     timestamp: '2026-07-22T02:55:00+09:00',
     description: '전역 검색(Ctrl+/)이 업무·일정·할 일·업무 기록의 제목/본문만 검색하고 태그는 무시해, 예를 들어 "긴급" 태그가 붙은 항목이라도 제목에 그 단어가 없으면 검색되지 않았습니다. `frontend/src/globalSearch.js`가 각 항목의 `tags` 배열도 함께 검색하도록 수정했습니다.',

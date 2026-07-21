@@ -8,14 +8,22 @@ function matchesTags(item, query) {
   return Array.isArray(item.tags) && item.tags.some(tag => matches(tag, query))
 }
 
+function matchesCustomFields(item, query) {
+  return Array.isArray(item.custom_fields) && item.custom_fields.some(f => matches(f.label, query) || matches(f.value, query))
+}
+
+function matchesExtra(item, query) {
+  return matches(item.link_url, query) || matchesTags(item, query) || matchesCustomFields(item, query)
+}
+
 export function searchAll({ tasks = [], events = [], todos = [], logs = [] } = {}, query) {
   const q = (query || '').trim().toLowerCase()
   if (!q) return { tasks: [], events: [], todos: [], logs: [] }
   return {
-    tasks: tasks.filter(t => matches(t.title, q) || matches(t.description, q) || matchesTags(t, q)).slice(0, MAX_PER_GROUP),
-    events: events.filter(e => matches(e.title, q) || matches(e.location, q) || matchesTags(e, q)).slice(0, MAX_PER_GROUP),
-    todos: todos.filter(t => matches(t.title, q) || matches(t.memo, q) || matchesTags(t, q)).slice(0, MAX_PER_GROUP),
-    logs: logs.filter(l => matches(l.content, q) || matchesTags(l, q)).slice(0, MAX_PER_GROUP),
+    tasks: tasks.filter(t => matches(t.title, q) || matches(t.description, q) || matchesExtra(t, q)).slice(0, MAX_PER_GROUP),
+    events: events.filter(e => matches(e.title, q) || matches(e.location, q) || matchesExtra(e, q)).slice(0, MAX_PER_GROUP),
+    todos: todos.filter(t => matches(t.title, q) || matches(t.memo, q) || matchesExtra(t, q)).slice(0, MAX_PER_GROUP),
+    logs: logs.filter(l => matches(l.content, q) || matchesExtra(l, q)).slice(0, MAX_PER_GROUP),
   }
 }
 

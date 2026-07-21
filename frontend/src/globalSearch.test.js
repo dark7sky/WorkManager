@@ -40,3 +40,14 @@ test('searchAll matches tags across entities', () => {
   const result = searchAll(tagged, '긴급')
   assert.equal(globalSearchResultCount(result), 4)
 })
+
+test('searchAll matches link_url and custom_fields across entities', () => {
+  const extra = {
+    tasks: [{ id: 1, title: '작업', link_url: 'https://example.com/spec-doc' }],
+    events: [{ id: 1, title: '일정', custom_fields: [{ label: '담당팀', value: '재무팀' }] }],
+    todos: [{ id: 1, title: '할일', custom_fields: [{ label: '메모', value: '재무 검토' }] }],
+    logs: [{ id: 1, content: '기록', link_url: 'https://example.com/재무-보고서' }],
+  }
+  assert.equal(globalSearchResultCount(searchAll(extra, 'spec-doc')), 1)
+  assert.equal(globalSearchResultCount(searchAll(extra, '재무')), 3)
+})
