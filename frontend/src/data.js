@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-bulk-promote-todo',
+    timestamp: '2026-07-21T13:14:00+09:00',
+    description: '오늘 할 일 목록의 일괄 작업 바에 "업무로 전환" 버튼을 추가했습니다. 기존에는 할 일을 업무로 전환하려면 한 번에 하나씩만 가능했는데, 이제 여러 할 일을 선택해 한 번에 업무로 옮길 수 있습니다 (`frontend/src/App.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-task-share-link',
     timestamp: '2026-07-21T13:08:00+09:00',
     description: '업무 상세 화면에 "공유 링크 만들기" 버튼을 추가해, 로그인 없이 특정 업무를 읽기 전용으로 볼 수 있는 공개 링크(`/public/tasks/{token}`)를 생성·복사·해제할 수 있게 했습니다. 고객이나 협업자에게 로그인 계정 없이 진행 상황을 공유할 때 유용합니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/api.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/PublicTask.jsx`, `frontend/src/App.jsx`).',
