@@ -63,6 +63,8 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [repeatRule, setRepeatRule] = useState('')
   const [repeatUntil, setRepeatUntil] = useState('')
   const [applyToSeries, setApplyToSeries] = useState(false)
+  const [seriesItems, setSeriesItems] = useState(null)
+  const [seriesLoading, setSeriesLoading] = useState(false)
   const [links, setLinks] = useState(() => event?.links || [])
   const [linkUrlText, setLinkUrlText] = useState('')
   const [linkLabelText, setLinkLabelText] = useState('')
@@ -112,6 +114,18 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   }
   const copyShareLink = async () => {
     try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { /* clipboard unavailable */ }
+  }
+  const loadSeries = async () => {
+    if (seriesItems) { setSeriesItems(null); return }
+    setSeriesLoading(true)
+    try {
+      const result = await api.eventSeries(event.id)
+      setSeriesItems(result.items || [])
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSeriesLoading(false)
+    }
   }
   const applyTemplate = id => {
     const template = templates.find(t => t.id === id)
@@ -321,6 +335,10 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <div className="span-2"><button type="button" className="text-button" disabled={aiEstimating} onClick={recommendEstimate}>AI 우선순위·예상시간 추천</button></div>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option><option value="yearly">매년</option><option value="weekdays">평일마다</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     {event?.recurrence_group_id ? <label className="span-2"><input type="checkbox" checked={applyToSeries} onChange={e => setApplyToSeries(e.target.checked)}/> <span>이 일정과 이후 반복 일정에 모두 적용 (제목·장소·태그·색상 등)</span></label> : null}
+    {event?.recurrence_group_id ? <div className="span-2">
+      <button type="button" className="text-button" disabled={seriesLoading} onClick={loadSeries}>{seriesItems ? '반복 이력 닫기' : '반복 이력 보기'}</button>
+      {seriesItems ? (seriesItems.length > 1 ? <ul className="task-log-list">{seriesItems.map(item => <li key={item.id}><strong>{localInput(item.start_at).slice(0, 10)}</strong><span>{item.title}</span></li>)}</ul> : <p className="muted">아직 생성된 다른 회차가 없습니다.</p>) : null}
+    </div> : null}
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">체크리스트{checklist.length ? ` (${checklist.filter(i => i.done).length}/${checklist.length})` : ''}</span>
       {checklist.map((item, index) => <div key={item.id} className="checklist-editor-item">
         <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>

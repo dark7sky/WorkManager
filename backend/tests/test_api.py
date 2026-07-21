@@ -981,6 +981,28 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_event_series_get_lists_all_occurrences_and_rejects_other_users(self, *_):
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "rec-test-group-history"
+        occurrences = []
+        for day in ("2026-11-01", "2026-11-08", "2026-11-15"):
+            created = b.post("/api/events", json={
+                "title": "월간 점검", "start_at": f"{day}T09:00:00", "end_at": f"{day}T10:00:00",
+                "recurrence_group_id": group_id})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        series = b.get(f"/api/events/{occurrences[0]['id']}/series")
+        self.assertEqual(series.status_code, 200, series.text)
+        self.assertEqual([item["id"] for item in series.json()["items"]], [o["id"] for o in occurrences])
+        self.assertEqual(a.get(f"/api/events/{occurrences[0]['id']}/series").status_code, 404)
+        self.assertEqual(b.get("/api/events/999999/series").status_code, 404)
+        solo = b.post("/api/events", json={"title": "단독 일정", "start_at": "2026-11-20T09:00:00", "end_at": "2026-11-20T10:00:00"})
+        self.assertEqual(solo.status_code, 200, solo.text)
+        solo_series = b.get(f"/api/events/{solo.json()['id']}/series")
+        self.assertEqual(len(solo_series.json()["items"]), 1)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_series_delete_removes_only_future_occurrences(self, *_):
         b, a = self.client(self.token_b), self.client(self.token_a)
         group_id = "rec-test-group-2"

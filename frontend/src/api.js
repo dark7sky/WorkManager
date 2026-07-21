@@ -70,6 +70,7 @@ export const api = {
   shareTask: (id,expiresInDays) => request(`/tasks/${id}/share${expiresInDays?`?expires_in_days=${expiresInDays}`:''}`,{method:'POST'}), unshareTask: id => request(`/tasks/${id}/share`,{method:'DELETE'}),
   publicTask: token => request(`/public/tasks/${token}`, { suppressAuthEvent: true }),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
+  eventSeries: id => request(`/events/${id}/series`),
   updateEventSeries: (groupId,fromStartAt,data) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,json('PATCH',data)),
   deleteEventSeries: (groupId,fromStartAt) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,{method:'DELETE'}),
   archivedEvents: (limit,offset=0) => request(`/events/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),

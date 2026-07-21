@@ -2000,6 +2000,20 @@ def task_series(item_id: int, user=Depends(require_user)):
 EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority"}
 
 
+@app.get("/api/events/{item_id}/series")
+def event_series(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT * FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Item not found")
+        event = row_dict(existing)
+        if not event.get("recurrence_group_id"):
+            return {"items": [{"id": event["id"], "title": event["title"], "start_at": event["start_at"], "end_at": event["end_at"]}]}
+        items = c.execute("SELECT id,title,start_at,end_at FROM events WHERE user_id=? AND recurrence_group_id=? AND deleted_at IS NULL ORDER BY start_at,id",
+                           (user, event["recurrence_group_id"])).fetchall()
+    return {"items": [{"id": r["id"], "title": r["title"], "start_at": r["start_at"], "end_at": r["end_at"]} for r in items]}
+
+
 @app.patch("/api/events/series/{group_id}")
 def update_event_series(group_id: str, from_start_at: str, payload: dict = Body(...), user=Depends(require_user)):
     data = {k: v for k, v in payload.items() if k in EVENT_SERIES_EDITABLE_FIELDS}

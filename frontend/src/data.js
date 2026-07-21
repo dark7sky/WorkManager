@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-event-recurrence-series-history',
+    timestamp: '2026-07-22T03:31:20+09:00',
+    description: '반복 업무·Todo는 수정 폼에서 "반복 이력 보기"로 같은 시리즈의 과거·현재 회차를 확인할 수 있었지만, 반복 일정(Event)에는 같은 기능이 없어 지금 보고 있는 일정이 반복 시리즈의 몇 번째 회차인지 확인할 방법이 없었습니다. 백엔드에 `GET /api/events/{id}/series`를 추가하고 일정 수정 폼(`frontend/src/screens/Calendar.jsx`)에 "반복 이력 보기" 버튼을 연결해 같은 `recurrence_group_id`를 공유하는 일정 목록을 날짜순으로 보여주도록 했습니다, 테스트: `backend/tests/test_api.py::test_event_series_get_lists_all_occurrences_and_rejects_other_users`.',
+  },
+  {
     id: '2026-07-22-event-todo-log-unseen-comment-indicator',
     timestamp: '2026-07-22T03:19:02+09:00',
     description: '업무 목록에는 새 댓글이 달리면 빨간 점으로 표시하는 "안 읽은 댓글" 표시가 있었지만, 일정·할 일·업무 기록 목록에는 없어 협업자가 남긴 댓글을 놓치기 쉬웠습니다. 업무와 동일한 `commentActivity.js` 헬퍼(로컬 저장 기반 마지막 확인 시각 비교)를 일정/할 일/업무 기록 화면에도 연결해 항목을 열람하면 확인 표시가 갱신되도록 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
