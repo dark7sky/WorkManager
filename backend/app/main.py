@@ -2641,7 +2641,7 @@ def public_task(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-task", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
-          assignee_name,tags,created_at,updated_at FROM tasks
+          tags,created_at,updated_at FROM tasks
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:

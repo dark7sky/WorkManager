@@ -444,6 +444,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(public.status_code, 200, public.text)
         self.assertEqual(public.json()["title"], "shared plan")
         self.assertNotIn("user_id", public.json())
+        self.assertNotIn("assignee_name", public.json())
         self.assertEqual(b.get(f"/api/public/tasks/{token}").status_code, 200)
         revoked = a.delete(f"/api/tasks/{task['id']}/share")
         self.assertEqual(revoked.status_code, 200, revoked.text)

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-public-task-drop-assignee-name',
+    timestamp: '2026-07-22T08:39:11+09:00',
+    description: '담당자 지정 기능은 1인 사용에 맞춰 이미 제거됐지만, 업무 공유 링크(로그인 없이 접근 가능한 공개 화면)에는 여전히 `assignee_name` 필드가 응답에 남아 있고 화면에도 표시될 수 있었습니다. 백엔드 `/api/public/tasks/{token}` 응답에서 `assignee_name`을 제거하고, 프런트엔드 공개 업무 화면에서도 관련 렌더링을 삭제해 제거된 기능의 잔재를 정리했습니다.',
+  },
+  {
     id: '2026-07-22-content-security-policy',
     timestamp: '2026-07-22T08:34:13+09:00',
     description: '보안 응답 헤더는 있었지만 콘텐츠 보안 정책(CSP)이 빠져 있어 XSS로 스크립트가 주입되면 외부 도메인 로드를 막을 방법이 없었습니다. nginx가 서빙하는 프런트엔드 응답에 CSP(및 나머지 보안 헤더)를 추가하고, index.html의 인라인 테마 스크립트를 `/theme-init.js`로 분리해 script-src에서 `unsafe-inline` 없이도 동작하도록 했습니다. 백엔드 API 응답에도 `default-src \'none\'`인 CSP를 추가했습니다.',

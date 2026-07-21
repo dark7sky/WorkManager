@@ -30,7 +30,6 @@ export default function PublicTask({ token }) {
         <div className="section-title"><div><h2>{task.title}</h2><p>상태 {statusLabel[task.status] || task.status} · 우선순위 {priorityLabel[task.priority] || task.priority} · 진행률 {task.progress}%</p></div></div>
         {task.description ? <p>{task.description}</p> : null}
         <dl className="public-task-meta">
-          {task.assignee_name ? <div><dt>담당자</dt><dd>{task.assignee_name}</dd></div> : null}
           {task.start_date ? <div><dt>시작일</dt><dd>{task.start_date}</dd></div> : null}
           {task.due_date ? <div><dt>마감일</dt><dd>{task.due_date}</dd></div> : null}
           {task.tags?.length ? <div><dt>태그</dt><dd>{task.tags.join(', ')}</dd></div> : null}
