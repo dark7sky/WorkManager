@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-todo-worklog-csv-column-picker',
+    timestamp: '2026-07-22T00:39:11+09:00',
+    description: '업무/일정 화면에는 CSV·Excel로 내보낼 열을 고르는 "내보낼 열" 메뉴가 있었지만, 오늘 화면의 할 일(Todo)과 업무 기록(Work Log) 내보내기는 항상 모든 열을 포함해 필요 없는 열까지 매번 정리해야 했습니다. `frontend/src/todoCsvColumns.js`와 `frontend/src/workLogCsvColumns.js`를 추가해 선택한 열 구성을 로컬에 저장하고, `Today.jsx`의 CSV·Excel 내보내기 버튼 옆에 동일한 열 선택 드롭다운을 연결했습니다.',
+  },
+  {
     id: '2026-07-22-calendar-day-view',
     timestamp: '2026-07-22T00:34:58+09:00',
     description: '일정(Calendar) 화면은 월/주/년 3가지 보기만 지원해, 하루에 일정이 몰린 날은 주간 보기 안의 좁은 한 칸 안에서만 확인해야 했습니다. "일" 단위 보기를 추가해(`frontend/src/screens/Calendar.jsx`) 선택한 하루의 모든 일정을 시간·장소·설명과 함께 세로로 나열해 보여주고, 업무 마감 항목도 함께 표시하도록 했습니다. 기존 좌우 화살표 이동과 클릭으로 일정 추가하는 흐름도 일 단위 보기에 동일하게 연결했습니다.',

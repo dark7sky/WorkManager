@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle, Clock3, Copy, DollarSign, Download, ExternalLink, FileText, Flag, History, Link2, Paperclip, Palette, Pause, Pencil, Play, Plus, SkipForward, Sparkles, Square, Star, Tag, Trash2, Upload, X } from 'lucide-react'
+import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle, Clock3, Copy, DollarSign, Download, ExternalLink, FileText, Flag, History, Link2, Paperclip, Palette, Pause, Pencil, Play, Plus, SkipForward, Sparkles, Square, SlidersHorizontal, Star, Tag, Trash2, Upload, X } from 'lucide-react'
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
@@ -12,8 +12,10 @@ import { loadLogSort, loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, saveLo
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterTodosByCompleted, filterLogsByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets, todoDeepLink } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, logDeepLink, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
-import { dedupeImportedLogs, dedupeImportedTodos, parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
-import { todoExcelFilename, todosToExcelXml, workLogExcelFilename, workLogsToExcelXml } from '../xlsx'
+import { dedupeImportedLogs, dedupeImportedTodos, filterCsvColumns, parseTodosCsv, parseWorkLogsCsv, rowsToCsv, todoCsvFilename, todoHeaders, todoRows, workLogCsvFilename, workLogHeaders, workLogRows } from '../csv'
+import { todoExcelFilename, workLogExcelFilename, rowsToSpreadsheetXml } from '../xlsx'
+import { loadTodoCsvColumns, saveTodoCsvColumns, TODO_CSV_COLUMN_OPTIONS, toggleTodoCsvColumn } from '../todoCsvColumns'
+import { loadWorkLogCsvColumns, saveWorkLogCsvColumns, WORK_LOG_CSV_COLUMN_OPTIONS, toggleWorkLogCsvColumn } from '../workLogCsvColumns'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
 import { todoIcsFilename, todosToIcs, icsToTodos, logIcsFilename, logsToIcs, icsToLogs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
@@ -389,6 +391,12 @@ export default function Today(props) {
   const togglePin = todo => setPinnedTodoIds(ids => { const next = togglePinnedTodo(ids, todo.id); savePinnedTodoIds(next); return next })
   const [pinnedLogIds, setPinnedLogIds] = useState(() => loadPinnedLogIds())
   const togglePinLog = log => setPinnedLogIds(ids => { const next = togglePinnedLog(ids, log.id); savePinnedLogIds(next); return next })
+  const [todoCsvColumns, setTodoCsvColumns] = useState(() => loadTodoCsvColumns())
+  const [todoCsvColumnMenuOpen, setTodoCsvColumnMenuOpen] = useState(false)
+  const toggleTodoCsvCol = index => setTodoCsvColumns(x => { if (x.size === 1 && x.has(index)) return x; const next = toggleTodoCsvColumn(x, index); saveTodoCsvColumns(next); return next })
+  const [logCsvColumns, setLogCsvColumns] = useState(() => loadWorkLogCsvColumns())
+  const [logCsvColumnMenuOpen, setLogCsvColumnMenuOpen] = useState(false)
+  const toggleLogCsvCol = index => setLogCsvColumns(x => { if (x.size === 1 && x.has(index)) return x; const next = toggleWorkLogCsvColumn(x, index); saveWorkLogCsvColumns(next); return next })
 
   useEffect(() => {
     if (!timer || timer.pausedAt) return
@@ -763,11 +771,13 @@ export default function Today(props) {
     finally { setSaving('') }
   }
   const exportTodos = () => {
-    const csv = `﻿${todosToCsv(shownTodos, pinnedTodoIds)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(shownTodos, pinnedTodoIds), todoCsvColumns)
+    const csv = `﻿${rowsToCsv(headers, rows)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportTodosExcel = () => {
-    const xml = todosToExcelXml(shownTodos, pinnedTodoIds), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(shownTodos, pinnedTodoIds), todoCsvColumns)
+    const xml = rowsToSpreadsheetXml('Todo', headers, rows), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportTodosIcs = () => {
@@ -828,11 +838,13 @@ export default function Today(props) {
     link.href = url; link.download = logIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportLogs = () => {
-    const csv = `﻿${workLogsToCsv(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
+    const csv = `﻿${rowsToCsv(headers, rows)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportLogsExcel = () => {
-    const xml = workLogsToExcelXml(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
+    const xml = rowsToSpreadsheetXml('업무 기록', headers, rows), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const printLogsReport = () => {
@@ -884,6 +896,7 @@ export default function Today(props) {
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
+        {shownTodos.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setTodoCsvColumnMenuOpen(o => !o)} aria-expanded={todoCsvColumnMenuOpen} aria-label="내보낼 열 설정"><SlidersHorizontal size={14}/> 내보낼 열</button>{todoCsvColumnMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{TODO_CSV_COLUMN_OPTIONS.map(opt => <label key={opt.index}><input type="checkbox" checked={todoCsvColumns.has(opt.index)} onChange={() => toggleTodoCsvCol(opt.index)}/>{opt.label}</label>)}</div> : null}</div> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosExcel}><Download size={14}/> Excel</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs}><Download size={14}/> ICS</button> : null}
@@ -914,6 +927,7 @@ export default function Today(props) {
         <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}{logFiltersActive ? <button type="button" className="text-button" onClick={resetLogFilters}>필터 초기화</button> : null}</div>
         {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs}><Download size={14}/> ICS</button> : null}
+        {shownLogs.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setLogCsvColumnMenuOpen(o => !o)} aria-expanded={logCsvColumnMenuOpen} aria-label="내보낼 열 설정"><SlidersHorizontal size={14}/> 내보낼 열</button>{logCsvColumnMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{WORK_LOG_CSV_COLUMN_OPTIONS.map(opt => <label key={opt.index}><input type="checkbox" checked={logCsvColumns.has(opt.index)} onChange={() => toggleLogCsvCol(opt.index)}/>{opt.label}</label>)}</div> : null}</div> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsExcel}><Download size={14}/> Excel</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/><button type="button" className="text-button" onClick={() => logIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={logIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importLogsIcs}/></> : null}
