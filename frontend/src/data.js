@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-audit-log-diff-view',
+    timestamp: '2026-07-21T21:45:00+09:00',
+    description: '감사 로그에서 "필드가 변경됨" 정도만 알 수 있고 실제로 어떤 값에서 어떤 값으로 바뀌었는지는 확인할 수 없었습니다. 백엔드 `update_item`이 변경된 각 필드의 이전/이후 값을 감사 로그 메타데이터(`changes`)에 함께 기록하도록 했고, 감사 로그 화면에 "변경 내용 보기" 토글을 추가해 필드별 이전 → 이후 값을 펼쳐볼 수 있도록 했습니다.',
+  },
+  {
     id: '2026-07-21-work-log-hourly-rate-override',
     timestamp: '2026-07-21T22:05:00+09:00',
     description: '모든 청구 가능 업무 기록에 하나의 시급만 적용할 수 있어, 고객마다 단가가 다른 경우 청구서 금액이 부정확했습니다. 업무 기록에 `hourly_rate_override` 필드를 추가해 개별 기록에서 시급을 재정의할 수 있도록 했고, 성과 화면 청구서(`invoiceReport.js`)와 실적 요약(`backend/app/main.py`의 `achievements`)이 재정의된 시급을 우선 적용해 금액을 계산하도록 했습니다.',

@@ -90,6 +90,13 @@ def rows(table, user_id, where="", args=(), tags=None):
     return items
 
 
+def _audit_diff_value(value):
+    if value is None:
+        return None
+    text = value if isinstance(value, str) else str(value)
+    return text if len(text) <= 200 else text[:200] + "…"
+
+
 def audit(user_id, action, entity_type, entity_id=None, metadata=None):
     with connection() as c:
         c.execute("INSERT INTO audit_logs(user_id,action,entity_type,entity_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
@@ -1245,7 +1252,15 @@ def update_item(table, item_id, data, user_id, audit_extra=None):
             item = rows("events", user_id, "WHERE id=?", (item_id,))[0]
         except HTTPException:
             item["sync_pending"] = True
-    audit(user_id, "update", table, item_id, {"fields": sorted(data), **(audit_extra or {})})
+    changes = {}
+    for key in sorted(data):
+        if key in ("updated_at", "sync_state"):
+            continue
+        before, after = existing[key], data[key]
+        if before == after:
+            continue
+        changes[key] = {"before": _audit_diff_value(before), "after": _audit_diff_value(after)}
+    audit(user_id, "update", table, item_id, {"fields": sorted(data), "changes": changes, **(audit_extra or {})})
     if table == "tasks" and became_done:
         next_id = spawn_recurring_task(item, user_id)
         if next_id:

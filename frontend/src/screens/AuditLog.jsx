@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ClipboardList, Download, FileText, Filter, LoaderCircle, Search } from 'lucide-react'
+import { ChevronDown, ChevronRight, ClipboardList, Download, FileText, Filter, LoaderCircle, Search } from 'lucide-react'
 import Header from '../components/Header'
 import { api } from '../api'
 import { auditLogCsvFilename, auditLogsToCsv, auditActionLabels as actionLabels, auditEntityLabels as entityLabels } from '../csv'
@@ -24,6 +24,15 @@ const metadataText = metadata => {
   return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
 }
 
+const fieldLabels = {
+  title: '제목', name: '이름', description: '설명', status: '상태', priority: '우선순위',
+  progress: '진행률', start_date: '시작일', due_date: '마감일', start_time: '시작 시간', due_time: '마감 시간',
+  parent_id: '상위 항목', category: '분류', tags: '태그', notes: '메모', location: '장소',
+  todo_date: '날짜', hours: '작업 시간', rate: '시급', completed: '완료 여부', archived: '보관 여부',
+  approval_status: '승인 상태', schedule_approval_status: '일정 승인 상태',
+}
+const diffValue = value => value === null || value === undefined || value === '' ? '(없음)' : String(value)
+
 const PAGE_SIZE = 200
 
 export default function AuditLog({ focus }) {
@@ -31,6 +40,8 @@ export default function AuditLog({ focus }) {
   const [loadingMore,setLoadingMore] = useState(false), [hasMore,setHasMore] = useState(false)
   const [query,setQuery] = useState(()=>focus?.query||''), [entity,setEntity] = useState(()=>focus?.entity||'all')
   const [dateStart,setDateStart] = useState(''), [dateEnd,setDateEnd] = useState('')
+  const [expanded,setExpanded] = useState(()=>new Set())
+  const toggleExpanded = id => setExpanded(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
   const invalidRange = dateStart && dateEnd && dateStart > dateEnd
   const filtersActive = query || entity !== 'all' || dateStart || dateEnd
   const resetFilters = () => { setQuery(''); setEntity('all'); setDateStart(''); setDateEnd('') }
@@ -93,10 +104,25 @@ export default function AuditLog({ focus }) {
       {invalidRange?<p className="inline-error">종료일은 시작일 이후여야 합니다.</p>:null}
       {loading?<div className="audit-state"><LoaderCircle className="spin"/> 불러오는 중…</div>:error?<div className="audit-state error" role="alert">{error} <button onClick={load}>다시 시도</button></div>:shown.length?<>
       <ol className="audit-list">
-        {shown.map(log=><li key={log.id}>
+        {shown.map(log=>{
+          const changes = log.metadata?.changes && typeof log.metadata.changes === 'object' ? Object.entries(log.metadata.changes) : []
+          const isOpen = expanded.has(log.id)
+          return <li key={log.id}>
           <time dateTime={log.created_at}>{formatTimestamp(log.created_at)}</time>
-          <div><strong>{actionLabels[log.action] || log.action}</strong><span>{entityLabels[log.entity_type] || log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ''}</span>{metadataText(log.metadata)?<p>{metadataText(log.metadata)}</p>:null}</div>
-        </li>)}
+          <div>
+            <strong>{actionLabels[log.action] || log.action}</strong>
+            <span>{entityLabels[log.entity_type] || log.entity_type}{log.entity_id ? ` #${log.entity_id}` : ''}</span>
+            {metadataText(log.metadata)?<p>{metadataText(log.metadata)}</p>:null}
+            {changes.length?<>
+              <button type="button" className="text-button audit-diff-toggle" onClick={()=>toggleExpanded(log.id)} aria-expanded={isOpen}>
+                {isOpen?<ChevronDown/>:<ChevronRight/>} 변경 내용 보기 ({changes.length})
+              </button>
+              {isOpen?<ul className="audit-diff">
+                {changes.map(([field,{before,after}])=><li key={field}><strong>{fieldLabels[field]||field}</strong><span className="audit-diff-before">{diffValue(before)}</span><span className="audit-diff-arrow">→</span><span className="audit-diff-after">{diffValue(after)}</span></li>)}
+              </ul>:null}
+            </>:null}
+          </div>
+        </li>})}
       </ol>
       {hasMore?<div className="audit-load-more"><button type="button" className="text-button" onClick={loadMore} disabled={loadingMore}>{loadingMore?<><LoaderCircle className="spin"/> 불러오는 중…</>:'더 보기'}</button></div>:null}
       </>:<p className="empty-state">조건에 맞는 감사 로그가 없습니다.</p>}

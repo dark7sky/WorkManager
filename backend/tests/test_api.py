@@ -582,6 +582,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_audit_log_update_records_before_after_diff(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "diffable task", "priority": "normal"}).json()
+        updated = a.patch(f"/api/tasks/{task['id']}", json={"title": "diffable task renamed", "priority": "high"})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        logs = a.get("/api/audit-logs?limit=10").json()["items"]
+        entry = next(x for x in logs if x["action"] == "update" and x["entity_type"] == "tasks" and x["entity_id"] == str(task["id"]))
+        changes = entry["metadata"]["changes"]
+        self.assertEqual(changes["title"], {"before": "diffable task", "after": "diffable task renamed"})
+        self.assertEqual(changes["priority"], {"before": "normal", "after": "high"})
+        self.assertNotIn("updated_at", changes)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_audit_logs_filter_by_date_range(self, *_):
         from app.db import connection
         a = self.client(self.token_a)
