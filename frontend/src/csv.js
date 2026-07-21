@@ -105,6 +105,20 @@ export const parseTasksCsv = text => {
   return { tasks, errors }
 }
 
+export const dedupeImportedTasks = (parsed, existingTasks) => {
+  const key = t => `${(t.title || '').trim().toLowerCase()}|${t.start_date || ''}|${t.due_date || ''}`
+  const existingKeys = new Set((existingTasks || []).map(key))
+  const seen = new Set()
+  const unique = [], duplicates = []
+  for (const task of parsed) {
+    const k = key(task)
+    if (existingKeys.has(k) || seen.has(k)) { duplicates.push(task); continue }
+    seen.add(k)
+    unique.push(task)
+  }
+  return { tasks: unique, duplicates }
+}
+
 const timelineHeaders = ['날짜', '구분', '제목', '태그', '예상 소요(분)']
 
 export const timelineToCsv = items => {

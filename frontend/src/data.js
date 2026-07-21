@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-csv-import-dedup',
+    timestamp: '2026-07-21T15:37:17+09:00',
+    description: '업무 화면에서 이전에 내보낸 CSV 파일을 실수로 다시 가져오면 동일한 업무가 그대로 중복 생성되었습니다. CSV 가져오기 시 제목·시작일·기한이 같은 업무는 기존 업무 및 같은 파일 내 중복 행과 비교해 자동으로 건너뛰고, 몇 건을 건너뛰었는지 알려주도록 했습니다(`frontend/src/csv.js`의 `dedupeImportedTasks`, `frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-21-task-json-field-repair',
     timestamp: '2026-07-21T15:23:45+09:00',
     description: '일부 업무의 체크리스트/링크/사용자 정의 필드에 손상된 값이 저장되어 있으면, 해당 업무를 편집 후 저장할 때마다 서버 오류가 발생해 영구적으로 저장이 막히는 문제가 있었습니다. 저장 시 이 세 필드를 자동으로 정리(손상된 항목 제거)하도록 백엔드 검증 로직을 보강했습니다(`backend/app/main.py`의 `normalize_legacy_json_array_field`, `update_item`).',

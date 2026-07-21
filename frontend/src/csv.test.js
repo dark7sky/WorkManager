@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, dedupeImportedTasks, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -225,6 +225,28 @@ test('parseTasksCsv skips rows without a title and reports the row number', () =
 
 test('parseTasksCsv returns nothing for empty input', () => {
   assert.deepEqual(parseTasksCsv(''), { tasks: [], errors: [] })
+})
+
+test('dedupeImportedTasks skips rows matching an existing task by title/start/due', () => {
+  const existing = [{ title: '분기 보고서', start_date: '2026-07-01', due_date: '2026-07-10' }]
+  const parsed = [
+    { title: '분기 보고서', start_date: '2026-07-01', due_date: '2026-07-10' },
+    { title: ' 분기 보고서 ', start_date: '2026-07-01', due_date: '2026-07-10' },
+    { title: '신규 업무', start_date: '2026-07-01', due_date: '2026-07-10' },
+  ]
+  const { tasks, duplicates } = dedupeImportedTasks(parsed, existing)
+  assert.deepEqual(tasks, [{ title: '신규 업무', start_date: '2026-07-01', due_date: '2026-07-10' }])
+  assert.equal(duplicates.length, 2)
+})
+
+test('dedupeImportedTasks also skips duplicates within the same import batch', () => {
+  const parsed = [
+    { title: '업무 A', start_date: '2026-07-01', due_date: '2026-07-05' },
+    { title: '업무 A', start_date: '2026-07-01', due_date: '2026-07-05' },
+  ]
+  const { tasks, duplicates } = dedupeImportedTasks(parsed, [])
+  assert.equal(tasks.length, 1)
+  assert.equal(duplicates.length, 1)
 })
 
 test('todosToCsv exports todo rows with labels and escaping', () => {

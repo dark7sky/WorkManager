@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Archive, ArrowUpToLine, BellRing, CalendarClock, CalendarRange, CheckCircle2, ChevronDown, ChevronRight, Clock, Copy, Download, ExternalLink, FileText, Flag, GitPullRequestArrow, History, MessageSquare, Paperclip, Palette, Repeat, RotateCcw, Search, ShieldCheck, SkipForward, SlidersHorizontal, Star, Tag, Upload, Zap } from 'lucide-react'
 import Header from '../components/Header'
 import { TagChips,TagFilter } from '../components/TagsInput'
-import { parseTasksCsv, taskCsvFilename, tasksToCsv } from '../csv'
+import { dedupeImportedTasks, parseTasksCsv, taskCsvFilename, tasksToCsv } from '../csv'
 import { icsToTasks, taskIcsFilename, tasksToIcs } from '../ics'
 import { taskReportFilename, tasksToPrintableReport } from '../taskReport'
 import { allIdsSelected, BOARD_STATUSES, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, isTaskOverdue, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds } from '../taskFilters'
@@ -84,7 +84,9 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
     if(!file||!onImport)return
     const text=await file.text(),{tasks:parsed,errors}=parseTasksCsv(text)
     if(!parsed.length){notify?.(errors.length?errors.join('\n'):'가져올 업무가 없습니다.','error');return}
-    await onImport(parsed,errors)
+    const {tasks:unique,duplicates}=dedupeImportedTasks(parsed,tasks)
+    if(!unique.length){notify?.('이미 동일한 업무가 있어 가져올 항목이 없습니다.','error');return}
+    await onImport(unique,[...errors,...duplicates.map(d=>`중복 건너뜀: ${d.title}`)])
   }
   const importIcs=async e=>{
     const file=e.target.files?.[0];e.target.value=''
