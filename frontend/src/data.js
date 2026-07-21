@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-custom-field-search',
+    timestamp: '2026-07-21T15:03:00+09:00',
+    description: '업무의 체크리스트 항목·첨부파일명은 검색과 Ctrl/⌘+K 빠른 입력에서 찾을 수 있었지만, 방금 추가된 사용자 정의 필드(예: 고객사 "어크미")는 제목/메모에 없으면 검색으로 찾을 수 없었습니다. 업무 검색(`frontend/src/taskFilters.js`)과 명령 팔레트(`frontend/src/commandPalette.js`)가 사용자 정의 필드의 이름과 값도 함께 검색하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-task-custom-fields',
     timestamp: '2026-07-21T14:58:06+09:00',
     description: '업무에 팀마다 다른 정보(고객사, 계약 번호, 프로젝트 코드 등)를 남길 방법이 없어 메모란에 섞어 적어야 했습니다. 업무 편집 폼에 이름/값 쌍의 "사용자 정의 필드"를 자유롭게 추가·삭제할 수 있도록 했고, 복제 시에도 함께 복사되며 Gantt 목록 행에 필드 개수 배지를 표시합니다 (`backend/app/db.py`, `backend/app/main.py`, `frontend/src/taskFormPayload.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Tasks.jsx`).',

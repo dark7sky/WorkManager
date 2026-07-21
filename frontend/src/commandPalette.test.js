@@ -84,3 +84,9 @@ test('searchItems matches attachment filename across all four tables', () => {
   assert.equal(searchItems('checklist.pdf', withAttachments)[0]?.id, 32)
   assert.equal(searchItems('summary', withAttachments)[0]?.id, 33)
 })
+
+test('searchItems matches task custom field label and value', () => {
+  const withCustomFields = { tasks: [{ id: 40, title: '계약 검토', tags: [], custom_fields: [{ label: '고객사', value: '어크미' }] }] }
+  assert.equal(searchItems('고객사', withCustomFields)[0]?.id, 40)
+  assert.equal(searchItems('어크미', withCustomFields)[0]?.id, 40)
+})

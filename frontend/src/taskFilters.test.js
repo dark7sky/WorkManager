@@ -59,6 +59,18 @@ test('filterTasks matches query text against attachment filename', () => {
   assert.deepEqual(shown.map(task => task.id), [6])
 })
 
+test('filterTasks matches query text against custom field label and value', () => {
+  const withCustomFields = [
+    ...tasks,
+    { id: 7, title: '계약 검토', status: 'todo', due_date: '2026-07-10', progress: 0, priority: 'normal', tags: [], custom_fields: [{ id: '1', label: '고객사', value: '어크미' }] },
+  ]
+  const shownByLabel = filterTasks(withCustomFields, { query: '고객사', status: 'all', selectedTags: [], todayIso: '2026-07-07' })
+  const shownByValue = filterTasks(withCustomFields, { query: '어크미', status: 'all', selectedTags: [], todayIso: '2026-07-07' })
+
+  assert.deepEqual(shownByLabel.map(task => task.id), [7])
+  assert.deepEqual(shownByValue.map(task => task.id), [7])
+})
+
 test('filterTasks narrows active tasks by priority', () => {
   const shown = filterTasks(tasks, {
     query: '',

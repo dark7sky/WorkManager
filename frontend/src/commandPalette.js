@@ -20,7 +20,7 @@ export function searchScreens(query) {
 
 const ITEM_SOURCES = [
   ['task', 'tasks', item => item.title, item => item.due_date ? `마감 ${item.due_date}` : item.status, 'tasks',
-    item => `${item.description || ''} ${(item.checklist || []).map(c => c?.text || '').join(' ')} ${(item.attachment_names || []).join(' ')}`],
+    item => `${item.description || ''} ${(item.checklist || []).map(c => c?.text || '').join(' ')} ${(item.attachment_names || []).join(' ')} ${(item.custom_fields || []).map(f => `${f?.label || ''} ${f?.value || ''}`).join(' ')}`],
   ['event', 'events', item => item.title, item => (item.start_at || '').slice(0, 16).replace('T', ' '), 'calendar',
     item => `${item.description || ''} ${(item.checklist || []).map(c => c?.text || '').join(' ')} ${(item.attachment_names || []).join(' ')}`],
   ['todo', 'todos', item => item.title, item => item.todo_date, 'today',

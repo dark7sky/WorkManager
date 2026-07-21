@@ -32,7 +32,8 @@ export const filterTasks = (tasks, { query = '', status = 'active', selectedTags
   return tasks.filter(task => {
     const checklistText = (task.checklist || []).map(item => item?.text || '').join(' ')
     const attachmentText = (task.attachment_names || []).join(' ')
-    const matchesQuery = !q || `${task.title} ${task.description || ''} ${(task.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
+    const customFieldText = (task.custom_fields || []).map(field => `${field?.label || ''} ${field?.value || ''}`).join(' ')
+    const matchesQuery = !q || `${task.title} ${task.description || ''} ${(task.tags || []).join(' ')} ${checklistText} ${attachmentText} ${customFieldText}`.toLowerCase().includes(q)
     const matchesStatus = status === 'all'
       || (status === 'overdue'
         ? isTaskOverdue(task, todayIso)
