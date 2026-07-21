@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-copy-link',
+    timestamp: '2026-07-21T19:38:46+09:00',
+    description: '업무 상세 링크를 팀원에게 전달하려면 업무 제목으로 직접 검색하게 해야 했습니다. 업무 목록의 각 행에 "링크" 버튼을 추가해 해당 업무로 바로 열리는 내부 링크(`?page=tasks&taskId=`)를 클립보드에 복사할 수 있게 하고, 앱이 이 링크로 열리면 로그인 후 자동으로 해당 업무 수정 창을 띄우도록 했습니다(`frontend/src/screens/Tasks.jsx`의 `copyTaskLink`, `frontend/src/taskFilters.js`의 `taskDeepLink`, `frontend/src/App.jsx`의 `taskId` 딥링크 처리).',
+  },
+  {
     id: '2026-07-21-ai-apply-audit-reason',
     timestamp: '2026-07-21T19:33:50+09:00',
     description: 'AI 제안(추천/QuickCapture/자연어 입력)을 적용하면 감사 로그에는 "변경 필드" 목록만 남아, 무엇을 왜 어떻게 바꿨는지 사람이 읽을 수 있는 근거가 남지 않았습니다. AI가 적용한 변경은 감사 로그에 "AI 자동 수정" 출처와 함께, 있는 경우 추천 사유(reason) 문구를 함께 기록하고 감사 로그 화면에도 구분해 표시하도록 했습니다(`backend/app/main.py`의 `ai_apply`/`create_item`/`update_item`, `frontend/src/screens/AuditLog.jsx`의 `metadataText`, `frontend/src/App.jsx`·`QuickCapture.jsx`·`Performance.jsx`의 `aiApply` 호출).',

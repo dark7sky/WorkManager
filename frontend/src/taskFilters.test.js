@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -8,6 +8,10 @@ const tasks = [
   { id: 3, title: '회의록 배포', status: 'done', due_date: '2026-07-06', progress: 100, priority: 'low', tags: ['운영'] },
   { id: 4, title: '검토 대기', status: 'todo', due_date: '2026-07-06', progress: 10, priority: 'high', tags: [] },
 ]
+
+test('taskDeepLink builds an internal task URL with the taskId query param', () => {
+  assert.equal(taskDeepLink('https://app.example.com', '/', 42), 'https://app.example.com/?page=tasks&taskId=42')
+})
 
 test('hasActiveTaskFilters is false at defaults and true once any filter is touched', () => {
   assert.equal(hasActiveTaskFilters(DEFAULT_TASK_FILTERS), false)

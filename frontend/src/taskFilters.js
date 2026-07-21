@@ -1,5 +1,7 @@
 export const isTaskOverdue = (task, todayIso) => task.status !== 'done' && task.due_date && todayIso && task.due_date < todayIso
 
+export const taskDeepLink = (origin, pathname, taskId) => `${origin}${pathname}?page=tasks&taskId=${taskId}`
+
 export const withAddedTag = (tags, tag) => {
   const trimmed = (tag || '').trim()
   if (!trimmed) return tags || []
