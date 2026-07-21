@@ -27,6 +27,16 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 
 
 @app.middleware("http")
+async def set_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    return response
+
+
+@app.middleware("http")
 async def verify_request_origin(request: Request, call_next):
     if request.method in {"POST", "PUT", "PATCH", "DELETE"} and os.getenv("COOKIE_SECURE", "false").lower() == "true":
         if request.url.path.startswith("/api/admin/") and request.headers.get("authorization", "").startswith("Bearer "):

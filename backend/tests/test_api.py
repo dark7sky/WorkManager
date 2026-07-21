@@ -243,6 +243,13 @@ class ApiTests(unittest.TestCase):
     def test_readiness_checks_database(self):
         self.assertEqual(TestClient(self.app).get("/api/ready").json()["database"], "ready")
 
+    def test_responses_include_security_headers(self):
+        response = TestClient(self.app).get("/api/ready")
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+        self.assertEqual(response.headers["Referrer-Policy"], "strict-origin-when-cross-origin")
+        self.assertIn("geolocation=()", response.headers["Permissions-Policy"])
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_soft_delete_trash_restore_is_isolated(self, *_):

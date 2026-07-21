@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-security-response-headers',
+    timestamp: '2026-07-22T08:47:00+09:00',
+    description: '백엔드 응답에 보안 헤더(X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy)가 전혀 설정되지 않아, 클릭재킹이나 MIME 스니핑 같은 브라우저 레벨 공격에 대한 기본 방어가 빠져 있었습니다. `backend/app/main.py`에 모든 응답에 이 헤더들을 붙이는 미들웨어를 추가했습니다.',
+  },
+  {
     id: '2026-07-22-tab-title-pending-badge',
     timestamp: '2026-07-22T08:41:00+09:00',
     description: '사이드바에는 지연·승인 대기 업무, 캘린더 동기화 충돌 건수가 배지로 표시됐지만, 다른 탭을 보고 있을 때는 이 알림을 알아챌 방법이 없었습니다. `frontend/src/App.jsx`가 이미 계산된 지연/승인 대기/충돌 건수를 합산해 브라우저 탭 제목을 "(N) WorkManager" 형태로 표시하도록 했습니다.',
