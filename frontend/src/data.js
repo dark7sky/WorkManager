@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-bulk-archive',
+    timestamp: '2026-07-21T12:08:00+09:00',
+    description: '업무/일정/할 일/업무 기록 목록에서 여러 항목을 선택해 한 번에 보관 처리할 수 있는 "보관" 일괄 작업 버튼을 추가했습니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-event-promote-to-task',
     timestamp: '2026-07-21T12:20:00+09:00',
     description: '할 일과 업무 기록에는 있던 "업무로 전환" 기능이 일정에는 없었습니다. 이제 일정 상세 화면과 모바일 목록에서도 업무로 전환할 수 있습니다 (`frontend/src/eventDuplicate.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
