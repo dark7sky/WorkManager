@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-gantt-drag-reparent',
+    timestamp: '2026-07-21T18:32:18+09:00',
+    description: '간트 차트에서 업무를 다른 업무의 하위로 옮기려면 편집 폼을 열어 "상위 업무" 드롭다운을 찾아 선택하거나, 여러 개를 선택해 일괄 작업 바의 "상위 업무 지정"을 써야 했습니다. 이제 업무 행 제목을 잡아 다른 업무 행 위로 끌어다 놓으면 바로 하위 업무로 이동합니다(자기 자신이나 자신의 하위 업무 위로는 놓을 수 없도록 순환 방지). 기존 `PATCH parent_id` 검증을 그대로 재사용했습니다(`frontend/src/taskHierarchy.js`의 `canReparentTask()`, `frontend/src/screens/Tasks.jsx`, `frontend/src/styles.css`), 테스트는 `frontend/src/taskHierarchy.test.js`.',
+  },
+  {
     id: '2026-07-21-event-custom-fields',
     timestamp: '2026-07-21T18:23:51+09:00',
     description: '업무(Task)·할 일(Todo)·업무 기록(Work log)은 사용자 정의 필드(예: 고객사, 계약 번호)를 지원했지만, 캘린더의 일정(Event)에는 이 기능이 없어 네 항목 유형 간 기능이 어긋나 있었습니다. `events` 테이블에 `custom_fields` 컬럼을 추가하고 백엔드 검증(`EventPayload`)과 캘린더 일정 등록/수정 폼에 동일한 사용자 정의 필드 편집 UI, 목록 배지를 추가했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/screens/Calendar.jsx`).',

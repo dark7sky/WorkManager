@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
+import { canReparentTask, criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -32,6 +32,23 @@ test('taskParentOptions labels nested parent choices with hierarchy depth', () =
 test('taskParentOptions keeps the current parent selectable even when archived/missing from the list', () => {
   const options = taskParentOptions(tasks, 3, 99)
   assert.deepEqual(options[0], { id: 99, label: '#99 (보관됨/목록에 없음)' })
+})
+
+test('canReparentTask allows moving a task under an unrelated task', () => {
+  assert.equal(canReparentTask(tasks, 4, 1), true)
+})
+
+test('canReparentTask rejects dropping a task onto itself', () => {
+  assert.equal(canReparentTask(tasks, 1, 1), false)
+})
+
+test('canReparentTask rejects dropping a task onto its own descendant', () => {
+  assert.equal(canReparentTask(tasks, 1, 3), false)
+})
+
+test('canReparentTask rejects missing ids', () => {
+  assert.equal(canReparentTask(tasks, 1, null), false)
+  assert.equal(canReparentTask(tasks, null, 1), false)
 })
 
 test('taskDependencyOptions keeps current dependencies selectable even when archived/missing from the list', () => {

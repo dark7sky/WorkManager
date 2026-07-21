@@ -63,6 +63,11 @@ export const taskParentOptions = (tasks, currentTaskId, currentParentId) => {
   return options
 }
 
+export const canReparentTask = (tasks, taskId, candidateParentId) => {
+  if (!taskId || !candidateParentId || taskId === candidateParentId) return false
+  return !childTaskIds(tasks, taskId).has(candidateParentId)
+}
+
 export const taskBulkParentOptions = (tasks, selectedIds) => {
   const selected = new Set(selectedIds)
   const blocked = new Set(selected)
