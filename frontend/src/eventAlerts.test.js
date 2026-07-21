@@ -30,6 +30,12 @@ test('eventsDueForAlert respects a wider configured lead time', () => {
   assert.deepEqual(due.map(e => e.id), [1])
 })
 
+test('eventsDueForAlert lets a per-event reminder_minutes_before override the global lead time', () => {
+  const events = [{ id: 1, start_at: at(25), reminder_minutes_before: 30 }, { id: 2, start_at: at(10), reminder_minutes_before: 5 }]
+  const due = eventsDueForAlert(events, now, 15)
+  assert.deepEqual(due.map(e => e.id), [1])
+})
+
 test('isWithinQuietHours is always false when disabled', () => {
   assert.equal(isWithinQuietHours(new Date(2026, 0, 1, 23, 0), { enabled: false, start: '22:00', end: '08:00' }), false)
 })

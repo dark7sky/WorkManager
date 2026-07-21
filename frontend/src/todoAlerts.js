@@ -8,11 +8,11 @@ export const loadTodoAlertLeadMinutes = () => {
 }
 
 export const todosDueForAlert = (todos, now, leadMinutes = DEFAULT_TODO_ALERT_LEAD_MINUTES) => {
-  const windowMs = leadMinutes * 60 * 1000
   return todos.filter(t => {
     if (t.completed || !t.todo_date || !t.todo_time) return false
     const due = new Date(`${t.todo_date}T${t.todo_time}`).getTime()
     if (Number.isNaN(due)) return false
+    const windowMs = (Number.isFinite(t.reminder_minutes_before) ? t.reminder_minutes_before : leadMinutes) * 60 * 1000
     return due >= now && due - now <= windowMs
   })
 }

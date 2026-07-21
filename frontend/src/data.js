@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-per-item-reminder-lead-time',
+    timestamp: '2026-07-21T19:30:00+09:00',
+    description: '업무/일정/할 일의 마감·시작 알림은 설정 화면의 전역 알림 시점(분 전)만 따랐는데, 항목별로 미리 알림받고 싶은 시간이 다른 경우 대응할 수 없었습니다. 각 항목에 선택적 "알림 시점(분 전)" 필드를 추가해 지정된 경우 전역 설정 대신 그 값을 우선 적용하도록 했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/taskAlerts.js`/`eventAlerts.js`/`todoAlerts.js`, 업무/일정/할 일 입력 폼).',
+  },
+  {
     id: '2026-07-21-overdue-task-auto-escalation',
     timestamp: '2026-07-21T18:52:00+09:00',
     description: '마감일이 24시간 넘게 지났는데도 완료되지 않은 업무는 우선순위가 자동으로 "높음"으로 상향되도록 했습니다. 목록을 불러올 때마다 서버가 확인해 승격하며, 감사 로그에도 기록됩니다(`backend/app/main.py`의 `escalate_overdue_tasks`).',

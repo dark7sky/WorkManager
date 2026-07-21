@@ -38,3 +38,9 @@ test('todosDueForAlert respects a wider configured lead time independent of even
   const due = todosDueForAlert(todos, now, 30)
   assert.deepEqual(due.map(t => t.id), [1])
 })
+
+test('todosDueForAlert lets a per-todo reminder_minutes_before override the global lead time', () => {
+  const todos = [{ id: 1, completed: false, reminder_minutes_before: 30, ...time(25) }, { id: 2, completed: false, reminder_minutes_before: 5, ...time(10) }]
+  const due = todosDueForAlert(todos, now, 15)
+  assert.deepEqual(due.map(t => t.id), [1])
+})

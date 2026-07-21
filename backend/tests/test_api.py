@@ -1590,6 +1590,25 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(updated.status_code, 200, updated.text)
         self.assertEqual(updated.json()["custom_fields"], [])
 
+    def test_reminder_minutes_before_is_persisted_and_validated_on_task_event_todo(self):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "reminder task", "reminder_minutes_before": 45})
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["reminder_minutes_before"], 45)
+        cleared = a.patch(f"/api/tasks/{task.json()['id']}", json={"reminder_minutes_before": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["reminder_minutes_before"])
+        invalid_task = a.post("/api/tasks", json={"title": "bad reminder", "reminder_minutes_before": 1441})
+        self.assertEqual(invalid_task.status_code, 422)
+
+        event = a.post("/api/events", json={"title": "reminder event", "start_at": "2026-08-01T10:00:00", "end_at": "2026-08-01T11:00:00", "reminder_minutes_before": 20})
+        self.assertEqual(event.status_code, 200, event.text)
+        self.assertEqual(event.json()["reminder_minutes_before"], 20)
+
+        todo = a.post("/api/todos", json={"title": "reminder todo", "todo_date": "2026-08-01", "reminder_minutes_before": 10})
+        self.assertEqual(todo.status_code, 200, todo.text)
+        self.assertEqual(todo.json()["reminder_minutes_before"], 10)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_color_is_persisted_and_validated(self, *_):

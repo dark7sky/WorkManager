@@ -37,6 +37,11 @@ export const normalizedEstimatedMinutes = value => {
   const number = Number(value)
   return Number.isFinite(number) && number >= 0 ? Math.min(ESTIMATED_MINUTES_MAX, Math.round(number)) : null
 }
+export const normalizedReminderMinutesBefore = value => {
+  if (value === '' || value === null || value === undefined) return null
+  const number = Number(value)
+  return Number.isFinite(number) && number >= 0 ? Math.min(1440, Math.round(number)) : null
+}
 export const clampedTaskProgress = value => {
   const number = Number(value)
   return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number))) : 0
@@ -128,6 +133,7 @@ export const buildTaskPayload = (data, { tags = [], task = null } = {}) => {
     custom_fields: normalizedCustomFields(data.custom_fields),
     color: data.color || null,
     tags: normalizedTaskTags(tags),
+    reminder_minutes_before: normalizedReminderMinutesBefore(data.reminder_minutes_before),
   }
 
   const taskId = normalizedOptionalId(task?.id)

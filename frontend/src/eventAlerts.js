@@ -8,11 +8,11 @@ export const loadEventAlertLeadMinutes = () => {
 }
 
 export const eventsDueForAlert = (events, now, leadMinutes = DEFAULT_EVENT_ALERT_LEAD_MINUTES) => {
-  const windowMs = leadMinutes * 60 * 1000
   return events.filter(ev => {
     if (!ev.start_at) return false
     const start = new Date(ev.start_at).getTime()
     if (Number.isNaN(start)) return false
+    const windowMs = (Number.isFinite(ev.reminder_minutes_before) ? ev.reminder_minutes_before : leadMinutes) * 60 * 1000
     return start >= now && start - now <= windowMs
   })
 }

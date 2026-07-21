@@ -38,3 +38,9 @@ test('tasksDueForAlert respects a wider configured lead time independent of even
   const due = tasksDueForAlert(tasks, now, 30)
   assert.deepEqual(due.map(t => t.id), [1])
 })
+
+test('tasksDueForAlert lets a per-task reminder_minutes_before override the global lead time', () => {
+  const tasks = [{ id: 1, status: 'pending', reminder_minutes_before: 30, ...time(25) }, { id: 2, status: 'pending', reminder_minutes_before: 5, ...time(10) }]
+  const due = tasksDueForAlert(tasks, now, 15)
+  assert.deepEqual(due.map(t => t.id), [1])
+})

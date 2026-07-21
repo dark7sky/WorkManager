@@ -20,7 +20,7 @@ import { monthGridCells, yearMonths } from '../calendarYear'
 import { holidayNameForDate } from '../holidays'
 import { EVENT_COLORS, eventColorHex } from '../eventColors'
 import { moveChecklistItem } from '../taskFormPayload'
-import { normalizedLinks, normalizedEstimatedMinutes, normalizedCustomFields } from '../taskFormPayload'
+import { normalizedLinks, normalizedEstimatedMinutes, normalizedCustomFields, normalizedReminderMinutesBefore } from '../taskFormPayload'
 import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingEvents } from '../eventOverlap'
 import { validateEventForm } from '../formValidation'
@@ -262,7 +262,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     setSaving(true)
     setError('')
     const linkUrl = data.link_url.trim()
-    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null, priority: data.priority || null, links: normalizedLinks(links), checklist, estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes), custom_fields: normalizedCustomFields(customFields) }
+    const payload = { ...data, title: data.title.trim(), description: data.description.trim(), location: data.location.trim(), start_at: `${data.start_at}:00`, end_at: `${data.end_at}:00`, tags, link_url: linkUrl && /^https?:\/\//.test(linkUrl) ? linkUrl : null, color: data.color || null, priority: data.priority || null, links: normalizedLinks(links), checklist, estimated_minutes: normalizedEstimatedMinutes(data.estimated_minutes), reminder_minutes_before: normalizedReminderMinutesBefore(data.reminder_minutes_before), custom_fields: normalizedCustomFields(customFields) }
     const toSave = !event && repeatRule && repeatUntil ? expandRecurringEvent(payload, repeatRule, repeatUntil) : payload
     const ok = await onSave(toSave, applyToSeries)
     if (!ok) setError('저장하지 못했습니다. 입력 내용은 유지됩니다.')
@@ -281,6 +281,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <label key={`color-${prefillKey}`}>색상<select name="color" defaultValue={prefill?.color ?? event?.color ?? ''}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
     <label key={`priority-${prefillKey}`}>우선순위<select ref={priorityRef} name="priority" defaultValue={prefill?.priority ?? event?.priority ?? ''}><option value="">보통</option><option value="low">낮음</option><option value="high">중요</option></select></label>
     <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input ref={estimateRef} name="estimated_minutes" type="number" min="0" step="1" placeholder="예: 60" defaultValue={prefill?.estimated_minutes ?? event?.estimated_minutes ?? ''}/></label>
+    <label key={`reminder-${prefillKey}`}>시작 알림 시점(분 전)<input name="reminder_minutes_before" type="number" min="0" max="1440" step="1" placeholder="설정 안 함 시 기본값 사용" defaultValue={prefill?.reminder_minutes_before ?? event?.reminder_minutes_before ?? ''}/></label>
     <div className="span-2"><button type="button" className="text-button" disabled={aiEstimating} onClick={recommendEstimate}>AI 우선순위·예상시간 추천</button></div>
     {!event ? <><label>반복<select value={repeatRule} onChange={e => setRepeatRule(e.target.value)}><option value="">반복 안 함</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option><option value="yearly">매년</option></select></label>{repeatRule ? <label>반복 종료일<input type="date" value={repeatUntil} onChange={e => setRepeatUntil(e.target.value)} required/></label> : null}</> : null}
     {event?.recurrence_group_id ? <label className="span-2"><input type="checkbox" checked={applyToSeries} onChange={e => setApplyToSeries(e.target.checked)}/> <span>이 일정과 이후 반복 일정에 모두 적용 (제목·장소·태그·색상 등)</span></label> : null}

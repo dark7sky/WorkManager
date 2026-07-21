@@ -8,11 +8,11 @@ export const loadTaskAlertLeadMinutes = () => {
 }
 
 export const tasksDueForAlert = (tasks, now, leadMinutes = DEFAULT_TASK_ALERT_LEAD_MINUTES) => {
-  const windowMs = leadMinutes * 60 * 1000
   return tasks.filter(t => {
     if (t.status === 'done' || !t.due_date || !t.due_time) return false
     const due = new Date(`${t.due_date}T${t.due_time}`).getTime()
     if (Number.isNaN(due)) return false
+    const windowMs = (Number.isFinite(t.reminder_minutes_before) ? t.reminder_minutes_before : leadMinutes) * 60 * 1000
     return due >= now && due - now <= windowMs
   })
 }
