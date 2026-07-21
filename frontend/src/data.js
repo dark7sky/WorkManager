@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-worklog-csv-rate-invoiced-columns',
+    timestamp: '2026-07-21T22:30:00+09:00',
+    description: '업무 기록 CSV/Excel 내보내기·가져오기에 `hourly_rate_override`(시급 재정의)와 `invoiced_at`(청구 완료일시) 필드가 빠져 있어, 청구서 발행 상태와 개별 시급이 파일로는 확인·이전되지 않았습니다. `frontend/src/csv.js`의 업무 기록 헤더·행 생성·파싱 함수에 "시급 재정의(원)"·"청구 완료일시" 열을 추가했고, Excel 내보내기(`xlsx.js`)도 같은 함수를 재사용해 함께 반영됩니다.',
+  },
+  {
     id: '2026-07-21-invoice-vat-breakdown',
     timestamp: '2026-07-21T22:20:00+09:00',
     description: '청구서에 부가세(10%) 표시 옵션을 추가했습니다. 설정에서 켜면 청구서에 공급가액·부가세·합계금액을 나눠 보여줍니다. 사업자등록번호를 입력한 사업자용 청구서인데도 그동안 부가세 항목이 없어 실제 세금계산서/청구서로 바로 쓰기 어려웠던 점을 보완했습니다.',
