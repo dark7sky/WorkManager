@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-title-length-validation',
+    timestamp: '2026-07-21T11:42:31+09:00',
+    description: '업무/일정 제목, Todo 내용, 업무 기록 내용이 서버 글자수 제한(300~20000자)을 넘으면 저장 시 알아보기 힘든 서버 오류가 표시되었습니다. 입력창에 `maxLength`를 지정하고, 저장 전 기존 인라인 검증(빨간 테두리 + 한글 안내 문구)에 글자수 초과 검사를 추가했습니다 (`frontend/src/formValidation.js`).',
+  },
+  {
     id: '2026-07-21-attachment-upload-rate-limit',
     timestamp: '2026-07-21T11:42:00+09:00',
     description: '동기화·가져오기·AI 요청 등 부담이 큰 API에는 요청 빈도 제한이 걸려 있었지만, 업무/일정/할 일/업무 기록의 첨부파일 업로드 API에는 제한이 없어 반복 업로드로 서버 부하를 일으킬 수 있었습니다. 다른 무거운 API와 동일하게 분당 요청 수 제한을 추가했습니다 (`backend/app/main.py`).',

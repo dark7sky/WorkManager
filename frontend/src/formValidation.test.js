@@ -39,6 +39,16 @@ test('ignores recurrence end date when no recurrence rule set', () => {
   assert.deepEqual(errors, {})
 })
 
+test('flags title over 300 characters', () => {
+  const errors = validateTaskForm({ title: 'a'.repeat(301) })
+  assert.equal(errors.title, '업무 제목은 300자를 넘을 수 없습니다.')
+})
+
+test('allows title at exactly 300 characters', () => {
+  const errors = validateTaskForm({ title: 'a'.repeat(300) })
+  assert.deepEqual(errors, {})
+})
+
 test('event form flags empty title', () => {
   const errors = validateEventForm({ title: ' ', start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
   assert.equal(errors.title, '일정 제목을 입력하세요.')
@@ -55,6 +65,11 @@ test('event form flags end time before or equal to start time', () => {
 test('event form passes valid input with no errors', () => {
   const errors = validateEventForm({ title: '회의', start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
   assert.deepEqual(errors, {})
+})
+
+test('event form flags title over 300 characters', () => {
+  const errors = validateEventForm({ title: 'a'.repeat(301), start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
+  assert.equal(errors.title, '일정 제목은 300자를 넘을 수 없습니다.')
 })
 
 test('todo form flags empty title', () => {
@@ -75,6 +90,16 @@ test('todo form flags recurrence end date before todo date', () => {
 test('todo form allows recurrence end date on or after todo date', () => {
   const errors = validateTodoForm({ title: '보고서 작성', todo_date: '2026-07-10', recurrence_rule: 'weekly', recurrence_end_date: '2026-07-10' })
   assert.deepEqual(errors, {})
+})
+
+test('todo form flags title over 500 characters', () => {
+  const errors = validateTodoForm({ title: 'a'.repeat(501) })
+  assert.equal(errors.title, 'Todo 내용은 500자를 넘을 수 없습니다.')
+})
+
+test('log form flags content over 20000 characters', () => {
+  const errors = validateLogForm({ content: 'a'.repeat(20001) })
+  assert.equal(errors.content, '업무 기록 내용은 20000자를 넘을 수 없습니다.')
 })
 
 test('log form flags empty content', () => {
