@@ -2009,6 +2009,38 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(a.get("/api/tasks/999999/series").status_code, 404)
         self.assertEqual(b.get(f"/api/tasks/{task['id']}/series").status_code, 404)
 
+    def test_task_series_update_applies_to_future_occurrences_only(self):
+        from app.db import connection
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "task-rec-test-group-1"
+        occurrences = []
+        for day in ("2026-09-01", "2026-09-08", "2026-09-15"):
+            created = b.post("/api/tasks", json={"title": "주간 보고", "due_date": day})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/tasks", json={"title": "지난 보고", "due_date": "2026-08-25"})
+        self.assertEqual(past.status_code, 200, past.text)
+        with connection() as c:
+            c.execute("UPDATE tasks SET recurrence_group_id=? WHERE id IN (?,?,?,?)",
+                       (group_id, *[o["id"] for o in occurrences], past.json()["id"]))
+        other_user_conflict = a.patch(f"/api/tasks/series/{group_id}?from_date=2026-09-01", json={"title": "몰래 변경"})
+        self.assertEqual(other_user_conflict.status_code, 404)
+        response = b.patch(f"/api/tasks/series/{group_id}?from_date=2026-09-01", json={"title": "주간 보고 (변경)", "priority": "high", "due_date": "1999-01-01"})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["updated"], 3)
+        for occurrence in occurrences:
+            refreshed = b.get("/api/tasks").json()
+            match = next(t for t in refreshed if t["id"] == occurrence["id"])
+            self.assertEqual(match["title"], "주간 보고 (변경)")
+            self.assertEqual(match["priority"], "high")
+            self.assertEqual(match["due_date"], occurrence["due_date"])
+        untouched = next(t for t in b.get("/api/tasks").json() if t["id"] == past.json()["id"])
+        self.assertEqual(untouched["title"], "지난 보고")
+        no_op = b.patch(f"/api/tasks/series/{group_id}?from_date=2026-09-01", json={"due_date": "1999-01-01"})
+        self.assertEqual(no_op.status_code, 422)
+        missing_group = b.patch("/api/tasks/series/does-not-exist?from_date=2026-09-01", json={"title": "x"})
+        self.assertEqual(missing_group.status_code, 404)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_series_links_completed_occurrences_to_the_newly_spawned_one(self, *_):

@@ -2016,6 +2016,24 @@ def task_series(item_id: int, user=Depends(require_user)):
     return {"items": [{"id": r["id"], "title": r["title"], "start_date": r["start_date"], "due_date": r["due_date"], "status": r["status"], "progress": r["progress"]} for r in items]}
 
 
+TASK_SERIES_EDITABLE_FIELDS = {"title", "description", "tags", "link_url", "color", "priority", "estimated_minutes"}
+
+
+@app.patch("/api/tasks/series/{group_id}")
+def update_task_series(group_id: str, from_date: str, payload: dict = Body(...), user=Depends(require_user)):
+    data = {k: v for k, v in payload.items() if k in TASK_SERIES_EDITABLE_FIELDS}
+    if not data:
+        raise HTTPException(422, "수정할 필드가 없습니다.")
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM tasks WHERE user_id=? AND recurrence_group_id=? AND COALESCE(due_date,start_date,'')>=? AND deleted_at IS NULL ORDER BY COALESCE(due_date,start_date,'')",
+            (user, group_id, from_date)).fetchall()]
+    if not ids:
+        raise HTTPException(404, "반복 업무를 찾을 수 없습니다.")
+    items = [update_item("tasks", item_id, dict(data), user) for item_id in ids]
+    return {"ok": True, "updated": len(items), "items": items}
+
+
 EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority"}
 
 

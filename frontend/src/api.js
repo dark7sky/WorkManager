@@ -65,6 +65,7 @@ export const api = {
   createTask: data => request('/tasks', json('POST', data)), updateTask: (id,data) => request(`/tasks/${id}`,json('PATCH',data)), deleteTask: id => request(`/tasks/${id}`,{method:'DELETE'}),
   skipTaskRecurrence: id => request(`/tasks/${id}/skip-recurrence`,{method:'POST'}),
   taskSeries: id => request(`/tasks/${id}/series`),
+  updateTaskSeries: (groupId,fromDate,data) => request(`/tasks/series/${groupId}?from_date=${encodeURIComponent(fromDate)}`,json('PATCH',data)),
   archivedTasks: (limit,offset=0) => request(`/tasks/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveTask: id => request(`/tasks/${id}/archive`,{method:'POST'}), unarchiveTask: id => request(`/tasks/${id}/unarchive`,{method:'POST'}),
   shareTask: (id,expiresInDays) => request(`/tasks/${id}/share${expiresInDays?`?expires_in_days=${expiresInDays}`:''}`,{method:'POST'}), unshareTask: id => request(`/tasks/${id}/share`,{method:'DELETE'}),

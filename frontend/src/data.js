@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-task-series-bulk-edit',
+    timestamp: '2026-07-22T03:57:40+09:00',
+    description: '반복 일정과 반복 할 일은 이후 회차를 한 번에 수정할 수 있었지만 반복 업무(태스크)는 회차별로 하나씩 수정해야 해서, 매주 반복되는 업무의 제목이나 우선순위를 바꾸려면 회차 수만큼 반복 작업이 필요했습니다. `PATCH /api/tasks/series/{group_id}` 엔드포인트를 추가해 지정한 날짜 이후의 모든 회차에 제목·설명·태그·링크·색상·우선순위·예상 소요 시간을 한 번에 적용할 수 있게 하고(`backend/app/main.py`), 업무 수정 폼(`frontend/src/components/TaskForm.jsx`)에 "이 업무와 이후 반복 업무에 모두 적용" 체크박스를 추가했습니다. 테스트: `backend/tests/test_api.py::test_task_series_update_applies_to_future_occurrences_only`.',
+  },
+  {
     id: '2026-07-22-todo-series-bulk-edit',
     timestamp: '2026-07-22T03:52:10+09:00',
     description: '반복 일정(이벤트)은 이후 회차를 한 번에 수정할 수 있었지만 반복 할 일은 회차별로 하나씩 수정해야 해서, 매일/매주 반복되는 할 일의 제목이나 메모를 바꾸려면 회차 수만큼 반복 작업이 필요했습니다. `PATCH /api/todos/series/{group_id}` 엔드포인트를 추가해 지정한 날짜 이후의 모든 회차에 제목·메모·태그·링크·색상·우선순위·시간을 한 번에 적용할 수 있게 하고(`backend/app/main.py`), 할 일 수정 폼(`frontend/src/screens/Today.jsx`)에 "이 항목과 이후 반복 항목에 모두 적용" 체크박스를 추가했습니다. 테스트: `backend/tests/test_api.py::test_todo_series_update_applies_to_future_occurrences_only`.',
