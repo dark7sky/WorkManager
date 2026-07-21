@@ -1,11 +1,11 @@
-import { AlertTriangle, CalendarDays, CheckCircle2, CornerDownLeft, LoaderCircle, Sparkles, Target } from 'lucide-react'
+import { AlertTriangle, CalendarDays, CheckCircle2, CornerDownLeft, LoaderCircle, Sparkles, Target, X } from 'lucide-react'
 import Header from '../components/Header'
 import { TagChips } from '../components/TagsInput'
 
 const ACTION_LABELS = { create: '새 항목 등록', update: '기존 항목 수정' }
 const ENTITY_LABELS = { task: '업무', event: '일정', todo: '오늘 할 일', work_log: '업무 기록' }
 
-export default function AIAssistant({ text, setText, items, recommendations, mode, loading, onPreview, onRecommend, onApplyItem, history = [], onRemoveHistory }) {
+export default function AIAssistant({ text, setText, items, recommendations, mode, loading, onPreview, onRecommend, onApplyItem, onDismissItem, history = [], onRemoveHistory }) {
   const hasItems = items && items.length > 0
   const warning = items?.[0]?.warning
   return <><Header title="AI 도우미" subtitle="자연어로 업무를 정리하고, 지금 집중할 일을 추천받으세요."/><div className="content ai-layout">
@@ -18,17 +18,17 @@ export default function AIAssistant({ text, setText, items, recommendations, mod
     <section className="ai-result" aria-live="polite"><div className="section-title"><div><h2>{mode === 'recommend' ? '오늘의 추천' : hasItems ? `분석 결과 (${items.length}건)` : '분석 결과'}</h2><p>{mode === 'recommend' ? '추천 결과는 업무를 자동으로 변경하지 않습니다.' : '건마다 확인 후 개별적으로 적용하세요.'}</p></div></div>
       {loading && mode === 'recommend' ? <div className="ai-empty"><LoaderCircle className="spin"/><strong>업무 우선순위를 분석하고 있습니다.</strong></div> : null}
       {!loading && mode === 'recommend' ? <RecommendationList items={recommendations}/> : null}
-      {!loading && mode !== 'recommend' && hasItems ? <>{warning ? <div className="ai-warning"><AlertTriangle/><span>{warning}</span></div> : null}{items.map((item, index) => <PreviewItem key={`${item.action}-${item.entity}-${index}`} item={item} onApply={() => onApplyItem(index)}/>)}</> : null}
+      {!loading && mode !== 'recommend' && hasItems ? <>{warning ? <div className="ai-warning"><AlertTriangle/><span>{warning}</span></div> : null}{items.map((item, index) => <PreviewItem key={`${item.action}-${item.entity}-${index}`} item={item} onApply={() => onApplyItem(index)} onDismiss={() => onDismissItem(index)}/>)}</> : null}
       {!loading && mode !== 'recommend' && !hasItems ? <div className="ai-empty"><Sparkles/><strong>요청을 분석하거나 오늘의 추천을 받아보세요.</strong><p>AI가 만든 내용은 확인 없이 저장되지 않습니다.</p></div> : null}
     </section></div></>
 }
 
-function PreviewItem({ item, onApply }) {
+function PreviewItem({ item, onApply, onDismiss }) {
   const data = item?.data || {}, isRemote = item?.source === 'remote-ai'
   return <div className="preview-card">
-    <div className="ai-source"><span className={isRemote ? 'online' : ''}>{isRemote ? 'AI API 분석' : '로컬 규칙 분석'}</span>{item.confidence != null ? <span>신뢰도 {Math.round(item.confidence * 100)}%</span> : null}</div>
+    <div className="ai-source"><span className={isRemote ? 'online' : ''}>{isRemote ? 'AI API 분석' : '로컬 규칙 분석'}</span>{item.confidence != null ? <span>신뢰도 {Math.round(item.confidence * 100)}%</span> : null}<button type="button" className="preview-dismiss" title="이 제안 무시" aria-label="이 제안 무시" onClick={onDismiss}><X aria-hidden="true"/></button></div>
     <div className="preview-item"><span className="preview-icon"><Sparkles/></span><div><small>{ACTION_LABELS[item.action] || item.action} · {ENTITY_LABELS[item.entity] || item.entity}</small><h3>{data.title || data.content || '제목 없음'}</h3><p>{data.content ? '' : data.description}</p><TagChips tags={data.tags}/><dl><div><dt>시작</dt><dd>{data.start_date || data.start_at || data.log_date || '-'}</dd></div><div><dt>완료</dt><dd>{data.due_date || data.end_at || '-'}</dd></div><div><dt>우선순위 / 진행률</dt><dd>{data.priority || (data.progress != null ? `${data.progress}%` : '보통')}</dd></div></dl></div></div>
-    <div className="result-actions"><button className="primary" onClick={onApply}>확인하고 적용</button></div>
+    <div className="result-actions"><button type="button" className="secondary" onClick={onDismiss}>무시</button><button className="primary" onClick={onApply}>확인하고 적용</button></div>
   </div>
 }
 
