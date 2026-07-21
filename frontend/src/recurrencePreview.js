@@ -11,6 +11,11 @@ export function nextRecurrenceDate(dateStr, rule) {
   if (rule === 'daily') return new Date(Date.UTC(y, m - 1, d) + DAY_MS).toISOString().slice(0, 10)
   if (rule === 'weekly') return new Date(Date.UTC(y, m - 1, d) + 7 * DAY_MS).toISOString().slice(0, 10)
   if (rule === 'biweekly') return new Date(Date.UTC(y, m - 1, d) + 14 * DAY_MS).toISOString().slice(0, 10)
+  if (rule === 'weekdays') {
+    let next = new Date(Date.UTC(y, m - 1, d) + DAY_MS)
+    while (next.getUTCDay() === 0 || next.getUTCDay() === 6) next = new Date(next.getTime() + DAY_MS)
+    return next.toISOString().slice(0, 10)
+  }
   if (rule === 'yearly') {
     const day = Math.min(d, daysInMonth(y + 1, m - 1))
     return `${String(y + 1).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`

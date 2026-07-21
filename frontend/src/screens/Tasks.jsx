@@ -24,7 +24,7 @@ import { deriveTagColorMap } from '../tagColors'
 import { api } from '../api'
 
 const labels={todo:'할 일',doing:'진행 중',in_progress:'진행 중',done:'완료',overdue:'지연'}
-const recurrenceLabels={daily:'매일',weekly:'매주',biweekly:'격주',monthly:'매월',yearly:'매년'}
+const recurrenceLabels={daily:'매일',weekly:'매주',biweekly:'격주',monthly:'매월',yearly:'매년',weekdays:'평일마다'}
 const approvalLabels={none:'승인 없음',pending:'승인 대기',approved:'승인 완료',rejected:'재작업 요청'}
 const scheduleApprovalLabels={none:'일정 검토 없음',pending:'일정 승인 대기',approved:'일정 승인 완료',rejected:'일정 재검토'}
 const iso=d=>d.toLocaleDateString('en-CA')

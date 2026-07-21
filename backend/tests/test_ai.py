@@ -219,6 +219,12 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["data"]["recurrence_rule"], "biweekly")
         self.assertEqual(result["data"]["recurrence_end_date"], date(next_year, 8, 30).isoformat())
 
+    def test_weekdays_recurring_event_sets_recurrence_rule(self):
+        next_year = date.today().year + (date.today().month >= 8)
+        result = ai.rule_parse("평일마다 스탠드업 회의 8월 30일까지")
+        self.assertEqual(result["data"]["recurrence_rule"], "weekdays")
+        self.assertEqual(result["data"]["recurrence_end_date"], date(next_year, 8, 30).isoformat())
+
     def test_event_without_recurrence_keyword_omits_recurrence_fields(self):
         result = ai.rule_parse("내일 오후 3시 고객 회의")
         self.assertNotIn("recurrence_rule", result["data"])

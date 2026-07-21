@@ -265,7 +265,7 @@ export const parseEventsCsv = text => {
 }
 
 export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정']
-const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년' }
+const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
 
 export const todoRows = (todos, pinnedIds) => todos.map(todo => [
   todo.title,
@@ -288,7 +288,7 @@ export const todosToCsv = (todos, pinnedIds) => [todoHeaders, ...todoRows(todos,
 
 export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
 
-const todoRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly' }
+const todoRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', 평일마다: 'weekdays', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly', weekdays: 'weekdays' }
 
 export const parseTodosCsv = text => {
   const rows = parseCsvRows(text.replace(/^﻿/, ''))

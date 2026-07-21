@@ -26,6 +26,12 @@ test('expands biweekly occurrences', () => {
   assert.equal(result[2].start_at, '2026-08-10T10:00:00')
 })
 
+test('expands weekdays occurrences, skipping weekends', () => {
+  const result = expandRecurringEvent(basePayload, 'weekdays', '2026-07-20')
+  assert.deepEqual(result.map(e => e.start_at.slice(0, 10)),
+    ['2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16', '2026-07-17', '2026-07-20'])
+})
+
 test('expands daily occurrences', () => {
   const result = expandRecurringEvent(basePayload, 'daily', '2026-07-16')
   assert.deepEqual(result.map(e => e.start_at.slice(0, 10)), ['2026-07-13', '2026-07-14', '2026-07-15', '2026-07-16'])

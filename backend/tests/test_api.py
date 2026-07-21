@@ -317,6 +317,18 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_recurring_task_weekdays_skips_weekend(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "standup", "start_date": "2026-07-10",
+                                           "due_date": "2026-07-10", "recurrence_rule": "weekdays"}).json()
+        first = a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100}).json()
+        self.assertIn("next_recurrence_id", first)
+        children = [x for x in a.get("/api/tasks").json() if x.get("parent_id") == task["id"]]
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0]["due_date"], "2026-07-13")
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_yearly_spawns_one_year_later(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "annual review", "start_date": "2026-07-06",

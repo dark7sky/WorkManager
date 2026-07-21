@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-weekdays-recurrence-rule',
+    timestamp: '2026-07-22T03:05:17+09:00',
+    description: '업무·할 일·일정 반복 주기가 매일/매주/격주/매월/매년만 지원해, 평일마다 반복되는 일정(일일 스탠드업, 평일 업무 보고 등)은 주말에도 반복되거나 매번 수동으로 건너뛰어야 했습니다. 반복 규칙에 "평일마다"(weekdays, 토·일요일은 건너뛰고 다음 평일로 이동)를 추가해 업무 폼, 오늘 할 일 빠른 추가/수정, 일정 등록 폼의 반복 선택지와 CSV 가져오기/내보내기, AI 어시스턴트(로컬 규칙 파싱)에서 사용할 수 있습니다 (`backend/app/main.py`, `backend/app/ai.py`, `frontend/src/recurrencePreview.js`, `frontend/src/eventRecurrence.js`, `frontend/src/csv.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Tasks.jsx`), 테스트: `backend/tests/test_api.py::test_recurring_task_weekdays_skips_weekend`, `backend/tests/test_ai.py::test_weekdays_recurring_event_sets_recurrence_rule`, `frontend/src/recurrencePreview.test.js`, `frontend/src/eventRecurrence.test.js`.',
+  },
+  {
     id: '2026-07-22-task-save-date-invert-heal-fix',
     timestamp: '2026-07-22T03:11:00+09:00',
     description: '업무 수정 화면에서 시작일과 완료 예정일이 모두 유효한 업무의 완료 예정일(또는 시작일)만 바꿔 상대편보다 앞서게 되면 "변경사항 저장" 시 원인을 알 수 없는 저장 실패(422)가 발생했습니다. 건드리지 않은 날짜를 자동으로 맞춰주는 자가 치유 로직이 유효성 검사(Pydantic) 이후에만 실행되어, 검사 단계에서 먼저 막히는 문제였습니다. `backend/app/main.py`의 `update_item()`에서 자가 치유를 유효성 검사보다 먼저 수행하도록 순서를 바꿨습니다.',

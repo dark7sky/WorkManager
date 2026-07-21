@@ -404,7 +404,7 @@ class TaskPayload(StrictPayload):
     approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     schedule_approval_status: Literal["none", "pending", "approved", "rejected"] | None = None
     tags: list[str] | None = Field(None, max_length=50)
-    recurrence_rule: Literal["daily", "weekly", "biweekly", "monthly", "yearly"] | None = None
+    recurrence_rule: Literal["daily", "weekly", "biweekly", "monthly", "yearly", "weekdays"] | None = None
     recurrence_end_date: date | None = None
     parent_id: int | None = Field(None, ge=1)
     dependency_ids: list[int] | None = Field(None, max_length=100)
@@ -537,7 +537,7 @@ class TodoPayload(StrictPayload):
     todo_date: date | None = None
     completed: bool | None = None
     tags: list[str] | None = Field(None, max_length=50)
-    recurrence_rule: Literal["daily", "weekly", "biweekly", "monthly", "yearly"] | None = None
+    recurrence_rule: Literal["daily", "weekly", "biweekly", "monthly", "yearly", "weekdays"] | None = None
     recurrence_end_date: date | None = None
     priority: Literal["low", "normal", "high"] | None = None
     link_url: str | None = Field(None, max_length=2000)
@@ -685,7 +685,7 @@ VALID_EVENT_COLORS = {"red", "orange", "yellow", "green", "purple", "gray"}
 VALID_TASK_STATUSES = {"todo", "doing", "done"}
 VALID_TASK_PRIORITIES = {"low", "normal", "high"}
 VALID_TASK_APPROVAL_STATES = {"none", "pending", "approved", "rejected"}
-VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "biweekly", "monthly", "yearly"}
+VALID_TASK_RECURRENCE_RULES = {"daily", "weekly", "biweekly", "monthly", "yearly", "weekdays"}
 TASK_TEXT_LIMITS = {"title": 300, "description": 20000}
 TASK_DEPENDENCY_LIMIT = 100
 
@@ -951,6 +951,11 @@ def next_recurrence_date(value, rule, anchor_day=None, anchor_month_end=False):
         return (current + timedelta(days=7)).isoformat()
     if rule == "biweekly":
         return (current + timedelta(days=14)).isoformat()
+    if rule == "weekdays":
+        nxt = current + timedelta(days=1)
+        while nxt.weekday() >= 5:
+            nxt += timedelta(days=1)
+        return nxt.isoformat()
     if rule == "yearly":
         year = current.year + 1
         last_day = month_calendar.monthrange(year, current.month)[1]
@@ -969,6 +974,11 @@ def _advance_event_datetime(value, rule):
         return value + timedelta(days=7)
     if rule == "biweekly":
         return value + timedelta(days=14)
+    if rule == "weekdays":
+        nxt = value + timedelta(days=1)
+        while nxt.weekday() >= 5:
+            nxt += timedelta(days=1)
+        return nxt
     if rule == "yearly":
         year = value.year + 1
         day = min(value.day, month_calendar.monthrange(year, value.month)[1])

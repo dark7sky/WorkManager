@@ -23,3 +23,8 @@ test('advances yearly and clamps leap-day dates', () => {
   assert.equal(nextRecurrenceDate('2026-07-21', 'yearly'), '2027-07-21')
   assert.equal(nextRecurrenceDate('2028-02-29', 'yearly'), '2029-02-28')
 })
+
+test('weekdays rule skips weekends', () => {
+  assert.equal(nextRecurrenceDate('2026-07-24', 'weekdays'), '2026-07-27')
+  assert.equal(nextRecurrenceDate('2026-07-21', 'weekdays'), '2026-07-22')
+})
