@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-goal-overachievement',
+    timestamp: '2026-07-21T11:55:15+09:00',
+    description: '성과 화면의 기간 목표 진행률이 100%에서 잘려 목표를 초과 달성해도 그 사실을 알 수 없었습니다. 이제 달성률 수치는 100%를 넘겨 그대로 표시하고(진행 막대만 100%에서 채워짐), 목표를 달성한 항목은 초록색으로 강조합니다 (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-21-archive-pagination',
     timestamp: '2026-07-21T11:54:01+09:00',
     description: '업무/할 일/일정/업무 기록 보관함이 전체 목록을 한 번에 불러와 항목이 많으면 느려졌습니다. 감사 로그 화면처럼 50개씩 나눠 불러오고 "더 보기" 버튼으로 이어서 조회하도록 개선했습니다 (`backend/app/main.py`, `frontend/src/components/ArchiveSection.jsx`).',

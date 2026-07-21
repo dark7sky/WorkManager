@@ -356,17 +356,26 @@ test('savePerformanceGoal: clears invalid/empty entries to null', () => {
   assert.deepStrictEqual(result, { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
 })
 
-test('goalProgress: computes clamped percentages against each goal', () => {
+test('goalProgress: computes percentages against each goal, uncapped for overachievement', () => {
   const stats = { completed_tasks: 15, tracked_minutes: 900, completed_todos: 45, events: 20 }
   const result = goalProgress(stats, { taskGoal: 20, minutesGoal: 600, todoGoal: 30, eventGoal: 10 })
   assert.strictEqual(result.taskPercent, 75)
-  assert.strictEqual(result.minutesPercent, 100)
-  assert.strictEqual(result.todoPercent, 100)
-  assert.strictEqual(result.eventsPercent, 100)
+  assert.strictEqual(result.minutesPercent, 150)
+  assert.strictEqual(result.todoPercent, 150)
+  assert.strictEqual(result.eventsPercent, 200)
+})
+
+test('goalProgress: caps bar-width percentages at 100 even when goal is exceeded', () => {
+  const stats = { completed_tasks: 15, tracked_minutes: 900, completed_todos: 45, events: 20 }
+  const result = goalProgress(stats, { taskGoal: 20, minutesGoal: 600, todoGoal: 30, eventGoal: 10 })
+  assert.strictEqual(result.taskBarPercent, 75)
+  assert.strictEqual(result.minutesBarPercent, 100)
+  assert.strictEqual(result.todoBarPercent, 100)
+  assert.strictEqual(result.eventsBarPercent, 100)
 })
 
 test('goalProgress: returns null percent when a goal is unset', () => {
   const stats = { completed_tasks: 5, tracked_minutes: 100, completed_todos: 2, events: 3 }
   const result = goalProgress(stats, { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
-  assert.deepStrictEqual(result, { taskPercent: null, minutesPercent: null, todoPercent: null, eventsPercent: null })
+  assert.deepStrictEqual(result, { taskPercent: null, minutesPercent: null, todoPercent: null, eventsPercent: null, taskBarPercent: null, minutesBarPercent: null, todoBarPercent: null, eventsBarPercent: null })
 })

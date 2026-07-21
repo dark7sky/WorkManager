@@ -189,11 +189,17 @@ export const savePerformanceGoal = (storage, goal) => {
 }
 
 export const goalProgress = (stats, goal) => {
-  const pct = (value, target) => (target ? Math.min(100, Math.round((Number(value) || 0) / target * 100)) : null)
+  const pct = (value, target) => (target ? Math.round((Number(value) || 0) / target * 100) : null)
+  const bar = (percent) => (percent === null ? null : Math.min(100, percent))
+  const taskPercent = pct(stats?.completed_tasks, goal?.taskGoal)
+  const minutesPercent = pct(stats?.tracked_minutes, goal?.minutesGoal)
+  const todoPercent = pct(stats?.completed_todos, goal?.todoGoal)
+  const eventsPercent = pct(stats?.events, goal?.eventGoal)
   return {
-    taskPercent: pct(stats?.completed_tasks, goal?.taskGoal),
-    minutesPercent: pct(stats?.tracked_minutes, goal?.minutesGoal),
-    todoPercent: pct(stats?.completed_todos, goal?.todoGoal),
-    eventsPercent: pct(stats?.events, goal?.eventGoal),
+    taskPercent, minutesPercent, todoPercent, eventsPercent,
+    taskBarPercent: bar(taskPercent),
+    minutesBarPercent: bar(minutesPercent),
+    todoBarPercent: bar(todoPercent),
+    eventsBarPercent: bar(eventsPercent),
   }
 }
