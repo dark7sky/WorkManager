@@ -1015,12 +1015,18 @@ def create_item(table, data, user_id):
 def update_item(table, item_id, data, user_id):
     became_done = False
     todo_became_done = False
-    if table == "tasks" and "start_date" in data and "due_date" in data:
+    if table == "tasks":
         with connection() as c:
-            existing_row = c.execute("SELECT start_date, due_date FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
-        if existing_row and data["start_date"] == existing_row["start_date"] and data["due_date"] == existing_row["due_date"] \
-                and data["due_date"] and data["start_date"] and data["due_date"] < data["start_date"]:
-            data["start_date"], data["due_date"] = data["due_date"], data["start_date"]
+            existing_row = c.execute("SELECT start_date, due_date, recurrence_end_date FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
+        if existing_row:
+            if "start_date" in data and "due_date" in data and data["start_date"] == existing_row["start_date"] and data["due_date"] == existing_row["due_date"] \
+                    and data["due_date"] and data["start_date"] and data["due_date"] < data["start_date"]:
+                data["start_date"], data["due_date"] = data["due_date"], data["start_date"]
+            recurrence_end_unchanged = data.get("recurrence_end_date", existing_row["recurrence_end_date"]) == existing_row["recurrence_end_date"]
+            effective_recurrence_end = data.get("recurrence_end_date", existing_row["recurrence_end_date"])
+            effective_base_date = data.get("due_date", existing_row["due_date"]) or data.get("start_date", existing_row["start_date"])
+            if recurrence_end_unchanged and effective_recurrence_end and effective_base_date and effective_recurrence_end < effective_base_date:
+                data["recurrence_end_date"] = None
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id, item_id)

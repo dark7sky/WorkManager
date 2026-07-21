@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-recurrence-end-date-save-fix',
+    timestamp: '2026-07-21T13:41:19+09:00',
+    description: '반복 업무의 마감일을 늦춰서 저장하면, 편집 폼이 예전 반복 종료일 값을 그대로 다시 보내는 바람에 "반복 종료일" 검증 오류로 저장이 실패하던 문제를 고쳤습니다. 이제 반복 종료일이 실제로 바뀌지 않았다면 새 마감일에 맞춰 자동으로 정리됩니다 (`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-21-legacy-cycle-save-fix',
     timestamp: '2026-07-21T13:26:19+09:00',
     description: '업무를 수정하고 저장할 때, 실제로는 관련 없는 다른 업무들 사이의 예전 순환 참조(선행 업무나 상위 업무 데이터 오류) 때문에 "순환 참조" 오류로 저장이 막히던 문제를 고쳤습니다. 이제 지금 편집 중인 업무 자신이 순환에 포함될 때만 저장을 막습니다 (`backend/app/main.py`).',

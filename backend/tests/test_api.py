@@ -321,6 +321,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_edit_form_resave_self_heals_stale_recurrence_end_date(self, *_):
+        # Regression: editing a recurring task and pushing due_date past its unchanged
+        # recurrence_end_date must not 422 (the edit form always resubmits recurrence_end_date).
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "weekly review", "start_date": "2026-07-25",
+                                           "due_date": "2026-07-25", "recurrence_rule": "weekly",
+                                           "recurrence_end_date": "2026-08-01"}).json()
+        updated = a.patch(f"/api/tasks/{task['id']}", json={
+            "due_date": "2026-08-05", "recurrence_end_date": "2026-08-01"}).json()
+        self.assertEqual(updated["due_date"], "2026-08-05")
+        self.assertIsNone(updated["recurrence_end_date"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_recurring_task_spawn_carries_estimate_link_color_checklist_and_resets_checklist(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={
