@@ -440,6 +440,7 @@ class EventPayload(StrictPayload):
     recurrence_group_id: str | None = Field(None, max_length=64)
     checklist: list[dict] | None = Field(None, max_length=200)
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
+    custom_fields: list[dict] | None = Field(None, max_length=50)
 
     @field_validator("link_url", "color", "priority", "estimated_minutes", mode="before")
     @classmethod
@@ -464,6 +465,11 @@ class EventPayload(StrictPayload):
     @classmethod
     def links_well_formed(cls, value):
         return _clean_links(value)
+
+    @field_validator("custom_fields")
+    @classmethod
+    def custom_fields_well_formed(cls, value):
+        return _clean_custom_fields(value)
 
     @field_validator("checklist")
     @classmethod
@@ -616,7 +622,7 @@ class WorkflowSettingsPayload(StrictPayload):
 MODELS = {"tasks": TaskPayload, "events": EventPayload, "todos": TodoPayload, "work_logs": WorkLogPayload}
 CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links", "custom_fields"}, "updated_at"),
-    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes"}, "updated_at"),
+    "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes", "custom_fields"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "custom_fields", "estimated_minutes"}, None),
     "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes", "custom_fields"}, None),
 }

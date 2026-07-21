@@ -187,6 +187,7 @@ def init_db():
             "conflict_remote_json": "TEXT", "conflict_detected_at": "TEXT", "link_url": "TEXT", "color": "TEXT",
             "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
             "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
+            "custom_fields": "TEXT NOT NULL DEFAULT '[]'",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")

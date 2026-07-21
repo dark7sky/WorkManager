@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-custom-fields',
+    timestamp: '2026-07-21T18:23:51+09:00',
+    description: '업무(Task)·할 일(Todo)·업무 기록(Work log)은 사용자 정의 필드(예: 고객사, 계약 번호)를 지원했지만, 캘린더의 일정(Event)에는 이 기능이 없어 네 항목 유형 간 기능이 어긋나 있었습니다. `events` 테이블에 `custom_fields` 컬럼을 추가하고 백엔드 검증(`EventPayload`)과 캘린더 일정 등록/수정 폼에 동일한 사용자 정의 필드 편집 UI, 목록 배지를 추가했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-21-work-log-custom-fields',
     timestamp: '2026-07-21T16:57:18+09:00',
     description: '업무(Task)와 할 일(Todo)은 이미 사용자 정의 필드(예: 고객사, 계약 번호)를 등록/수정 화면 모두에서 지원했지만, 오늘 한 일(업무 기록)에는 이 기능이 전혀 없어 세 항목 유형 간 기능이 어긋나 있었습니다. `work_logs` 테이블에 `custom_fields` 컬럼을 추가하고 백엔드 검증(`WorkLogPayload`)과 오늘 화면의 기록 등록/수정 폼에 동일한 사용자 정의 필드 편집 UI를 추가했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/logDuplicate.js`).',
