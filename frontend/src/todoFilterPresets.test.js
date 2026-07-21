@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { loadTodoFilterPresets, saveTodoFilterPresets, buildTodoFilterPreset, addTodoFilterPreset, removeTodoFilterPreset } from './todoFilterPresets.js'
+import { loadTodoFilterPresets, saveTodoFilterPresets, buildTodoFilterPreset, addTodoFilterPreset, removeTodoFilterPreset, todoDeepLink } from './todoFilterPresets.js'
 
 const makeStorage = () => {
   const store = new Map()
@@ -12,6 +12,10 @@ const makeStorage = () => {
 
 test('loadTodoFilterPresets returns empty array when nothing stored', () => {
   assert.deepEqual(loadTodoFilterPresets(makeStorage()), [])
+})
+
+test('todoDeepLink builds an internal todo URL with the todoId query param', () => {
+  assert.equal(todoDeepLink('https://app.example.com', '/', 42), 'https://app.example.com/?page=today&todoId=42')
 })
 
 test('loadTodoFilterPresets returns empty array on malformed JSON', () => {

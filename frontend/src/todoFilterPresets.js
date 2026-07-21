@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'wm-todo-filter-presets'
 const NAME_LIMIT = 100
 
+export const todoDeepLink = (origin, pathname, todoId) => `${origin}${pathname}?page=today&todoId=${todoId}`
+
 export const loadTodoFilterPresets = (storage = localStorage) => {
   try {
     const parsed = JSON.parse(storage.getItem(STORAGE_KEY) || '[]')

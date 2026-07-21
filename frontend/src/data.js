@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-deep-link',
+    timestamp: '2026-07-21T19:52:42+09:00',
+    description: '업무(Tasks) 화면에는 특정 항목으로 바로 이동하는 링크 복사 기능이 있었지만, 오늘 화면의 할 일에는 동일한 기능이 없어 특정 할 일을 다른 사람과 공유하거나 즐겨찾기로 저장할 수 없었습니다. `todoDeepLink`(`frontend/src/todoFilterPresets.js`)와 할 일 행의 "링크" 복사 버튼(`frontend/src/screens/Today.jsx`)을 추가하고, `todoId` URL 파라미터로 접속 시 오늘 화면으로 이동해 해당 할 일의 수정 모드를 자동으로 여는 로직을 `App.jsx`에 추가했습니다(회귀 테스트 `todoFilterPresets.test.js`).',
+  },
+  {
     id: '2026-07-21-custom-field-search-parity',
     timestamp: '2026-07-21T19:45:14+09:00',
     description: '업무 검색에는 사용자 정의 필드(라벨/값) 텍스트가 반영되지만, 오늘 화면의 할 일·업무 일지 검색과 캘린더 일정 검색에는 빠져 있어 사용자 정의 필드로만 구분되는 항목을 찾을 수 없었습니다. `filterTodosByQuery`/`filterLogsByQuery`(`frontend/src/todaySearch.js`)와 `filterEventsByQuery`(`frontend/src/eventSearch.js`)가 `custom_fields`의 라벨과 값도 검색하도록 맞췄습니다(회귀 테스트 `todaySearch.test.js`, `eventSearch.test.js`).',
