@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, selectExportRows, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -244,4 +244,11 @@ test('toggleSelectAllIds selects every id when not all selected, and clears when
   assert.deepEqual([...selected], [1, 2, 3])
   const cleared = toggleSelectAllIds([1, 2, 3], new Set([1, 2, 3]))
   assert.deepEqual([...cleared], [])
+})
+
+test('selectExportRows returns only the selected rows when a selection exists, otherwise all shown rows', () => {
+  const shown = [{ id: 1 }, { id: 2 }, { id: 3 }]
+  assert.deepEqual(selectExportRows(shown, new Set()), shown)
+  assert.deepEqual(selectExportRows(shown, new Set([2])), [{ id: 2 }])
+  assert.deepEqual(selectExportRows(shown, undefined), shown)
 })

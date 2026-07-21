@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-export-selected-only',
+    timestamp: '2026-07-21T20:39:00+09:00',
+    description: '업무 화면의 PDF/CSV/Excel/ICS 내보내기 버튼은 항상 필터로 걸러진 전체 목록을 내보내, 여러 업무를 체크박스로 선택해 둔 상태에서도 선택 항목만 골라 내보낼 방법이 없었습니다. 업무를 하나 이상 선택했을 때는 선택된 업무만 내보내도록 동작을 바꾸고, 버튼에 안내 툴팁을 추가했습니다 (`frontend/src/taskFilters.js`의 `selectExportRows`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/taskFilters.test.js`.',
+  },
+  {
     id: '2026-07-21-task-badge-visibility-toggle',
     timestamp: '2026-07-21T20:55:00+09:00',
     description: '업무 간트 목록의 각 행에는 하위 업무/체크리스트/예상 소요시간/반복/관련 링크/사용자 정의 필드/댓글/첨부파일/선행 업무 대기/핵심 경로 등 최대 10종의 배지가 항상 함께 표시되어, 업무가 많거나 화면이 좁을 때 목록이 번잡했습니다. 업무 화면 툴바에 "표시 항목" 드롭다운을 추가해 배지 종류별로 켜고 끌 수 있게 하고 설정을 localStorage에 저장했습니다 (`frontend/src/taskBadgeVisibility.js`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/taskBadgeVisibility.test.js`.',

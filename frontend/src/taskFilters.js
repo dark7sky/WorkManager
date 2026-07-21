@@ -99,6 +99,9 @@ export const allIdsSelected = (ids, selected) => ids.length > 0 && ids.every(id 
 export const toggleSelectAllIds = (ids, selected) =>
   allIdsSelected(ids, selected) ? new Set() : new Set(ids)
 
+export const selectExportRows = (shown, selected) =>
+  selected?.size ? shown.filter(t => selected.has(t.id)) : shown
+
 export const BOARD_STATUSES = ['todo', 'doing', 'done']
 
 export const groupTasksByStatus = tasks => {
