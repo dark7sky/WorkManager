@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-excel-export',
+    timestamp: '2026-07-21T18:37:03+09:00',
+    description: '업무 목록은 CSV·ICS·PDF로만 내보낼 수 있어, Excel에서 곧바로 열어 서식·피벗을 적용하려는 사용자는 CSV를 다시 변환해야 했습니다. 업무 화면에 "Excel" 내보내기 버튼을 추가해 SpreadsheetML(.xls) 형식으로 바로 내려받도록 했습니다. CSV 내보내기와 동일한 헤더·행 데이터를 재사용합니다(`frontend/src/csv.js`의 `taskHeaders`/`taskRows`, `frontend/src/xlsx.js`의 `rowsToSpreadsheetXml`/`tasksToExcelXml`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/xlsx.test.js`.',
+  },
+  {
     id: '2026-07-21-gantt-drag-reparent',
     timestamp: '2026-07-21T18:32:18+09:00',
     description: '간트 차트에서 업무를 다른 업무의 하위로 옮기려면 편집 폼을 열어 "상위 업무" 드롭다운을 찾아 선택하거나, 여러 개를 선택해 일괄 작업 바의 "상위 업무 지정"을 써야 했습니다. 이제 업무 행 제목을 잡아 다른 업무 행 위로 끌어다 놓으면 바로 하위 업무로 이동합니다(자기 자신이나 자신의 하위 업무 위로는 놓을 수 없도록 순환 방지). 기존 `PATCH parent_id` 검증을 그대로 재사용했습니다(`frontend/src/taskHierarchy.js`의 `canReparentTask()`, `frontend/src/screens/Tasks.jsx`, `frontend/src/styles.css`), 테스트는 `frontend/src/taskHierarchy.test.js`.',

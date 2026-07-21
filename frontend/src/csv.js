@@ -22,7 +22,7 @@ const parseChecklistCell = cell => {
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
 
-const headers = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -35,25 +35,24 @@ export const taskExportStatus = (task, todayIso) => {
   return overdue ? 'overdue' : task.status
 }
 
-export const tasksToCsv = (tasks, todayIso) => {
-  const rows = tasks.map(task => [
-    task.title,
-    taskStatusLabels[taskExportStatus(task, todayIso)] || task.status,
-    priorityValueToLabel[task.priority] || task.priority,
-    task.start_date,
-    task.start_time,
-    task.due_date,
-    task.due_time,
-    `${Number(task.progress || 0)}%`,
-    (task.tags || []).join('; '),
-    task.description,
-    task.link_url,
-    task.estimated_minutes ?? '',
-    colorValueToLabel[task.color] || '',
-    checklistSummary(task.checklist),
-  ])
-  return [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const taskRows = (tasks, todayIso) => tasks.map(task => [
+  task.title,
+  taskStatusLabels[taskExportStatus(task, todayIso)] || task.status,
+  priorityValueToLabel[task.priority] || task.priority,
+  task.start_date,
+  task.start_time,
+  task.due_date,
+  task.due_time,
+  `${Number(task.progress || 0)}%`,
+  (task.tags || []).join('; '),
+  task.description,
+  task.link_url,
+  task.estimated_minutes ?? '',
+  colorValueToLabel[task.color] || '',
+  checklistSummary(task.checklist),
+])
+
+export const tasksToCsv = (tasks, todayIso) => [taskHeaders, ...taskRows(tasks, todayIso)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const taskCsvFilename = date => `workmanager-tasks-${date}.csv`
 
