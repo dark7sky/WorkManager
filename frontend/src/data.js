@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-badge-visibility-toggle',
+    timestamp: '2026-07-21T20:55:00+09:00',
+    description: '업무 간트 목록의 각 행에는 하위 업무/체크리스트/예상 소요시간/반복/관련 링크/사용자 정의 필드/댓글/첨부파일/선행 업무 대기/핵심 경로 등 최대 10종의 배지가 항상 함께 표시되어, 업무가 많거나 화면이 좁을 때 목록이 번잡했습니다. 업무 화면 툴바에 "표시 항목" 드롭다운을 추가해 배지 종류별로 켜고 끌 수 있게 하고 설정을 localStorage에 저장했습니다 (`frontend/src/taskBadgeVisibility.js`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/taskBadgeVisibility.test.js`.',
+  },
+  {
     id: '2026-07-21-event-manual-sort-order',
     timestamp: '2026-07-21T20:40:00+09:00',
     description: '오늘 화면의 할 일/업무 기록 목록은 드래그하거나 ▲▼ 버튼으로 순서를 직접 지정하는 "직접 정렬" 모드를 지원했지만, 캘린더 화면의 일정 목록(모바일 아젠다)에는 시간순/우선순위순/제목순만 있고 수동 정렬이 없었습니다. 동일한 패턴으로 `frontend/src/eventOrder.js`(저장/이동 로직)를 추가하고 `frontend/src/eventPins.js`에 `manual` 정렬 옵션을 더해, 캘린더 일정 목록에도 드래그 및 키보드 ▲▼ 버튼으로 순서를 저장하는 "직접 정렬" 모드를 추가했습니다 (`frontend/src/screens/Calendar.jsx`), 테스트는 `frontend/src/eventOrder.test.js`, `frontend/src/eventPins.test.js`.',
