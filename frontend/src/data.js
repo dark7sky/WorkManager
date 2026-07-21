@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-recurrence-next-occurrence-preview',
+    timestamp: '2026-07-21T20:25:11+09:00',
+    description: '업무와 할 일에 반복 주기(매일/매주/격주/매월/매년)를 설정할 때, 저장 전까지는 다음 회차가 언제인지 알 수 없었습니다. 새 순수 함수 `nextRecurrenceDate`(`frontend/src/recurrencePreview.js`)를 추가해 업무 작성/수정 폼(`frontend/src/components/TaskForm.jsx`)과 오늘 화면의 할 일 추가/수정 폼(`frontend/src/screens/Today.jsx`)에 "다음 회차" 예정일을 실시간으로 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-csv-import-dedup-parity',
     timestamp: '2026-07-21T20:18:42+09:00',
     description: '업무 CSV 가져오기는 이미 내보낸 파일을 다시 불러오거나 같은 파일을 두 번 불러올 때 중복 항목을 건너뛰도록 되어 있었지만, 일정·할 일·업무 기록 CSV 가져오기는 이 검사가 없어 매번 완전히 중복된 항목이 그대로 추가되었습니다. `dedupeImportedEvents`/`dedupeImportedTodos`/`dedupeImportedLogs`(`frontend/src/csv.js`)를 추가해 제목/날짜(또는 내용/날짜) 기준으로 기존 항목 및 같은 배치 내 중복을 건너뛰고 "중복 건너뜀" 메시지를 표시하도록 했습니다(`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
