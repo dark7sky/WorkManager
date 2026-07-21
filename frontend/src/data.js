@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-public-share-link-url-parity',
+    timestamp: '2026-07-22T08:56:40+09:00',
+    description: '업무/일정/할 일/업무 기록의 공개 공유 링크 화면(로그인 없이 보는 읽기 전용 화면)에 관련 링크(link_url) 필드가 누락되어 있었습니다. 백엔드 공개 조회 API(/api/public/{tasks,events,todos,work_logs}/{token})의 SELECT에 link_url을 추가하고, 4개의 PublicXxx.jsx 화면에 "관련 링크" 버튼을 표시하도록 하여 공유 필드 노출 범위를 통일했습니다.',
+  },
+  {
     id: '2026-07-22-toast-alert-role',
     timestamp: '2026-07-22T08:50:12+09:00',
     description: '알림(Toast) 메시지가 성공/오류 상관없이 항상 role="status"(정중한 알림)로 렌더링되어, 화면 낭독기 사용자가 저장 실패 같은 오류 메시지를 놓치기 쉬웠습니다. 오류 유형 토스트는 role="alert"와 aria-live="assertive"로 즉시 알리도록 하고, 성공/일반 알림은 기존처럼 role="status"/aria-live="polite"를 유지하도록 `frontend/src/components/Toast.jsx`를 수정했습니다.',

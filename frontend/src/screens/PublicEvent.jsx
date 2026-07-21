@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays, ExternalLink } from 'lucide-react'
 import { api } from '../api'
 
 const formatTimestamp = value => {
@@ -32,6 +32,7 @@ export default function PublicEvent({ token }) {
           {event.end_at ? <div><dt>종료</dt><dd>{formatTimestamp(event.end_at)}</dd></div> : null}
           {event.tags?.length ? <div><dt>태그</dt><dd>{event.tags.join(', ')}</dd></div> : null}
         </dl>
+        {event.link_url ? <a className="task-link" href={event.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
         <p className="empty-state">최종 수정 {formatTimestamp(event.updated_at)}</p>
       </section> : null}
     </div>

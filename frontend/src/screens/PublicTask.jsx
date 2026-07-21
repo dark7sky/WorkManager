@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ListTodo } from 'lucide-react'
+import { ListTodo, ExternalLink } from 'lucide-react'
 import { api } from '../api'
 
 const statusLabel = { todo: '예정', doing: '진행 중', done: '완료' }
@@ -34,6 +34,7 @@ export default function PublicTask({ token }) {
           {task.due_date ? <div><dt>마감일</dt><dd>{task.due_date}</dd></div> : null}
           {task.tags?.length ? <div><dt>태그</dt><dd>{task.tags.join(', ')}</dd></div> : null}
         </dl>
+        {task.link_url ? <a className="task-link" href={task.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
         <p className="empty-state">최종 수정 {formatTimestamp(task.updated_at)}</p>
       </section> : null}
     </div>

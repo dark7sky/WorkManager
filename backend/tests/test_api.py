@@ -433,7 +433,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        task = a.post("/api/tasks", json={"title": "shared plan", "description": "secret-ish detail"}).json()
+        task = a.post("/api/tasks", json={"title": "shared plan", "description": "secret-ish detail", "link_url": "https://example.com/spec"}).json()
         no_auth = TestClient(self.app)
         self.assertEqual(no_auth.get("/api/public/tasks/does-not-exist").status_code, 404)
         shared = a.post(f"/api/tasks/{task['id']}/share")
@@ -443,6 +443,7 @@ class ApiTests(unittest.TestCase):
         public = no_auth.get(f"/api/public/tasks/{token}")
         self.assertEqual(public.status_code, 200, public.text)
         self.assertEqual(public.json()["title"], "shared plan")
+        self.assertEqual(public.json()["link_url"], "https://example.com/spec")
         self.assertNotIn("user_id", public.json())
         self.assertNotIn("assignee_name", public.json())
         self.assertEqual(b.get(f"/api/public/tasks/{token}").status_code, 200)
@@ -474,7 +475,7 @@ class ApiTests(unittest.TestCase):
         a, b = self.client(self.token_a), self.client(self.token_b)
         event = a.post("/api/events", json={
             "title": "client kickoff", "start_at": "2025-01-01T10:00:00", "end_at": "2025-01-01T11:00:00",
-            "location": "meeting room"}).json()
+            "location": "meeting room", "link_url": "https://example.com/agenda"}).json()
         no_auth = TestClient(self.app)
         self.assertEqual(no_auth.get("/api/public/events/does-not-exist").status_code, 404)
         shared = a.post(f"/api/events/{event['id']}/share")
@@ -484,6 +485,7 @@ class ApiTests(unittest.TestCase):
         public = no_auth.get(f"/api/public/events/{token}")
         self.assertEqual(public.status_code, 200, public.text)
         self.assertEqual(public.json()["title"], "client kickoff")
+        self.assertEqual(public.json()["link_url"], "https://example.com/agenda")
         self.assertNotIn("user_id", public.json())
         self.assertEqual(b.get(f"/api/public/events/{token}").status_code, 200)
         revoked = a.delete(f"/api/events/{event['id']}/share")
@@ -494,7 +496,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        todo = a.post("/api/todos", json={"title": "pick up dry cleaning", "todo_date": "2026-08-01"}).json()
+        todo = a.post("/api/todos", json={"title": "pick up dry cleaning", "todo_date": "2026-08-01", "link_url": "https://example.com/store"}).json()
         no_auth = TestClient(self.app)
         self.assertEqual(no_auth.get("/api/public/todos/does-not-exist").status_code, 404)
         shared = a.post(f"/api/todos/{todo['id']}/share")
@@ -504,6 +506,7 @@ class ApiTests(unittest.TestCase):
         public = no_auth.get(f"/api/public/todos/{token}")
         self.assertEqual(public.status_code, 200, public.text)
         self.assertEqual(public.json()["title"], "pick up dry cleaning")
+        self.assertEqual(public.json()["link_url"], "https://example.com/store")
         self.assertNotIn("user_id", public.json())
         self.assertEqual(b.get(f"/api/public/todos/{token}").status_code, 200)
         revoked = a.delete(f"/api/todos/{todo['id']}/share")
@@ -514,7 +517,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        log = a.post("/api/work_logs", json={"content": "wrote release notes", "log_date": "2026-07-21"}).json()
+        log = a.post("/api/work_logs", json={"content": "wrote release notes", "log_date": "2026-07-21", "link_url": "https://example.com/notes"}).json()
         no_auth = TestClient(self.app)
         self.assertEqual(no_auth.get("/api/public/work_logs/does-not-exist").status_code, 404)
         shared = a.post(f"/api/work_logs/{log['id']}/share")
@@ -524,6 +527,7 @@ class ApiTests(unittest.TestCase):
         public = no_auth.get(f"/api/public/work_logs/{token}")
         self.assertEqual(public.status_code, 200, public.text)
         self.assertEqual(public.json()["content"], "wrote release notes")
+        self.assertEqual(public.json()["link_url"], "https://example.com/notes")
         self.assertNotIn("user_id", public.json())
         self.assertEqual(b.get(f"/api/public/work_logs/{token}").status_code, 200)
         revoked = a.delete(f"/api/work_logs/{log['id']}/share")

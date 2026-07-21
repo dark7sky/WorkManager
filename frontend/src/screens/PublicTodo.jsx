@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ListChecks } from 'lucide-react'
+import { ListChecks, ExternalLink } from 'lucide-react'
 import { api } from '../api'
 
 const priorityLabel = { low: '낮음', normal: '보통', high: '높음' }
@@ -32,6 +32,7 @@ export default function PublicTodo({ token }) {
           {todo.todo_date ? <div><dt>날짜</dt><dd>{todo.todo_date}{todo.todo_time ? ` ${todo.todo_time}` : ''}</dd></div> : null}
           {todo.tags?.length ? <div><dt>태그</dt><dd>{todo.tags.join(', ')}</dd></div> : null}
         </dl>
+        {todo.link_url ? <a className="task-link" href={todo.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
         <p className="empty-state">생성 {formatTimestamp(todo.created_at)}</p>
       </section> : null}
     </div>

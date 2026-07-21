@@ -2641,7 +2641,7 @@ def public_task(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-task", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
-          tags,created_at,updated_at FROM tasks
+          tags,link_url,created_at,updated_at FROM tasks
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
@@ -2654,7 +2654,7 @@ def public_event(token: str, request: Request):
     """Public, read-only view of an event shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-event", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT title,description,location,start_at,end_at,tags,created_at,updated_at FROM events
+        item = c.execute("""SELECT title,description,location,start_at,end_at,tags,link_url,created_at,updated_at FROM events
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
@@ -2667,7 +2667,7 @@ def public_todo(token: str, request: Request):
     """Public, read-only view of a todo shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-todo", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,created_at FROM todos
+        item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,link_url,created_at FROM todos
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
@@ -2680,7 +2680,7 @@ def public_work_log(token: str, request: Request):
     """Public, read-only view of a work log shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-work-log", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,created_at FROM work_logs
+        item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,link_url,created_at FROM work_logs
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:

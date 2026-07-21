@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NotebookPen } from 'lucide-react'
+import { NotebookPen, ExternalLink } from 'lucide-react'
 import { api } from '../api'
 
 const priorityLabel = { low: '낮음', normal: '보통', high: '높음' }
@@ -32,6 +32,7 @@ export default function PublicWorkLog({ token }) {
           {log.duration_minutes ? <div><dt>소요 시간</dt><dd>{log.duration_minutes}분</dd></div> : null}
           {log.tags?.length ? <div><dt>태그</dt><dd>{log.tags.join(', ')}</dd></div> : null}
         </dl>
+        {log.link_url ? <a className="task-link" href={log.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
         <p className="empty-state">생성 {formatTimestamp(log.created_at)}</p>
       </section> : null}
     </div>
