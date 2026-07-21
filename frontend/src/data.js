@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-calendar-feed-reminder-alarms',
+    timestamp: '2026-07-21T21:35:00+09:00',
+    description: '업무/일정/할 일에 개별 알림 시점(`reminder_minutes_before`)을 설정해도 캘린더 구독(webcal) 피드와 .ics 내보내기에는 반영되지 않아, Google/Apple/Outlook 캘린더로 가져가면 알림 없이 조용히 등록됐습니다. `build_calendar_feed`(`backend/app/main.py`)와 내보내기 함수(`frontend/src/ics.js`의 `eventsToIcs`/`tasksToIcs`/`todosToIcs`)가 시간이 지정된 항목에 `VALARM`(`TRIGGER:-PT{n}M`) 블록을 추가하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-invoice-biz-reg-number',
     timestamp: '2026-07-21T21:20:00+09:00',
     description: '청구서 PDF에는 청구 대상 이름과 시급×시간 금액만 표시되고 사업자등록번호가 없어, 세금계산서 등 공식 증빙에 필요한 정보를 인쇄 후 손으로 적어 넣어야 했습니다. 설정에 "사업자등록번호" 필드를 추가하고(`billing_biz_reg_number`, `backend/app/main.py`), 청구서 PDF 상단 "청구 대상" 줄 아래에 표시하도록 했습니다 (`frontend/src/screens/Settings.jsx`, `frontend/src/screens/Performance.jsx`, `frontend/src/invoiceReport.js`).',

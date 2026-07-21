@@ -2334,6 +2334,27 @@ class ApiTests(unittest.TestCase):
         second_path = "/" + second["feed_url"].split("/", 3)[3]
         self.assertEqual(TestClient(self.app).get(second_path).status_code, 404)
 
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_calendar_feed_includes_valarm_for_items_with_reminder_lead(self, *_):
+        a = self.client(self.token_a)
+        a.post("/api/tasks", json={"title": "reminded task", "due_date": "2026-07-20", "due_time": "09:00",
+                                    "reminder_minutes_before": 30})
+        a.post("/api/tasks", json={"title": "no-time task", "due_date": "2026-07-20", "reminder_minutes_before": 30})
+        a.post("/api/events", json={"title": "reminded event", "start_at": "2026-07-21T10:00:00",
+                                     "end_at": "2026-07-21T11:00:00", "reminder_minutes_before": 15})
+        a.post("/api/todos", json={"title": "reminded todo", "todo_date": "2026-07-22", "todo_time": "08:00",
+                                    "reminder_minutes_before": 5})
+        feed_url = a.post("/api/settings/calendar-feed/rotate").json()["feed_url"]
+        path = "/" + feed_url.split("/", 3)[3]
+        text = TestClient(self.app).get(path).text
+        self.assertIn("TRIGGER:-PT30M", text)
+        self.assertIn("TRIGGER:-PT15M", text)
+        self.assertIn("TRIGGER:-PT5M", text)
+        # all-day task with no due_time has no meaningful alert moment, so no VALARM for it
+        self.assertEqual(text.count("BEGIN:VALARM"), 3)
+        a.delete("/api/settings/calendar-feed")
+
     @patch("app.main.google_calendar.selected_calendar", return_value="cal-1")
     @patch("app.main.google_calendar.token_status", return_value={"connected": True})
     def test_google_status_reports_last_sync_at(self, *_):

@@ -138,6 +138,11 @@ def _ics_datetime(value):
     return datetime.fromisoformat(value).strftime("%Y%m%dT%H%M%S")
 
 
+def _ics_valarm(lines, reminder_minutes_before):
+    if not reminder_minutes_before: return
+    lines += ["BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:REMINDER", f"TRIGGER:-PT{reminder_minutes_before}M", "END:VALARM"]
+
+
 def build_calendar_feed(user_id):
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//WorkManager//Calendar Feed//KO", "CALSCALE:GREGORIAN"]
     for e in rows("events", user_id):
@@ -147,6 +152,7 @@ def build_calendar_feed(user_id):
                   f"SUMMARY:{_ics_escape(e['title'])}"]
         if e.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(e['description'])}")
         if e.get("location"): lines.append(f"LOCATION:{_ics_escape(e['location'])}")
+        _ics_valarm(lines, e.get("reminder_minutes_before"))
         lines.append("END:VEVENT")
     for t in rows("tasks", user_id):
         if not t.get("due_date"): continue
@@ -159,6 +165,7 @@ def build_calendar_feed(user_id):
                   dtstart,
                   f"SUMMARY:{_ics_escape('[업무] ' + t['title'])}"]
         if t.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(t['description'])}")
+        if t.get("due_time"): _ics_valarm(lines, t.get("reminder_minutes_before"))
         lines.append("END:VEVENT")
     for td in rows("todos", user_id):
         if not td.get("todo_date"): continue
@@ -171,6 +178,7 @@ def build_calendar_feed(user_id):
                   dtstart,
                   f"SUMMARY:{_ics_escape('[할 일] ' + td['title'])}"]
         if td.get("memo"): lines.append(f"DESCRIPTION:{_ics_escape(td['memo'])}")
+        if td.get("todo_time"): _ics_valarm(lines, td.get("reminder_minutes_before"))
         lines.append("END:VEVENT")
     lines.append("END:VCALENDAR")
     return "\r\n".join(_ics_fold(line) for line in lines)

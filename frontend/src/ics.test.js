@@ -24,6 +24,13 @@ test('icsFilename uses the requested date', () => {
   assert.equal(icsFilename('2026-07-12'), 'workmanager-events-2026-07-12.ics')
 })
 
+test('eventsToIcs emits a VALARM when the event has a reminder lead, omits it otherwise', () => {
+  const withReminder = eventsToIcs([{ id: 1, title: '알림 있음', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00', reminder_minutes_before: 15 }])
+  assert.match(withReminder, /BEGIN:VALARM[\s\S]*TRIGGER:-PT15M[\s\S]*END:VALARM/)
+  const withoutReminder = eventsToIcs([{ id: 2, title: '알림 없음', start_at: '2026-07-06T10:00:00+09:00', end_at: '2026-07-06T11:00:00+09:00' }])
+  assert.doesNotMatch(withoutReminder, /BEGIN:VALARM/)
+})
+
 test('tasksToIcs emits an all-day VEVENT per task with a due date', () => {
   const ics = tasksToIcs([
     { id: 5, title: '기획, 승인', description: '검토\n필요', due_date: '2026-07-20' },
@@ -43,6 +50,16 @@ test('tasksToIcs emits a timed VEVENT when the task has a due_time', () => {
   assert.match(ics, /DTEND:20260720T063000Z/)
 })
 
+test('tasksToIcs emits a VALARM only for timed tasks with a reminder lead', () => {
+  const ics = tasksToIcs([
+    { id: 9, title: '시간 있음', due_date: '2026-07-20', due_time: '15:00', reminder_minutes_before: 30 },
+    { id: 10, title: '알림 없음', due_date: '2026-07-20', due_time: '15:00' },
+    { id: 11, title: '종일', due_date: '2026-07-20', reminder_minutes_before: 30 },
+  ])
+  assert.match(ics, /UID:task-9@workmanager[\s\S]*TRIGGER:-PT30M/)
+  assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 1)
+})
+
 test('taskIcsFilename uses the requested date', () => {
   assert.equal(taskIcsFilename('2026-07-12'), 'workmanager-tasks-2026-07-12.ics')
 })
@@ -59,6 +76,15 @@ test('todosToIcs emits an all-day VEVENT for a date-only todo and a timed VEVENT
   assert.match(ics, /DESCRIPTION:메모\\n확인/)
   assert.match(ics, /UID:todo-8@workmanager[\s\S]*DTSTART:20260721T010000Z[\s\S]*DTEND:20260721T013000Z/)
   assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 2)
+})
+
+test('todosToIcs emits a VALARM only for timed todos with a reminder lead', () => {
+  const ics = todosToIcs([
+    { id: 8, title: '시간 있음', todo_date: '2026-07-21', todo_time: '10:00', reminder_minutes_before: 5 },
+    { id: 9, title: '종일', todo_date: '2026-07-21', reminder_minutes_before: 5 },
+  ])
+  assert.match(ics, /UID:todo-8@workmanager[\s\S]*TRIGGER:-PT5M/)
+  assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 1)
 })
 
 test('todoIcsFilename uses the requested date', () => {

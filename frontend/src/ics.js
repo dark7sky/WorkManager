@@ -19,6 +19,11 @@ const foldLine = line => {
   return chunks.join('\r\n')
 }
 
+const pushValarm = (lines, reminderMinutesBefore) => {
+  if (!reminderMinutesBefore) return
+  lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:REMINDER', `TRIGGER:-PT${reminderMinutesBefore}M`, 'END:VALARM')
+}
+
 export const eventsToIcs = events => {
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//WorkManager//Calendar Export//KO']
   for (const event of events) {
@@ -38,6 +43,7 @@ export const eventsToIcs = events => {
     if (event.link_url) lines.push(`URL:${escapeIcsText(event.link_url)}`)
     if (event.color) lines.push(`X-WM-COLOR:${event.color}`)
     if (event.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(event.checklist))}`)
+    pushValarm(lines, event.reminder_minutes_before)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -73,6 +79,7 @@ export const tasksToIcs = tasks => {
     if (task.link_url) lines.push(`URL:${escapeIcsText(task.link_url)}`)
     if (task.color) lines.push(`X-WM-COLOR:${task.color}`)
     if (task.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(task.checklist))}`)
+    if (task.due_time) pushValarm(lines, task.reminder_minutes_before)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
@@ -103,6 +110,7 @@ export const todosToIcs = todos => {
     if (todo.link_url) lines.push(`URL:${escapeIcsText(todo.link_url)}`)
     if (todo.color) lines.push(`X-WM-COLOR:${todo.color}`)
     if (todo.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(todo.checklist))}`)
+    if (todo.todo_time) pushValarm(lines, todo.reminder_minutes_before)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')
