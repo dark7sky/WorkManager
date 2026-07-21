@@ -51,12 +51,16 @@ export const childTaskIds = (tasks, taskId) => {
   return result
 }
 
-export const taskParentOptions = (tasks, currentTaskId) => {
+export const taskParentOptions = (tasks, currentTaskId, currentParentId) => {
   const blocked = childTaskIds(tasks, currentTaskId)
   if (currentTaskId) blocked.add(currentTaskId)
-  return orderTasksHierarchically(tasks, tasks)
+  const options = orderTasksHierarchically(tasks, tasks)
     .filter(({ task }) => !blocked.has(task.id))
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
+  if (currentParentId && !options.some(option => option.id === currentParentId)) {
+    options.unshift({ id: currentParentId, label: `#${currentParentId} (보관됨/목록에 없음)` })
+  }
+  return options
 }
 
 export const dependentTaskIds = (tasks, taskId) => {
@@ -86,12 +90,17 @@ export const directDependentTasks = (tasks, taskId) => {
     .map(task => ({ id: task.id, title: task.title || `#${task.id}` }))
 }
 
-export const taskDependencyOptions = (tasks, currentTaskId) => {
+export const taskDependencyOptions = (tasks, currentTaskId, currentDependencyIds) => {
   const blocked = dependentTaskIds(tasks, currentTaskId)
   if (currentTaskId) blocked.add(currentTaskId)
-  return orderTasksHierarchically(tasks, tasks)
+  const options = orderTasksHierarchically(tasks, tasks)
     .filter(({ task }) => !blocked.has(task.id))
     .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
+  const knownIds = new Set(options.map(option => option.id))
+  for (const id of currentDependencyIds || []) {
+    if (!knownIds.has(id)) { options.unshift({ id, label: `#${id} (보관됨/목록에 없음)` }); knownIds.add(id) }
+  }
+  return options
 }
 
 export const matchesDependencyFilter = (option, query) => !query.trim() || option.label.toLowerCase().includes(query.trim().toLowerCase())

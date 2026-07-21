@@ -29,6 +29,16 @@ test('taskParentOptions labels nested parent choices with hierarchy depth', () =
   assert.deepEqual(taskParentOptions(tasks).map(option => option.label), ['Alpha', '-- Bravo', '-- -- Charlie', 'Delta'])
 })
 
+test('taskParentOptions keeps the current parent selectable even when archived/missing from the list', () => {
+  const options = taskParentOptions(tasks, 3, 99)
+  assert.deepEqual(options[0], { id: 99, label: '#99 (보관됨/목록에 없음)' })
+})
+
+test('taskDependencyOptions keeps current dependencies selectable even when archived/missing from the list', () => {
+  const options = taskDependencyOptions(tasks, 3, [99])
+  assert.ok(options.some(option => option.id === 99))
+})
+
 test('orderTasksHierarchically places children directly below visible parents', () => {
   const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks)
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[1, 0], [2, 1], [3, 2], [4, 0]])

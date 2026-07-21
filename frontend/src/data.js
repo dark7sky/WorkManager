@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-archived-link-save-fix',
+    timestamp: '2026-07-21T13:20:00+09:00',
+    description: '상위 업무나 선행 업무가 보관된 상태에서 하위/후행 업무를 열어 저장하면, 선택 목록에 해당 업무가 보이지 않아 연결이 조용히 끊어지던 문제를 고쳤습니다. 이제 보관된 업무도 "(보관됨/목록에 없음)" 표시로 선택 목록에 유지되어, 실제로 변경하지 않는 한 연결이 그대로 저장됩니다 (`frontend/src/taskHierarchy.js`, `frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-21-bulk-promote-todo',
     timestamp: '2026-07-21T13:14:00+09:00',
     description: '오늘 할 일 목록의 일괄 작업 바에 "업무로 전환" 버튼을 추가했습니다. 기존에는 할 일을 업무로 전환하려면 한 번에 하나씩만 가능했는데, 이제 여러 할 일을 선택해 한 번에 업무로 옮길 수 있습니다 (`frontend/src/App.jsx`, `frontend/src/screens/Today.jsx`).',

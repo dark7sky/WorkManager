@@ -46,8 +46,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     if (value !== null && progressRef.current) progressRef.current.value = value
   }
   const today = new Date().toLocaleDateString('en-CA')
-  const parentOptions = taskParentOptions(tasks, task?.id)
-  const dependencyOptions = taskDependencyOptions(tasks, task?.id)
+  const parentOptions = taskParentOptions(tasks, task?.id, task?.parent_id || null)
+  const dependencyOptions = taskDependencyOptions(tasks, task?.id, (task?.dependency_ids || []).map(Number))
   const [dependencyFilter, setDependencyFilter] = useState('')
   const dependentTasks = directDependentTasks(tasks, task?.id)
   const [startDateVal, setStartDateVal] = useState(() => initialTaskDateValue(task, 'start_date', today))
