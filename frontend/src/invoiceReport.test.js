@@ -44,6 +44,16 @@ test('workLogsToPrintableInvoice omits client line when not provided', () => {
   assert.doesNotMatch(html, /청구 대상:/)
 })
 
+test('workLogsToPrintableInvoice shows escaped business registration number when provided', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', bizRegNumber: '<123>-45-67890' })
+  assert.match(html, /사업자등록번호: &lt;123&gt;-45-67890/)
+})
+
+test('workLogsToPrintableInvoice omits business registration number line when not provided', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03' })
+  assert.doesNotMatch(html, /사업자등록번호:/)
+})
+
 test('workLogsToPrintableInvoice handles no billable logs', () => {
   const html = workLogsToPrintableInvoice([], { start: '2026-07-01', end: '2026-07-03' })
   assert.match(html, /청구 가능한 업무 기록이 없습니다/)

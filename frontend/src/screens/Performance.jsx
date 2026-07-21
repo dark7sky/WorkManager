@@ -121,7 +121,7 @@ export default function Performance({ notify, onDataChanged }) {
 
   const printInvoice = useCallback(() => {
     if (!data || invalidRange) return
-    const html = workLogsToPrintableInvoice(data.work_logs || [], { start: dates[0], end: dates[1], hourlyRate: data.summary?.billing_hourly_rate, clientName: data.summary?.billing_client_name, generatedAt: new Date().toISOString() })
+    const html = workLogsToPrintableInvoice(data.work_logs || [], { start: dates[0], end: dates[1], hourlyRate: data.summary?.billing_hourly_rate, clientName: data.summary?.billing_client_name, bizRegNumber: data.summary?.billing_biz_reg_number, generatedAt: new Date().toISOString() })
     const win = window.open('', '_blank')
     if (!win) return
     win.document.open(); win.document.write(html); win.document.close()

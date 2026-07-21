@@ -22,6 +22,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [workflowSettings, setWorkflowSettings] = useState(null)
   const [billingRateDraft, setBillingRateDraft] = useState('')
   const [billingClientNameDraft, setBillingClientNameDraft] = useState('')
+  const [billingBizRegNumberDraft, setBillingBizRegNumberDraft] = useState('')
   const [calendarFeed, setCalendarFeed] = useState(null)
   const [calendarFeedUrl, setCalendarFeedUrl] = useState('')
   const [sessions, setSessions] = useState(null)
@@ -66,6 +67,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
       setWorkflowSettings(workflow)
       setBillingRateDraft(workflow?.billing_hourly_rate != null ? String(workflow.billing_hourly_rate) : '')
       setBillingClientNameDraft(workflow?.billing_client_name || '')
+      setBillingBizRegNumberDraft(workflow?.billing_biz_reg_number || '')
       setCalendarFeed(feed)
       setServerErrors(errors.items || [])
       setSessions(sessionList.sessions || [])
@@ -309,6 +311,21 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
     }
   }
 
+  const saveBillingBizRegNumber = async e => {
+    e.preventDefault()
+    setBusy('billing-biz-reg-save')
+    try {
+      const result = await api.saveWorkflowSettings({ billing_biz_reg_number: billingBizRegNumberDraft.trim() || null })
+      setWorkflowSettings(result)
+      setBillingBizRegNumberDraft(result.billing_biz_reg_number || '')
+      notify('사업자등록번호를 저장했습니다.')
+    } catch (e) {
+      notify(e.message, 'error')
+    } finally {
+      setBusy('')
+    }
+  }
+
   const rotateCalendarFeed = async () => {
     setBusy('feed-rotate')
     try {
@@ -415,6 +432,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
         <div className="settings-heading"><span><ClipboardList /></span><div><h2>청구 시급</h2><p>시급을 설정하면 성과 화면에서 청구 가능 시간을 금액으로 환산해 보여줍니다.</p></div></div>
         {workflowSettings ? <form className="integration-body" onSubmit={saveBillingHourlyRate}><label>시급 (원)<input type="number" min="0" step="1000" placeholder="예: 50000" value={billingRateDraft} disabled={busy === 'billing-rate-save'} onChange={e => setBillingRateDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-rate-save'}>{busy === 'billing-rate-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_hourly_rate != null ? `현재 시급: ${workflowSettings.billing_hourly_rate.toLocaleString('ko-KR')}원` : '시급을 설정하지 않으면 금액은 표시되지 않습니다.'}</small></form> : <div className="skeleton lines" />}
         {workflowSettings ? <form className="integration-body" onSubmit={saveBillingClientName}><label>청구 대상 이름<input type="text" maxLength={200} placeholder="예: (주)에이스컴퍼니" value={billingClientNameDraft} disabled={busy === 'billing-client-save'} onChange={e => setBillingClientNameDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-client-save'}>{busy === 'billing-client-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_client_name ? `청구서에 "${workflowSettings.billing_client_name}" 앞으로 표시됩니다.` : '설정하면 청구서 PDF 상단에 청구 대상으로 표시됩니다.'}</small></form> : null}
+        {workflowSettings ? <form className="integration-body" onSubmit={saveBillingBizRegNumber}><label>사업자등록번호<input type="text" maxLength={50} placeholder="예: 123-45-67890" value={billingBizRegNumberDraft} disabled={busy === 'billing-biz-reg-save'} onChange={e => setBillingBizRegNumberDraft(e.target.value)} /></label><button type="submit" className="secondary" disabled={busy === 'billing-biz-reg-save'}>{busy === 'billing-biz-reg-save' ? <LoaderCircle className="spin" /> : null} 저장</button><small>{workflowSettings.billing_biz_reg_number ? `청구서에 사업자등록번호 "${workflowSettings.billing_biz_reg_number}"가 표시됩니다.` : '설정하면 청구서 PDF 상단에 사업자등록번호로 표시됩니다.'}</small></form> : null}
       </section>
       <section className="settings-card">
         <div className="settings-heading"><span><CalendarSync /></span><div><h2>캘린더 구독 피드</h2><p>Google·Apple·Outlook 캘린더에 구독 주소를 등록하면 업무 마감일과 일정이 자동으로 최신 상태를 유지합니다.</p></div><em className={`status-pill ${calendarFeed?.enabled ? 'online' : ''}`}>{calendarFeed?.enabled ? '켜짐' : '꺼짐'}</em></div>

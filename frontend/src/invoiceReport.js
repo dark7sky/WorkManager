@@ -18,7 +18,7 @@ export const invoiceTotals = (logs, hourlyRate) => {
 
 export const defaultInvoiceNumber = (start, end) => `INV-${String(start || '').replaceAll('-', '')}-${String(end || '').replaceAll('-', '')}`
 
-export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
+export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, bizRegNumber, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
   const billable = billableWorkLogs(logs)
   const { minutes, amount } = invoiceTotals(logs, hourlyRate)
   const number = invoiceNumber || defaultInvoiceNumber(start, end)
@@ -52,6 +52,7 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clien
     <h1>${escapeHtml(title)}</h1>
     <p>청구서 번호: ${escapeHtml(number)}</p>
     ${clientName ? `<p>청구 대상: ${escapeHtml(clientName)}</p>` : ''}
+    ${bizRegNumber ? `<p>사업자등록번호: ${escapeHtml(bizRegNumber)}</p>` : ''}
     <p>청구 기간: ${escapeHtml(start || '-')} ~ ${escapeHtml(end || '-')}</p>
     <p>생성 시각: ${escapeHtml(generatedAt)}</p>
   </header>
