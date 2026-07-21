@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-reminder-lead-time-csv-export',
+    timestamp: '2026-07-21T19:39:50+09:00',
+    description: '업무/일정/할 일에 항목별 "알림 시점(분 전)" 필드가 추가되었지만, CSV/Excel 내보내기와 가져오기에는 반영되지 않아 내보낸 파일에서 해당 값이 누락되고 스프레드시트로 일괄 설정하거나 복원할 수도 없었습니다. 업무/일정/할 일 CSV 내보내기·가져오기(및 이를 재사용하는 Excel 내보내기)에 "알림(분 전)" 열을 추가했습니다(`frontend/src/csv.js`의 `taskHeaders`/`eventHeaders`/`todoHeaders`, `taskRows`/`eventRows`/`todoRows`, `parseTasksCsv`/`parseEventsCsv`/`parseTodosCsv`), 회귀 테스트 `frontend/src/csv.test.js`.',
+  },
+  {
     id: '2026-07-21-task-copy-link',
     timestamp: '2026-07-21T19:38:46+09:00',
     description: '업무 상세 링크를 팀원에게 전달하려면 업무 제목으로 직접 검색하게 해야 했습니다. 업무 목록의 각 행에 "링크" 버튼을 추가해 해당 업무로 바로 열리는 내부 링크(`?page=tasks&taskId=`)를 클립보드에 복사할 수 있게 하고, 앱이 이 링크로 열리면 로그인 후 자동으로 해당 업무 수정 창을 띄우도록 했습니다(`frontend/src/screens/Tasks.jsx`의 `copyTaskLink`, `frontend/src/taskFilters.js`의 `taskDeepLink`, `frontend/src/App.jsx`의 `taskId` 딥링크 처리).',

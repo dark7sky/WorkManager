@@ -22,7 +22,7 @@ const parseChecklistCell = cell => {
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
 
-export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트']
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -48,6 +48,7 @@ export const taskRows = (tasks, todayIso) => tasks.map(task => [
   task.description,
   task.link_url,
   task.estimated_minutes ?? '',
+  task.reminder_minutes_before ?? '',
   colorValueToLabel[task.color] || '',
   checklistSummary(task.checklist),
 ])
@@ -82,7 +83,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -97,6 +98,7 @@ export const parseTasksCsv = text => {
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) task.estimated_minutes = Number(cells[iEstimate])
+    if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) task.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) task.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) task.checklist = c }
     tasks.push(task)
@@ -192,7 +194,7 @@ export const auditLogsToCsv = logs => [auditHeaders, ...auditRows(logs)].map(row
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트']
 
 export const eventRows = events => events.map(event => [
   event.title,
@@ -205,6 +207,7 @@ export const eventRows = events => events.map(event => [
   event.description,
   event.link_url,
   event.estimated_minutes ?? '',
+  event.reminder_minutes_before ?? '',
   colorValueToLabel[event.color] || '',
   checklistSummary(event.checklist),
 ])
@@ -218,7 +221,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -233,6 +236,7 @@ export const parseEventsCsv = text => {
     if (iDescription >= 0 && cells[iDescription]) event.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) event.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) event.estimated_minutes = Number(cells[iEstimate])
+    if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) event.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) event.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) event.checklist = c }
     events.push(event)
@@ -240,7 +244,7 @@ export const parseEventsCsv = text => {
   return { events, errors }
 }
 
-export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년' }
 
 export const todoRows = todos => todos.map(todo => [
@@ -254,6 +258,7 @@ export const todoRows = todos => todos.map(todo => [
   todo.memo,
   todo.link_url,
   todo.estimated_minutes ?? '',
+  todo.reminder_minutes_before ?? '',
   colorValueToLabel[todo.color] || '',
   checklistSummary(todo.checklist),
 ])
@@ -269,7 +274,7 @@ export const parseTodosCsv = text => {
   if (!rows.length) return { todos: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
   const todos = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -283,6 +288,7 @@ export const parseTodosCsv = text => {
     if (iMemo >= 0 && cells[iMemo]) todo.memo = cells[iMemo]
     if (iLink >= 0 && cells[iLink]) todo.link_url = cells[iLink].trim()
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) todo.estimated_minutes = Number(cells[iEstimate])
+    if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) todo.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) todo.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) todo.checklist = c }
     todos.push(todo)
