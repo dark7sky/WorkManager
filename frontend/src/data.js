@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-add-form-links-custom-fields',
+    timestamp: '2026-07-21T16:50:18+09:00',
+    description: '오늘 화면에서 할 일(Todo)을 수정할 때는 첨부 링크와 사용자 정의 필드를 추가할 수 있었지만, 새 할 일을 등록하는 입력 폼에는 같은 기능이 없어 등록 후 다시 열어 수정해야 했습니다. 새 할 일 등록 폼에도 첨부 링크/사용자 정의 필드 입력 UI를 추가했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onAddTodo`).',
+  },
+  {
     id: '2026-07-21-estimated-minutes-step-mismatch',
     timestamp: '2026-07-21T15:51:47+09:00',
     description: '캘린더 일정, 오늘의 할 일/업무 기록 수정 화면의 "예상 소요 시간(분)" 입력란이 5분 단위(step=5)로 제한되어 있어, 5의 배수가 아닌 값(가져오기·API로 등록된 값 등)을 가진 항목을 열어 저장하면 브라우저 유효성 검사에 걸려 조용히 실패했습니다. 백엔드는 5분 단위 제약이 없으므로 해당 입력란들의 step을 1로 맞췄습니다(`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',

@@ -266,6 +266,12 @@ export default function Today(props) {
   const [todoEstimate, setTodoEstimate] = useState('')
   const [todoChecklist, setTodoChecklist] = useState([])
   const [todoChecklistText, setTodoChecklistText] = useState('')
+  const [todoLinks, setTodoLinks] = useState([])
+  const [todoLinkUrlText, setTodoLinkUrlText] = useState('')
+  const [todoLinkLabelText, setTodoLinkLabelText] = useState('')
+  const [todoCustomFields, setTodoCustomFields] = useState([])
+  const [todoCustomFieldLabelText, setTodoCustomFieldLabelText] = useState('')
+  const [todoCustomFieldValueText, setTodoCustomFieldValueText] = useState('')
   const [todoTemplates, setTodoTemplates] = useState(() => loadTodoTemplates())
   const [editRecurrence, setEditRecurrence] = useState('')
   const [editRecurrenceEnd, setEditRecurrenceEnd] = useState('')
@@ -413,6 +419,22 @@ export default function Today(props) {
   const toggleTodoChecklistItem = id => setTodoChecklist(todoChecklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const removeTodoChecklistItem = id => setTodoChecklist(todoChecklist.filter(item => item.id !== id))
   const shiftTodoChecklistItem = (id, direction) => setTodoChecklist(list => moveChecklistItem(list, id, direction))
+  const addTodoLink = () => {
+    const url = todoLinkUrlText.trim()
+    if (!/^https?:\/\//.test(url)) return
+    setTodoLinks([...todoLinks, { id: `${Date.now()}`, url, label: todoLinkLabelText.trim() }])
+    setTodoLinkUrlText('')
+    setTodoLinkLabelText('')
+  }
+  const removeTodoLink = id => setTodoLinks(todoLinks.filter(item => item.id !== id))
+  const addTodoCustomField = () => {
+    const label = todoCustomFieldLabelText.trim()
+    if (!label) return
+    setTodoCustomFields([...todoCustomFields, { id: `${Date.now()}`, label, value: todoCustomFieldValueText.trim() }])
+    setTodoCustomFieldLabelText('')
+    setTodoCustomFieldValueText('')
+  }
+  const removeTodoCustomField = id => setTodoCustomFields(todoCustomFields.filter(item => item.id !== id))
   const addEditTodoChecklistItem = () => {
     const text = editTodoChecklistText.trim()
     if (!text) return
@@ -524,7 +546,7 @@ export default function Today(props) {
     setTodoFieldErrors(errors)
     if (Object.keys(errors).length) return
     setSaving('todo')
-    if (await onAddTodo(todoDraft.trim(), todoTags, todoRecurrence, todoPriority, todoLink.trim(), todoRecurrenceEnd, todoMemo.trim(), todoColor, todoTime, normalizedChecklist(todoChecklist), todoEstimate)) {
+    if (await onAddTodo(todoDraft.trim(), todoTags, todoRecurrence, todoPriority, todoLink.trim(), todoRecurrenceEnd, todoMemo.trim(), todoColor, todoTime, normalizedChecklist(todoChecklist), todoEstimate, normalizedLinks(todoLinks), normalizedCustomFields(todoCustomFields))) {
       setTodoDraft('')
       setTodoFieldErrors({})
       setTodoTags([])
@@ -538,6 +560,12 @@ export default function Today(props) {
       setTodoChecklist([])
       setTodoChecklistText('')
       setTodoEstimate('')
+      setTodoLinks([])
+      setTodoLinkUrlText('')
+      setTodoLinkLabelText('')
+      setTodoCustomFields([])
+      setTodoCustomFieldLabelText('')
+      setTodoCustomFieldValueText('')
     }
     setSaving('')
   }
@@ -724,6 +752,8 @@ export default function Today(props) {
           <input className="link-input" type="url" value={todoLink} onChange={event => setTodoLink(event.target.value)} aria-label="관련 링크" placeholder="관련 링크 (https://...)"/>
           <input className="log-minutes" type="number" min="0" step="1" value={todoEstimate} onChange={event => setTodoEstimate(event.target.value)} aria-label="예상 소요 시간(분)" placeholder="예상 소요 시간(분)"/>
           <div className="checklist-editor"><span className="dependency-picker-label">체크리스트{todoChecklist.length ? ` (${todoChecklist.filter(i => i.done).length}/${todoChecklist.length})` : ''}</span>{todoChecklist.map((item, index) => <div key={item.id} className="checklist-editor-item"><button type="button" className="text-button" onClick={() => toggleTodoChecklistItem(item.id)} aria-label={`${item.text} 완료 상태 변경`}>{item.done ? <Check aria-hidden="true"/> : <Square aria-hidden="true"/>}</button><span className={item.done ? 'checklist-done-text' : ''}>{item.text}</span><button type="button" className="text-button" disabled={index === 0} onClick={() => shiftTodoChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button><button type="button" className="text-button" disabled={index === todoChecklist.length - 1} onClick={() => shiftTodoChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button><button type="button" className="text-button" onClick={() => removeTodoChecklistItem(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="text" value={todoChecklistText} placeholder="세부 항목 추가" onChange={e => setTodoChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTodoChecklistItem() } }}/><button type="button" className="text-button" onClick={addTodoChecklistItem}>추가</button></div></div>
+          <div className="checklist-editor"><span className="dependency-picker-label">첨부 링크{todoLinks.length ? ` (${todoLinks.length})` : ''}</span>{todoLinks.map(item => <div key={item.id} className="checklist-editor-item"><a href={item.url} target="_blank" rel="noopener noreferrer">{item.label || item.url}</a><button type="button" className="text-button" onClick={() => removeTodoLink(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="url" value={todoLinkUrlText} placeholder="https://..." onChange={e => setTodoLinkUrlText(e.target.value)}/><input type="text" value={todoLinkLabelText} placeholder="이름 (선택)" onChange={e => setTodoLinkLabelText(e.target.value)}/><button type="button" className="text-button" onClick={addTodoLink}>추가</button></div></div>
+          <div className="checklist-editor"><span className="dependency-picker-label">사용자 정의 필드{todoCustomFields.length ? ` (${todoCustomFields.length})` : ''}</span>{todoCustomFields.map(item => <div key={item.id} className="checklist-editor-item"><span><strong>{item.label}</strong>{item.value ? `: ${item.value}` : ''}</span><button type="button" className="text-button" onClick={() => removeTodoCustomField(item.id)}>삭제</button></div>)}<div className="checklist-editor-add"><input type="text" maxLength={100} value={todoCustomFieldLabelText} placeholder="필드 이름 (예: 고객사)" onChange={e => setTodoCustomFieldLabelText(e.target.value)}/><input type="text" maxLength={500} value={todoCustomFieldValueText} placeholder="값" onChange={e => setTodoCustomFieldValueText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTodoCustomField() } }}/><button type="button" className="text-button" onClick={addTodoCustomField}>추가</button></div></div>
           <input className="link-input" value={todoMemo} onChange={event => setTodoMemo(event.target.value)} aria-label="메모" placeholder="메모 (선택)"/>
           <select aria-label="색상" value={todoColor} onChange={event => setTodoColor(event.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select>
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}<button type="button" className="text-button" disabled={saving === 'estimate-todo'} onClick={recommendTodoEstimate}>AI 우선순위·예상시간 추천</button></div>
