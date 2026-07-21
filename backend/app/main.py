@@ -1147,9 +1147,20 @@ def update_item(table, item_id, data, user_id, audit_extra=None):
         with connection() as c:
             existing_row = c.execute("SELECT start_date, due_date, recurrence_end_date FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user_id)).fetchone()
         if existing_row:
-            if "start_date" in data and "due_date" in data and data["start_date"] == existing_row["start_date"] and data["due_date"] == existing_row["due_date"] \
-                    and data["due_date"] and data["start_date"] and data["due_date"] < data["start_date"]:
-                data["start_date"], data["due_date"] = data["due_date"], data["start_date"]
+            start_touched = "start_date" in data and data["start_date"] != existing_row["start_date"]
+            due_touched = "due_date" in data and data["due_date"] != existing_row["due_date"]
+            effective_start = data.get("start_date", existing_row["start_date"])
+            effective_due = data.get("due_date", existing_row["due_date"])
+            if effective_start and effective_due and effective_due < effective_start:
+                # Heal the untouched side instead of failing Pydantic validation in
+                # normalize() below on a field the user didn't touch (or, if neither
+                # side was touched, un-invert a pre-existing bad pair).
+                if due_touched and not start_touched:
+                    data["start_date"] = effective_due
+                elif start_touched and not due_touched:
+                    data["due_date"] = effective_start
+                else:
+                    data["start_date"], data["due_date"] = effective_due, effective_start
             recurrence_end_unchanged = data.get("recurrence_end_date", existing_row["recurrence_end_date"]) == existing_row["recurrence_end_date"]
             effective_recurrence_end = data.get("recurrence_end_date", existing_row["recurrence_end_date"])
             effective_base_date = data.get("due_date", existing_row["due_date"]) or data.get("start_date", existing_row["start_date"])

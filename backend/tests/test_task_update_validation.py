@@ -362,6 +362,31 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["start_date"], "2026-07-25")
             self.assertEqual(updated["due_date"], "2026-07-25")
 
+    def test_update_item_heals_untouched_side_when_valid_dates_are_edited_to_invert(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import create_item, update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+
+            task = create_item("tasks", {
+                "title": "valid dates edit",
+                "start_date": "2026-07-25",
+                "due_date": "2026-07-30",
+            }, "sub-a")
+
+            # Editing only due_date to a value before the untouched start_date used to 422
+            # inside normalize()'s Pydantic validation before the self-heal logic below it
+            # ever ran (a real bug, not the flaky/unreproducible complaint prior sessions
+            # dismissed - it triggers on an ordinary edit of an otherwise valid task).
+            updated = update_item("tasks", task["id"], {"due_date": "2026-07-22"}, "sub-a")
+
+            self.assertEqual(updated["due_date"], "2026-07-22")
+            self.assertEqual(updated["start_date"], "2026-07-22")
+
     def test_update_item_rejects_recurrence_end_date_before_due_date(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-task-save-date-invert-heal-fix',
+    timestamp: '2026-07-22T03:11:00+09:00',
+    description: '업무 수정 화면에서 시작일과 완료 예정일이 모두 유효한 업무의 완료 예정일(또는 시작일)만 바꿔 상대편보다 앞서게 되면 "변경사항 저장" 시 원인을 알 수 없는 저장 실패(422)가 발생했습니다. 건드리지 않은 날짜를 자동으로 맞춰주는 자가 치유 로직이 유효성 검사(Pydantic) 이후에만 실행되어, 검사 단계에서 먼저 막히는 문제였습니다. `backend/app/main.py`의 `update_item()`에서 자가 치유를 유효성 검사보다 먼저 수행하도록 순서를 바꿨습니다.',
+  },
+  {
     id: '2026-07-22-global-search-link-customfield-match',
     timestamp: '2026-07-22T02:57:00+09:00',
     description: '전역 검색(Ctrl+/)이 제목/본문/태그만 검색하고 참고 링크(link_url)와 사용자 정의 필드(custom_fields)는 무시해, 예를 들어 사용자 정의 필드에 "재무팀"을 적어둔 항목은 제목에 그 단어가 없으면 검색되지 않았습니다. `frontend/src/globalSearch.js`가 업무·일정·할 일·업무 기록 모두에서 링크 주소와 사용자 정의 필드의 이름/값도 함께 검색하도록 수정했습니다.',
