@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem, normalizedEstimatedMinutes } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -40,6 +40,12 @@ test('clampedTaskProgress keeps out-of-range legacy values inside the 0-100 inpu
   assert.equal(clampedTaskProgress(-10), 0)
   assert.equal(clampedTaskProgress(40), 40)
   assert.equal(clampedTaskProgress(null), 0)
+})
+
+test('normalizedEstimatedMinutes accepts values not divisible by 5, matching the backend integer field (no step constraint)', () => {
+  assert.equal(normalizedEstimatedMinutes(37), 37)
+  assert.equal(normalizedEstimatedMinutes('123'), 123)
+  assert.equal(normalizedEstimatedMinutes(''), null)
 })
 
 test('buildTaskPayload never sends the edited task as its own parent', () => {
