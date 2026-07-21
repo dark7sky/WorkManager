@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-worklog-duplicate-content-warning',
+    timestamp: '2026-07-21T22:56:00+09:00',
+    description: '업무(Task)와 Todo는 같은 제목으로 새로 만들거나 수정할 때 진행 중인 항목과 중복되면 경고가 표시되었지만, 업무 기록(Work Log)에는 같은 안전장치가 없어 같은 내용을 실수로 중복 기록하기 쉬웠습니다. `frontend/src/logDuplicateCheck.js`의 `findDuplicateContentLogs`로 업무 기록 추가/수정 폼(`frontend/src/screens/Today.jsx`)에도 동일한 실시간 중복 내용 경고를 추가했습니다.',
+  },
+  {
     id: '2026-07-21-task-single-side-date-edit-fix',
     timestamp: '2026-07-21T23:05:00+09:00',
     description: '업무의 시작일/완료 예정일이 이미 어긋나 있는 상태(예: 매월/매년 반복 업무가 다음 회차로 생성될 때 두 날짜가 서로 다른 날 기준으로 계산되어 순서가 뒤바뀐 경우)에서 둘 중 한쪽 날짜만 수정하고 저장하면 건드리지 않은 날짜 때문에 "완료 예정일은 시작일보다 빠를 수 없습니다" 오류로 저장이 막히던 문제를 고쳤습니다. 프런트엔드(`frontend/src/formValidation.js`의 `suppressStaleTaskDateErrors`)와 백엔드(`backend/app/main.py`의 `update_item`)가 이제 시작일/완료 예정일 중 실제로 사용자가 수정하지 않은 쪽만 자동으로 맞춰 저장을 허용하며, 두 날짜를 모두 새로 바꿔 순서가 어긋난 경우에는 그대로 오류를 유지합니다.',
