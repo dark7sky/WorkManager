@@ -939,6 +939,32 @@ def expand_recurring_event(data, rule, until, limit=52):
     return occurrences or [data]
 
 
+OVERDUE_ESCALATION_HOURS = 24
+
+
+def escalate_overdue_tasks(user_id):
+    """Auto-bump priority to 'high' for tasks overdue by more than OVERDUE_ESCALATION_HOURS, once."""
+    threshold = datetime.now() - timedelta(hours=OVERDUE_ESCALATION_HOURS)
+    with connection() as c:
+        candidates = c.execute(
+            "SELECT id, due_date, due_time FROM tasks WHERE user_id=? AND deleted_at IS NULL AND archived_at IS NULL "
+            "AND status!='done' AND priority!='high' AND due_date IS NOT NULL", (user_id,)).fetchall()
+        escalated = []
+        for row in candidates:
+            try:
+                due_dt = datetime.fromisoformat(f"{row['due_date']}T{row['due_time'] or '23:59'}:00")
+            except ValueError:
+                continue
+            if due_dt < threshold:
+                escalated.append(row["id"])
+        if escalated:
+            timestamp = now()
+            c.executemany("UPDATE tasks SET priority='high', updated_at=? WHERE id=?", [(timestamp, i) for i in escalated])
+    for task_id in escalated:
+        audit(user_id, "auto_escalate", "tasks", task_id, {"reason": "overdue", "hours": OVERDUE_ESCALATION_HOURS, "priority": "high"})
+    return escalated
+
+
 def spawn_recurring_task(task, user_id):
     rule = task.get("recurrence_rule")
     if not rule or task.get("recurrence_spawned_at"):
@@ -1248,6 +1274,8 @@ def archived_work_logs(limit: int | None = Query(None, ge=1, le=1000), offset: i
 
 for _table in CONFIG:
     def list_endpoint(tags: str | None = None, limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), table=_table, user=Depends(require_user)):
+        if table == "tasks":
+            escalate_overdue_tasks(user)
         order = "start_at" if table == "events" else ("todo_date" if table == "todos" else ("log_date" if table == "work_logs" else "created_at"))
         where = "WHERE archived_at IS NULL " if table in ("tasks", "todos", "events", "work_logs") else ""
         items = rows(table, user, f"{where}ORDER BY {order} DESC", tags=(tags or "").split(","))

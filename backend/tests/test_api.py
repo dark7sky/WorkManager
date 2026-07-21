@@ -449,6 +449,20 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_overdue_task_is_auto_escalated_to_high_priority_on_list(self, *_):
+        a = self.client(self.token_a)
+        overdue = a.post("/api/tasks", json={"title": "way overdue", "due_date": "2020-01-01", "priority": "normal"}).json()
+        due_soon = a.post("/api/tasks", json={"title": "due today", "due_date": "2026-07-21", "priority": "normal"}).json()
+        already_high = a.post("/api/tasks", json={"title": "already urgent", "due_date": "2020-01-01", "priority": "high"}).json()
+        listing = {item["id"]: item for item in a.get("/api/tasks").json()}
+        self.assertEqual(listing[overdue["id"]]["priority"], "high")
+        self.assertEqual(listing[due_soon["id"]]["priority"], "normal")
+        self.assertEqual(listing[already_high["id"]]["priority"], "high")
+        audit = a.get("/api/audit-logs").json()["items"]
+        self.assertTrue(any(e["action"] == "auto_escalate" and e["entity_id"] == str(overdue["id"]) for e in audit))
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_legacy_task_values_do_not_break_edit_save(self, *_):
         from app.db import connection
         with connection() as c:

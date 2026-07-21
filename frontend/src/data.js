@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-overdue-task-auto-escalation',
+    timestamp: '2026-07-21T18:52:00+09:00',
+    description: '마감일이 24시간 넘게 지났는데도 완료되지 않은 업무는 우선순위가 자동으로 "높음"으로 상향되도록 했습니다. 목록을 불러올 때마다 서버가 확인해 승격하며, 감사 로그에도 기록됩니다(`backend/app/main.py`의 `escalate_overdue_tasks`).',
+  },
+  {
     id: '2026-07-21-quickcapture-ai-warning',
     timestamp: '2026-07-21T18:43:05+09:00',
     description: 'AI 분석(빠른 입력, Ctrl/⌘+K)이 AI 서비스 장애로 로컬 규칙 분석으로 대체됐을 때, AI 어시스턴트 화면에는 경고 배너가 표시되지만 더 자주 쓰이는 빠른 입력 창에는 안내가 전혀 없어 사용자가 부정확할 수 있는 결과를 AI 분석으로 오인할 수 있었습니다. 빠른 입력에도 동일한 경고 배너를 추가했습니다(`frontend/src/components/QuickCapture.jsx`).',
