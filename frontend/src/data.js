@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-calendar-feed-includes-todos',
+    timestamp: '2026-07-21T20:45:00+09:00',
+    description: '설정에서 구독하는 캘린더 피드(webcal)가 업무와 일정만 포함하고 할 일은 빠져 있어, 외부 캘린더 앱에서 할 일 마감일을 확인할 수 없었습니다. 할 일도 피드에 포함되도록 `backend/app/main.py`의 `build_calendar_feed`를 수정했습니다, 테스트는 `backend/tests/test_api.py`.',
+  },
+  {
     id: '2026-07-21-task-export-selected-only',
     timestamp: '2026-07-21T20:39:00+09:00',
     description: '업무 화면의 PDF/CSV/Excel/ICS 내보내기 버튼은 항상 필터로 걸러진 전체 목록을 내보내, 여러 업무를 체크박스로 선택해 둔 상태에서도 선택 항목만 골라 내보낼 방법이 없었습니다. 업무를 하나 이상 선택했을 때는 선택된 업무만 내보내도록 동작을 바꾸고, 버튼에 안내 툴팁을 추가했습니다 (`frontend/src/taskFilters.js`의 `selectExportRows`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/taskFilters.test.js`.',

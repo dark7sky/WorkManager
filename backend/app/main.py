@@ -153,6 +153,18 @@ def build_calendar_feed(user_id):
                   f"SUMMARY:{_ics_escape('[업무] ' + t['title'])}"]
         if t.get("description"): lines.append(f"DESCRIPTION:{_ics_escape(t['description'])}")
         lines.append("END:VEVENT")
+    for td in rows("todos", user_id):
+        if not td.get("todo_date"): continue
+        if td.get("todo_time"):
+            due_datetime = f"{td['todo_date']}T{td['todo_time']}:00"
+            dtstart = f"DTSTART:{_ics_datetime(due_datetime)}"
+        else:
+            dtstart = f"DTSTART;VALUE=DATE:{td['todo_date'].replace('-', '')}"
+        lines += ["BEGIN:VEVENT", f"UID:todo-{td['id']}@workmanager", f"DTSTAMP:{_ics_datetime(now())}",
+                  dtstart,
+                  f"SUMMARY:{_ics_escape('[할 일] ' + td['title'])}"]
+        if td.get("memo"): lines.append(f"DESCRIPTION:{_ics_escape(td['memo'])}")
+        lines.append("END:VEVENT")
     lines.append("END:VCALENDAR")
     return "\r\n".join(_ics_fold(line) for line in lines)
 

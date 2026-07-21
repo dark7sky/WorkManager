@@ -2217,6 +2217,7 @@ class ApiTests(unittest.TestCase):
         a.post("/api/tasks", json={"title": "feed task", "due_date": "2026-07-20"})
         a.post("/api/events", json={"title": "feed event", "start_at": "2026-07-21T10:00:00",
                                     "end_at": "2026-07-21T11:00:00"})
+        a.post("/api/todos", json={"title": "feed todo", "todo_date": "2026-07-22"})
         first = a.post("/api/settings/calendar-feed/rotate")
         self.assertEqual(first.status_code, 200, first.text)
         first_url = first.json()["feed_url"]
@@ -2228,6 +2229,7 @@ class ApiTests(unittest.TestCase):
         self.assertIn("text/calendar", feed.headers["content-type"])
         self.assertIn("SUMMARY:feed event", feed.text)
         self.assertIn("SUMMARY:[업무] feed task", feed.text)
+        self.assertIn("SUMMARY:[할 일] feed todo", feed.text)
         self.assertEqual(TestClient(self.app).get("/api/calendar-feed/not-a-real-token.ics").status_code, 404)
         second = a.post("/api/settings/calendar-feed/rotate").json()
         self.assertNotEqual(second["feed_url"], first_url)
