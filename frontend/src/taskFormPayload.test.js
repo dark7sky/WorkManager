@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem, normalizedEstimatedMinutes } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem, normalizedEstimatedMinutes, overdueChecklistCount } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -233,6 +233,27 @@ test('buildTaskPayload normalizes checklist items, dropping blanks and capping t
 
   assert.deepEqual(payload.checklist.map(i => i.text), ['초안 작성', '가'.repeat(300)])
   assert.equal(payload.checklist[0].done, true)
+})
+
+test('buildTaskPayload keeps a valid checklist item due date but drops a malformed one', () => {
+  const payload = buildTaskPayload({
+    ...baseData,
+    checklist: [{ id: '1', text: '초안 작성', done: false, due: '2026-08-01' }, { id: '2', text: '검토', done: false, due: 'not-a-date' }],
+  }, { task: { id: 1 } })
+
+  assert.equal(payload.checklist[0].due, '2026-08-01')
+  assert.equal(payload.checklist[1].due, undefined)
+})
+
+test('overdueChecklistCount counts only incomplete items with a past due date', () => {
+  const items = [
+    { id: '1', text: 'a', done: false, due: '2026-07-01' },
+    { id: '2', text: 'b', done: true, due: '2026-07-01' },
+    { id: '3', text: 'c', done: false, due: '2026-08-01' },
+    { id: '4', text: 'd', done: false },
+  ]
+  assert.equal(overdueChecklistCount(items, '2026-07-21'), 1)
+  assert.equal(overdueChecklistCount([], '2026-07-21'), 0)
 })
 
 test('buildTaskDuplicatePayload copies checklist items but resets done state', () => {

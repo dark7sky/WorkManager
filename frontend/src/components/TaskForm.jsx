@@ -24,6 +24,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [customFieldValueText, setCustomFieldValueText] = useState('')
   const [recurrenceRule, setRecurrenceRule] = useState(() => task?.recurrence_rule || '')
   const [checklistText, setChecklistText] = useState('')
+  const [checklistDueText, setChecklistDueText] = useState('')
   const [linkUrlText, setLinkUrlText] = useState('')
   const [linkLabelText, setLinkLabelText] = useState('')
   const [suggestions, setSuggestions] = useState([])
@@ -224,15 +225,20 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     }
   }
 
+  const todayIso = new Date().toISOString().slice(0, 10)
   const addChecklistItem = () => {
     const text = checklistText.trim()
     if (!text) return
-    setChecklist([...checklist, { id: `${Date.now()}`, text, done: false }])
+    const item = { id: `${Date.now()}`, text, done: false }
+    if (checklistDueText) item.due = checklistDueText
+    setChecklist([...checklist, item])
     setChecklistText('')
+    setChecklistDueText('')
   }
   const toggleChecklistItem = id => setChecklist(checklist.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const removeChecklistItem = id => setChecklist(checklist.filter(item => item.id !== id))
   const shiftChecklistItem = (id, direction) => setChecklist(list => moveChecklistItem(list, id, direction))
+  const setChecklistItemDue = (id, due) => setChecklist(checklist.map(item => item.id === id ? (due ? { ...item, due } : { ...item, due: undefined }) : item))
   const [editingChecklistId, setEditingChecklistId] = useState(null)
   const [editingChecklistText, setEditingChecklistText] = useState('')
   const beginEditChecklistItem = item => { setEditingChecklistId(item.id); setEditingChecklistText(item.text) }
@@ -351,12 +357,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
         <input type="checkbox" checked={item.done} onChange={() => toggleChecklistItem(item.id)}/>
         {editingChecklistId === item.id
           ? <input type="text" className="inline-edit" autoFocus value={editingChecklistText} onChange={e => setEditingChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEditChecklistItem(item.id) } if (e.key === 'Escape') setEditingChecklistId(null) }} onBlur={() => saveEditChecklistItem(item.id)}/>
-          : <span className={item.done ? 'checklist-done-text' : ''} onClick={() => beginEditChecklistItem(item)}>{item.text}</span>}
+          : <span className={item.done ? 'checklist-done-text' : (item.due && item.due < todayIso ? 'checklist-overdue-text' : '')} onClick={() => beginEditChecklistItem(item)}>{item.text}</span>}
+        <input type="date" className="checklist-item-due" value={item.due || ''} onChange={e => setChecklistItemDue(item.id, e.target.value)} aria-label="세부 항목 기한"/>
         <button type="button" className="text-button" disabled={index === 0} onClick={() => shiftChecklistItem(item.id, 'up')} aria-label="위로 이동">▲</button>
         <button type="button" className="text-button" disabled={index === checklist.length - 1} onClick={() => shiftChecklistItem(item.id, 'down')} aria-label="아래로 이동">▼</button>
         <button type="button" className="text-button" onClick={() => removeChecklistItem(item.id)}>삭제</button>
       </div>)}
-      <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
+      <div className="checklist-editor-add"><input type="text" value={checklistText} placeholder="세부 항목 추가" onChange={e => setChecklistText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChecklistItem() } }}/><input type="date" value={checklistDueText} onChange={e => setChecklistDueText(e.target.value)} aria-label="세부 항목 기한"/><button type="button" className="text-button" onClick={addChecklistItem}>추가</button></div>
       {checklist.length ? <button type="button" className="text-button" onClick={applyChecklistProgress}>체크리스트로 진행률 계산</button> : null}
     </div>
     <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부 링크{links.length ? ` (${links.length})` : ''}</span>

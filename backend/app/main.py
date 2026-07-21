@@ -368,6 +368,9 @@ def _clean_custom_fields(value):
     return cleaned
 
 
+_CHECKLIST_DUE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
 def _clean_checklist(value):
     if value is None:
         return value
@@ -376,7 +379,11 @@ def _clean_checklist(value):
         text = str(item.get("text", "")).strip()[:300]
         if not text:
             continue
-        cleaned.append({"id": str(item.get("id") or uuid.uuid4()), "text": text, "done": bool(item.get("done"))})
+        due = str(item.get("due") or "").strip()[:10]
+        entry = {"id": str(item.get("id") or uuid.uuid4()), "text": text, "done": bool(item.get("done"))}
+        if _CHECKLIST_DUE_RE.match(due):
+            entry["due"] = due
+        cleaned.append(entry)
     return cleaned
 
 

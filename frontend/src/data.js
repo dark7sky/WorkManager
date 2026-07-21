@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-checklist-item-due-dates',
+    timestamp: '2026-07-21T22:45:00+09:00',
+    description: '업무 체크리스트 항목은 완료 여부만 기록할 뿐 개별 기한이 없어, 하위 항목 하나가 늦어지고 있어도 업무 목록 화면에서는 알 수 없었습니다. 체크리스트 항목에 선택적 `due`(기한) 필드를 추가(`backend/app/main.py`의 `_clean_checklist`, `frontend/src/taskFormPayload.js`의 `normalizedChecklist`/`overdueChecklistCount`), 업무 편집 폼의 체크리스트 편집기에 날짜 입력과 기한 지남 강조 표시를 추가했고(`frontend/src/components/TaskForm.jsx`), 간트 목록 행에 "체크리스트 기한 N건 지남" 배지를 추가했습니다(`frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-21-worklog-csv-rate-invoiced-columns',
     timestamp: '2026-07-21T22:30:00+09:00',
     description: '업무 기록 CSV/Excel 내보내기·가져오기에 `hourly_rate_override`(시급 재정의)와 `invoiced_at`(청구 완료일시) 필드가 빠져 있어, 청구서 발행 상태와 개별 시급이 파일로는 확인·이전되지 않았습니다. `frontend/src/csv.js`의 업무 기록 헤더·행 생성·파싱 함수에 "시급 재정의(원)"·"청구 완료일시" 열을 추가했고, Excel 내보내기(`xlsx.js`)도 같은 함수를 재사용해 함께 반영됩니다.',

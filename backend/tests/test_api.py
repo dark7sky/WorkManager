@@ -1636,6 +1636,17 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(checked.status_code, 200, checked.text)
         self.assertTrue(checked.json()["checklist"][0]["done"])
 
+    def test_task_checklist_item_due_date_is_kept_when_valid_and_dropped_when_malformed(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "with checklist due", "checklist": [
+            {"id": "1", "text": "초안 작성", "done": False, "due": "2026-08-01"},
+            {"id": "2", "text": "검토", "done": False, "due": "not-a-date"},
+        ]})
+        self.assertEqual(task.status_code, 200, task.text)
+        checklist = task.json()["checklist"]
+        self.assertEqual(checklist[0]["due"], "2026-08-01")
+        self.assertNotIn("due", checklist[1])
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_checklist_is_persisted_and_sanitized(self, *_):

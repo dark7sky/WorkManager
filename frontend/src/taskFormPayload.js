@@ -55,11 +55,16 @@ export const normalizedChecklist = items => {
   for (const raw of Array.isArray(items) ? items : []) {
     const text = trimField(raw?.text).slice(0, 300)
     if (!text) continue
-    cleaned.push({ id: String(raw?.id || `${Date.now()}-${cleaned.length}`), text, done: Boolean(raw?.done) })
+    const due = trimField(raw?.due)
+    const item = { id: String(raw?.id || `${Date.now()}-${cleaned.length}`), text, done: Boolean(raw?.done) }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(due)) item.due = due
+    cleaned.push(item)
     if (cleaned.length >= 200) break
   }
   return cleaned
 }
+export const overdueChecklistCount = (items, today = new Date().toISOString().slice(0, 10)) =>
+  (Array.isArray(items) ? items : []).filter(item => !item.done && item.due && item.due < today).length
 export const moveChecklistItem = (items, id, direction) => {
   const list = Array.isArray(items) ? [...items] : []
   const index = list.findIndex(item => item.id === id)
