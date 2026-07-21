@@ -323,7 +323,7 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정']
+export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정']
 
 export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.map(log => [
   log.log_date,
@@ -335,6 +335,7 @@ export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.
   (log.tags || []).join('; '),
   log.link_url,
   log.billable ? 'Y' : '',
+  log.client_name ?? '',
   log.billable && (log.hourly_rate_override ?? hourlyRate) != null ? Math.round((log.duration_minutes || 0) / 60 * (log.hourly_rate_override ?? hourlyRate)) : '',
   log.hourly_rate_override ?? '',
   log.invoiced_at ?? '',
@@ -352,7 +353,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iClientName = col('청구 고객'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -366,6 +367,7 @@ export const parseWorkLogsCsv = text => {
     if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iLink >= 0 && cells[iLink]) log.link_url = cells[iLink].trim()
     if (iBillable >= 0 && cells[iBillable]) log.billable = cells[iBillable].trim().toUpperCase() === 'Y'
+    if (iClientName >= 0 && cells[iClientName]) log.client_name = cells[iClientName].trim()
     if (iRateOverride >= 0 && cells[iRateOverride] && !Number.isNaN(Number(cells[iRateOverride]))) log.hourly_rate_override = Number(cells[iRateOverride])
     if (iInvoicedAt >= 0 && cells[iInvoicedAt]) log.invoiced_at = cells[iInvoicedAt].trim()
     if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''

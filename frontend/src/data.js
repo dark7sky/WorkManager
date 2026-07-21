@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-client-name',
+    timestamp: '2026-07-22T03:34:38+09:00',
+    description: '업무 기록의 청구 가능 항목에는 시급 재정의와 청구 완료일시는 있었지만 어느 고객에게 청구할지 기록할 방법이 없어, 여러 고객을 동시에 대응하는 프리랜서·컨설턴트가 청구 대상을 구분할 수 없었습니다. `work_logs` 테이블에 `client_name` 컬럼을 추가하고(`backend/app/db.py`, `WorkLogPayload`) 업무 기록 수정 폼(`frontend/src/screens/Today.jsx`)에 "청구 고객" 입력란과 배지를 추가했으며, CSV/Excel 내보내기·가져오기(`frontend/src/csv.js`)에도 "청구 고객" 열을 연결했습니다. 테스트: `backend/tests/test_api.py::test_work_log_client_name_is_persisted_and_clearable`, `frontend/src/csv.test.js`.',
+  },
+  {
     id: '2026-07-22-event-recurrence-series-history',
     timestamp: '2026-07-22T03:31:20+09:00',
     description: '반복 업무·Todo는 수정 폼에서 "반복 이력 보기"로 같은 시리즈의 과거·현재 회차를 확인할 수 있었지만, 반복 일정(Event)에는 같은 기능이 없어 지금 보고 있는 일정이 반복 시리즈의 몇 번째 회차인지 확인할 방법이 없었습니다. 백엔드에 `GET /api/events/{id}/series`를 추가하고 일정 수정 폼(`frontend/src/screens/Calendar.jsx`)에 "반복 이력 보기" 버튼을 연결해 같은 `recurrence_group_id`를 공유하는 일정 목록을 날짜순으로 보여주도록 했습니다, 테스트: `backend/tests/test_api.py::test_event_series_get_lists_all_occurrences_and_rejects_other_users`.',

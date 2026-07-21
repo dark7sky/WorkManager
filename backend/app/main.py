@@ -608,8 +608,9 @@ class WorkLogPayload(StrictPayload):
     custom_fields: list[dict] | None = Field(None, max_length=50)
     invoiced_at: datetime | None = None
     hourly_rate_override: float | None = Field(None, ge=0, le=1000000)
+    client_name: str | None = Field(None, max_length=200)
 
-    @field_validator("link_url", "color", "log_time", "priority", "estimated_minutes", mode="before")
+    @field_validator("link_url", "color", "log_time", "priority", "estimated_minutes", "client_name", mode="before")
     @classmethod
     def empty_link_url_to_null(cls, value):
         return None if value == "" else value
@@ -678,7 +679,7 @@ CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links", "custom_fields", "reminder_minutes_before"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes", "custom_fields", "reminder_minutes_before"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "custom_fields", "estimated_minutes", "reminder_minutes_before"}, None),
-    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes", "custom_fields", "invoiced_at", "hourly_rate_override"}, None),
+    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes", "custom_fields", "invoiced_at", "hourly_rate_override", "client_name"}, None),
 }
 
 VALID_EVENT_COLORS = {"red", "orange", "yellow", "green", "purple", "gray"}
@@ -802,7 +803,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "start_time", "due_time", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", "reminder_minutes_before"},
-                "events": {"link_url", "color", "priority", "recurrence_group_id", "estimated_minutes", "reminder_minutes_before"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes", "reminder_minutes_before"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable", "priority", "estimated_minutes", "invoiced_at", "hourly_rate_override"}}[table]
+                "events": {"link_url", "color", "priority", "recurrence_group_id", "estimated_minutes", "reminder_minutes_before"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes", "reminder_minutes_before"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable", "priority", "estimated_minutes", "invoiced_at", "hourly_rate_override", "client_name"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
