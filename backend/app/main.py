@@ -1029,7 +1029,7 @@ def spawn_recurring_todo(todo, user_id):
     return next_id
 
 
-def create_item(table, data, user_id):
+def create_item(table, data, user_id, audit_extra=None):
     data = normalize(table, data)
     if table == "tasks":
         validate_task_links(data, user_id)
@@ -1081,11 +1081,11 @@ def create_item(table, data, user_id):
             item = rows("events", user_id, "WHERE id=?", (item["id"],))[0]
         except HTTPException:
             item["sync_pending"] = True
-    audit(user_id, "create", table, item["id"])
+    audit(user_id, "create", table, item["id"], audit_extra)
     return item
 
 
-def update_item(table, item_id, data, user_id):
+def update_item(table, item_id, data, user_id, audit_extra=None):
     became_done = False
     todo_became_done = False
     if table == "tasks":
@@ -1215,7 +1215,7 @@ def update_item(table, item_id, data, user_id):
             item = rows("events", user_id, "WHERE id=?", (item_id,))[0]
         except HTTPException:
             item["sync_pending"] = True
-    audit(user_id, "update", table, item_id, {"fields": sorted(data)})
+    audit(user_id, "update", table, item_id, {"fields": sorted(data), **(audit_extra or {})})
     if table == "tasks" and became_done:
         next_id = spawn_recurring_task(item, user_id)
         if next_id:
@@ -2694,19 +2694,21 @@ def ai_apply(payload: dict = Body(...), user=Depends(require_user)):
     table = {"task": "tasks", "event": "events", "todo": "todos", "work_log": "work_logs"}.get(payload.get("entity"))
     if not table:
         raise HTTPException(422, "Unsupported entity")
+    reason = str(payload.get("reason") or "").strip()[:500]
+    audit_extra = {"source": "ai", **({"ai_reason": reason} if reason else {})}
     if payload.get("action") == "update":
         try:
             item_id = int(payload.get("id"))
         except (TypeError, ValueError):
             raise HTTPException(422, "A numeric id is required")
-        return update_item(table, item_id, payload.get("data") or {}, user)
+        return update_item(table, item_id, payload.get("data") or {}, user, audit_extra)
     if payload.get("action") == "create":
         data = dict(payload.get("data") or {})
         if table == "events":
             rule, until = data.pop("recurrence_rule", None), data.pop("recurrence_end_date", None)
             if rule and until and data.get("start_at") and data.get("end_at"):
-                return [create_item(table, occurrence, user) for occurrence in expand_recurring_event(data, rule, until)]
-        return create_item(table, data, user)
+                return [create_item(table, occurrence, user, audit_extra) for occurrence in expand_recurring_event(data, rule, until)]
+        return create_item(table, data, user, audit_extra)
     raise HTTPException(422, "Unsupported action")
 
 

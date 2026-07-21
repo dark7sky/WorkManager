@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ai-apply-audit-reason',
+    timestamp: '2026-07-21T19:33:50+09:00',
+    description: 'AI 제안(추천/QuickCapture/자연어 입력)을 적용하면 감사 로그에는 "변경 필드" 목록만 남아, 무엇을 왜 어떻게 바꿨는지 사람이 읽을 수 있는 근거가 남지 않았습니다. AI가 적용한 변경은 감사 로그에 "AI 자동 수정" 출처와 함께, 있는 경우 추천 사유(reason) 문구를 함께 기록하고 감사 로그 화면에도 구분해 표시하도록 했습니다(`backend/app/main.py`의 `ai_apply`/`create_item`/`update_item`, `frontend/src/screens/AuditLog.jsx`의 `metadataText`, `frontend/src/App.jsx`·`QuickCapture.jsx`·`Performance.jsx`의 `aiApply` 호출).',
+  },
+  {
     id: '2026-07-21-audit-log-excel-export',
     timestamp: '2026-07-21T19:29:00+09:00',
     description: '업무·일정·오늘 화면에는 CSV 외에 Excel 내보내기 버튼이 있었지만, 감사 로그 화면은 CSV와 PDF 보고서만 지원해 감사 추적 자료를 감사인·재무 담당자에게 스프레드시트로 전달하려면 수동 변환이 필요했습니다. 감사 로그 화면에도 동일한 Excel 내보내기 버튼을 추가했습니다(`frontend/src/xlsx.js`의 `auditLogsToExcelXml`, `frontend/src/screens/AuditLog.jsx`).',

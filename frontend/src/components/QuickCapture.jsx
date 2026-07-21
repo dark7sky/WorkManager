@@ -46,7 +46,7 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     setBusy(true)
     try {
       const item = items[index]
-      await api.aiApply({ action: item.action, entity: item.entity, id: item.id, data: item.data })
+      await api.aiApply({ action: item.action, entity: item.entity, id: item.id, data: item.data, reason: item.reason })
       const remaining = items.filter((_, i) => i !== index)
       setItems(remaining)
       await onApplied?.()

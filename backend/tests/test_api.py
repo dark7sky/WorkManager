@@ -1469,6 +1469,22 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_ai_apply_records_audit_log_with_ai_reason(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "ai audited task", "progress": 0}).json()
+        result = a.post("/api/ai/apply", json={
+            "action": "update", "entity": "task", "id": task["id"],
+            "data": {"progress": 50}, "reason": "최근 작업 기록을 근거로 진행률을 갱신했습니다.",
+        })
+        self.assertEqual(result.status_code, 200, result.text)
+        logs = a.get("/api/audit-logs?limit=10").json()["items"]
+        entry = next(x for x in logs if x["action"] == "update" and x["entity_id"] == str(task["id"]))
+        self.assertEqual(entry["metadata"]["source"], "ai")
+        self.assertEqual(entry["metadata"]["ai_reason"], "최근 작업 기록을 근거로 진행률을 갱신했습니다.")
+        self.assertIn("progress", entry["metadata"]["fields"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_checklist_is_persisted_and_sanitized(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "with checklist", "checklist": [

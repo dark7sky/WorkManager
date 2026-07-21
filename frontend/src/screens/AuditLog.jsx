@@ -14,10 +14,13 @@ const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
 
 const metadataText = metadata => {
   if (!metadata || !Object.keys(metadata).length) return ''
-  if (Array.isArray(metadata.fields)) return `변경 필드: ${metadata.fields.join(', ')}`
-  if (metadata.strategy) return `처리 방식: ${metadata.strategy}`
-  if (metadata.rule) return `반복 규칙: ${metadata.rule}`
-  if (metadata.older_than_days) return `${metadata.older_than_days}일 이전 항목 정리`
+  const parts = []
+  if (Array.isArray(metadata.fields)) parts.push(`변경 필드: ${metadata.fields.join(', ')}`)
+  if (metadata.strategy) parts.push(`처리 방식: ${metadata.strategy}`)
+  if (metadata.rule) parts.push(`반복 규칙: ${metadata.rule}`)
+  if (metadata.older_than_days) parts.push(`${metadata.older_than_days}일 이전 항목 정리`)
+  if (metadata.source === 'ai') parts.push(metadata.ai_reason ? `AI 자동 수정: ${metadata.ai_reason}` : 'AI 자동 수정')
+  if (parts.length) return parts.join(' · ')
   return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
 }
 

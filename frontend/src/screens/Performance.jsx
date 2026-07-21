@@ -72,7 +72,7 @@ export default function Performance({ notify, onDataChanged }) {
   const applySuggestion = async item => {
     setAiLoading(`apply-${item.id}`)
     try {
-      await api.aiApply({ action: item.action, entity: item.entity, id: item.id, data: item.data })
+      await api.aiApply({ action: item.action, entity: item.entity, id: item.id, data: item.data, reason: item.reason })
       setSuggestions(current => current.filter(value => value !== item)); setPendingId(null)
       notify('검토한 AI 제안을 적용했습니다.'); setRefreshKey(value => value + 1); await onDataChanged?.()
     } catch (error) { notify(error.message, 'error') }
