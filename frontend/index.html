@@ -12,14 +12,7 @@
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>WorkManager</title>
-    <script>
-      (() => {
-        const preference = localStorage.getItem('wm-theme-v1') || 'auto';
-        const dark = preference === 'dark' || (preference === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

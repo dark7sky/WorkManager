@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-content-security-policy',
+    timestamp: '2026-07-22T08:34:13+09:00',
+    description: '보안 응답 헤더는 있었지만 콘텐츠 보안 정책(CSP)이 빠져 있어 XSS로 스크립트가 주입되면 외부 도메인 로드를 막을 방법이 없었습니다. nginx가 서빙하는 프런트엔드 응답에 CSP(및 나머지 보안 헤더)를 추가하고, index.html의 인라인 테마 스크립트를 `/theme-init.js`로 분리해 script-src에서 `unsafe-inline` 없이도 동작하도록 했습니다. 백엔드 API 응답에도 `default-src \'none\'`인 CSP를 추가했습니다.',
+  },
+  {
     id: '2026-07-22-security-response-headers',
     timestamp: '2026-07-22T08:47:00+09:00',
     description: '백엔드 응답에 보안 헤더(X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy)가 전혀 설정되지 않아, 클릭재킹이나 MIME 스니핑 같은 브라우저 레벨 공격에 대한 기본 방어가 빠져 있었습니다. `backend/app/main.py`에 모든 응답에 이 헤더들을 붙이는 미들웨어를 추가했습니다.',

@@ -249,6 +249,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.headers["X-Frame-Options"], "DENY")
         self.assertEqual(response.headers["Referrer-Policy"], "strict-origin-when-cross-origin")
         self.assertIn("geolocation=()", response.headers["Permissions-Policy"])
+        self.assertIn("default-src 'none'", response.headers["Content-Security-Policy"])
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
