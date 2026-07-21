@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-json-field-repair',
+    timestamp: '2026-07-21T15:23:45+09:00',
+    description: '일부 업무의 체크리스트/링크/사용자 정의 필드에 손상된 값이 저장되어 있으면, 해당 업무를 편집 후 저장할 때마다 서버 오류가 발생해 영구적으로 저장이 막히는 문제가 있었습니다. 저장 시 이 세 필드를 자동으로 정리(손상된 항목 제거)하도록 백엔드 검증 로직을 보강했습니다(`backend/app/main.py`의 `normalize_legacy_json_array_field`, `update_item`).',
+  },
+  {
     id: '2026-07-21-todo-log-manual-order-keyboard',
     timestamp: '2026-07-21T15:07:07+09:00',
     description: '오늘 화면에서 할 일/업무 기록을 "직접 정렬"로 바꾸면 순서를 드래그로만 바꿀 수 있어, 키보드나 스크린 리더 사용자는 순서를 조정할 방법이 없었습니다. 체크리스트 항목의 위/아래 이동 버튼과 같은 패턴으로, 직접 정렬 모드일 때 각 할 일/기록 행에 "위로 이동"/"아래로 이동" 버튼을 추가했습니다(`frontend/src/screens/Today.jsx`, 기존 `moveTodoBefore`/`moveLogBefore` 재사용).',

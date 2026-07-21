@@ -513,6 +513,32 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(len(updated["tags"]), 50)
             self.assertEqual(updated["tags"], [f"태그-{index}" for index in range(50)])
 
+    def test_update_item_repairs_corrupted_legacy_checklist_links_custom_fields_on_edit(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,checklist,links,custom_fields,created_at,updated_at)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "corrupted json fields edit", "", "doing", "normal", 15, None, None, "Dana", "none", "none",
+                     '["not-a-dict", {"text": "valid item", "done": false}]',
+                     '["also-not-a-dict", {"url": "https://example.com", "label": "ok"}]',
+                     '[42, {"label": "team", "value": "growth"}]',
+                     "2026-07-08T10:26:59", "2026-07-08T10:26:59"))
+                task_id = cur.lastrowid
+
+            updated = update_item("tasks", task_id, {"title": "corrupted json fields edit saved"}, "sub-a")
+
+            self.assertEqual(updated["title"], "corrupted json fields edit saved")
+            self.assertEqual([item["text"] for item in updated["checklist"]], ["valid item"])
+            self.assertEqual([item["label"] for item in updated["links"]], ["ok"])
+            self.assertEqual([item["label"] for item in updated["custom_fields"]], ["team"])
+
     def test_update_item_repairs_invalid_legacy_parent_id_on_edit(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import init_db

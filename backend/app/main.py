@@ -700,6 +700,10 @@ def normalize_legacy_json_array_field(key, value):
                 if len(normalized) >= 50:
                     break
         return normalized
+    if key in ("checklist", "links", "custom_fields"):
+        cleaner = {"checklist": _clean_checklist, "links": _clean_links, "custom_fields": _clean_custom_fields}[key]
+        limit = {"checklist": 200, "links": 50, "custom_fields": 50}[key]
+        return cleaner([item for item in items if isinstance(item, dict)])[:limit]
     return items
 
 
@@ -1114,7 +1118,7 @@ def update_item(table, item_id, data, user_id):
                     (user_id,),
                 ).fetchall()
             }
-            for key in ("tags", "dependency_ids"):
+            for key in ("tags", "dependency_ids", "checklist", "links", "custom_fields"):
                 normalized = sanitize_legacy_dependency_ids(existing[key], visible_task_ids, item_id) if key == "dependency_ids" else normalize_legacy_json_array_field(key, existing[key])
                 normalized_json = json.dumps(normalized, ensure_ascii=False)
                 if normalized_json != (existing[key] or "[]") and key not in data:
