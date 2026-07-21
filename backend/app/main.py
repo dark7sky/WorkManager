@@ -241,7 +241,7 @@ def auth_config():
 @app.post("/api/auth/demo")
 def start_demo(request: Request, response: Response):
     enforce_rate(request.client.host if request.client else "unknown", "demo-login", 20, 3600)
-    response.set_cookie("wm_session", create_session(DEMO_USER_ID, ttl=DEMO_SESSION_TTL), httponly=True, samesite="lax",
+    response.set_cookie("wm_session", create_session(DEMO_USER_ID, ttl=DEMO_SESSION_TTL, user_agent=request.headers.get("user-agent")), httponly=True, samesite="lax",
                         secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
                         max_age=DEMO_SESSION_TTL, path="/")
     return {"ok": True}
@@ -291,7 +291,7 @@ async def google_callback(request: Request, code: str, state: str):
     user_id = upsert_google_user(str(profile["sub"]), email, profile.get("name", ""), profile.get("picture"))
     google_calendar.save_tokens(user_id, email, token.json())
     response = RedirectResponse(os.getenv("FRONTEND_URL", "/"))
-    response.set_cookie("wm_session", create_session(user_id), httponly=True, samesite="lax",
+    response.set_cookie("wm_session", create_session(user_id, user_agent=request.headers.get("user-agent")), httponly=True, samesite="lax",
                         secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
                         max_age=1209600, path="/")
     response.delete_cookie("google_oauth_state", path="/")

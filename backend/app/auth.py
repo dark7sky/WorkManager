@@ -16,13 +16,48 @@ def _hash(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def create_session(user_id, ttl=SESSION_TTL):
+def _describe_user_agent(user_agent):
+    if not user_agent:
+        return None
+    ua = user_agent.lower()
+    if "iphone" in ua:
+        os_label = "iPhone"
+    elif "ipad" in ua:
+        os_label = "iPad"
+    elif "android" in ua:
+        os_label = "Android"
+    elif "windows" in ua:
+        os_label = "Windows"
+    elif "mac os x" in ua or "macintosh" in ua:
+        os_label = "Mac"
+    elif "linux" in ua:
+        os_label = "Linux"
+    else:
+        os_label = None
+    if "edg/" in ua:
+        browser_label = "Edge"
+    elif "opr/" in ua or "opera" in ua:
+        browser_label = "Opera"
+    elif "chrome" in ua or "crios" in ua:
+        browser_label = "Chrome"
+    elif "firefox" in ua or "fxios" in ua:
+        browser_label = "Firefox"
+    elif "safari" in ua:
+        browser_label = "Safari"
+    else:
+        browser_label = None
+    if browser_label and os_label:
+        return f"{browser_label} · {os_label}"
+    return browser_label or os_label
+
+
+def create_session(user_id, ttl=SESSION_TTL, user_agent=None):
     token = secrets.token_urlsafe(48)
     now = int(time.time())
     with connection() as c:
         c.execute("DELETE FROM sessions WHERE expires_at<?", (now,))
-        c.execute("INSERT INTO sessions(token_hash,user_id,expires_at,created_at,last_seen_at) VALUES(?,?,?,?,?)",
-                  (_hash(token), user_id, now + ttl, now, now))
+        c.execute("INSERT INTO sessions(token_hash,user_id,expires_at,created_at,last_seen_at,user_agent) VALUES(?,?,?,?,?,?)",
+                  (_hash(token), user_id, now + ttl, now, now, (user_agent or "")[:300]))
     return token
 
 
@@ -46,10 +81,11 @@ def revoke_session(token):
 def list_sessions(user_id, current_token):
     current_hash = _hash(current_token) if current_token else None
     with connection() as c:
-        rows = c.execute("""SELECT token_hash,created_at,last_seen_at,expires_at FROM sessions
+        rows = c.execute("""SELECT token_hash,created_at,last_seen_at,expires_at,user_agent FROM sessions
           WHERE user_id=? ORDER BY last_seen_at DESC""", (user_id,)).fetchall()
     return [{"id": row["token_hash"], "created_at": row["created_at"], "last_seen_at": row["last_seen_at"],
-             "expires_at": row["expires_at"], "current": row["token_hash"] == current_hash} for row in rows]
+             "expires_at": row["expires_at"], "current": row["token_hash"] == current_hash,
+             "device": _describe_user_agent(row["user_agent"])} for row in rows]
 
 
 def revoke_session_by_id(user_id, session_id):

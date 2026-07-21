@@ -182,6 +182,26 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(client_2.get("/api/auth/me").status_code, 401)
         self.assertEqual(client_1.get("/api/auth/me").status_code, 200)
 
+    def test_sessions_include_parsed_device_label(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                      ("sub-device", "sub-device", "device@example.com", "device@example.com", "2026-01-01", "2026-01-01"))
+        token = create_session("sub-device", user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36")
+        listing = self.client(token).get("/api/auth/sessions").json()["sessions"]
+        self.assertEqual(listing[0]["device"], "Chrome · Windows")
+
+    def test_session_without_user_agent_has_no_device_label(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                      ("sub-no-device", "sub-no-device", "nodevice@example.com", "nodevice@example.com", "2026-01-01", "2026-01-01"))
+        token = create_session("sub-no-device")
+        listing = self.client(token).get("/api/auth/sessions").json()["sessions"]
+        self.assertIsNone(listing[0]["device"])
+
     def test_revoke_other_sessions_keeps_current_only(self):
         from app.auth import create_session
         from app.db import connection

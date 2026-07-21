@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-session-device-label',
+    timestamp: '2026-07-21T15:43:04+09:00',
+    description: '설정 화면의 활성 세션 목록에 "현재 세션"/"다른 세션"이라는 표시만 있어 여러 기기로 로그인했을 때 어떤 세션이 어느 브라우저·기기인지 구분할 방법이 없었습니다. 로그인 시 User-Agent를 저장해 "Chrome · Windows", "Safari · iPhone"처럼 브라우저·기기 라벨을 함께 보여주도록 했습니다(`backend/app/auth.py`의 `_describe_user_agent`, `backend/app/db.py`, `frontend/src/screens/Settings.jsx`).',
+  },
+  {
     id: '2026-07-21-task-csv-import-dedup',
     timestamp: '2026-07-21T15:37:17+09:00',
     description: '업무 화면에서 이전에 내보낸 CSV 파일을 실수로 다시 가져오면 동일한 업무가 그대로 중복 생성되었습니다. CSV 가져오기 시 제목·시작일·기한이 같은 업무는 기존 업무 및 같은 파일 내 중복 행과 비교해 자동으로 건너뛰고, 몇 건을 건너뛰었는지 알려주도록 했습니다(`frontend/src/csv.js`의 `dedupeImportedTasks`, `frontend/src/screens/Tasks.jsx`).',

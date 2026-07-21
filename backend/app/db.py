@@ -162,6 +162,7 @@ def init_db():
         _add_column(c, "work_logs", "estimated_minutes", "INTEGER")
         _add_column(c, "work_logs", "archived_at", "TEXT")
         _add_column(c, "task_comments", "edited_at", "TEXT")
+        _add_column(c, "sessions", "user_agent", "TEXT")
         for name, definition in {
             "recurrence_rule": "TEXT", "parent_id": "INTEGER", "dependency_ids": "TEXT NOT NULL DEFAULT '[]'",
             "recurrence_spawned_at": "TEXT", "recurrence_anchor_day": "INTEGER",
