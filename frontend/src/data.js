@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-list-skeleton-loading-parity',
+    timestamp: '2026-07-22T08:45:46+09:00',
+    description: '업무(Gantt) 화면은 데이터를 불러오는 동안 스켈레톤 행을 보여주지만, 오늘 화면의 할 일/업무 기록 목록과 일정 화면의 모바일 일정 목록은 상단에 작은 "동기화 중…" 표시만 있고 목록 본문은 로딩이 끝날 때까지 빈 상태 문구("조건에 맞는 항목이 없습니다")를 그대로 보여줘 데이터가 없는 것으로 오인하기 쉬웠습니다. `frontend/src/screens/Today.jsx`의 할 일/업무 기록 목록과 `frontend/src/screens/Calendar.jsx`의 모바일 일정 목록에 업무 화면과 동일한 `.gantt-skeleton`/`.skeleton row` 패턴을 적용해 로딩 중에는 스켈레톤 행을, 로딩이 끝난 뒤 실제로 항목이 없을 때만 빈 상태 문구를 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-22-public-task-drop-assignee-name',
     timestamp: '2026-07-22T08:39:11+09:00',
     description: '담당자 지정 기능은 1인 사용에 맞춰 이미 제거됐지만, 업무 공유 링크(로그인 없이 접근 가능한 공개 화면)에는 여전히 `assignee_name` 필드가 응답에 남아 있고 화면에도 표시될 수 있었습니다. 백엔드 `/api/public/tasks/{token}` 응답에서 `assignee_name`을 제거하고, 프런트엔드 공개 업무 화면에서도 관련 렌더링을 삭제해 제거된 기능의 잔재를 정리했습니다.',
