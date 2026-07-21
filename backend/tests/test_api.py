@@ -1581,6 +1581,25 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_archived_tasks_list_supports_limit_and_offset(self, *_):
+        a = self.client(self.token_a)
+        before = len(a.get("/api/tasks/archived").json())
+        ids = []
+        for i in range(3):
+            task = a.post("/api/tasks", json={"title": f"stale project {i}"}).json()
+            a.post(f"/api/tasks/{task['id']}/archive")
+            ids.append(task["id"])
+        full = a.get("/api/tasks/archived").json()
+        self.assertEqual(len(full), before + 3)
+        new_ordered = [t["id"] for t in full if t["id"] in ids]
+        page1 = a.get(f"/api/tasks/archived?limit={before + 2}&offset=0").json()
+        page2 = a.get(f"/api/tasks/archived?limit={before + 2}&offset={before + 2}").json()
+        combined_new = [t["id"] for t in page1 + page2 if t["id"] in ids]
+        self.assertEqual(combined_new, new_ordered)
+        self.assertLessEqual(len(page1), before + 2)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_archive_todo_hides_from_list_and_unarchive_restores_it(self, *_):
         a = self.client(self.token_a)
         todo = a.post("/api/todos", json={"title": "stale idea"}).json()

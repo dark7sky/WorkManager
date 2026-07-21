@@ -1144,32 +1144,34 @@ def _soft_delete_event(item_id: int, user: str) -> bool:
     return False
 
 
-@app.get("/api/tasks/archived")
-def archived_tasks(user=Depends(require_user)):
+def _archived_list(table, user, limit, offset):
+    sql = f"SELECT * FROM {table} WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC"
+    args = (user,)
+    if limit is not None:
+        sql += " LIMIT ? OFFSET ?"
+        args = (user, limit, offset)
     with connection() as c:
-        return [row_dict(r) for r in c.execute(
-            "SELECT * FROM tasks WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC", (user,)).fetchall()]
+        return [row_dict(r) for r in c.execute(sql, args).fetchall()]
+
+
+@app.get("/api/tasks/archived")
+def archived_tasks(limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), user=Depends(require_user)):
+    return _archived_list("tasks", user, limit, offset)
 
 
 @app.get("/api/todos/archived")
-def archived_todos(user=Depends(require_user)):
-    with connection() as c:
-        return [row_dict(r) for r in c.execute(
-            "SELECT * FROM todos WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC", (user,)).fetchall()]
+def archived_todos(limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), user=Depends(require_user)):
+    return _archived_list("todos", user, limit, offset)
 
 
 @app.get("/api/events/archived")
-def archived_events(user=Depends(require_user)):
-    with connection() as c:
-        return [row_dict(r) for r in c.execute(
-            "SELECT * FROM events WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC", (user,)).fetchall()]
+def archived_events(limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), user=Depends(require_user)):
+    return _archived_list("events", user, limit, offset)
 
 
 @app.get("/api/work_logs/archived")
-def archived_work_logs(user=Depends(require_user)):
-    with connection() as c:
-        return [row_dict(r) for r in c.execute(
-            "SELECT * FROM work_logs WHERE user_id=? AND archived_at IS NOT NULL AND deleted_at IS NULL ORDER BY archived_at DESC", (user,)).fetchall()]
+def archived_work_logs(limit: int | None = Query(None, ge=1, le=1000), offset: int = Query(0, ge=0), user=Depends(require_user)):
+    return _archived_list("work_logs", user, limit, offset)
 
 
 for _table in CONFIG:

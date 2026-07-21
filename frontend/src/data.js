@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-archive-pagination',
+    timestamp: '2026-07-21T11:54:01+09:00',
+    description: '업무/할 일/일정/업무 기록 보관함이 전체 목록을 한 번에 불러와 항목이 많으면 느려졌습니다. 감사 로그 화면처럼 50개씩 나눠 불러오고 "더 보기" 버튼으로 이어서 조회하도록 개선했습니다 (`backend/app/main.py`, `frontend/src/components/ArchiveSection.jsx`).',
+  },
+  {
     id: '2026-07-21-title-length-validation',
     timestamp: '2026-07-21T11:42:31+09:00',
     description: '업무/일정 제목, Todo 내용, 업무 기록 내용이 서버 글자수 제한(300~20000자)을 넘으면 저장 시 알아보기 힘든 서버 오류가 표시되었습니다. 입력창에 `maxLength`를 지정하고, 저장 전 기존 인라인 검증(빨간 테두리 + 한글 안내 문구)에 글자수 초과 검사를 추가했습니다 (`frontend/src/formValidation.js`).',
