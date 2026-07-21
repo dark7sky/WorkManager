@@ -185,6 +185,11 @@ test('buildTaskPayload normalizes estimated_minutes to a non-negative integer or
   assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '-5' }, { task: { id: 1 } }).estimated_minutes, null)
 })
 
+test('buildTaskPayload clamps estimated_minutes to the backend max so save does not 422', () => {
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '200000' }, { task: { id: 1 } }).estimated_minutes, 100000)
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '100000' }, { task: { id: 1 } }).estimated_minutes, 100000)
+})
+
 test('buildTaskDuplicatePayload copies estimated_minutes', () => {
   const payload = buildTaskDuplicatePayload({ id: 1, title: '업무', estimated_minutes: 60 })
 

@@ -31,10 +31,11 @@ const normalizedOptionalId = value => {
   const number = Number(value)
   return Number.isInteger(number) && number > 0 ? number : null
 }
+const ESTIMATED_MINUTES_MAX = 100000
 export const normalizedEstimatedMinutes = value => {
   if (value === '' || value === null || value === undefined) return null
   const number = Number(value)
-  return Number.isFinite(number) && number >= 0 ? Math.round(number) : null
+  return Number.isFinite(number) && number >= 0 ? Math.min(ESTIMATED_MINUTES_MAX, Math.round(number)) : null
 }
 const normalizedLinkUrl = value => {
   const trimmed = trimField(value).slice(0, 2000)

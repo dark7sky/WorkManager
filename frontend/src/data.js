@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-estimated-minutes-upper-bound-clamp',
+    timestamp: '2026-07-21T13:57:39+09:00',
+    description: '예상 소요 시간(분) 입력값이 서버 허용 상한(100,000분)을 넘으면 저장 시 422 오류가 발생하던 문제를 고쳤습니다. 이제 입력값이 자동으로 상한에 맞춰 조정되며, 업무 편집 폼에도 상한이 표시됩니다 (`frontend/src/taskFormPayload.js`, `frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-21-task-form-stale-recurrence-end-date-validation-fix',
     timestamp: '2026-07-21T13:57:00+09:00',
     description: '업무 편집 폼이 백엔드의 반복 종료일 자동 정리 로직보다 먼저 클라이언트에서 검증을 막아, 반복 업무의 마감일만 바꿔도 "변경사항 저장" 버튼을 눌렀을 때 오류가 나던 문제를 고쳤습니다. 이제 반복 종료일 값 자체를 건드리지 않았다면 저장이 정상적으로 진행됩니다 (`frontend/src/components/TaskForm.jsx`, `frontend/src/formValidation.js`).',
