@@ -22,7 +22,9 @@ const parseChecklistCell = cell => {
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
 
-export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정']
+export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '반복', '반복 종료일', '고정']
+const taskRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
+const taskRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', 평일마다: 'weekdays', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly', weekdays: 'weekdays' }
 
 const escapeCsvCell = value => {
   const text = value == null ? '' : String(value)
@@ -51,6 +53,8 @@ export const taskRows = (tasks, todayIso, pinnedIds) => tasks.map(task => [
   task.reminder_minutes_before ?? '',
   colorValueToLabel[task.color] || '',
   checklistSummary(task.checklist),
+  taskRecurrenceLabels[task.recurrence_rule] || '',
+  task.recurrence_end_date || '',
   pinnedIds?.has(task.id) ? 'Y' : '',
 ])
 
@@ -91,7 +95,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트'), iRecurrence = col('반복'), iRecurrenceEnd = col('반복 종료일')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -109,6 +113,8 @@ export const parseTasksCsv = text => {
     if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) task.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) task.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) task.checklist = c }
+    if (iRecurrence >= 0 && cells[iRecurrence]) task.recurrence_rule = taskRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
+    if (iRecurrenceEnd >= 0 && cells[iRecurrenceEnd]) task.recurrence_end_date = cells[iRecurrenceEnd].trim()
     tasks.push(task)
   })
   return { tasks, errors }

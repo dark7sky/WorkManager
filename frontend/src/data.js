@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-task-csv-recurrence-columns',
+    timestamp: '2026-07-22T03:11:17+09:00',
+    description: '업무 CSV/Excel 내보내기·가져오기에서 반복 규칙(반복 주기, 반복 종료일)이 빠져 있어, 반복 설정된 업무를 내보낸 뒤 다시 가져오면 반복이 조용히 사라졌습니다. Todo에서 이미 쓰던 방식대로 업무 CSV/Excel에도 "반복", "반복 종료일" 열을 추가해 내보내기·가져오기 양쪽에서 반복 설정이 그대로 유지되도록 했습니다 (`frontend/src/csv.js`), 테스트: `frontend/src/csv.test.js`.',
+  },
+  {
     id: '2026-07-22-weekdays-recurrence-rule',
     timestamp: '2026-07-22T03:05:17+09:00',
     description: '업무·할 일·일정 반복 주기가 매일/매주/격주/매월/매년만 지원해, 평일마다 반복되는 일정(일일 스탠드업, 평일 업무 보고 등)은 주말에도 반복되거나 매번 수동으로 건너뛰어야 했습니다. 반복 규칙에 "평일마다"(weekdays, 토·일요일은 건너뛰고 다음 평일로 이동)를 추가해 업무 폼, 오늘 할 일 빠른 추가/수정, 일정 등록 폼의 반복 선택지와 CSV 가져오기/내보내기, AI 어시스턴트(로컬 규칙 파싱)에서 사용할 수 있습니다 (`backend/app/main.py`, `backend/app/ai.py`, `frontend/src/recurrencePreview.js`, `frontend/src/eventRecurrence.js`, `frontend/src/csv.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Tasks.jsx`), 테스트: `backend/tests/test_api.py::test_recurring_task_weekdays_skips_weekend`, `backend/tests/test_ai.py::test_weekdays_recurring_event_sets_recurrence_rule`, `frontend/src/recurrencePreview.test.js`, `frontend/src/eventRecurrence.test.js`.',

@@ -18,8 +18,8 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
   ], '2026-07-07')
 
   assert.equal(csv, [
-    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,태그,메모,링크,예상 소요시간(분),알림(분 전),색상,체크리스트,고정',
-    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,,,[x] a; [ ] b,',
+    '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,태그,메모,링크,예상 소요시간(분),알림(분 전),색상,체크리스트,반복,반복 종료일,고정',
+    '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,,,[x] a; [ ] b,,,',
   ].join('\n'))
 })
 
@@ -554,7 +554,7 @@ test('parseWorkLogsCsv returns nothing for empty input', () => {
 test('checklist column exports each item with its done state across all four CSV exports and round-trips on import', () => {
   const checklist = [{ text: 'a', done: true }, { text: 'b', done: false }, { text: 'c', done: true }]
 
-  assert.match(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'), /,\[x\] a; \[ \] b; \[x\] c,$/m)
+  assert.match(tasksToCsv([{ title: '업무', status: 'todo', progress: 0, checklist }], '2026-07-18'), /,\[x\] a; \[ \] b; \[x\] c,,,$/m)
   assert.match(eventsToCsv([{ title: '일정', start_at: '2026-07-18T09:00:00', checklist }]), /,\[x\] a; \[ \] b; \[x\] c,$/m)
   assert.match(todosToCsv([{ title: '할 일', completed: false, checklist }]), /,\[x\] a; \[ \] b; \[x\] c,$/m)
   assert.match(workLogsToCsv([{ log_date: '2026-07-18', content: '기록', checklist }], new Map()), /,\[x\] a; \[ \] b; \[x\] c,$/m)
@@ -565,14 +565,14 @@ test('checklist column exports each item with its done state across all four CSV
 
 test('tasksToCsv and parseTasksCsv round-trip the link column', () => {
   const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, link_url: 'https://example.com/doc' }], '2026-07-18')
-  assert.match(csv, /,https:\/\/example\.com\/doc,,,,,$/m)
+  assert.match(csv, /,https:\/\/example\.com\/doc,,,,,,,$/m)
   const { tasks } = parseTasksCsv(csv)
   assert.equal(tasks[0].link_url, 'https://example.com/doc')
 })
 
 test('tasksToCsv and parseTasksCsv round-trip the estimated minutes column', () => {
   const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, estimated_minutes: 90 }], '2026-07-18')
-  assert.match(csv, /,90,,,,$/m)
+  assert.match(csv, /,90,,,,,,$/m)
   const { tasks } = parseTasksCsv(csv)
   assert.equal(tasks[0].estimated_minutes, 90)
 })
@@ -582,6 +582,15 @@ test('tasksToCsv and parseTasksCsv round-trip the reminder lead time column', ()
   const { tasks, errors } = parseTasksCsv(csv)
   assert.deepEqual(errors, [])
   assert.equal(tasks[0].reminder_minutes_before, 15)
+})
+
+test('tasksToCsv and parseTasksCsv round-trip the recurrence columns', () => {
+  const csv = tasksToCsv([{ title: '업무', status: 'todo', progress: 0, recurrence_rule: 'weekdays', recurrence_end_date: '2026-08-31' }], '2026-07-18')
+  assert.match(csv, /,평일마다,2026-08-31,$/m)
+  const { tasks, errors } = parseTasksCsv(csv)
+  assert.deepEqual(errors, [])
+  assert.equal(tasks[0].recurrence_rule, 'weekdays')
+  assert.equal(tasks[0].recurrence_end_date, '2026-08-31')
 })
 
 test('todosToCsv and parseTodosCsv round-trip the reminder lead time column', () => {
