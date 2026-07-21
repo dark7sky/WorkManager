@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-event-badge-visibility-toggle',
+    timestamp: '2026-07-22T00:41:47+09:00',
+    description: '업무(Tasks) 화면에는 간트 행에 표시할 뱃지(체크리스트, 예상 소요시간, 링크 등)를 고르는 "표시 항목" 메뉴가 있었지만, 일정(Calendar) 화면의 일정 목록은 관련 링크·사용자 정의 필드·체크리스트·예상 소요시간·댓글·첨부파일 뱃지를 항상 모두 표시해 목록이 번잡했습니다. `frontend/src/eventBadgeVisibility.js`를 추가해 동일한 로컬 저장 방식으로 뱃지 표시 여부를 선택할 수 있는 "표시 항목" 드롭다운을 `Calendar.jsx` 목록 뷰 툴바에 연결했습니다.',
+  },
+  {
     id: '2026-07-22-todo-worklog-csv-column-picker',
     timestamp: '2026-07-22T00:39:11+09:00',
     description: '업무/일정 화면에는 CSV·Excel로 내보낼 열을 고르는 "내보낼 열" 메뉴가 있었지만, 오늘 화면의 할 일(Todo)과 업무 기록(Work Log) 내보내기는 항상 모든 열을 포함해 필요 없는 열까지 매번 정리해야 했습니다. `frontend/src/todoCsvColumns.js`와 `frontend/src/workLogCsvColumns.js`를 추가해 선택한 열 구성을 로컬에 저장하고, `Today.jsx`의 CSV·Excel 내보내기 버튼 옆에 동일한 열 선택 드롭다운을 연결했습니다.',
