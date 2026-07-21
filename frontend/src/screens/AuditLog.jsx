@@ -45,32 +45,34 @@ export default function AuditLog({ focus }) {
   const invalidRange = dateStart && dateEnd && dateStart > dateEnd
   const filtersActive = query || entity !== 'all' || dateStart || dateEnd
   const resetFilters = () => { setQuery(''); setEntity('all'); setDateStart(''); setDateEnd('') }
-  const load = async () => {
+  const load = async cancelledRef => {
     if (invalidRange) return
     setLoading(true); setError('')
     try {
       const result = await api.auditLogs(PAGE_SIZE, dateStart, dateEnd, 0)
+      if (cancelledRef && cancelledRef.current) return
       const items = result.items || []
       setLogs(items); setHasMore(items.length === PAGE_SIZE)
     } catch(e) {
-      setError(e.message)
+      if (!cancelledRef || !cancelledRef.current) setError(e.message)
     } finally {
-      setLoading(false)
+      if (!cancelledRef || !cancelledRef.current) setLoading(false)
     }
   }
   const loadMore = async () => {
     setLoadingMore(true)
+    const offset = logs.length
     try {
-      const result = await api.auditLogs(PAGE_SIZE, dateStart, dateEnd, logs.length)
+      const result = await api.auditLogs(PAGE_SIZE, dateStart, dateEnd, offset)
       const items = result.items || []
-      setLogs(prev=>[...prev,...items]); setHasMore(items.length === PAGE_SIZE)
+      setLogs(prev => prev.length === offset ? [...prev,...items] : prev); setHasMore(items.length === PAGE_SIZE)
     } catch(e) {
       setError(e.message)
     } finally {
       setLoadingMore(false)
     }
   }
-  useEffect(()=>{ load() },[dateStart,dateEnd])
+  useEffect(()=>{ const cancelledRef={current:false}; load(cancelledRef); return ()=>{ cancelledRef.current=true } },[dateStart,dateEnd])
   const entities = useMemo(()=>[...new Set(logs.map(log=>log.entity_type).filter(Boolean))].sort(),[logs])
   const shown = logs.filter(log => {
     const haystack = `${log.action} ${actionLabels[log.action] || ''} ${log.entity_type} ${entityLabels[log.entity_type] || ''} ${log.entity_id || ''} ${metadataText(log.metadata)}`.toLowerCase()
