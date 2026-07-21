@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-global-search-open-log-event-fix',
+    timestamp: '2026-07-21T23:23:16+09:00',
+    description: '전역 검색(⌘K)에서 업무 기록/일정 결과를 클릭하면 목록이 있는 화면으로 이동만 할 뿐 실제로 어떤 항목을 검색했는지 표시되지 않아, 검색 결과가 많을 때 사용자가 다시 직접 찾아야 했습니다. Todo와 동일하게 클릭한 업무 기록/일정을 자동으로 열고 강조 표시하도록 전역 검색의 onOpenLog/onOpenEvent 핸들러를 수정했습니다.',
+  },
+  {
     id: '2026-07-21-share-link-expiry',
     timestamp: '2026-07-21T23:17:49+09:00',
     description: '업무/일정/Todo/업무 기록의 공유 링크는 한 번 만들면 직접 해제하기 전까지 로그인 없이 영구히 열람 가능해, 상업용 제품 기준으로 보안상 위험 요소였습니다. 공유 링크 생성 시 만료 기간(7일/30일/90일/무제한)을 선택할 수 있도록 4개 엔티티 모두에 `public_token_expires_at` 컬럼과 만료 검사를 추가하고, 만료된 링크는 해제된 것과 동일하게 404로 처리하도록 했습니다.',
