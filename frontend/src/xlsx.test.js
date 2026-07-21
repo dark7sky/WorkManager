@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { eventExcelFilename, eventsToExcelXml, rowsToSpreadsheetXml, taskExcelFilename, tasksToExcelXml, todoExcelFilename, todosToExcelXml, workLogExcelFilename, workLogsToExcelXml } from './xlsx.js'
+import { auditLogExcelFilename, auditLogsToExcelXml, eventExcelFilename, eventsToExcelXml, rowsToSpreadsheetXml, taskExcelFilename, tasksToExcelXml, todoExcelFilename, todosToExcelXml, workLogExcelFilename, workLogsToExcelXml } from './xlsx.js'
 
 test('rowsToSpreadsheetXml builds a valid SpreadsheetML workbook with escaped cells', () => {
   const xml = rowsToSpreadsheetXml('시트', ['제목', '메모'], [['A & B', '<탭> "인용" \'따옴표\'']])
@@ -55,4 +55,15 @@ test('workLogsToExcelXml reuses the work log CSV headers and row values', () => 
 
 test('workLogExcelFilename uses the .xls extension', () => {
   assert.equal(workLogExcelFilename('2026-07-21'), 'workmanager-work-logs-2026-07-21.xls')
+})
+
+test('auditLogsToExcelXml reuses the audit log CSV headers and row values', () => {
+  const xml = auditLogsToExcelXml([{ created_at: '2026-07-21T10:00:00', action: 'update', entity_type: 'tasks', entity_id: 5, metadata: { fields: ['title'] } }])
+  assert.match(xml, /<Data ss:Type="String">일시<\/Data>/)
+  assert.match(xml, /<Data ss:Type="String">수정<\/Data>/)
+  assert.match(xml, /<Data ss:Type="String">업무<\/Data>/)
+})
+
+test('auditLogExcelFilename uses the .xls extension', () => {
+  assert.equal(auditLogExcelFilename('2026-07-21'), 'workmanager-audit-log-2026-07-21.xls')
 })

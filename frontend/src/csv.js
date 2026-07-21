@@ -178,18 +178,17 @@ const auditMetadataText = metadata => {
   return Object.entries(metadata).map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`).join(' · ')
 }
 
-const auditHeaders = ['일시', '작업', '대상', '대상 ID', '상세']
+export const auditHeaders = ['일시', '작업', '대상', '대상 ID', '상세']
 
-export const auditLogsToCsv = logs => {
-  const rows = logs.map(log => [
-    log.created_at,
-    auditActionLabels[log.action] || log.action,
-    auditEntityLabels[log.entity_type] || log.entity_type,
-    log.entity_id ?? '',
-    auditMetadataText(log.metadata),
-  ])
-  return [auditHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const auditRows = logs => logs.map(log => [
+  log.created_at,
+  auditActionLabels[log.action] || log.action,
+  auditEntityLabels[log.entity_type] || log.entity_type,
+  log.entity_id ?? '',
+  auditMetadataText(log.metadata),
+])
+
+export const auditLogsToCsv = logs => [auditHeaders, ...auditRows(logs)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 

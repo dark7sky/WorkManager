@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-audit-log-excel-export',
+    timestamp: '2026-07-21T19:29:00+09:00',
+    description: '업무·일정·오늘 화면에는 CSV 외에 Excel 내보내기 버튼이 있었지만, 감사 로그 화면은 CSV와 PDF 보고서만 지원해 감사 추적 자료를 감사인·재무 담당자에게 스프레드시트로 전달하려면 수동 변환이 필요했습니다. 감사 로그 화면에도 동일한 Excel 내보내기 버튼을 추가했습니다(`frontend/src/xlsx.js`의 `auditLogsToExcelXml`, `frontend/src/screens/AuditLog.jsx`).',
+  },
+  {
     id: '2026-07-21-bulk-promote-worklog',
     timestamp: '2026-07-21T19:55:00+09:00',
     description: '할 일 목록에는 여러 개를 선택해 한 번에 "업무로 전환"하는 일괄 작업 버튼이 있었지만, 오늘 한 일(업무 기록) 목록에는 항목별 전환 버튼만 있고 일괄 전환 기능이 빠져 있었습니다. 업무 기록 선택 도구모음에도 동일한 "업무로 전환" 일괄 작업 버튼을 추가했습니다(`frontend/src/App.jsx`의 `onBulkPromoteLog`, `frontend/src/screens/Today.jsx`).',

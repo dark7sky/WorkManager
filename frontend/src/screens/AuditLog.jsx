@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import { api } from '../api'
 import { auditLogCsvFilename, auditLogsToCsv, auditActionLabels as actionLabels, auditEntityLabels as entityLabels } from '../csv'
 import { auditLogReportFilename, auditLogsToPrintableReport } from '../auditLogReport'
+import { auditLogExcelFilename, auditLogsToExcelXml } from '../xlsx'
 
 const formatTimestamp = value => new Intl.DateTimeFormat('ko-KR', {
   dateStyle: 'medium',
@@ -65,6 +66,10 @@ export default function AuditLog({ focus }) {
     const csv=`﻿${auditLogsToCsv(shown)}`,blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a')
     link.href=url;link.download=auditLogCsvFilename(new Date().toISOString().slice(0,10));document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url)
   }
+  const exportExcel = () => {
+    const xml=auditLogsToExcelXml(shown),blob=new Blob([xml],{type:'application/vnd.ms-excel'}),url=URL.createObjectURL(blob),link=document.createElement('a')
+    link.href=url;link.download=auditLogExcelFilename(new Date().toISOString().slice(0,10));document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url)
+  }
   const printReport = () => {
     const today=new Date().toISOString().slice(0,10),html=auditLogsToPrintableReport(shown,{actionLabels,entityLabels,metadataText,generatedAt:new Date().toISOString(),title:'WorkManager 감사 로그 보고서'}),win=window.open('', '_blank')
     if(!win) return
@@ -78,6 +83,7 @@ export default function AuditLog({ focus }) {
       {filtersActive?<button type="button" className="text-button" onClick={resetFilters}>필터 초기화</button>:null}
       <button type="button" className="text-button" onClick={printReport} disabled={!shown.length}><FileText/> PDF</button>
       <button type="button" className="text-button" onClick={exportShown} disabled={!shown.length}><Download/> CSV 내보내기</button>
+      <button type="button" className="text-button" onClick={exportExcel} disabled={!shown.length}><Download/> Excel 내보내기</button>
     </div>
     <section className="audit-panel" aria-labelledby="audit-title">
       <div className="section-title"><div><h2 id="audit-title">최근 활동</h2><p>{dateStart||dateEnd?'선택한 기간의 ':''}최근 변경 이력을 보여줍니다.</p></div><ClipboardList aria-hidden="true"/></div>
