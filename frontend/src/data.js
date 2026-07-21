@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-legacy-cycle-save-fix',
+    timestamp: '2026-07-21T13:26:19+09:00',
+    description: '업무를 수정하고 저장할 때, 실제로는 관련 없는 다른 업무들 사이의 예전 순환 참조(선행 업무나 상위 업무 데이터 오류) 때문에 "순환 참조" 오류로 저장이 막히던 문제를 고쳤습니다. 이제 지금 편집 중인 업무 자신이 순환에 포함될 때만 저장을 막습니다 (`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-21-archived-link-save-fix',
     timestamp: '2026-07-21T13:20:00+09:00',
     description: '상위 업무나 선행 업무가 보관된 상태에서 하위/후행 업무를 열어 저장하면, 선택 목록에 해당 업무가 보이지 않아 연결이 조용히 끊어지던 문제를 고쳤습니다. 이제 보관된 업무도 "(보관됨/목록에 없음)" 표시로 선택 목록에 유지되어, 실제로 변경하지 않는 한 연결이 그대로 저장됩니다 (`frontend/src/taskHierarchy.js`, `frontend/src/components/TaskForm.jsx`).',

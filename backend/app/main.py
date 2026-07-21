@@ -791,30 +791,34 @@ def validate_task_links(data, user_id, current_id=None):
             graph = {r["id"]: set(normalize_legacy_json_array_field("dependency_ids", r["dependency_ids"])) for r in c.execute(
                 "SELECT id,dependency_ids FROM tasks WHERE user_id=? AND deleted_at IS NULL", (user_id,)).fetchall()}
         graph[current_id] = proposed
-        visiting, visited = set(), set()
-        def visit(node):
-            if node in visiting:
-                return True
-            if node in visited:
-                return False
-            visiting.add(node)
-            if any(visit(child) for child in graph.get(node, set())):
-                return True
-            visiting.remove(node); visited.add(node)
-            return False
-        if visit(current_id):
-            raise HTTPException(422, "Task dependencies must not contain a cycle")
+        # Only flag a cycle that actually loops back to current_id; pre-existing
+        # cycles among unrelated legacy rows elsewhere in the graph must not
+        # block saving a task that doesn't participate in them.
+        stack, seen = list(proposed), set()
+        while stack:
+            node = stack.pop()
+            if node == current_id:
+                raise HTTPException(422, "Task dependencies must not contain a cycle")
+            if node in seen:
+                continue
+            seen.add(node)
+            stack.extend(graph.get(node, ()))
     if current_id is not None and "parent_id" in data:
         with connection() as c:
             parents = {r["id"]: normalize_legacy_optional_task_id(r["parent_id"]) for r in c.execute(
                 "SELECT id,parent_id FROM tasks WHERE user_id=? AND deleted_at IS NULL", (user_id,)).fetchall()}
         parents = {node: (None if parent == node else parent) for node, parent in parents.items()}
         parents[current_id] = data.get("parent_id")
+        # Only flag a cycle that loops back to current_id itself; stop walking
+        # (without raising) if the chain runs into an unrelated pre-existing
+        # cycle among legacy rows that current_id doesn't actually belong to.
         seen = set()
         node = current_id
         while node is not None:
             if node in seen:
-                raise HTTPException(422, "Task parent hierarchy must not contain a cycle")
+                if node == current_id:
+                    raise HTTPException(422, "Task parent hierarchy must not contain a cycle")
+                break
             seen.add(node)
             node = parents.get(node)
 

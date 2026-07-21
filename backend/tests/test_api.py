@@ -1507,6 +1507,36 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_editing_task_unaffected_by_unrelated_legacy_dependency_cycle(self, *_):
+        import json
+        from app.db import connection
+        a = self.client(self.token_a)
+        x = a.post("/api/tasks", json={"title": "x"}).json()
+        y = a.post("/api/tasks", json={"title": "y"}).json()
+        with connection() as c:
+            c.execute("UPDATE tasks SET dependency_ids=? WHERE id=?", (json.dumps([y["id"]]), x["id"]))
+            c.execute("UPDATE tasks SET dependency_ids=? WHERE id=?", (json.dumps([x["id"]]), y["id"]))
+        z = a.post("/api/tasks", json={"title": "z", "dependency_ids": [x["id"]]}).json()
+        other = a.post("/api/tasks", json={"title": "other"}).json()
+        response = a.patch(f"/api/tasks/{z['id']}", json={"title": "z edited", "dependency_ids": [x["id"], other["id"]]})
+        self.assertEqual(response.status_code, 200, response.text)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_editing_task_unaffected_by_unrelated_legacy_parent_cycle(self, *_):
+        from app.db import connection
+        a = self.client(self.token_a)
+        x = a.post("/api/tasks", json={"title": "x"}).json()
+        y = a.post("/api/tasks", json={"title": "y"}).json()
+        with connection() as c:
+            c.execute("UPDATE tasks SET parent_id=? WHERE id=?", (y["id"], x["id"]))
+            c.execute("UPDATE tasks SET parent_id=? WHERE id=?", (x["id"], y["id"]))
+        z = a.post("/api/tasks", json={"title": "z", "parent_id": x["id"]}).json()
+        response = a.patch(f"/api/tasks/{z['id']}", json={"title": "z edited", "parent_id": x["id"]})
+        self.assertEqual(response.status_code, 200, response.text)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_month_end_recurrence_returns_to_month_end(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "month end", "start_date": "2027-01-31", "due_date": "2027-01-31", "recurrence_rule": "monthly"}).json()
