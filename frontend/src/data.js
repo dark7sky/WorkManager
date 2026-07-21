@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-todo-worklog-badge-visibility',
+    timestamp: '2026-07-22T03:17:42+09:00',
+    description: '업무/일정 목록에는 뱃지 표시 항목을 숨길 수 있는 "표시 항목" 메뉴가 있었지만, 오늘 화면의 할 일·업무 기록 목록에는 없어 링크·체크리스트·사용자 정의 필드·예상 소요시간·댓글·첨부파일 뱃지가 촘촘한 목록에서 항상 다 표시됐습니다. 같은 패턴으로 할 일·업무 기록에도 로컬 저장 기반 "표시 항목" 토글 메뉴를 추가했습니다 (`frontend/src/todoBadgeVisibility.js`, `frontend/src/workLogBadgeVisibility.js`, `frontend/src/screens/Today.jsx`), 테스트: `frontend/src/todoBadgeVisibility.test.js`, `frontend/src/workLogBadgeVisibility.test.js`.',
+  },
+  {
     id: '2026-07-22-task-csv-recurrence-columns',
     timestamp: '2026-07-22T03:11:17+09:00',
     description: '업무 CSV/Excel 내보내기·가져오기에서 반복 규칙(반복 주기, 반복 종료일)이 빠져 있어, 반복 설정된 업무를 내보낸 뒤 다시 가져오면 반복이 조용히 사라졌습니다. Todo에서 이미 쓰던 방식대로 업무 CSV/Excel에도 "반복", "반복 종료일" 열을 추가해 내보내기·가져오기 양쪽에서 반복 설정이 그대로 유지되도록 했습니다 (`frontend/src/csv.js`), 테스트: `frontend/src/csv.test.js`.',
