@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-quickcapture-apply-all',
+    timestamp: '2026-07-22T07:56:20+09:00',
+    description: '빠른 입력(Ctrl/⌘+K)은 줄바꿈으로 여러 건을 한 번에 분석할 수 있었지만, 분석된 항목은 "하나씩 확인 후 추가하세요" 안내대로 매번 개별 "추가" 버튼을 눌러야 했습니다. 하루치 회의록·메모를 한 번에 업무/일정/할 일로 옮기는 실무 흐름을 지원하기 위해 "모두 추가" 버튼(`frontend/src/components/QuickCapture.jsx`)을 추가했습니다. 항목을 순차 적용하며 실패한 항목은 목록에 남기고 성공/실패 건수를 안내합니다.',
+  },
+  {
     id: '2026-07-22-worklog-client-breakdown',
     timestamp: '2026-07-22T07:55:00+09:00',
     description: '업무 기록에 청구 고객명(client_name)과 시간당 요율을 입력할 수 있었지만, 여러 고객을 동시에 관리하는 프리랜서/컨설턴트가 고객별 총 소요 시간과 청구 예상 금액을 확인하려면 CSV/Excel로 내보내 직접 집계해야 했습니다. 성과 리포트(`/api/achievements`)에 태그별 집계(`tag_breakdown`)와 동일한 방식으로 `client_breakdown`(고객별 소요 시간·청구 가능 시간·청구 예상 금액)을 추가하고(`backend/app/main.py`), 성과 화면(`frontend/src/screens/Performance.jsx`)에 "고객별 소요 시간" 섹션과 Markdown 내보내기(`frontend/src/performanceReport.js`)에 해당 섹션을 추가했습니다. 테스트: `backend/tests/test_api.py::test_achievement_report_includes_client_breakdown`, `frontend/src/performanceReport.test.js`.',

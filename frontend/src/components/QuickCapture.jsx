@@ -56,13 +56,29 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     finally { setBusy(false) }
   }
 
+  const applyAll = async () => {
+    setBusy(true)
+    let succeeded = 0
+    const failed = []
+    for (const item of items) {
+      try { await api.aiApply({ action: item.action, entity: item.entity, id: item.id, data: item.data, reason: item.reason }); succeeded++ }
+      catch { failed.push(item) }
+    }
+    setItems(failed)
+    if (succeeded) await onApplied?.()
+    if (failed.length) notify(`${succeeded}건 추가, ${failed.length}건 실패했습니다.`, 'error')
+    else notify(`빠른 입력으로 ${succeeded}건 추가했습니다.`)
+    if (!failed.length) onClose()
+    setBusy(false)
+  }
+
   return <Modal title="빠른 입력" onClose={onClose}>
     <form className="quick-capture-form" onSubmit={analyze}>
       <div className="quick-capture-input"><Search size={18} aria-hidden="true"/><input autoFocus value={text} onChange={e => setText(e.target.value)} placeholder="예: 내일 오후 3시 고객 미팅 (여러 건은 줄바꿈으로 구분)" disabled={busy} aria-label="빠른 입력"/></div>
       {!items ? <button className="primary" disabled={!text.trim() || busy}>{busy ? <LoaderCircle className="spin"/> : <CornerDownLeft/>} 분석</button> : null}
     </form>
     {items && items.length ? <>
-      {items.length > 1 ? <small className="quick-capture-count">{items.length}건 분석됨 · 하나씩 확인 후 추가하세요.</small> : null}
+      {items.length > 1 ? <div className="quick-capture-count-row"><small className="quick-capture-count">{items.length}건 분석됨 · 확인 후 추가하세요.</small><button type="button" className="secondary" disabled={busy} onClick={applyAll}>{busy ? <LoaderCircle className="spin"/> : null} 모두 추가</button></div> : null}
       {items[0]?.warning ? <div className="ai-warning"><AlertTriangle/><span>{items[0].warning}</span></div> : null}
       {items.map((item, index) => {
         const data = item?.data || {}
