@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-today-task-row-open',
+    timestamp: '2026-07-21T11:41:00+09:00',
+    description: '오늘 화면의 "오늘 예정 업무" 목록은 마우스를 올리면 강조되어 클릭할 수 있어 보였지만 실제로는 아무 반응이 없어 업무를 열려면 업무 화면으로 따로 이동해야 했습니다. 업무 제목을 눌러 바로 수정 화면을 열 수 있도록 연결했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
+  },
+  {
     id: '2026-07-21-task-promote-subtask-button',
     timestamp: '2026-07-21T11:25:03+09:00',
     description: '하위 업무를 최상위로 옮기려면 매번 수정 화면을 열어 상위 업무 항목을 지워야 했습니다. Gantt 업무 목록의 하위 업무 행에 "최상위로" 버튼을 추가해 미루기·복제·보관과 같은 자리에서 한 번에 상위 업무 지정을 해제할 수 있도록 했습니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
