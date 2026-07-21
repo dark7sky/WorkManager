@@ -45,6 +45,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const priorityRef = useRef(null)
   const [aiEstimating, setAiEstimating] = useState(false)
   const [shareToken, setShareToken] = useState(() => task?.public_token || '')
+  const [shareExpiresAt, setShareExpiresAt] = useState(() => task?.public_token_expires_at || '')
+  const [shareExpiryDays, setShareExpiryDays] = useState('')
   const [shareBusy, setShareBusy] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const applyChecklistProgress = () => {
@@ -177,13 +179,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const shareUrl = shareToken ? `${location.origin}/public/tasks/${shareToken}` : ''
   const createShareLink = async () => {
     setShareBusy(true); setShareCopied(false)
-    try { const res = await api.shareTask(task.id); setShareToken(res.public_token) }
+    try { const res = await api.shareTask(task.id, shareExpiryDays ? Number(shareExpiryDays) : undefined); setShareToken(res.public_token); setShareExpiresAt(res.public_token_expires_at || '') }
     catch (e) { setError(e.message) }
     finally { setShareBusy(false) }
   }
   const revokeShareLink = async () => {
     setShareBusy(true)
-    try { await api.unshareTask(task.id); setShareToken(''); setShareCopied(false) }
+    try { await api.unshareTask(task.id); setShareToken(''); setShareCopied(false); setShareExpiresAt('') }
     catch (e) { setError(e.message) }
     finally { setShareBusy(false) }
   }
@@ -393,7 +395,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
       {shareToken
         ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
-        : <div className="checklist-editor-add"><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
+        : <div className="checklist-editor-add"><select value={shareExpiryDays} onChange={e => setShareExpiryDays(e.target.value)} aria-label="공유 링크 만료 기간"><option value="">무제한</option><option value="7">7일 후 만료</option><option value="30">30일 후 만료</option><option value="90">90일 후 만료</option></select><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
+      {shareToken ? <p className="muted">{shareExpiresAt ? `${new Date(shareExpiresAt).toLocaleDateString('ko-KR')}에 만료됩니다.` : '만료 없이 유지됩니다.'}</p> : null}
       <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 업무를 읽기 전용으로 볼 수 있습니다.</p>
     </div> : null}
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>

@@ -2055,16 +2055,25 @@ def unarchive_task(item_id: int, user=Depends(require_user)):
     return rows("tasks", user, "WHERE id=?", (item_id,))[0]
 
 
+def _share_expiry(expires_in_days: int | None):
+    if expires_in_days is None:
+        return None
+    if expires_in_days <= 0:
+        raise HTTPException(422, "expires_in_days must be positive")
+    return (datetime.now() + timedelta(days=expires_in_days)).isoformat(timespec="seconds")
+
+
 @app.post("/api/tasks/{item_id}/share")
-def share_task(item_id: int, user=Depends(require_user)):
+def share_task(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+    expires_at = _share_expiry(expires_in_days)
     with connection() as c:
         item = c.execute("SELECT public_token FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE tasks SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+        c.execute("UPDATE tasks SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
     audit(user, "share", "tasks", item_id)
-    return {"public_token": token}
+    return {"public_token": token, "public_token_expires_at": expires_at}
 
 
 @app.delete("/api/tasks/{item_id}/share")
@@ -2073,21 +2082,22 @@ def unshare_task(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE tasks SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE tasks SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "tasks", item_id)
     return {"ok": True}
 
 
 @app.post("/api/events/{item_id}/share")
-def share_event(item_id: int, user=Depends(require_user)):
+def share_event(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+    expires_at = _share_expiry(expires_in_days)
     with connection() as c:
         item = c.execute("SELECT public_token FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE events SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+        c.execute("UPDATE events SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
     audit(user, "share", "events", item_id)
-    return {"public_token": token}
+    return {"public_token": token, "public_token_expires_at": expires_at}
 
 
 @app.delete("/api/events/{item_id}/share")
@@ -2096,21 +2106,22 @@ def unshare_event(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE events SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE events SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "events", item_id)
     return {"ok": True}
 
 
 @app.post("/api/todos/{item_id}/share")
-def share_todo(item_id: int, user=Depends(require_user)):
+def share_todo(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+    expires_at = _share_expiry(expires_in_days)
     with connection() as c:
         item = c.execute("SELECT public_token FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE todos SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+        c.execute("UPDATE todos SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
     audit(user, "share", "todos", item_id)
-    return {"public_token": token}
+    return {"public_token": token, "public_token_expires_at": expires_at}
 
 
 @app.delete("/api/todos/{item_id}/share")
@@ -2119,21 +2130,22 @@ def unshare_todo(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE todos SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE todos SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "todos", item_id)
     return {"ok": True}
 
 
 @app.post("/api/work_logs/{item_id}/share")
-def share_work_log(item_id: int, user=Depends(require_user)):
+def share_work_log(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+    expires_at = _share_expiry(expires_in_days)
     with connection() as c:
         item = c.execute("SELECT public_token FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE work_logs SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+        c.execute("UPDATE work_logs SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
     audit(user, "share", "work_logs", item_id)
-    return {"public_token": token}
+    return {"public_token": token, "public_token_expires_at": expires_at}
 
 
 @app.delete("/api/work_logs/{item_id}/share")
@@ -2142,7 +2154,7 @@ def unshare_work_log(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE work_logs SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE work_logs SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "work_logs", item_id)
     return {"ok": True}
 
@@ -2515,7 +2527,8 @@ def public_task(token: str, request: Request):
     with connection() as c:
         item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
           assignee_name,tags,created_at,updated_at FROM tasks
-          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+          WHERE public_token=? AND deleted_at IS NULL
+          AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
     return row_dict(item)
@@ -2527,7 +2540,8 @@ def public_event(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-event", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,description,location,start_at,end_at,tags,created_at,updated_at FROM events
-          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+          WHERE public_token=? AND deleted_at IS NULL
+          AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
     return row_dict(item)
@@ -2539,7 +2553,8 @@ def public_todo(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-todo", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,created_at FROM todos
-          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+          WHERE public_token=? AND deleted_at IS NULL
+          AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
     return row_dict(item)
@@ -2551,7 +2566,8 @@ def public_work_log(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-work-log", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,created_at FROM work_logs
-          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+          WHERE public_token=? AND deleted_at IS NULL
+          AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
     return row_dict(item)

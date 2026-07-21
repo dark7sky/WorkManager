@@ -431,6 +431,24 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_share_link_can_expire(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "expiring plan"}).json()
+        no_auth = TestClient(self.app)
+        rejected = a.post(f"/api/tasks/{task['id']}/share", params={"expires_in_days": 0})
+        self.assertEqual(rejected.status_code, 422, rejected.text)
+        shared = a.post(f"/api/tasks/{task['id']}/share", params={"expires_in_days": 7})
+        self.assertEqual(shared.status_code, 200, shared.text)
+        self.assertTrue(shared.json()["public_token_expires_at"])
+        token = shared.json()["public_token"]
+        self.assertEqual(no_auth.get(f"/api/public/tasks/{token}").status_code, 200)
+        from app.db import connection
+        with connection() as c:
+            c.execute("UPDATE tasks SET public_token_expires_at=? WHERE id=?", ("2000-01-01T00:00:00", task["id"]))
+        self.assertEqual(no_auth.get(f"/api/public/tasks/{token}").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         event = a.post("/api/events", json={

@@ -163,6 +163,7 @@ def init_db():
         _add_column(c, "work_logs", "archived_at", "TEXT")
         _add_column(c, "work_logs", "custom_fields", "TEXT NOT NULL DEFAULT '[]'")
         _add_column(c, "work_logs", "public_token", "TEXT")
+        _add_column(c, "work_logs", "public_token_expires_at", "TEXT")
         _add_column(c, "work_logs", "invoiced_at", "TEXT")
         _add_column(c, "work_logs", "hourly_rate_override", "REAL")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_work_logs_public_token ON work_logs(public_token) WHERE public_token IS NOT NULL")
@@ -178,6 +179,7 @@ def init_db():
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
             "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT", "public_token": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
+            "public_token_expires_at": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_public_token ON tasks(public_token) WHERE public_token IS NOT NULL")
@@ -192,7 +194,7 @@ def init_db():
             "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
             "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
-            "public_token": "TEXT",
+            "public_token": "TEXT", "public_token_expires_at": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_public_token ON events(public_token) WHERE public_token IS NOT NULL")
@@ -203,7 +205,8 @@ def init_db():
         for name, definition in {"recurrence_rule": "TEXT", "recurrence_spawned_at": "TEXT", "priority": "TEXT NOT NULL DEFAULT 'normal'", "link_url": "TEXT", "recurrence_end_date": "TEXT", "memo": "TEXT",
                                   "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
                                   "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
-                                  "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER", "public_token": "TEXT"}.items():
+                                  "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER", "public_token": "TEXT",
+                                  "public_token_expires_at": "TEXT"}.items():
             _add_column(c, "todos", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_todos_public_token ON todos(public_token) WHERE public_token IS NOT NULL")
         _migrate_scoped_kv(c)
