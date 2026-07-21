@@ -95,6 +95,13 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
     tagBreakdown.forEach(t => lines.push(`- ${t.tag}: ${formatDuration(t.tracked_minutes)} · 완료 ${t.completed_tasks}건`))
   }
 
+  const clientBreakdown = data?.client_breakdown || []
+  if (clientBreakdown.length) {
+    lines.push('')
+    lines.push('## 고객별 소요 시간')
+    clientBreakdown.forEach(c => lines.push(`- ${c.client_name}: ${formatDuration(c.tracked_minutes)}${c.billable_amount ? ` · 청구 ${Math.round(c.billable_amount).toLocaleString('ko-KR')}원` : ''}`))
+  }
+
   if (summary && (summary.headline || summary.narrative)) {
     lines.push('')
     lines.push('## AI 요약')

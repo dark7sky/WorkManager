@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-client-breakdown',
+    timestamp: '2026-07-22T07:55:00+09:00',
+    description: '업무 기록에 청구 고객명(client_name)과 시간당 요율을 입력할 수 있었지만, 여러 고객을 동시에 관리하는 프리랜서/컨설턴트가 고객별 총 소요 시간과 청구 예상 금액을 확인하려면 CSV/Excel로 내보내 직접 집계해야 했습니다. 성과 리포트(`/api/achievements`)에 태그별 집계(`tag_breakdown`)와 동일한 방식으로 `client_breakdown`(고객별 소요 시간·청구 가능 시간·청구 예상 금액)을 추가하고(`backend/app/main.py`), 성과 화면(`frontend/src/screens/Performance.jsx`)에 "고객별 소요 시간" 섹션과 Markdown 내보내기(`frontend/src/performanceReport.js`)에 해당 섹션을 추가했습니다. 테스트: `backend/tests/test_api.py::test_achievement_report_includes_client_breakdown`, `frontend/src/performanceReport.test.js`.',
+  },
+  {
     id: '2026-07-22-task-series-bulk-edit',
     timestamp: '2026-07-22T03:57:40+09:00',
     description: '반복 일정과 반복 할 일은 이후 회차를 한 번에 수정할 수 있었지만 반복 업무(태스크)는 회차별로 하나씩 수정해야 해서, 매주 반복되는 업무의 제목이나 우선순위를 바꾸려면 회차 수만큼 반복 작업이 필요했습니다. `PATCH /api/tasks/series/{group_id}` 엔드포인트를 추가해 지정한 날짜 이후의 모든 회차에 제목·설명·태그·링크·색상·우선순위·예상 소요 시간을 한 번에 적용할 수 있게 하고(`backend/app/main.py`), 업무 수정 폼(`frontend/src/components/TaskForm.jsx`)에 "이 업무와 이후 반복 업무에 모두 적용" 체크박스를 추가했습니다. 테스트: `backend/tests/test_api.py::test_task_series_update_applies_to_future_occurrences_only`.',

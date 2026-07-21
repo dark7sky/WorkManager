@@ -1296,6 +1296,26 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_achievement_report_includes_client_breakdown(self, *_):
+        a = self.client(self.token_a)
+        a.post("/api/work_logs", json={"content": "client work", "log_date": "2026-07-06", "duration_minutes": 90,
+                                        "client_name": "Acme Corp", "billable": True, "hourly_rate_override": 60,
+                                        "tags": ["ClientBreakdownTest"]})
+        a.post("/api/work_logs", json={"content": "no client", "log_date": "2026-07-06", "duration_minutes": 20,
+                                        "tags": ["ClientBreakdownTest"]})
+        report = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")
+        self.assertEqual(report.status_code, 200, report.text)
+        breakdown = {row["client_name"]: row for row in report.json()["client_breakdown"]}
+        self.assertIn("Acme Corp", breakdown)
+        self.assertEqual(breakdown["Acme Corp"]["tracked_minutes"], 90)
+        self.assertEqual(breakdown["Acme Corp"]["billable_minutes"], 90)
+        self.assertEqual(breakdown["Acme Corp"]["billable_amount"], 90.0)
+        self.assertIn("(고객 없음)", breakdown)
+        self.assertEqual(breakdown["(고객 없음)"]["tracked_minutes"], 20)
+        self.assertEqual(breakdown["(고객 없음)"]["billable_minutes"], 0)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_achievement_summary_excludes_archived_tasks_from_active_count(self, *_):
         a = self.client(self.token_a)
         report_before = a.get("/api/achievements?start_date=2026-01-01&end_date=2026-12-31")

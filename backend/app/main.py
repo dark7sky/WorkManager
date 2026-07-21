@@ -2851,6 +2851,16 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     billable_amount = None
     if hourly_rate is not None or any(x.get("hourly_rate_override") is not None for x in logs if x.get("billable")):
         billable_amount = round(sum(int(x.get("duration_minutes") or 0) / 60 * (log_rate(x) or 0) for x in logs if x.get("billable")), 2)
+    by_client = {}
+    for x in logs:
+        client = x.get("client_name") or "(고객 없음)"
+        entry = by_client.setdefault(client, {"client_name": client, "tracked_minutes": 0, "billable_minutes": 0, "billable_amount": 0.0})
+        entry["tracked_minutes"] += int(x.get("duration_minutes") or 0)
+        if x.get("billable"):
+            entry["billable_minutes"] += int(x.get("duration_minutes") or 0)
+            entry["billable_amount"] += int(x.get("duration_minutes") or 0) / 60 * (log_rate(x) or 0)
+    client_breakdown = sorted(({**e, "billable_amount": round(e["billable_amount"], 2)} for e in by_client.values()),
+                               key=lambda e: e["tracked_minutes"], reverse=True)
     return {"period": {"start": start, "end": end},
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
@@ -2863,7 +2873,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
                         "billable_amount": billable_amount,
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
-            "tags": available_tags, "tag_breakdown": tag_breakdown, "timeline": timeline,
+            "tags": available_tags, "tag_breakdown": tag_breakdown, "client_breakdown": client_breakdown, "timeline": timeline,
             "tasks": tasks, "work_logs": logs, "events": events, "todos": todos}
 
 

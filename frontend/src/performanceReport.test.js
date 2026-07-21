@@ -61,6 +61,21 @@ test('performanceReportMarkdown: omits tag breakdown section when empty', () => 
   assert(!md.includes('## 태그별 소요 시간'))
 })
 
+test('performanceReportMarkdown: includes client breakdown section when present', () => {
+  const data = { summary: {}, timeline: [], client_breakdown: [{ client_name: 'Acme Corp', tracked_minutes: 90, billable_minutes: 90, billable_amount: 90 }] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(md.includes('## 고객별 소요 시간'))
+  assert(md.includes('- Acme Corp: 1시간 30분 · 청구 90원'))
+})
+
+test('performanceReportMarkdown: omits client breakdown section when empty', () => {
+  const data = { summary: {}, timeline: [], client_breakdown: [] }
+  const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: [], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(!md.includes('## 고객별 소요 시간'))
+})
+
 test('performanceReportMarkdown: includes tags in period line', () => {
   const data = { summary: {}, timeline: [] }
   const md = performanceReportMarkdown(data, { start: '2026-01-01', end: '2026-01-31', tags: ['sprint', 'Q1'], summary: null, generatedAt: '2026-01-31T10:00:00Z' })
