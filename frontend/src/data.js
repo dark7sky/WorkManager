@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-duplicate-title-warning',
+    timestamp: '2026-07-21T22:12:00+09:00',
+    description: '업무를 새로 만들거나 수정할 때 같은 제목의 진행 중인 업무가 이미 있으면 경고 문구를 표시하도록 개선했습니다. 그동안 CSV 가져오기, 일정 겹침 등에는 중복/충돌 경고가 있었지만 직접 입력한 업무 제목의 중복은 알려주지 않아 같은 업무를 실수로 여러 번 만드는 경우가 있었습니다.',
+  },
+  {
     id: '2026-07-21-task-new-comment-indicator',
     timestamp: '2026-07-21T21:57:00+09:00',
     description: '업무 목록에서 댓글이 새로 달려도 알아채기 어려웠던 문제를 개선했습니다. 목록 조회 API가 각 업무의 최신 댓글 시각(`latest_comment_at`)을 함께 내려주고, 업무 화면은 이 값을 마지막으로 확인한 시각과 비교해 아직 보지 않은 댓글이 있으면 댓글 배지에 강조 표시와 점(dot)을 붙입니다. 업무를 열어 보면 확인 시각이 갱신되어 표시가 사라집니다.',

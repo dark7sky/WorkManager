@@ -8,6 +8,7 @@ import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, t
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import { dropZoneHandlers } from '../fileDrop'
 import { findOverlappingTasks } from '../taskOverlap'
+import { findDuplicateTitleTasks } from '../taskDuplicateCheck'
 import { nextRecurrenceDate } from '../recurrencePreview'
 import TagsInput from './TagsInput'
 
@@ -58,7 +59,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [startTimeVal, setStartTimeVal] = useState(() => task?.start_time ?? '')
   const [dueDateVal, setDueDateVal] = useState(() => initialTaskDateValue(task, 'due_date', today))
   const [dueTimeVal, setDueTimeVal] = useState(() => task?.due_time ?? '')
+  const [titleVal, setTitleVal] = useState(() => task?.title ?? '')
   const overlapping = useMemo(() => findOverlappingTasks(startDateVal, startTimeVal, dueDateVal, dueTimeVal, tasks, task?.id ?? null), [startDateVal, startTimeVal, dueDateVal, dueTimeVal, tasks, task])
+  const duplicateTitled = useMemo(() => findDuplicateTitleTasks(titleVal, tasks, task?.id ?? null), [titleVal, tasks, task])
 
   const [prefillKey, setPrefillKey] = useState(0)
   const applyTemplate = id => {
@@ -67,6 +70,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     const filled = applyTaskTemplate(template, today)
     setPrefill(filled)
     setPrefillKey(k => k + 1)
+    setTitleVal(filled.title ?? titleVal)
     setTags(filled.tags)
     setRecurrenceRule(filled.recurrence_rule || '')
     setChecklist(filled.checklist || [])
@@ -321,7 +325,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       <label>업무 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
     </div> : null}
-    <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus maxLength={300} className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'} defaultValue={prefill?.title ?? task?.title ?? ''}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
+    <label className="span-2" key={`title-${prefillKey}`}>업무 제목<input name="title" required autoFocus maxLength={300} className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'} defaultValue={prefill?.title ?? task?.title ?? ''} onChange={e => setTitleVal(e.target.value)}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
+    {duplicateTitled.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 제목의 진행 중인 업무가 이미 있습니다: {duplicateTitled.map(t => t.title).join(', ')}</p> : null}
     <label key={`start-${prefillKey}`}>시작일<input name="start_date" type="date" defaultValue={prefill?.start_date ?? initialTaskDateValue(task, 'start_date', today)} onChange={e => setStartDateVal(e.target.value)}/></label>
     <label key={`start-time-${prefillKey}`}>시작 시각<input name="start_time" type="time" defaultValue={prefill?.start_time ?? task?.start_time ?? ''} onChange={e => setStartTimeVal(e.target.value)}/></label>
     <label key={`due-${prefillKey}`}>완료 예정일<input name="due_date" type="date" className={fieldErrors.due_date ? 'invalid' : ''} aria-invalid={fieldErrors.due_date ? 'true' : 'false'} defaultValue={prefill?.due_date ?? initialTaskDateValue(task, 'due_date', today)} onChange={e => setDueDateVal(e.target.value)}/>{fieldErrors.due_date ? <small className="field-error" role="alert">{fieldErrors.due_date}</small> : null}</label>
