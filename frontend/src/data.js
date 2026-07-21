@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-event-todo-log-unseen-comment-indicator',
+    timestamp: '2026-07-22T03:19:02+09:00',
+    description: '업무 목록에는 새 댓글이 달리면 빨간 점으로 표시하는 "안 읽은 댓글" 표시가 있었지만, 일정·할 일·업무 기록 목록에는 없어 협업자가 남긴 댓글을 놓치기 쉬웠습니다. 업무와 동일한 `commentActivity.js` 헬퍼(로컬 저장 기반 마지막 확인 시각 비교)를 일정/할 일/업무 기록 화면에도 연결해 항목을 열람하면 확인 표시가 갱신되도록 했습니다 (`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-22-todo-worklog-badge-visibility',
     timestamp: '2026-07-22T03:17:42+09:00',
     description: '업무/일정 목록에는 뱃지 표시 항목을 숨길 수 있는 "표시 항목" 메뉴가 있었지만, 오늘 화면의 할 일·업무 기록 목록에는 없어 링크·체크리스트·사용자 정의 필드·예상 소요시간·댓글·첨부파일 뱃지가 촘촘한 목록에서 항상 다 표시됐습니다. 같은 패턴으로 할 일·업무 기록에도 로컬 저장 기반 "표시 항목" 토글 메뉴를 추가했습니다 (`frontend/src/todoBadgeVisibility.js`, `frontend/src/workLogBadgeVisibility.js`, `frontend/src/screens/Today.jsx`), 테스트: `frontend/src/todoBadgeVisibility.test.js`, `frontend/src/workLogBadgeVisibility.test.js`.',
