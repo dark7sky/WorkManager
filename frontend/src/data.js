@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-share-link',
+    timestamp: '2026-07-21T13:08:00+09:00',
+    description: '업무 상세 화면에 "공유 링크 만들기" 버튼을 추가해, 로그인 없이 특정 업무를 읽기 전용으로 볼 수 있는 공개 링크(`/public/tasks/{token}`)를 생성·복사·해제할 수 있게 했습니다. 고객이나 협업자에게 로그인 계정 없이 진행 상황을 공유할 때 유용합니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/api.js`, `frontend/src/components/TaskForm.jsx`, `frontend/src/screens/PublicTask.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-ai-preview-dismiss',
     timestamp: '2026-07-21T13:05:00+09:00',
     description: 'AI 도우미의 분석 결과 카드에서 원치 않는 제안을 적용하지 않고도 목록에서 무시(삭제)할 수 있는 버튼을 추가했습니다. 여러 건을 한 번에 분석했을 때 필요한 항목만 골라 적용하기 쉬워졌습니다 (`frontend/src/screens/AIAssistant.jsx`, `frontend/src/App.jsx`).',

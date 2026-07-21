@@ -4,6 +4,7 @@ import { useTheme } from './hooks/useTheme'
 import AppShell from './components/AppShell'; import Login from './components/Login'; import Modal from './components/Modal'; import ConfirmDialog from './components/ConfirmDialog'; import TaskForm from './components/TaskForm'; import Toast from './components/Toast'; import QuickCapture from './components/QuickCapture'; import KeyboardShortcuts from './components/KeyboardShortcuts'
 const Today=lazy(()=>import('./screens/Today')),Tasks=lazy(()=>import('./screens/Tasks')),Calendar=lazy(()=>import('./screens/Calendar')),AIAssistant=lazy(()=>import('./screens/AIAssistant')),Settings=lazy(()=>import('./screens/Settings'))
 const Changelog=lazy(()=>import('./screens/Changelog'))
+const PublicTask=lazy(()=>import('./screens/PublicTask'))
 const Performance=lazy(()=>import('./screens/Performance'))
 const AuditLog=lazy(()=>import('./screens/AuditLog'))
 const ScreenFallback=()=><div className="app-loading" role="status"><span className="brand-mark">W</span><span>불러오는 중…</span></div>
@@ -80,6 +81,7 @@ export default function App(){
  const applyItem=index=>mutate(async()=>{const item=preview.items[index],isLast=preview.items.length<=1;await api.aiApply({action:item.action,entity:item.entity,id:item.id,data:item.data});setPreview(current=>{if(!current)return null;const items=current.items.filter((_,i)=>i!==index);return items.length?{...current,items}:null});if(isLast){setAiText('');setPage('today')}},'AI 제안을 적용했습니다.')
  const dismissItem=index=>setPreview(current=>{if(!current)return null;const items=current.items.filter((_,i)=>i!==index);return items.length?{...current,items}:null})
  if(location.pathname.replace(/\/+$/,'')==='/changelog')return <Suspense fallback={<ScreenFallback/>}><Changelog publicMode/></Suspense>
+ {const publicTaskMatch=location.pathname.match(/^\/public\/tasks\/([^/]+)\/?$/);if(publicTaskMatch)return <Suspense fallback={<ScreenFallback/>}><PublicTask token={publicTaskMatch[1]}/></Suspense>}
  if(boot.loading)return <div className="app-loading" role="status"><span className="brand-mark">W</span><span>WorkManager를 준비하고 있습니다…</span></div>
  if(!user)return <Login error={boot.error} googleEnabled={boot.google} onRetry={bootstrap}/>
  const overdueTodos=overdueIncompleteTodos(allTodos,new Date().toLocaleDateString('en-CA'))

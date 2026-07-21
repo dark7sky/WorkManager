@@ -66,6 +66,8 @@ export const api = {
   skipTaskRecurrence: id => request(`/tasks/${id}/skip-recurrence`,{method:'POST'}),
   archivedTasks: (limit,offset=0) => request(`/tasks/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveTask: id => request(`/tasks/${id}/archive`,{method:'POST'}), unarchiveTask: id => request(`/tasks/${id}/unarchive`,{method:'POST'}),
+  shareTask: id => request(`/tasks/${id}/share`,{method:'POST'}), unshareTask: id => request(`/tasks/${id}/share`,{method:'DELETE'}),
+  publicTask: token => request(`/public/tasks/${token}`, { suppressAuthEvent: true }),
   createEvent: data => request('/events',json('POST',data)), updateEvent: (id,data) => request(`/events/${id}`,json('PATCH',data)), deleteEvent: id => request(`/events/${id}`,{method:'DELETE'}),
   updateEventSeries: (groupId,fromStartAt,data) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,json('PATCH',data)),
   deleteEventSeries: (groupId,fromStartAt) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,{method:'DELETE'}),

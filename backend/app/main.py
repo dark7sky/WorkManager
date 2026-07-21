@@ -1900,6 +1900,29 @@ def unarchive_task(item_id: int, user=Depends(require_user)):
     return rows("tasks", user, "WHERE id=?", (item_id,))[0]
 
 
+@app.post("/api/tasks/{item_id}/share")
+def share_task(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT public_token FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        token = item["public_token"] or secrets.token_urlsafe(16)
+        c.execute("UPDATE tasks SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+    audit(user, "share", "tasks", item_id)
+    return {"public_token": token}
+
+
+@app.delete("/api/tasks/{item_id}/share")
+def unshare_task(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        c.execute("UPDATE tasks SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "unshare", "tasks", item_id)
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/archive")
 def archive_todo(item_id: int, user=Depends(require_user)):
     with connection() as c:
@@ -2227,6 +2250,19 @@ def feature_request_list(status: Literal["pending", "in_progress", "done", "dism
         where = "WHERE status=? ORDER BY created_at DESC LIMIT ?"
         args = (status, *args)
     return {"items": rows("feature_requests", user, where, args)}
+
+
+@app.get("/api/public/tasks/{token}")
+def public_task(token: str, request: Request):
+    """Public, read-only view of a task shared via a share link. No auth required."""
+    enforce_rate(request.client.host if request.client else "unknown", "public-task", 60, 60)
+    with connection() as c:
+        item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
+          assignee_name,tags,created_at,updated_at FROM tasks
+          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+    if not item:
+        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+    return row_dict(item)
 
 
 @app.get("/api/public/changelog")

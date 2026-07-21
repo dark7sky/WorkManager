@@ -168,9 +168,10 @@ def init_db():
             "schedule_approval_status": "TEXT NOT NULL DEFAULT 'none'", "estimated_minutes": "INTEGER",
             "link_url": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "recurrence_end_date": "TEXT",
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
-            "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT",
+            "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT", "public_token": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
+        c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_public_token ON tasks(public_token) WHERE public_token IS NOT NULL")
         for name, definition in {
             "google_event_id": "TEXT", "google_calendar_id": "TEXT", "updated_at": "TEXT",
             "sync_state": "TEXT NOT NULL DEFAULT 'clean'", "google_etag": "TEXT",

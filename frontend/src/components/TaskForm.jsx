@@ -38,6 +38,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const estimateRef = useRef(null)
   const priorityRef = useRef(null)
   const [aiEstimating, setAiEstimating] = useState(false)
+  const [shareToken, setShareToken] = useState(() => task?.public_token || '')
+  const [shareBusy, setShareBusy] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
   const applyChecklistProgress = () => {
     const value = checklistProgress(checklist)
     if (value !== null && progressRef.current) progressRef.current.value = value
@@ -159,6 +162,22 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     }
   }
   const formatAttachmentSize = bytes => bytes < 1024 ? `${bytes}B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)}KB` : `${(bytes / (1024 * 1024)).toFixed(1)}MB`
+  const shareUrl = shareToken ? `${location.origin}/public/tasks/${shareToken}` : ''
+  const createShareLink = async () => {
+    setShareBusy(true); setShareCopied(false)
+    try { const res = await api.shareTask(task.id); setShareToken(res.public_token) }
+    catch (e) { setError(e.message) }
+    finally { setShareBusy(false) }
+  }
+  const revokeShareLink = async () => {
+    setShareBusy(true)
+    try { await api.unshareTask(task.id); setShareToken(''); setShareCopied(false) }
+    catch (e) { setError(e.message) }
+    finally { setShareBusy(false) }
+  }
+  const copyShareLink = async () => {
+    try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { /* clipboard unavailable */ }
+  }
 
   const addComment = async () => {
     const body = commentText.trim()
@@ -335,6 +354,12 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
       </div>)}
       <div className="checklist-editor-add"><input type="text" maxLength={2000} value={commentText} placeholder="댓글을 입력하세요" onChange={e => setCommentText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addComment() } }}/><button type="button" className="text-button" onClick={addComment}>등록</button></div>
       {commentError ? <p className="form-error" role="alert">{commentError}</p> : null}
+    </div> : null}
+    {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
+      {shareToken
+        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
+        : <div className="checklist-editor-add"><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
+      <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 업무를 읽기 전용으로 볼 수 있습니다.</p>
     </div> : null}
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">첨부파일{attachments.length ? ` (${attachments.length})` : ''}</span>
       {attachments.map(item => <div key={item.id} className="checklist-editor-item">
