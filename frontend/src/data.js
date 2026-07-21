@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-toast-alert-role',
+    timestamp: '2026-07-22T08:50:12+09:00',
+    description: '알림(Toast) 메시지가 성공/오류 상관없이 항상 role="status"(정중한 알림)로 렌더링되어, 화면 낭독기 사용자가 저장 실패 같은 오류 메시지를 놓치기 쉬웠습니다. 오류 유형 토스트는 role="alert"와 aria-live="assertive"로 즉시 알리도록 하고, 성공/일반 알림은 기존처럼 role="status"/aria-live="polite"를 유지하도록 `frontend/src/components/Toast.jsx`를 수정했습니다.',
+  },
+  {
     id: '2026-07-22-list-skeleton-loading-parity',
     timestamp: '2026-07-22T08:45:46+09:00',
     description: '업무(Gantt) 화면은 데이터를 불러오는 동안 스켈레톤 행을 보여주지만, 오늘 화면의 할 일/업무 기록 목록과 일정 화면의 모바일 일정 목록은 상단에 작은 "동기화 중…" 표시만 있고 목록 본문은 로딩이 끝날 때까지 빈 상태 문구("조건에 맞는 항목이 없습니다")를 그대로 보여줘 데이터가 없는 것으로 오인하기 쉬웠습니다. `frontend/src/screens/Today.jsx`의 할 일/업무 기록 목록과 `frontend/src/screens/Calendar.jsx`의 모바일 일정 목록에 업무 화면과 동일한 `.gantt-skeleton`/`.skeleton row` 패턴을 적용해 로딩 중에는 스켈레톤 행을, 로딩이 끝난 뒤 실제로 항목이 없을 때만 빈 상태 문구를 표시하도록 했습니다.',
