@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-bulk-promote-event',
+    timestamp: '2026-07-21T20:10:00+09:00',
+    description: '할 일과 업무 기록에는 여러 개를 한 번에 업무로 전환하는 일괄 작업 버튼이 있었지만, 일정(Calendar) 화면에는 한 개씩만 전환 가능해 여러 일정을 업무로 옮기려면 하나씩 반복해야 했습니다. 일정 화면 일괄 작업 바에 "업무로 전환" 버튼(`Calendar.jsx`)을 추가하고, 기존 `buildTaskFromEventPayload` 변환 로직을 재사용하는 `onBulkPromote` 핸들러(`App.jsx`)를 연결해 세 항목(할 일/업무 기록/일정) 간 일괄 전환 기능을 동일하게 맞췄습니다.',
+  },
+  {
     id: '2026-07-21-global-search',
     timestamp: '2026-07-21T20:02:54+09:00',
     description: '업무/일정/할 일/업무 기록이 각 화면 안에서만 검색 가능해 다른 화면에 있는 항목을 찾으려면 화면을 옮겨 다녀야 했습니다. 사이드바 버튼과 단축키(Ctrl/⌘+/)로 여는 전체 검색 모달(`GlobalSearch.jsx`, `globalSearch.js`)을 추가해 네 항목을 한 번에 검색하고 결과를 클릭해 바로 열 수 있도록 했습니다(회귀 테스트 `globalSearch.test.js`).',
