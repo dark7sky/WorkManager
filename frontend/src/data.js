@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-attachment-upload-rate-limit',
+    timestamp: '2026-07-21T11:42:00+09:00',
+    description: '동기화·가져오기·AI 요청 등 부담이 큰 API에는 요청 빈도 제한이 걸려 있었지만, 업무/일정/할 일/업무 기록의 첨부파일 업로드 API에는 제한이 없어 반복 업로드로 서버 부하를 일으킬 수 있었습니다. 다른 무거운 API와 동일하게 분당 요청 수 제한을 추가했습니다 (`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-21-log-bulk-billable',
     timestamp: '2026-07-21T11:35:52+09:00',
     description: '업무 기록 일괄 선택 도구모음에서 태그·연기·우선순위·색상은 한 번에 바꿀 수 있었지만 청구 가능 여부만 항목마다 따로 수정해야 했습니다. 선택한 기록들의 청구 여부를 한 번에 변경하는 버튼을 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',

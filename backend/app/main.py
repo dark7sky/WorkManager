@@ -1318,6 +1318,7 @@ def task_attachments_list(task_id: int, user=Depends(require_user)):
 
 @app.post("/api/tasks/{task_id}/attachments")
 async def task_attachments_create(task_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    enforce_rate(user, "attachment_upload", 30, 60)
     data = await file.read()
     if not data:
         raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
@@ -1381,6 +1382,7 @@ def event_attachments_list(event_id: int, user=Depends(require_user)):
 
 @app.post("/api/events/{event_id}/attachments")
 async def event_attachments_create(event_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    enforce_rate(user, "attachment_upload", 30, 60)
     data = await file.read()
     if not data:
         raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
@@ -1444,6 +1446,7 @@ def todo_attachments_list(todo_id: int, user=Depends(require_user)):
 
 @app.post("/api/todos/{todo_id}/attachments")
 async def todo_attachments_create(todo_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    enforce_rate(user, "attachment_upload", 30, 60)
     data = await file.read()
     if not data:
         raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")
@@ -1507,6 +1510,7 @@ def work_log_attachments_list(log_id: int, user=Depends(require_user)):
 
 @app.post("/api/work_logs/{log_id}/attachments")
 async def work_log_attachments_create(log_id: int, file: UploadFile = File(...), user=Depends(require_user)):
+    enforce_rate(user, "attachment_upload", 30, 60)
     data = await file.read()
     if not data:
         raise HTTPException(422, "빈 파일은 첨부할 수 없습니다.")

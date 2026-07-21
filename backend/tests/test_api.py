@@ -113,6 +113,22 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(limited.status_code, 429, limited.text)
         self.assertIn("Retry-After", limited.headers)
 
+    def test_attachment_upload_is_rate_limited(self):
+        from app.auth import create_session
+        from app.db import connection
+        with connection() as c:
+            c.execute("INSERT OR IGNORE INTO users(id,google_sub,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?)",
+                       ("sub-rl-attach", "sub-rl-attach", "rl-attach@example.com", "rl-attach@example.com", "2026-01-01", "2026-01-01"))
+        a = self.client(create_session("sub-rl-attach"))
+        for _ in range(30):
+            task = a.post("/api/tasks", json={"title": "rate limited attachments"}).json()
+            ok = a.post(f"/api/tasks/{task['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+            self.assertEqual(ok.status_code, 200, ok.text)
+        task = a.post("/api/tasks", json={"title": "rate limited attachments"}).json()
+        limited = a.post(f"/api/tasks/{task['id']}/attachments", files={"file": ("a.txt", b"hi", "text/plain")})
+        self.assertEqual(limited.status_code, 429, limited.text)
+        self.assertIn("Retry-After", limited.headers)
+
     def test_validation_rejects_bad_domain_values(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/tasks", json={"title": "x", "status": "invalid"}).status_code, 422)
