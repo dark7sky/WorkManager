@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-event-csv-column-picker',
+    timestamp: '2026-07-22T00:29:32+09:00',
+    description: '업무(Task) 화면에는 CSV/Excel 내보내기에서 열을 골라 선택할 수 있는 "내보낼 열" 설정이 있었지만, 일정(Event) 화면에는 같은 기능이 없어 항상 모든 열이 내보내졌습니다. `frontend/src/eventCsvColumns.js`를 추가하고 일정 화면(`frontend/src/screens/Calendar.jsx`)의 CSV/Excel 내보내기 버튼 옆에 동일한 "내보낼 열" 드롭다운을 추가해 선택한 열만 내보낼 수 있도록 했습니다.',
+  },
+  {
     id: '2026-07-22-recurrence-series-history',
     timestamp: '2026-07-22T00:22:47+09:00',
     description: '반복 업무/Todo는 회차가 완료될 때마다 새 항목이 새로 생성되는 방식이라, 지난 회차들이 서로 연결되지 않아 하나의 반복 시리즈로서 진행 이력을 한눈에 볼 방법이 없었습니다. 백엔드에 `recurrence_group_id`를 추가해 같은 반복에서 파생된 항목들을 하나로 묶고, 업무 수정 폼과 Todo 수정 폼에 "반복 이력 보기" 버튼을 추가해 같은 시리즈의 과거·현재 회차 목록과 완료 상태를 확인할 수 있도록 했습니다(백엔드 GET /api/tasks/{id}/series, GET /api/todos/{id}/series).',
