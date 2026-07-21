@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-log-bulk-billable',
+    timestamp: '2026-07-21T11:35:52+09:00',
+    description: '업무 기록 일괄 선택 도구모음에서 태그·연기·우선순위·색상은 한 번에 바꿀 수 있었지만 청구 가능 여부만 항목마다 따로 수정해야 했습니다. 선택한 기록들의 청구 여부를 한 번에 변경하는 버튼을 추가했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-today-task-row-open',
     timestamp: '2026-07-21T11:41:00+09:00',
     description: '오늘 화면의 "오늘 예정 업무" 목록은 마우스를 올리면 강조되어 클릭할 수 있어 보였지만 실제로는 아무 반응이 없어 업무를 열려면 업무 화면으로 따로 이동해야 했습니다. 업무 제목을 눌러 바로 수정 화면을 열 수 있도록 연결했습니다 (`frontend/src/screens/Today.jsx`, `frontend/src/styles.css`).',
