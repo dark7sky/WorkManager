@@ -13,8 +13,9 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
   const [text, setText] = useState('')
   const [items, setItems] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [failCount, setFailCount] = useState(0)
 
-  useEffect(() => { if (open) { setText(''); setItems(null); setBusy(false) } }, [open])
+  useEffect(() => { if (open) { setText(''); setItems(null); setBusy(false); setFailCount(0) } }, [open])
 
   const screenMatches = useMemo(() => items ? [] : searchScreens(text), [text, items])
   const itemMatches = useMemo(() => items ? [] : searchItems(text, data), [text, data, items])
@@ -37,8 +38,8 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     e.preventDefault()
     if (!text.trim() || busy) return
     setBusy(true)
-    try { const result = await api.aiPreview(text); setItems(result.items || []) }
-    catch (err) { notify(err.message, 'error') }
+    try { const result = await api.aiPreview(text); setItems(result.items || []); setFailCount(0) }
+    catch (err) { notify(err.message, 'error'); setFailCount(n => n + 1) }
     finally { setBusy(false) }
   }
 
@@ -77,6 +78,7 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
       <div className="quick-capture-input"><Search size={18} aria-hidden="true"/><input autoFocus value={text} onChange={e => setText(e.target.value)} placeholder="예: 내일 오후 3시 고객 미팅 (여러 건은 줄바꿈으로 구분)" disabled={busy} aria-label="빠른 입력"/></div>
       {!items ? <button className="primary" disabled={!text.trim() || busy}>{busy ? <LoaderCircle className="spin"/> : <CornerDownLeft/>} 분석</button> : null}
     </form>
+    {!items && failCount >= 2 ? <div className="ai-warning"><AlertTriangle/><span>AI 분석이 계속 실패하고 있습니다. 설정에서 AI 연동 상태를 확인해 보세요.</span><button type="button" className="text-button" onClick={() => go('settings')}>설정으로 이동</button></div> : null}
     {items && items.length ? <>
       {items.length > 1 ? <div className="quick-capture-count-row"><small className="quick-capture-count">{items.length}건 분석됨 · 확인 후 추가하세요.</small><button type="button" className="secondary" disabled={busy} onClick={applyAll}>{busy ? <LoaderCircle className="spin"/> : null} 모두 추가</button></div> : null}
       {items[0]?.warning ? <div className="ai-warning"><AlertTriangle/><span>{items[0].warning}</span></div> : null}

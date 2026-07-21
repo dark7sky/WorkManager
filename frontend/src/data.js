@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-quickcapture-ai-fail-hint',
+    timestamp: '2026-07-22T08:10:42+09:00',
+    description: '빠른 입력(AI 분석)이 연속으로 실패해도 매번 같은 오류 토스트만 보여 원인을 파악하기 어려웠습니다. `frontend/src/components/QuickCapture.jsx`가 연속 실패 횟수를 추적해 2회 이상 실패 시 AI 연동 상태 확인을 안내하는 배너와 설정 화면 바로가기 버튼을 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-22-unsaved-changes-guard',
     timestamp: '2026-07-22T08:02:19+09:00',
     description: '업무 수정 창에서 입력 중 실수로 Esc, 바깥 영역 클릭, 닫기(X) 버튼, 취소 버튼을 누르면 작성 중이던 내용이 경고 없이 사라졌습니다. `frontend/src/components/Modal.jsx`에 `isDirty` 가드를 추가해 닫기 시도 시 확인 창을 띄우도록 했고, `frontend/src/components/TaskForm.jsx`가 입력 변경을 감지해 저장 전까지 닫기를 막도록 연결했습니다.',
