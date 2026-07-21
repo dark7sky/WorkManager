@@ -79,6 +79,8 @@ export const api = {
   workLogs: () => request('/work_logs'),
   archivedLogs: (limit,offset=0) => request(`/work_logs/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveLog: id => request(`/work_logs/${id}/archive`,{method:'POST'}), unarchiveLog: id => request(`/work_logs/${id}/unarchive`,{method:'POST'}),
+  shareLog: id => request(`/work_logs/${id}/share`,{method:'POST'}), unshareLog: id => request(`/work_logs/${id}/share`,{method:'DELETE'}),
+  publicWorkLog: token => request(`/public/work_logs/${token}`, { suppressAuthEvent: true }),
   todos: () => request('/todos'),
   createTodo: data => request('/todos',json('POST',data)), updateTodo: (id,data) => request(`/todos/${id}`,json('PATCH',data)), deleteTodo: id => request(`/todos/${id}`,{method:'DELETE'}),
   skipTodoRecurrence: id => request(`/todos/${id}/skip-recurrence`,{method:'POST'}),

@@ -2066,6 +2066,29 @@ def unshare_todo(item_id: int, user=Depends(require_user)):
     return {"ok": True}
 
 
+@app.post("/api/work_logs/{item_id}/share")
+def share_work_log(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT public_token FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        token = item["public_token"] or secrets.token_urlsafe(16)
+        c.execute("UPDATE work_logs SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+    audit(user, "share", "work_logs", item_id)
+    return {"public_token": token}
+
+
+@app.delete("/api/work_logs/{item_id}/share")
+def unshare_work_log(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        c.execute("UPDATE work_logs SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "unshare", "work_logs", item_id)
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/archive")
 def archive_todo(item_id: int, user=Depends(require_user)):
     with connection() as c:
@@ -2426,6 +2449,18 @@ def public_todo(token: str, request: Request):
     enforce_rate(request.client.host if request.client else "unknown", "public-todo", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,created_at FROM todos
+          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+    if not item:
+        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+    return row_dict(item)
+
+
+@app.get("/api/public/work_logs/{token}")
+def public_work_log(token: str, request: Request):
+    """Public, read-only view of a work log shared via a share link. No auth required."""
+    enforce_rate(request.client.host if request.client else "unknown", "public-work-log", 60, 60)
+    with connection() as c:
+        item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,created_at FROM work_logs
           WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")

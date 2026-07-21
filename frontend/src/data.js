@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-worklog-public-share-link',
+    timestamp: '2026-07-21T21:10:00+09:00',
+    description: '업무, 일정, 할 일에는 공유 링크 기능이 있었지만 업무 기록에는 없어, 완료한 작업 내용을 외부에 공유하려면 따로 옮겨 적어야 했습니다. 업무 기록 수정 폼에도 "공유 링크 만들기" 버튼을 추가해 `/public/work_logs/{token}` 읽기 전용 링크를 생성·복사·해제할 수 있게 했습니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/api.js`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/PublicWorkLog.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-todo-public-share-link',
     timestamp: '2026-07-21T20:56:00+09:00',
     description: '업무와 일정에는 공유 링크 기능이 있었지만 할 일에는 없어, 외부에 개인 할 일을 공유하려면 내용을 따로 옮겨 적어야 했습니다. 할 일 수정 폼에도 "공유 링크 만들기" 버튼을 추가해 `/public/todos/{token}` 읽기 전용 링크를 생성·복사·해제할 수 있게 했습니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/api.js`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/PublicTodo.jsx`, `frontend/src/App.jsx`).',

@@ -473,6 +473,26 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_work_log_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        log = a.post("/api/work_logs", json={"content": "wrote release notes", "log_date": "2026-07-21"}).json()
+        no_auth = TestClient(self.app)
+        self.assertEqual(no_auth.get("/api/public/work_logs/does-not-exist").status_code, 404)
+        shared = a.post(f"/api/work_logs/{log['id']}/share")
+        self.assertEqual(shared.status_code, 200, shared.text)
+        token = shared.json()["public_token"]
+        self.assertTrue(token)
+        public = no_auth.get(f"/api/public/work_logs/{token}")
+        self.assertEqual(public.status_code, 200, public.text)
+        self.assertEqual(public.json()["content"], "wrote release notes")
+        self.assertNotIn("user_id", public.json())
+        self.assertEqual(b.get(f"/api/public/work_logs/{token}").status_code, 200)
+        revoked = a.delete(f"/api/work_logs/{log['id']}/share")
+        self.assertEqual(revoked.status_code, 200, revoked.text)
+        self.assertEqual(no_auth.get(f"/api/public/work_logs/{token}").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_rejects_unknown_assignee_field(self, *_):
         a = self.client(self.token_a)
         created = a.post("/api/tasks", json={"title": "handoff", "assignee_name": "Dana"})
