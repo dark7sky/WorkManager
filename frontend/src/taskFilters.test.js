@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, selectExportRows, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, selectExportRows, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, taskDependentTasks, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -173,6 +173,24 @@ test('taskBlockingDependencies returns unfinished dependency blockers only', () 
   )
 
   assert.deepEqual(blockers.map(task => task.id), [1])
+})
+
+test('taskDependentTasks returns unfinished tasks waiting on this one', () => {
+  const dependents = taskDependentTasks(
+    tasks.find(task => task.id === 1),
+    [...tasks, { id: 5, title: '후속 업무', status: 'todo', dependency_ids: [1] }, { id: 6, title: '완료된 후속', status: 'done', dependency_ids: [1] }],
+  )
+
+  assert.deepEqual(dependents.map(task => task.id), [5])
+})
+
+test('taskDependentTasks returns nothing once the task itself is done', () => {
+  const dependents = taskDependentTasks(
+    { id: 1, status: 'done' },
+    [{ id: 5, title: '후속 업무', status: 'todo', dependency_ids: [1] }],
+  )
+
+  assert.deepEqual(dependents, [])
 })
 
 test('summarizeBlockedTasks counts unfinished tasks blocked by incomplete dependencies', () => {

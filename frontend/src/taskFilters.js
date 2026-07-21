@@ -18,6 +18,11 @@ export const taskBlockingDependencies = (task, tasks) => {
   return tasks.filter(item => ids.has(Number(item.id)) && item.status !== 'done')
 }
 
+export const taskDependentTasks = (task, tasks) => {
+  if (task.status === 'done') return []
+  return tasks.filter(item => item.status !== 'done' && (item.dependency_ids || []).map(Number).includes(Number(task.id)))
+}
+
 const addDays = (isoDate, days) => {
   const date = new Date(`${isoDate}T00:00:00`)
   date.setDate(date.getDate() + days)

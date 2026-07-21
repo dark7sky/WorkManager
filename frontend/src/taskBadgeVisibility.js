@@ -10,6 +10,7 @@ export const TASK_BADGE_OPTIONS = [
   { key: 'comments', label: '댓글' },
   { key: 'attachments', label: '첨부파일' },
   { key: 'blocked', label: '선행 업무 대기' },
+  { key: 'dependents', label: '후속 업무 영향' },
   { key: 'criticalPath', label: '핵심 경로' },
 ]
 

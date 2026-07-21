@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-dependent-impact-badge',
+    timestamp: '2026-07-21T23:12:00+09:00',
+    description: '간트 차트에서 선행 업무(블로커)는 배지로 확인할 수 있었지만, 반대로 "이 업무를 완료해야 하는 다른 업무가 몇 개나 기다리고 있는지"는 알 수 없어 일정을 미루기 전에 하위 영향을 파악하기 어려웠습니다. `frontend/src/taskFilters.js`에 역방향 조회 함수 `taskDependentTasks`를 추가하고, 업무 화면(`frontend/src/screens/Tasks.jsx`)의 간트 행에 "N개 업무가 이 업무를 기다림" 배지(표시 항목 설정에서 켜고 끌 수 있음)를 새로 표시했습니다.',
+  },
+  {
     id: '2026-07-21-event-duplicate-title-warning',
     timestamp: '2026-07-21T22:59:00+09:00',
     description: '업무·Todo·업무 기록에는 같은 제목/내용으로 새로 만들거나 수정할 때 중복 경고가 표시되었지만, 일정(Event)에는 같은 안전장치가 없어 같은 일정을 실수로 중복 등록하기 쉬웠습니다. `frontend/src/eventDuplicateCheck.js`의 `findDuplicateTitleEvents`로 일정 추가/수정 폼(`frontend/src/screens/Calendar.jsx`)에도 동일한 실시간 중복 제목 경고를 추가해 업무/Todo/업무 기록/일정 4개 항목 모두에서 일관되게 동작하도록 했습니다.',
