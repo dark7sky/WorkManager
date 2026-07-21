@@ -10,10 +10,13 @@ const formatWon = amount => Math.round(Number(amount || 0)).toLocaleString('ko-K
 
 export const billableWorkLogs = logs => (logs || []).filter(log => log?.billable && !log?.invoiced_at)
 
+const logRate = (log, hourlyRate) => (log.hourly_rate_override != null ? Number(log.hourly_rate_override) : Number(hourlyRate) || 0)
+
 export const invoiceTotals = (logs, hourlyRate) => {
-  const minutes = billableWorkLogs(logs).reduce((sum, log) => sum + Number(log.duration_minutes || 0), 0)
-  const rate = Number(hourlyRate) || 0
-  return { minutes, amount: rate ? Math.round(minutes / 60 * rate) : 0 }
+  const billable = billableWorkLogs(logs)
+  const minutes = billable.reduce((sum, log) => sum + Number(log.duration_minutes || 0), 0)
+  const amount = Math.round(billable.reduce((sum, log) => sum + Number(log.duration_minutes || 0) / 60 * logRate(log, hourlyRate), 0))
+  return { minutes, amount }
 }
 
 export const defaultInvoiceNumber = (start, end) => `INV-${String(start || '').replaceAll('-', '')}-${String(end || '').replaceAll('-', '')}`
@@ -26,6 +29,7 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clien
       <td>${escapeHtml(log.log_date || '-')}</td>
       <td><strong>${escapeHtml(log.content || '')}</strong>${(log.tags || []).length ? `<small>${escapeHtml(log.tags.join(', '))}</small>` : ''}</td>
       <td>${formatMinutesAsHours(log.duration_minutes)}시간</td>
+      <td>${log.hourly_rate_override != null ? `${formatWon(log.hourly_rate_override)}원` : '-'}</td>
     </tr>`).join('')
 
   return `<!doctype html>
@@ -57,10 +61,10 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clien
     <p>생성 시각: ${escapeHtml(generatedAt)}</p>
   </header>
   <table>
-    <thead><tr><th>날짜</th><th>내용</th><th>시간</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="3">청구 가능한 업무 기록이 없습니다.</td></tr>'}</tbody>
+    <thead><tr><th>날짜</th><th>내용</th><th>시간</th><th>적용 시급</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="4">청구 가능한 업무 기록이 없습니다.</td></tr>'}</tbody>
   </table>
-  <p class="totals">청구 가능 시간 합계: ${formatMinutesAsHours(minutes)}시간${hourlyRate ? `<br>시급 ${formatWon(hourlyRate)}원 × 청구 가능 시간 = <strong>${formatWon(amount)}원</strong>` : ''}</p>
+  <p class="totals">청구 가능 시간 합계: ${formatMinutesAsHours(minutes)}시간${(hourlyRate || amount) ? `<br>청구 금액 합계: <strong>${formatWon(amount)}원</strong>` : ''}</p>
 </body>
 </html>`
 }

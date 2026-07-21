@@ -1333,6 +1333,21 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(summary.json()["summary"]["billable_minutes"], 45)
         self.assertIsNone(summary.json()["summary"]["billable_amount"])
 
+    def test_work_log_hourly_rate_override_computes_amount_without_global_rate(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "premium client", "log_date": "2026-07-08", "duration_minutes": 60, "billable": True, "hourly_rate_override": 100000})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["hourly_rate_override"], 100000)
+        summary = a.get("/api/achievements", params={"start_date": "2026-07-08", "end_date": "2026-07-08"})
+        self.assertEqual(summary.status_code, 200, summary.text)
+        self.assertEqual(summary.json()["summary"]["billable_amount"], 100000.0)
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"hourly_rate_override": None})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["hourly_rate_override"])
+        summary_after_clear = a.get("/api/achievements", params={"start_date": "2026-07-08", "end_date": "2026-07-08"})
+        self.assertIsNone(summary_after_clear.json()["summary"]["billable_amount"])
+        self.assertEqual(a.post("/api/work_logs", json={"content": "bad rate", "log_date": "2026-07-08", "hourly_rate_override": -1}).status_code, 422)
+
     def test_work_log_invoiced_at_is_persisted_and_clearable(self, *_):
         a = self.client(self.token_a)
         log = a.post("/api/work_logs", json={"content": "client work", "log_date": "2026-07-06", "duration_minutes": 90, "billable": True})

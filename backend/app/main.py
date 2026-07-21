@@ -587,6 +587,7 @@ class WorkLogPayload(StrictPayload):
     estimated_minutes: int | None = Field(None, ge=0, le=100000)
     custom_fields: list[dict] | None = Field(None, max_length=50)
     invoiced_at: datetime | None = None
+    hourly_rate_override: float | None = Field(None, ge=0, le=1000000)
 
     @field_validator("link_url", "color", "log_time", "priority", "estimated_minutes", mode="before")
     @classmethod
@@ -656,7 +657,7 @@ CONFIG = {
     "tasks": ({"title", "description", "status", "priority", "progress", "start_date", "due_date", "start_time", "due_time", "approval_status", "schedule_approval_status", "tags", "recurrence_rule", "recurrence_end_date", "parent_id", "dependency_ids", "estimated_minutes", "link_url", "checklist", "color", "links", "custom_fields", "reminder_minutes_before"}, "updated_at"),
     "events": ({"title", "description", "start_at", "end_at", "location", "google_is_all_day", "recurrence", "tags", "link_url", "color", "links", "priority", "recurrence_group_id", "checklist", "estimated_minutes", "custom_fields", "reminder_minutes_before"}, "updated_at"),
     "todos": ({"title", "todo_date", "todo_time", "completed", "tags", "recurrence_rule", "recurrence_end_date", "priority", "link_url", "memo", "color", "links", "checklist", "custom_fields", "estimated_minutes", "reminder_minutes_before"}, None),
-    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes", "custom_fields", "invoiced_at"}, None),
+    "work_logs": ({"content", "log_date", "task_id", "tags", "duration_minutes", "link_url", "links", "color", "log_time", "billable", "checklist", "priority", "estimated_minutes", "custom_fields", "invoiced_at", "hourly_rate_override"}, None),
 }
 
 VALID_EVENT_COLORS = {"red", "orange", "yellow", "green", "purple", "gray"}
@@ -780,7 +781,7 @@ def normalize(table, data):
         if key in result and isinstance(result[key], str):
             result[key] = result[key].strip()
     nullable = {"tasks": {"start_date", "due_date", "start_time", "due_time", "recurrence_rule", "recurrence_end_date", "parent_id", "estimated_minutes", "link_url", "color", "reminder_minutes_before"},
-                "events": {"link_url", "color", "priority", "recurrence_group_id", "estimated_minutes", "reminder_minutes_before"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes", "reminder_minutes_before"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable", "priority", "estimated_minutes", "invoiced_at"}}[table]
+                "events": {"link_url", "color", "priority", "recurrence_group_id", "estimated_minutes", "reminder_minutes_before"}, "todos": {"recurrence_rule", "recurrence_end_date", "link_url", "memo", "color", "todo_time", "estimated_minutes", "reminder_minutes_before"}, "work_logs": {"task_id", "duration_minutes", "link_url", "color", "log_time", "billable", "priority", "estimated_minutes", "invoiced_at", "hourly_rate_override"}}[table]
     invalid_nulls = [key for key, value in result.items() if value is None and key not in nullable]
     if invalid_nulls:
         raise HTTPException(422, f"Fields cannot be null: {', '.join(sorted(invalid_nulls))}")
@@ -2682,6 +2683,14 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
     tag_breakdown = sorted(by_tag.values(), key=lambda e: (e["tracked_minutes"], e["completed_tasks"]), reverse=True)
     billable_minutes = sum(int(x.get("duration_minutes") or 0) for x in logs if x.get("billable"))
     hourly_rate = load_billing_hourly_rate_setting(user)
+
+    def log_rate(x):
+        override = x.get("hourly_rate_override")
+        return override if override is not None else hourly_rate
+
+    billable_amount = None
+    if hourly_rate is not None or any(x.get("hourly_rate_override") is not None for x in logs if x.get("billable")):
+        billable_amount = round(sum(int(x.get("duration_minutes") or 0) / 60 * (log_rate(x) or 0) for x in logs if x.get("billable")), 2)
     return {"period": {"start": start, "end": end},
             "summary": {"completed_tasks": len(tasks), "work_logs": len(logs), "events": len(events),
                         "completed_todos": len(todos), "active_tasks": len(active),
@@ -2690,7 +2699,7 @@ def achievements(start_date: str | None = None, end_date: str | None = None,
                         "billing_hourly_rate": hourly_rate,
                         "billing_client_name": load_billing_client_name_setting(user),
                         "billing_biz_reg_number": load_billing_biz_reg_number_setting(user),
-                        "billable_amount": round(billable_minutes / 60 * hourly_rate, 2) if hourly_rate is not None else None,
+                        "billable_amount": billable_amount,
                         "estimated_minutes": sum(int(x.get("estimated_minutes") or 0) for x in tasks),
                         "average_active_progress": round(sum(int(x.get("progress") or 0) for x in active) / len(active), 1) if active else 0},
             "tags": available_tags, "tag_breakdown": tag_breakdown, "timeline": timeline,

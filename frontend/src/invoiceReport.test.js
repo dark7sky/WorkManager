@@ -29,6 +29,19 @@ test('invoiceTotals returns zero amount when no hourly rate is set', () => {
   assert.equal(totals.amount, 0)
 })
 
+test('invoiceTotals uses a per-log hourly rate override instead of the global rate', () => {
+  const withOverride = [...logs, { log_date: '2026-07-04', content: '고급 클라이언트', duration_minutes: 60, billable: true, hourly_rate_override: 100000, tags: [] }]
+  const totals = invoiceTotals(withOverride, 60000)
+  assert.equal(totals.minutes, 180)
+  assert.equal(totals.amount, 220000)
+})
+
+test('invoiceTotals applies per-log override even without a global hourly rate', () => {
+  const overrideOnly = [{ log_date: '2026-07-04', content: '고급 클라이언트', duration_minutes: 60, billable: true, hourly_rate_override: 100000, tags: [] }]
+  const totals = invoiceTotals(overrideOnly, null)
+  assert.equal(totals.amount, 100000)
+})
+
 test('workLogsToPrintableInvoice renders escaped billable rows and totals', () => {
   const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', hourlyRate: 60000, generatedAt: '2026-07-17T00:00:00+09:00' })
   assert.match(html, /청구 기간: 2026-07-01 ~ 2026-07-03/)

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-work-log-hourly-rate-override',
+    timestamp: '2026-07-21T22:05:00+09:00',
+    description: '모든 청구 가능 업무 기록에 하나의 시급만 적용할 수 있어, 고객마다 단가가 다른 경우 청구서 금액이 부정확했습니다. 업무 기록에 `hourly_rate_override` 필드를 추가해 개별 기록에서 시급을 재정의할 수 있도록 했고, 성과 화면 청구서(`invoiceReport.js`)와 실적 요약(`backend/app/main.py`의 `achievements`)이 재정의된 시급을 우선 적용해 금액을 계산하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-work-log-invoiced-marking',
     timestamp: '2026-07-21T21:50:00+09:00',
     description: '청구 가능(`billable`) 업무 기록으로 청구서를 다시 발행하면 이전에 이미 청구한 시간이 중복으로 다시 잡혔습니다. 업무 기록에 `invoiced_at` 필드를 추가하고, 성과 화면에 "청구 완료 표시" 버튼(`frontend/src/screens/Performance.jsx`)을 추가해 청구서에 포함된 항목을 한 번에 청구 완료로 표시하면 다음 청구서 생성 시 자동으로 제외되도록 했습니다.',
