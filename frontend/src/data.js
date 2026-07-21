@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-estimated-minutes-step-block-save',
+    timestamp: '2026-07-21T14:42:52+09:00',
+    description: '업무 편집 화면에서 예상 소요 시간이 5의 배수가 아닌 값(AI 추천, CSV 가져오기, 과거 데이터 등)으로 저장된 업무를 수정 후 저장하면 브라우저가 저장 버튼 클릭을 조용히 막아버리는 문제를 고쳤습니다. 입력창의 5분 단위 제한을 제거했습니다 (`frontend/src/components/TaskForm.jsx`).',
+  },
+  {
     id: '2026-07-21-critical-path',
     timestamp: '2026-07-21T14:41:00+09:00',
     description: '간트 차트에서 선행 업무 관계는 볼 수 있었지만, 그중 어떤 업무가 늦어지면 전체 일정이 밀리는지는 알 수 없었습니다. 선행 업무 사슬 중 기간 합이 가장 긴 경로를 계산해 "핵심 경로" 배지로 표시했습니다 (`frontend/src/taskHierarchy.js`의 `criticalPathTaskIds`, `frontend/src/screens/Tasks.jsx`).',

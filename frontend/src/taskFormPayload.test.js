@@ -190,6 +190,10 @@ test('buildTaskPayload clamps estimated_minutes to the backend max so save does 
   assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '100000' }, { task: { id: 1 } }).estimated_minutes, 100000)
 })
 
+test('buildTaskPayload keeps non-multiple-of-5 estimated_minutes so editing a task saved via AI/CSV does not get rejected', () => {
+  assert.equal(buildTaskPayload({ ...baseData, estimated_minutes: '47' }, { task: { id: 1 } }).estimated_minutes, 47)
+})
+
 test('buildTaskDuplicatePayload copies estimated_minutes', () => {
   const payload = buildTaskDuplicatePayload({ id: 1, title: '업무', estimated_minutes: 60 })
 
