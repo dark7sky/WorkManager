@@ -24,6 +24,7 @@ import { moveChecklistItem } from '../taskFormPayload'
 import { normalizedLinks, normalizedEstimatedMinutes, normalizedCustomFields, normalizedReminderMinutesBefore } from '../taskFormPayload'
 import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingEvents } from '../eventOverlap'
+import { findDuplicateTitleEvents } from '../eventDuplicateCheck'
 import { validateEventForm } from '../formValidation'
 import { dropZoneHandlers } from '../fileDrop'
 import { formatDuration } from '../performanceReport'
@@ -53,6 +54,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [fieldErrors, setFieldErrors] = useState({})
   const [tags, setTags] = useState(() => event?.tags || [])
   const [suggestions, setSuggestions] = useState([])
+  const [titleVal, setTitleVal] = useState(() => event?.title ?? '')
   const [startValue, setStartValue] = useState(() => localInput(event?.start_at || event?.start || `${date}T09:00:00`))
   const [endValue, setEndValue] = useState(() => localInput(event?.end_at || event?.end || `${date}T10:00:00`))
   const [repeatRule, setRepeatRule] = useState('')
@@ -110,6 +112,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     const filled = applyEventTemplate(template)
     setPrefill(filled)
     setPrefillKey(k => k + 1)
+    setTitleVal(filled.title || '')
     setTags(filled.tags)
     setChecklist(filled.checklist)
     setLinks(filled.links || [])
@@ -273,6 +276,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   }
   const onEndChange = e => { endTouchedRef.current = true; setEndValue(e.target.value) }
   const overlapping = useMemo(() => findOverlappingEvents(startValue, endValue, allEvents, event?.id ?? null), [startValue, endValue, allEvents, event])
+  const duplicateTitles = useMemo(() => findDuplicateTitleEvents(titleVal, allEvents, event?.id ?? null), [titleVal, allEvents, event])
   const submit = async formEvent => {
     formEvent.preventDefault()
     const data = Object.fromEntries(new FormData(formEvent.currentTarget))
@@ -294,7 +298,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       <label>일정 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
     </div> : null}
-    <label className="span-2" key={`title-${prefillKey}`}>일정 제목<input name="title" defaultValue={prefill?.title ?? event?.title ?? ''} required autoFocus maxLength={300} className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
+    <label className="span-2" key={`title-${prefillKey}`}>일정 제목<input name="title" defaultValue={prefill?.title ?? event?.title ?? ''} onChange={e => setTitleVal(e.target.value)} required autoFocus maxLength={300} className={fieldErrors.title ? 'invalid' : ''} aria-invalid={fieldErrors.title ? 'true' : 'false'}/>{fieldErrors.title ? <small className="field-error" role="alert">{fieldErrors.title}</small> : null}</label>
     <label>시작<input name="start_at" type="datetime-local" required value={startValue} onChange={onStartChange}/></label>
     <label>종료<input name="end_at" type="datetime-local" required value={endValue} onChange={onEndChange} className={fieldErrors.end_at ? 'invalid' : ''} aria-invalid={fieldErrors.end_at ? 'true' : 'false'}/>{fieldErrors.end_at ? <small className="field-error" role="alert">{fieldErrors.end_at}</small> : null}</label>
     <label className="span-2" key={`location-${prefillKey}`}>장소<input name="location" defaultValue={prefill?.location ?? event?.location ?? ''}/></label>
@@ -361,6 +365,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommendTags}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" defaultValue={event?.description || ''}/></label>
     {overlapping.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 시간대에 이미 일정이 있습니다: {overlapping.map(e => e.title).join(', ')}</p> : null}
+    {duplicateTitles.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 동일한 제목의 일정이 이미 있습니다: {duplicateTitles.map(e => e.title).join(', ')}</p> : null}
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
     <div className="form-actions span-2">{event ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}{event && onDuplicate ? <button type="button" className="secondary" disabled={saving} onClick={() => onDuplicate(event)}><Copy aria-hidden="true"/>복제</button> : null}{event && onCopyLink ? <button type="button" className="secondary" disabled={saving} onClick={() => onCopyLink(event)}><Link2 aria-hidden="true"/>링크 복사</button> : null}{event && onPostpone ? <button type="button" className="secondary" disabled={saving} onClick={() => onPostpone(event)}><CalendarClock aria-hidden="true"/>하루 미루기</button> : null}{event && onArchive ? <button type="button" className="secondary" disabled={saving} onClick={() => onArchive(event)}><Archive aria-hidden="true"/>보관</button> : null}{event && onPromote ? <button type="button" className="secondary" disabled={saving} onClick={() => onPromote(event)}><ArrowUpRight aria-hidden="true"/>업무로 전환</button> : null}{event && onViewHistory ?<button type="button" className="secondary" disabled={saving} onClick={() => onViewHistory(event)}><History aria-hidden="true"/>이력</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : event ? '변경사항 저장' : '일정 등록'}</button></div>
   </form>

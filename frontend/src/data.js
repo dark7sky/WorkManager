@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-duplicate-title-warning',
+    timestamp: '2026-07-21T22:59:00+09:00',
+    description: '업무·Todo·업무 기록에는 같은 제목/내용으로 새로 만들거나 수정할 때 중복 경고가 표시되었지만, 일정(Event)에는 같은 안전장치가 없어 같은 일정을 실수로 중복 등록하기 쉬웠습니다. `frontend/src/eventDuplicateCheck.js`의 `findDuplicateTitleEvents`로 일정 추가/수정 폼(`frontend/src/screens/Calendar.jsx`)에도 동일한 실시간 중복 제목 경고를 추가해 업무/Todo/업무 기록/일정 4개 항목 모두에서 일관되게 동작하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-worklog-duplicate-content-warning',
     timestamp: '2026-07-21T22:56:00+09:00',
     description: '업무(Task)와 Todo는 같은 제목으로 새로 만들거나 수정할 때 진행 중인 항목과 중복되면 경고가 표시되었지만, 업무 기록(Work Log)에는 같은 안전장치가 없어 같은 내용을 실수로 중복 기록하기 쉬웠습니다. `frontend/src/logDuplicateCheck.js`의 `findDuplicateContentLogs`로 업무 기록 추가/수정 폼(`frontend/src/screens/Today.jsx`)에도 동일한 실시간 중복 내용 경고를 추가했습니다.',
