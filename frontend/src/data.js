@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-events-todos-worklogs-excel-export',
+    timestamp: '2026-07-21T18:39:01+09:00',
+    description: 'Excel 내보내기는 업무 화면에만 있어, 일정·Todo·업무 기록을 Excel에서 열려는 사용자는 CSV를 내려받아 직접 변환해야 했습니다. 캘린더(일정), 오늘(Todo·업무 기록) 화면에도 "Excel" 내보내기 버튼을 추가해 SpreadsheetML(.xls) 형식으로 바로 내려받도록 했습니다. 각 CSV 내보내기와 동일한 헤더·행 데이터를 재사용합니다(`frontend/src/csv.js`의 `eventHeaders`/`eventRows`, `todoHeaders`/`todoRows`, `workLogHeaders`/`workLogRows`를 분리, `frontend/src/xlsx.js`의 `eventsToExcelXml`/`todosToExcelXml`/`workLogsToExcelXml`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`), 테스트는 `frontend/src/xlsx.test.js`.',
+  },
+  {
     id: '2026-07-21-task-excel-export',
     timestamp: '2026-07-21T18:37:03+09:00',
     description: '업무 목록은 CSV·ICS·PDF로만 내보낼 수 있어, Excel에서 곧바로 열어 서식·피벗을 적용하려는 사용자는 CSV를 다시 변환해야 했습니다. 업무 화면에 "Excel" 내보내기 버튼을 추가해 SpreadsheetML(.xls) 형식으로 바로 내려받도록 했습니다. CSV 내보내기와 동일한 헤더·행 데이터를 재사용합니다(`frontend/src/csv.js`의 `taskHeaders`/`taskRows`, `frontend/src/xlsx.js`의 `rowsToSpreadsheetXml`/`tasksToExcelXml`, `frontend/src/screens/Tasks.jsx`), 테스트는 `frontend/src/xlsx.test.js`.',

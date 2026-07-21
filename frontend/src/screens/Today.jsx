@@ -12,6 +12,7 @@ import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterTod
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
 import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
+import { todoExcelFilename, todosToExcelXml, workLogExcelFilename, workLogsToExcelXml } from '../xlsx'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
 import { todoIcsFilename, todosToIcs, icsToTodos, logIcsFilename, logsToIcs, icsToLogs } from '../ics'
 import { workLogReportFilename, workLogsToPrintableReport } from '../workLogReport'
@@ -680,6 +681,10 @@ export default function Today(props) {
     const csv = `﻿${todosToCsv(shownTodos)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
+  const exportTodosExcel = () => {
+    const xml = todosToExcelXml(shownTodos), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = todoExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
+  }
   const exportTodosIcs = () => {
     const ics = todosToIcs(shownTodos), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
@@ -738,6 +743,10 @@ export default function Today(props) {
     const csv = `﻿${workLogsToCsv(shownLogs, taskTitle, billingHourlyRate)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
+  const exportLogsExcel = () => {
+    const xml = workLogsToExcelXml(shownLogs, taskTitle, billingHourlyRate), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    link.href = url; link.download = workLogExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
+  }
   const printLogsReport = () => {
     const html = workLogsToPrintableReport(shownLogs, taskTitle, billingHourlyRate), win = window.open('', '_blank')
     if (!win) return
@@ -784,6 +793,7 @@ export default function Today(props) {
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosExcel}><Download size={14}/> Excel</button> : null}
         {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs}><Download size={14}/> ICS</button> : null}
         {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/><button type="button" className="text-button" onClick={() => todoIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={todoIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importTodosIcs}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
@@ -811,6 +821,7 @@ export default function Today(props) {
         {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs}><Download size={14}/> ICS</button> : null}
         {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsExcel}><Download size={14}/> Excel</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/><button type="button" className="text-button" onClick={() => logIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={logIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importLogsIcs}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}
         {selectedLogIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 업무 기록 일괄 작업"><span>{selectedLogIds.size}개 선택됨</span><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagLogs() }}><Tag size={14}/><input aria-label="추가할 태그" value={bulkLogTag} onChange={e => setBulkLogTag(e.target.value)} placeholder="태그 추가"/><button type="submit" className="secondary" disabled={!bulkLogTag.trim()}>추가</button></form>{onBulkPostponeLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeLogs() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkLogPostponeDays} onChange={e => setBulkLogPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkLogPostponeDays)}>연기</button></form> : null}{onBulkPriorityLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogPriority() }}><Flag size={14}/><select aria-label="변경할 우선순위" value={bulkLogPriority} onChange={e => setBulkLogPriority(e.target.value)}><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select><button type="submit" className="secondary">우선순위 변경</button></form> : null}{onBulkColorLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogColor() }}><Palette size={14}/><select aria-label="변경할 색상" value={bulkLogColor} onChange={e => setBulkLogColor(e.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><button type="submit" className="secondary">색상 변경</button></form> : null}{onBulkBillableLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogBillable() }}><DollarSign size={14}/><select aria-label="변경할 청구 여부" value={bulkLogBillable} onChange={e => setBulkLogBillable(e.target.value)}><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select><button type="submit" className="secondary">청구 여부 변경</button></form> : null}{onBulkDuplicateLog ? <button type="button" className="secondary" onClick={bulkDuplicateLogs}><Copy size={16}/>복제</button> : null}{onBulkArchiveLog ? <button type="button" className="secondary" onClick={bulkArchiveLogs}><Archive size={16}/>보관</button> : null}<button type="button" className="danger-button" onClick={bulkDeleteLogs}>삭제</button><button type="button" className="text-button" onClick={clearSelectedLogs}>선택 해제</button></div> : null}

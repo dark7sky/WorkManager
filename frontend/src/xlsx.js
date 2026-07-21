@@ -1,4 +1,4 @@
-import { taskHeaders, taskRows } from './csv.js'
+import { eventHeaders, eventRows, taskHeaders, taskRows, todoHeaders, todoRows, workLogHeaders, workLogRows } from './csv.js'
 
 const escapeXmlText = value => {
   const text = value == null ? '' : String(value)
@@ -15,3 +15,15 @@ export const rowsToSpreadsheetXml = (sheetName, headers, rows) => {
 export const tasksToExcelXml = (tasks, todayIso) => rowsToSpreadsheetXml('업무', taskHeaders, taskRows(tasks, todayIso))
 
 export const taskExcelFilename = date => `workmanager-tasks-${date}.xls`
+
+export const eventsToExcelXml = events => rowsToSpreadsheetXml('일정', eventHeaders, eventRows(events))
+
+export const eventExcelFilename = date => `workmanager-events-${date}.xls`
+
+export const todosToExcelXml = todos => rowsToSpreadsheetXml('Todo', todoHeaders, todoRows(todos))
+
+export const todoExcelFilename = date => `workmanager-todos-${date}.xls`
+
+export const workLogsToExcelXml = (logs, taskTitleById, hourlyRate) => rowsToSpreadsheetXml('업무 기록', workLogHeaders, workLogRows(logs, taskTitleById, hourlyRate))
+
+export const workLogExcelFilename = date => `workmanager-work-logs-${date}.xls`

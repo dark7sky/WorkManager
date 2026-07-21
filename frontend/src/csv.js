@@ -193,25 +193,24 @@ export const auditLogsToCsv = logs => {
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 
-export const eventsToCsv = events => {
-  const rows = events.map(event => [
-    event.title,
-    event.start_at || event.start,
-    event.end_at || event.end,
-    event.google_is_all_day ? 'Y' : 'N',
-    priorityValueToLabel[event.priority] || event.priority,
-    event.location,
-    (event.tags || []).join('; '),
-    event.description,
-    event.link_url,
-    event.estimated_minutes ?? '',
-    colorValueToLabel[event.color] || '',
-    checklistSummary(event.checklist),
-  ])
-  return [eventHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const eventRows = events => events.map(event => [
+  event.title,
+  event.start_at || event.start,
+  event.end_at || event.end,
+  event.google_is_all_day ? 'Y' : 'N',
+  priorityValueToLabel[event.priority] || event.priority,
+  event.location,
+  (event.tags || []).join('; '),
+  event.description,
+  event.link_url,
+  event.estimated_minutes ?? '',
+  colorValueToLabel[event.color] || '',
+  checklistSummary(event.checklist),
+])
+
+export const eventsToCsv = events => [eventHeaders, ...eventRows(events)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const eventCsvFilename = date => `workmanager-events-${date}.csv`
 
@@ -242,26 +241,25 @@ export const parseEventsCsv = text => {
   return { events, errors }
 }
 
-const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
+export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '색상', '체크리스트']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년' }
 
-export const todosToCsv = todos => {
-  const rows = todos.map(todo => [
-    todo.title,
-    todo.completed ? 'Y' : 'N',
-    priorityValueToLabel[todo.priority] || todo.priority,
-    todoRecurrenceLabels[todo.recurrence_rule] || '',
-    todo.todo_date,
-    todo.todo_time,
-    (todo.tags || []).join('; '),
-    todo.memo,
-    todo.link_url,
-    todo.estimated_minutes ?? '',
-    colorValueToLabel[todo.color] || '',
-    checklistSummary(todo.checklist),
-  ])
-  return [todoHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const todoRows = todos => todos.map(todo => [
+  todo.title,
+  todo.completed ? 'Y' : 'N',
+  priorityValueToLabel[todo.priority] || todo.priority,
+  todoRecurrenceLabels[todo.recurrence_rule] || '',
+  todo.todo_date,
+  todo.todo_time,
+  (todo.tags || []).join('; '),
+  todo.memo,
+  todo.link_url,
+  todo.estimated_minutes ?? '',
+  colorValueToLabel[todo.color] || '',
+  checklistSummary(todo.checklist),
+])
+
+export const todosToCsv = todos => [todoHeaders, ...todoRows(todos)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const todoCsvFilename = date => `workmanager-todos-${date}.csv`
 
@@ -293,25 +291,24 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 금액(원)', '색상', '체크리스트']
+export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 금액(원)', '색상', '체크리스트']
 
-export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => {
-  const rows = logs.map(log => [
-    log.log_date,
-    log.content,
-    log.duration_minutes ?? '',
-    log.estimated_minutes ?? '',
-    priorityValueToLabel[log.priority] || log.priority,
-    log.task_id ? (taskTitleById?.get(log.task_id) ? `#${log.task_id} ${taskTitleById.get(log.task_id)}` : `#${log.task_id}`) : '',
-    (log.tags || []).join('; '),
-    log.link_url,
-    log.billable ? 'Y' : '',
-    log.billable && hourlyRate != null ? Math.round((log.duration_minutes || 0) / 60 * hourlyRate) : '',
-    colorValueToLabel[log.color] || '',
-    checklistSummary(log.checklist),
-  ])
-  return [workLogHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const workLogRows = (logs, taskTitleById, hourlyRate) => logs.map(log => [
+  log.log_date,
+  log.content,
+  log.duration_minutes ?? '',
+  log.estimated_minutes ?? '',
+  priorityValueToLabel[log.priority] || log.priority,
+  log.task_id ? (taskTitleById?.get(log.task_id) ? `#${log.task_id} ${taskTitleById.get(log.task_id)}` : `#${log.task_id}`) : '',
+  (log.tags || []).join('; '),
+  log.link_url,
+  log.billable ? 'Y' : '',
+  log.billable && hourlyRate != null ? Math.round((log.duration_minutes || 0) / 60 * hourlyRate) : '',
+  colorValueToLabel[log.color] || '',
+  checklistSummary(log.checklist),
+])
+
+export const workLogsToCsv = (logs, taskTitleById, hourlyRate) => [workLogHeaders, ...workLogRows(logs, taskTitleById, hourlyRate)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const workLogCsvFilename = date => `workmanager-work-logs-${date}.csv`
 
