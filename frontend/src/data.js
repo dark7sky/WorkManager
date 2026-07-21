@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-csv-excel-column-picker',
+    timestamp: '2026-07-21T23:36:00+09:00',
+    description: '업무 화면의 CSV/Excel 내보내기는 항상 16개 열을 모두 포함해 파일로 내보냈기 때문에, 고객사 공유용 보고서를 만들 때 필요 없는 열(체크리스트, 알림 등)을 매번 직접 지워야 했습니다. CSV/Excel 버튼 옆에 "내보낼 열" 체크박스 메뉴를 추가해 원하는 열만 선택해서 내보낼 수 있도록 했고, 선택은 다음 방문 때도 유지됩니다(최소 1개 열은 항상 선택 상태 유지).',
+  },
+  {
     id: '2026-07-21-event-checklist-item-due-dates',
     timestamp: '2026-07-21T23:31:40+09:00',
     description: '업무(Task)와 Todo의 체크리스트 세부 항목에는 기한을 지정하고 기한이 지나면 배지로 알려주는 기능이 있었지만, 일정(Event)의 체크리스트에는 같은 기능이 없어 세부 항목별 마감을 놓치기 쉬웠습니다. 백엔드는 이미 모든 항목의 체크리스트에 공통으로 `due` 필드를 지원하고 있어, 일정 추가/수정 폼(`frontend/src/screens/Calendar.jsx`)에 세부 항목 기한 입력과 지난 기한 강조 표시를 추가하고, 모바일 일정 목록에 체크리스트 진행률/기한 지남 배지를 추가해 업무·Todo 화면과 동일하게 동작하도록 했습니다.',

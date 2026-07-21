@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, dedupeImportedEvents, dedupeImportedLogs, dedupeImportedTasks, dedupeImportedTodos, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, dedupeImportedEvents, dedupeImportedLogs, dedupeImportedTasks, dedupeImportedTodos, eventCsvFilename, eventsToCsv, filterCsvColumns, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, rowsToCsv, taskCsvFilename, taskHeaders, taskRows, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -21,6 +21,15 @@ test('tasksToCsv exports task rows with labels and escaping', () => {
     '제목,상태,우선순위,시작일,시작 시각,기한,완료 시각,진행률,태그,메모,링크,예상 소요시간(분),알림(분 전),색상,체크리스트,고정',
     '"보고서, 검토",지연,높음,2026-07-06,,2026-07-06,,25%,분기; 고객,"첫 줄\n둘째 줄",,,,,[x] a; [ ] b,',
   ].join('\n'))
+})
+
+test('filterCsvColumns keeps only the selected columns in order and rowsToCsv renders them', () => {
+  const rows = taskRows([{ title: '업무', status: 'todo', priority: 'high', progress: 40 }], '2026-07-07')
+  const titleIndex = taskHeaders.indexOf('제목'), progressIndex = taskHeaders.indexOf('진행률')
+  const { headers, rows: filteredRows } = filterCsvColumns(taskHeaders, rows, new Set([progressIndex, titleIndex]))
+  assert.deepEqual(headers, ['제목', '진행률'])
+  assert.deepEqual(filteredRows, [['업무', '40%']])
+  assert.equal(rowsToCsv(headers, filteredRows), '제목,진행률\n업무,40%')
 })
 
 test('tasksToCsv marks pinned tasks with Y in the 고정 column', () => {

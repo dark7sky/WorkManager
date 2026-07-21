@@ -58,6 +58,13 @@ export const tasksToCsv = (tasks, todayIso, pinnedIds) => [taskHeaders, ...taskR
 
 export const taskCsvFilename = date => `workmanager-tasks-${date}.csv`
 
+export const filterCsvColumns = (headers, rows, selectedIndices) => {
+  const indices = headers.map((_, i) => i).filter(i => selectedIndices.has(i))
+  return { headers: indices.map(i => headers[i]), rows: rows.map(row => indices.map(i => row[i])) }
+}
+
+export const rowsToCsv = (headers, rows) => [headers, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
+
 const priorityLabelToValue = { 낮음: 'low', 보통: 'normal', 높음: 'high', low: 'low', normal: 'normal', high: 'high' }
 
 const parseCsvRows = text => {
