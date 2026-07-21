@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
+import { criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -222,4 +222,33 @@ test('taskIndent increases with depth and caps indentation beyond depth 5', () =
   assert.equal(taskIndent(3), '62px')
   assert.equal(taskIndent(5), '98px')
   assert.equal(taskIndent(9), '98px')
+})
+
+test('criticalPathTaskIds marks the longest chain of dependent tasks', () => {
+  const chain = [
+    { id: 1, title: 'Design', status: 'todo', dependency_ids: [] },
+    { id: 2, title: 'Build', status: 'todo', dependency_ids: [1] },
+    { id: 3, title: 'Test', status: 'todo', dependency_ids: [2] },
+    { id: 4, title: 'Unrelated', status: 'todo', dependency_ids: [] },
+  ]
+  assert.deepEqual([...criticalPathTaskIds(chain)].sort(), [1, 2, 3])
+})
+
+test('criticalPathTaskIds prefers the longer-duration chain over a longer node count', () => {
+  const tasksWithDurations = [
+    { id: 1, title: 'A', status: 'todo', dependency_ids: [], start_date: '2026-01-01', due_date: '2026-01-10' },
+    { id: 2, title: 'B', status: 'todo', dependency_ids: [1], start_date: '2026-01-11', due_date: '2026-01-12' },
+    { id: 3, title: 'C', status: 'todo', dependency_ids: [], start_date: '2026-01-01', due_date: '2026-01-02' },
+    { id: 4, title: 'D', status: 'todo', dependency_ids: [3], start_date: '2026-01-03', due_date: '2026-01-04' },
+    { id: 5, title: 'E', status: 'todo', dependency_ids: [4], start_date: '2026-01-05', due_date: '2026-01-06' },
+  ]
+  assert.deepEqual([...criticalPathTaskIds(tasksWithDurations)].sort(), [1, 2])
+})
+
+test('criticalPathTaskIds ignores completed tasks and returns empty when no chain exists', () => {
+  assert.deepEqual(criticalPathTaskIds([{ id: 1, title: 'Solo', status: 'todo', dependency_ids: [] }]), new Set())
+  assert.deepEqual(criticalPathTaskIds([
+    { id: 1, title: 'Done', status: 'done', dependency_ids: [] },
+    { id: 2, title: 'Next', status: 'todo', dependency_ids: [1] },
+  ]), new Set())
 })

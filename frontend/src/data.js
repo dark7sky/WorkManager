@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-critical-path',
+    timestamp: '2026-07-21T14:41:00+09:00',
+    description: '간트 차트에서 선행 업무 관계는 볼 수 있었지만, 그중 어떤 업무가 늦어지면 전체 일정이 밀리는지는 알 수 없었습니다. 선행 업무 사슬 중 기간 합이 가장 긴 경로를 계산해 "핵심 경로" 배지로 표시했습니다 (`frontend/src/taskHierarchy.js`의 `criticalPathTaskIds`, `frontend/src/screens/Tasks.jsx`).',
+  },
+  {
     id: '2026-07-21-archive-undo',
     timestamp: '2026-07-21T14:35:30+09:00',
     description: '업무/할 일/일정/업무 기록을 보관(단일 또는 일괄)할 때 다른 삭제·완료 처리와 달리 "실행 취소"가 뜨지 않던 문제를 고쳤습니다. 이제 보관 알림에도 실행 취소 버튼이 함께 표시되어 즉시 되돌릴 수 있습니다 (`frontend/src/App.jsx`).',

@@ -141,6 +141,46 @@ export const taskHierarchyDepths = tasks => {
   return depths
 }
 
+const taskDurationDays = task => {
+  if (task?.start_date && task?.due_date) {
+    const days = Math.round((new Date(`${task.due_date}T00:00:00`) - new Date(`${task.start_date}T00:00:00`)) / 86400000) + 1
+    return Math.max(1, days)
+  }
+  return 1
+}
+
+// Longest chain through the dependency graph (unfinished tasks only, since
+// completed tasks no longer block anything). Marks every task on that chain
+// as "critical path" so slipping any one of them delays the whole chain.
+export const criticalPathTaskIds = tasks => {
+  const active = tasks.filter(task => task.status !== 'done')
+  const byId = new Map(active.map(task => [task.id, task]))
+  const memo = new Map()
+  const visiting = new Set()
+  const longestFrom = id => {
+    if (memo.has(id)) return memo.get(id)
+    if (visiting.has(id)) return { length: 0, path: [] }
+    visiting.add(id)
+    const task = byId.get(id)
+    let best = { length: taskDurationDays(task), path: [id] }
+    for (const depId of task?.dependency_ids || []) {
+      if (!byId.has(depId)) continue
+      const sub = longestFrom(depId)
+      const candidate = { length: sub.length + taskDurationDays(task), path: [...sub.path, id] }
+      if (candidate.length > best.length) best = candidate
+    }
+    visiting.delete(id)
+    memo.set(id, best)
+    return best
+  }
+  let overall = { length: 0, path: [] }
+  for (const task of active) {
+    const result = longestFrom(task.id)
+    if (result.length > overall.length) overall = result
+  }
+  return overall.path.length > 1 ? new Set(overall.path) : new Set()
+}
+
 export const subtaskRowClass = depth => depth > 0 ? ` subtask-row subtask-depth-${Math.min(depth, 3)}` : ''
 
 export const taskIndent = depth => `${8 + Math.min(depth, 5) * 18}px`
