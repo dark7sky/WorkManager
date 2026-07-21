@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-archive-undo',
+    timestamp: '2026-07-21T14:35:30+09:00',
+    description: '업무/할 일/일정/업무 기록을 보관(단일 또는 일괄)할 때 다른 삭제·완료 처리와 달리 "실행 취소"가 뜨지 않던 문제를 고쳤습니다. 이제 보관 알림에도 실행 취소 버튼이 함께 표시되어 즉시 되돌릴 수 있습니다 (`frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-task-bulk-set-parent',
     timestamp: '2026-07-21T14:16:00+09:00',
     description: '업무 목록에서 여러 업무를 선택했을 때 한 번에 상위 업무를 지정하거나 최상위로 이동할 수 있는 일괄 작업을 추가했습니다. 선택한 업무 자신과 그 하위 업무는 상위 업무 후보에서 제외되어 순환 관계가 만들어지지 않습니다 (`frontend/src/taskHierarchy.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
