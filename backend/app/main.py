@@ -1192,10 +1192,18 @@ def update_item(table, item_id, data, user_id, audit_extra=None):
                     data[key] = normalized
             effective_start = data.get("start_date", existing["start_date"])
             effective_due = data.get("due_date", existing["due_date"])
-            start_unchanged = data.get("start_date", existing["start_date"]) == existing["start_date"]
-            due_unchanged = data.get("due_date", existing["due_date"]) == existing["due_date"]
-            if effective_start and effective_due and effective_due < effective_start and start_unchanged and due_unchanged:
-                data["start_date"], data["due_date"] = effective_due, effective_start
+            start_touched = "start_date" in data and data["start_date"] != existing["start_date"]
+            due_touched = "due_date" in data and data["due_date"] != existing["due_date"]
+            if effective_start and effective_due and effective_due < effective_start:
+                # Only one side of a pre-existing bad pair was edited (e.g. after
+                # recurrence spawning skewed start/due) - heal the untouched side
+                # instead of blocking the save on a field the user didn't touch.
+                if not start_touched and not due_touched:
+                    data["start_date"], data["due_date"] = effective_due, effective_start
+                elif due_touched and not start_touched:
+                    data["start_date"] = effective_due
+                elif start_touched and not due_touched:
+                    data["due_date"] = effective_start
             effective_recurrence_end = data.get("recurrence_end_date", existing["recurrence_end_date"])
             effective_base_date = data.get("due_date", existing["due_date"]) or data.get("start_date", existing["start_date"])
             if "recurrence_end_date" not in data and effective_recurrence_end and effective_base_date and effective_recurrence_end < effective_base_date:

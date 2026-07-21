@@ -339,6 +339,29 @@ class TaskUpdateValidationTests(unittest.TestCase):
             self.assertEqual(updated["start_date"], "2026-07-01")
             self.assertEqual(updated["due_date"], "2026-08-01")
 
+    def test_update_item_repairs_reversed_legacy_task_dates_when_only_one_side_edited(self):
+        with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
+            from app.db import connection, init_db
+            from app.main import update_item
+
+            init_db()
+            with connection() as c:
+                c.execute("INSERT INTO users(id,email,display_name,created_at,updated_at) VALUES(?,?,?,?,?)",
+                          ("sub-a", "a@example.com", "A", "2026-07-08", "2026-07-08"))
+                cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,
+                    assignee_name,approval_status,schedule_approval_status,tags,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    ("sub-a", "reversed date single-side edit", "", "doing", "normal", 10, "2026-07-20", "2026-07-10",
+                     "Dana", "none", "none", "[]", "2026-07-08T10:11:08", "2026-07-08T10:11:08"))
+                task_id = cur.lastrowid
+
+            # e.g. a recurring task whose spawned instance ended up with a skewed
+            # start/due pair; editing only start_date must not 422 on the untouched
+            # stale due_date - the untouched side should heal instead.
+            updated = update_item("tasks", task_id, {"start_date": "2026-07-25"}, "sub-a")
+
+            self.assertEqual(updated["start_date"], "2026-07-25")
+            self.assertEqual(updated["due_date"], "2026-07-25")
+
     def test_update_item_rejects_recurrence_end_date_before_due_date(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {"DATABASE_PATH": os.path.join(folder, "test.db")}):
             from app.db import connection, init_db

@@ -13,14 +13,17 @@ export function validateTaskForm(data) {
 }
 
 // Drops date-order errors that only exist because a *stale, untouched* field
-// (e.g. an old recurrence_end_date left over after due_date moved) now looks
-// invalid; the backend self-heals those on save (see update_item in main.py).
+// (e.g. an old recurrence_end_date left over after due_date moved, or a
+// start/due pair skewed by recurrence spawning) now looks invalid; the
+// backend self-heals the untouched side on save (see update_item in main.py),
+// so only block submit when the user changed BOTH start_date and due_date
+// to a genuinely new, still-inverted pair.
 export function suppressStaleTaskDateErrors(errors, data, task) {
   const result = { ...errors }
   const startChanged = data.start_date !== (task?.start_date || '')
   const dueChanged = data.due_date !== (task?.due_date || '')
   const recurrenceEndChanged = data.recurrence_end_date !== (task?.recurrence_end_date || '')
-  if (result.due_date && !startChanged && !dueChanged) delete result.due_date
+  if (result.due_date && !(startChanged && dueChanged)) delete result.due_date
   if (result.recurrence_end_date && !recurrenceEndChanged) delete result.recurrence_end_date
   return result
 }

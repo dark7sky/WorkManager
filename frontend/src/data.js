@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-single-side-date-edit-fix',
+    timestamp: '2026-07-21T23:05:00+09:00',
+    description: '업무의 시작일/완료 예정일이 이미 어긋나 있는 상태(예: 매월/매년 반복 업무가 다음 회차로 생성될 때 두 날짜가 서로 다른 날 기준으로 계산되어 순서가 뒤바뀐 경우)에서 둘 중 한쪽 날짜만 수정하고 저장하면 건드리지 않은 날짜 때문에 "완료 예정일은 시작일보다 빠를 수 없습니다" 오류로 저장이 막히던 문제를 고쳤습니다. 프런트엔드(`frontend/src/formValidation.js`의 `suppressStaleTaskDateErrors`)와 백엔드(`backend/app/main.py`의 `update_item`)가 이제 시작일/완료 예정일 중 실제로 사용자가 수정하지 않은 쪽만 자동으로 맞춰 저장을 허용하며, 두 날짜를 모두 새로 바꿔 순서가 어긋난 경우에는 그대로 오류를 유지합니다.',
+  },
+  {
     id: '2026-07-21-gantt-keyboard-reparent',
     timestamp: '2026-07-21T22:58:00+09:00',
     description: '업무 간트 화면의 계층 구조(상위/하위 업무)는 지금까지 마우스 드래그로만 옮길 수 있었습니다. 업무 행에 포커스를 두고 Tab을 누르면 바로 위 형제 업무의 하위로 이동(들여쓰기), Shift+Tab을 누르면 한 단계 상위로 이동(내어쓰기)하도록 키보드 단축키를 추가했습니다. `frontend/src/taskHierarchy.js`에 `taskIndentTarget`/`taskOutdentTarget`을 추가하고 `frontend/src/screens/Tasks.jsx`의 업무 행 keydown 핸들러에 연결했습니다.',

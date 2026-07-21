@@ -63,6 +63,20 @@ test('keeps recurrence_end_date error when the field itself was edited to an inv
   assert.equal(errors.recurrence_end_date, '반복 종료일은 시작일/완료 예정일보다 빠를 수 없습니다.')
 })
 
+test('suppresses due_date error when a pre-existing inverted pair is edited on only one side', () => {
+  const task = { start_date: '2026-07-20', due_date: '2026-07-10' }
+  const data = { title: '업무', start_date: '2026-07-25', due_date: '2026-07-10' }
+  const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
+  assert.deepEqual(errors, {})
+})
+
+test('keeps due_date error when both start_date and due_date are edited to a new inverted pair', () => {
+  const task = { start_date: '2026-07-05', due_date: '2026-07-10' }
+  const data = { title: '업무', start_date: '2026-07-20', due_date: '2026-07-15' }
+  const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
+  assert.equal(errors.due_date, '완료 예정일은 시작일보다 빠를 수 없습니다.')
+})
+
 test('event form flags empty title', () => {
   const errors = validateEventForm({ title: ' ', start_at: '2026-07-05T09:00', end_at: '2026-07-05T10:00' })
   assert.equal(errors.title, '일정 제목을 입력하세요.')
