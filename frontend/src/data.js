@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-worklog-form-ai-priority-estimate',
+    timestamp: '2026-07-21T11:21:52+09:00',
+    description: '업무 기록(오늘 한 일) 빠른 입력에는 우선순위·예상 소요 시간을 AI가 채워주는 기능이 없어 업무·Todo·일정 양식에서만 쓸 수 있었습니다. 업무 기록 입력에도 "AI 우선순위·예상시간 추천" 버튼을 추가해 입력한 내용을 분석해 우선순위와 예상 소요 시간을 바로 채울 수 있도록 했습니다 (`frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-event-form-ai-priority-estimate',
     timestamp: '2026-07-21T07:47:56+09:00',
     description: '일정(이벤트) 등록·수정 화면에는 우선순위·예상 소요 시간을 AI가 채워주는 기능이 없어 업무·Todo 양식에서만 쓸 수 있었습니다. 일정 양식에도 "AI 우선순위·예상시간 추천" 버튼을 추가해 제목/메모를 분석해 우선순위와 예상 소요 시간을 바로 채울 수 있도록 했습니다 (`frontend/src/screens/Calendar.jsx`).',
