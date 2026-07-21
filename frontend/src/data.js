@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-checklist-item-due-dates',
+    timestamp: '2026-07-21T23:09:27+09:00',
+    description: '업무(Task)의 체크리스트 세부 항목에는 기한을 지정하고 기한이 지나면 배지로 알려주는 기능이 있었지만, Todo의 체크리스트에는 같은 기능이 없어 세부 항목별 마감을 놓치기 쉬웠습니다. 백엔드는 이미 모든 항목(업무/일정/Todo/업무 기록)의 체크리스트에 공통으로 `due` 필드를 지원하고 있어, Todo 추가/수정 폼(`frontend/src/screens/Today.jsx`)에 세부 항목 기한 입력과 지난 기한 강조 표시, 목록의 "체크리스트 기한 N건 지남" 배지를 추가해 업무 화면과 동일하게 동작하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-task-dependent-impact-badge',
     timestamp: '2026-07-21T23:12:00+09:00',
     description: '간트 차트에서 선행 업무(블로커)는 배지로 확인할 수 있었지만, 반대로 "이 업무를 완료해야 하는 다른 업무가 몇 개나 기다리고 있는지"는 알 수 없어 일정을 미루기 전에 하위 영향을 파악하기 어려웠습니다. `frontend/src/taskFilters.js`에 역방향 조회 함수 `taskDependentTasks`를 추가하고, 업무 화면(`frontend/src/screens/Tasks.jsx`)의 간트 행에 "N개 업무가 이 업무를 기다림" 배지(표시 항목 설정에서 켜고 끌 수 있음)를 새로 표시했습니다.',
