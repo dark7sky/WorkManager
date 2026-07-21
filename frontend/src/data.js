@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-unsaved-changes-guard',
+    timestamp: '2026-07-22T08:02:19+09:00',
+    description: '업무 수정 창에서 입력 중 실수로 Esc, 바깥 영역 클릭, 닫기(X) 버튼, 취소 버튼을 누르면 작성 중이던 내용이 경고 없이 사라졌습니다. `frontend/src/components/Modal.jsx`에 `isDirty` 가드를 추가해 닫기 시도 시 확인 창을 띄우도록 했고, `frontend/src/components/TaskForm.jsx`가 입력 변경을 감지해 저장 전까지 닫기를 막도록 연결했습니다.',
+  },
+  {
     id: '2026-07-22-quickcapture-apply-all',
     timestamp: '2026-07-22T07:56:20+09:00',
     description: '빠른 입력(Ctrl/⌘+K)은 줄바꿈으로 여러 건을 한 번에 분석할 수 있었지만, 분석된 항목은 "하나씩 확인 후 추가하세요" 안내대로 매번 개별 "추가" 버튼을 눌러야 했습니다. 하루치 회의록·메모를 한 번에 업무/일정/할 일로 옮기는 실무 흐름을 지원하기 위해 "모두 추가" 버튼(`frontend/src/components/QuickCapture.jsx`)을 추가했습니다. 항목을 순차 적용하며 실패한 항목은 목록에 남기고 성공/실패 건수를 안내합니다.',

@@ -12,8 +12,9 @@ import { findDuplicateTitleTasks } from '../taskDuplicateCheck'
 import { nextRecurrenceDate } from '../recurrencePreview'
 import TagsInput from './TagsInput'
 
-export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete }) {
+export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete, onDirtyChange }) {
   const [saving, setSaving] = useState(false)
+  const [dirty, setDirty] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [tags, setTags] = useState(() => task?.tags || [])
@@ -115,8 +116,11 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     saveTaskTemplates(next)
   }
 
+  useEffect(() => { onDirtyChange?.(dirty) }, [dirty])
+
   useEffect(() => {
     setSaving(false)
+    setDirty(false)
     setError('')
     setFieldErrors({})
     setSuggestions([])
@@ -341,10 +345,13 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     const result = await onSave(buildTaskPayload(data, { tags, task }), applyToSeries)
     const ok = typeof result === 'object' ? result.ok : result
     if (!ok) setError(result?.error || '저장하지 못했습니다. 입력 내용은 그대로 유지됩니다.')
+    else setDirty(false)
     setSaving(false)
   }
 
-  return <form ref={formRef} className="form-grid" onSubmit={submit}>
+  const cancel = () => { if (dirty && !window.confirm('저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?')) return; onCancel() }
+
+  return <form ref={formRef} className="form-grid" onChange={() => setDirty(true)} onSubmit={submit}>
     {!task ? <div className="span-2 task-template-bar">
       <label>업무 템플릿<select onChange={e => { applyTemplate(e.target.value); e.target.value = '' }} defaultValue=""><option value="" disabled>템플릿 선택</option>{templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
       {templates.length ? <button type="button" className="text-button" onClick={() => { const id = window.prompt('삭제할 템플릿 이름을 입력하세요.'); const match = templates.find(t => t.name === id); if (match) deleteTemplate(match.id) }}>템플릿 삭제</button> : null}
@@ -434,6 +441,6 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <div className="span-2"><TagsInput value={tags} onChange={setTags}/><div className="tag-recommend"><button type="button" className="text-button" disabled={saving} onClick={recommend}>AI 태그 추천</button>{suggestions.map(tag => <button type="button" key={tag} disabled={tags.includes(tag)} onClick={() => setTags([...tags, tag])}>+ #{tag}</button>)}</div></div>
     <label className="span-2">메모<textarea name="description" rows="4" placeholder="담당자·협업자 등은 메모나 태그로 남겨두세요." defaultValue={task?.description || ''}/></label>
     {error ? <p className="form-error span-2" role="alert">{error}</p> : null}
-    <div className="form-actions span-2">{task && onDelete ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={onCancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : task ? '변경사항 저장' : '업무 등록'}</button></div>
+    <div className="form-actions span-2">{task && onDelete ? <button type="button" className="danger-button" disabled={saving} onClick={onDelete}>휴지통으로 이동</button> : null}<button type="button" className="text-button" disabled={saving} onClick={saveAsTemplate}>템플릿으로 저장</button><span className="form-spacer"/><button type="button" className="secondary" disabled={saving} onClick={cancel}>취소</button><button className="primary" disabled={saving}>{saving ? '처리 중…' : task ? '변경사항 저장' : '업무 등록'}</button></div>
   </form>
 }
