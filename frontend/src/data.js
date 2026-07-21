@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-promote-to-task',
+    timestamp: '2026-07-21T12:20:00+09:00',
+    description: '할 일과 업무 기록에는 있던 "업무로 전환" 기능이 일정에는 없었습니다. 이제 일정 상세 화면과 모바일 목록에서도 업무로 전환할 수 있습니다 (`frontend/src/eventDuplicate.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-goal-overachievement',
     timestamp: '2026-07-21T11:55:15+09:00',
     description: '성과 화면의 기간 목표 진행률이 100%에서 잘려 목표를 초과 달성해도 그 사실을 알 수 없었습니다. 이제 달성률 수치는 100%를 넘겨 그대로 표시하고(진행 막대만 100%에서 채워짐), 목표를 달성한 항목은 초록색으로 강조합니다 (`frontend/src/performanceReport.js`, `frontend/src/screens/Performance.jsx`).',

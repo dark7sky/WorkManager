@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildEventDuplicatePayload } from './eventDuplicate.js'
+import { buildEventDuplicatePayload, buildTaskFromEventPayload } from './eventDuplicate.js'
 
 test('buildEventDuplicatePayload copies fields and suffixes the title', () => {
   const event = { id: 5, title: '주간 회의', description: '메모', start_at: '2026-07-14T09:00:00', end_at: '2026-07-14T10:00:00', location: '회의실 A', tags: ['업무'] }
@@ -46,4 +46,28 @@ test('buildEventDuplicatePayload handles missing optional fields', () => {
 test('buildEventDuplicatePayload copies estimated_minutes', () => {
   const result = buildEventDuplicatePayload({ title: '워크숍', estimated_minutes: 90 })
   assert.equal(result.estimated_minutes, 90)
+})
+
+test('buildTaskFromEventPayload maps event fields into a task payload', () => {
+  const event = { title: '주간 회의', priority: 'high', start_at: '2026-07-14T09:00:00', description: '메모', link_url: 'https://x.com', estimated_minutes: 30, checklist: [{ id: 'c1', text: '준비', done: true }] }
+  const result = buildTaskFromEventPayload(event)
+  assert.equal(result.title, '주간 회의')
+  assert.equal(result.priority, 'high')
+  assert.equal(result.due_date, '2026-07-14')
+  assert.equal(result.status, 'todo')
+  assert.equal(result.progress, 0)
+  assert.equal(result.description, '메모')
+  assert.equal(result.link_url, 'https://x.com')
+  assert.equal(result.estimated_minutes, 30)
+  assert.deepEqual(result.checklist, [{ id: 'c1', text: '준비', done: true }])
+})
+
+test('buildTaskFromEventPayload handles missing optional fields', () => {
+  const result = buildTaskFromEventPayload({ title: '휴가' })
+  assert.equal(result.priority, 'normal')
+  assert.equal(result.due_date, null)
+  assert.equal(result.description, null)
+  assert.equal(result.link_url, null)
+  assert.equal(result.estimated_minutes, null)
+  assert.deepEqual(result.checklist, [])
 })
