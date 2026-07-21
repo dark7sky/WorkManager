@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-checklist-item-due-dates',
+    timestamp: '2026-07-21T23:31:40+09:00',
+    description: '업무(Task)와 Todo의 체크리스트 세부 항목에는 기한을 지정하고 기한이 지나면 배지로 알려주는 기능이 있었지만, 일정(Event)의 체크리스트에는 같은 기능이 없어 세부 항목별 마감을 놓치기 쉬웠습니다. 백엔드는 이미 모든 항목의 체크리스트에 공통으로 `due` 필드를 지원하고 있어, 일정 추가/수정 폼(`frontend/src/screens/Calendar.jsx`)에 세부 항목 기한 입력과 지난 기한 강조 표시를 추가하고, 모바일 일정 목록에 체크리스트 진행률/기한 지남 배지를 추가해 업무·Todo 화면과 동일하게 동작하도록 했습니다.',
+  },
+  {
     id: '2026-07-21-global-search-open-log-event-fix',
     timestamp: '2026-07-21T23:23:16+09:00',
     description: '전역 검색(⌘K)에서 업무 기록/일정 결과를 클릭하면 목록이 있는 화면으로 이동만 할 뿐 실제로 어떤 항목을 검색했는지 표시되지 않아, 검색 결과가 많을 때 사용자가 다시 직접 찾아야 했습니다. Todo와 동일하게 클릭한 업무 기록/일정을 자동으로 열고 강조 표시하도록 전역 검색의 onOpenLog/onOpenEvent 핸들러를 수정했습니다.',
