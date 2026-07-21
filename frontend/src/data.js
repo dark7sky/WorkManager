@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-global-search-tag-match',
+    timestamp: '2026-07-22T02:55:00+09:00',
+    description: '전역 검색(Ctrl+/)이 업무·일정·할 일·업무 기록의 제목/본문만 검색하고 태그는 무시해, 예를 들어 "긴급" 태그가 붙은 항목이라도 제목에 그 단어가 없으면 검색되지 않았습니다. `frontend/src/globalSearch.js`가 각 항목의 `tags` 배열도 함께 검색하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-22-event-badge-visibility-toggle',
     timestamp: '2026-07-22T00:41:47+09:00',
     description: '업무(Tasks) 화면에는 간트 행에 표시할 뱃지(체크리스트, 예상 소요시간, 링크 등)를 고르는 "표시 항목" 메뉴가 있었지만, 일정(Calendar) 화면의 일정 목록은 관련 링크·사용자 정의 필드·체크리스트·예상 소요시간·댓글·첨부파일 뱃지를 항상 모두 표시해 목록이 번잡했습니다. `frontend/src/eventBadgeVisibility.js`를 추가해 동일한 로컬 저장 방식으로 뱃지 표시 여부를 선택할 수 있는 "표시 항목" 드롭다운을 `Calendar.jsx` 목록 뷰 툴바에 연결했습니다.',

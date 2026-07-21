@@ -29,3 +29,14 @@ test('searchAll returns empty groups when nothing matches', () => {
 test('globalSearchResultCount sums all groups', () => {
   assert.equal(globalSearchResultCount(searchAll(data, '회의')), 2)
 })
+
+test('searchAll matches tags across entities', () => {
+  const tagged = {
+    tasks: [{ id: 1, title: '작업', tags: ['긴급'] }],
+    events: [{ id: 1, title: '일정', tags: ['긴급'] }],
+    todos: [{ id: 1, title: '할일', tags: ['긴급'] }],
+    logs: [{ id: 1, content: '기록', tags: ['긴급'] }],
+  }
+  const result = searchAll(tagged, '긴급')
+  assert.equal(globalSearchResultCount(result), 4)
+})

@@ -1,6 +1,8 @@
 # WorkManager Roadmap
 
-Last updated: 2026-07-22 (00:41 KST)
+Last updated: 2026-07-22 (02:55 KST)
+
+- [x] Global search tag matching (2026-07-22): the global cross-entity search (Ctrl+/ modal) only matched title/description/location/memo/content fields, so searching for a tag name (e.g. "긴급") found nothing unless the word also appeared in the title, even though tags are a first-class, heavily-used metadata field across all 4 entities. `frontend/src/globalSearch.js` now also checks each item's `tags` array. Tests: `frontend/src/globalSearch.test.js`.
 
 - [x] Calendar event badge-visibility toggle (2026-07-22): the Task screen had a "표시 항목" dropdown to hide/show per-row badges (checklist, estimate, links, custom fields, comments, attachments), but the Calendar screen's event list always showed all of those badges, making a busy agenda cluttered. Added `frontend/src/eventBadgeVisibility.js` (same localStorage-persisted `Set` pattern as `taskBadgeVisibility.js`) and wired a matching "표시 항목" dropdown into `Calendar.jsx`'s list-view toolbar, gating the event row's link/custom-fields/checklist/estimate/comment/attachment badges. Tests: `frontend/src/eventBadgeVisibility.test.js`.
 - [x] Todo/Work Log CSV/Excel export column picker (2026-07-22): the Task and Event screens both had a "내보낼 열" checkbox dropdown to choose which CSV/Excel columns to export, but the 오늘 화면's Todo and Work Log exports (`frontend/src/screens/Today.jsx`) always exported every column. Added `frontend/src/todoCsvColumns.js` and `frontend/src/workLogCsvColumns.js` (same localStorage-persisted selection pattern as `taskCsvColumns.js`/`eventCsvColumns.js`) and wired the same dropdown into the Todo and Work Log CSV/Excel export buttons, reusing `filterCsvColumns`/`rowsToCsv`/`rowsToSpreadsheetXml`. Closes the CSV/Excel column-picker parity gap across all 4 entities. Tests: `frontend/src/todoCsvColumns.test.js`, `frontend/src/workLogCsvColumns.test.js`.
