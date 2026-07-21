@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, CornerDownLeft, LoaderCircle, Search } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CornerDownLeft, LoaderCircle, Search } from 'lucide-react'
 import Modal from './Modal'
 import { api } from '../api'
 import { searchItems, searchScreens } from '../commandPalette'
@@ -63,6 +63,7 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     </form>
     {items && items.length ? <>
       {items.length > 1 ? <small className="quick-capture-count">{items.length}건 분석됨 · 하나씩 확인 후 추가하세요.</small> : null}
+      {items[0]?.warning ? <div className="ai-warning"><AlertTriangle/><span>{items[0].warning}</span></div> : null}
       {items.map((item, index) => {
         const data = item?.data || {}
         return <div className="quick-capture-preview" key={`${item.action}-${item.entity}-${index}`}>

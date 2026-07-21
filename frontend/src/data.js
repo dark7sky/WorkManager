@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-quickcapture-ai-warning',
+    timestamp: '2026-07-21T18:43:05+09:00',
+    description: 'AI 분석(빠른 입력, Ctrl/⌘+K)이 AI 서비스 장애로 로컬 규칙 분석으로 대체됐을 때, AI 어시스턴트 화면에는 경고 배너가 표시되지만 더 자주 쓰이는 빠른 입력 창에는 안내가 전혀 없어 사용자가 부정확할 수 있는 결과를 AI 분석으로 오인할 수 있었습니다. 빠른 입력에도 동일한 경고 배너를 추가했습니다(`frontend/src/components/QuickCapture.jsx`).',
+  },
+  {
     id: '2026-07-21-events-todos-worklogs-excel-export',
     timestamp: '2026-07-21T18:39:01+09:00',
     description: 'Excel 내보내기는 업무 화면에만 있어, 일정·Todo·업무 기록을 Excel에서 열려는 사용자는 CSV를 내려받아 직접 변환해야 했습니다. 캘린더(일정), 오늘(Todo·업무 기록) 화면에도 "Excel" 내보내기 버튼을 추가해 SpreadsheetML(.xls) 형식으로 바로 내려받도록 했습니다. 각 CSV 내보내기와 동일한 헤더·행 데이터를 재사용합니다(`frontend/src/csv.js`의 `eventHeaders`/`eventRows`, `todoHeaders`/`todoRows`, `workLogHeaders`/`workLogRows`를 분리, `frontend/src/xlsx.js`의 `eventsToExcelXml`/`todosToExcelXml`/`workLogsToExcelXml`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`), 테스트는 `frontend/src/xlsx.test.js`.',
