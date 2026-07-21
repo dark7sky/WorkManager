@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-ai-progress-suggestion-date-guard',
+    timestamp: '2026-07-21T21:46:00+09:00',
+    description: '성과 화면의 "AI 진행률 제안"이 업무의 시작일보다 이른 완료일을 제안하는 경우가 있어, 제안을 확인 후 적용하면 서버 검증에 걸려 원인을 알기 어려운 오류가 발생했습니다. 로컬 규칙 기반 제안(`project_progress_suggestions`)과 원격 AI 제안(`smart_project_suggestions`, `backend/app/ai.py`) 모두 업무의 시작일을 확인해 시작일보다 이른 완료일 제안은 만들지 않도록 했고, 원격 AI 응답에 잘못된 항목이 섞여 있어도 나머지 유효한 제안은 버리지 않고 그대로 보여주도록 했습니다.',
+  },
+  {
     id: '2026-07-21-audit-log-stale-response-guard',
     timestamp: '2026-07-21T22:10:00+09:00',
     description: '감사 로그 화면에서 날짜 범위를 빠르게 연속으로 바꾸면 먼저 보낸 요청이 나중에 보낸 요청보다 늦게 응답하는 경우, 오래된 응답이 최신 결과를 덮어써 화면에 잘못된 기간의 로그가 표시될 수 있었습니다. 다른 화면들(`Calendar.jsx`, `Changelog.jsx` 등)에 이미 쓰인 취소 플래그 패턴을 감사 로그 조회(`load`)에도 적용해, 최신 요청이 아닌 응답은 상태에 반영하지 않도록 했습니다. "더 보기" 페이지 로딩도 목록이 그 사이 바뀐 경우 결과를 덧붙이지 않도록 방어했습니다.',

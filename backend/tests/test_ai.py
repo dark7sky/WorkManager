@@ -352,6 +352,28 @@ class ValidationAndStatusTests(unittest.TestCase):
         self.assertEqual(result[0]["id"], 7)
         self.assertEqual(result[0]["data"]["progress"], 30)
 
+    def test_project_suggestion_skips_due_date_before_start_date(self):
+        tasks = [{"id": 8, "title": "장기 프로젝트", "status": "doing", "progress": 10,
+                  "due_date": (date.today() - timedelta(days=1)).isoformat(),
+                  "start_date": (date.today() + timedelta(days=30)).isoformat(), "tags": []}]
+        result = ai.project_progress_suggestions(tasks, [], 5)
+        self.assertEqual(result, [])
+
+    def test_smart_project_suggestions_skips_remote_due_date_before_start_date(self):
+        tasks = [{"id": 1, "title": "A", "status": "doing", "progress": 10,
+                  "due_date": None, "start_date": (date.today() + timedelta(days=10)).isoformat(), "tags": []},
+                 {"id": 2, "title": "B", "status": "doing", "progress": 20, "due_date": None, "start_date": None, "tags": []}]
+        remote_result = {"items": [
+            {"action": "update", "entity": "task", "id": 1,
+             "data": {"due_date": date.today().isoformat()}, "confidence": 0.9, "reason": "지연 위험"},
+            {"action": "update", "entity": "task", "id": 2,
+             "data": {"progress": 40}, "confidence": 0.8, "reason": "최근 활동 근거"},
+        ]}
+        with patch.object(ai, "_remote_json", return_value=remote_result):
+            output, source = asyncio.run(ai.smart_project_suggestions(tasks, [], 5, user_id="__legacy__"))
+        self.assertEqual(source, "remote-ai")
+        self.assertEqual([item["id"] for item in output], [2])
+
     def test_changelog_period_summary_joins_descriptions_and_counts_extras(self):
         entries = [{"description": f"업데이트 {i}"} for i in range(8)]
         result = ai.changelog_period_summary("2026-06", entries)

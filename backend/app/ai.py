@@ -731,9 +731,12 @@ def project_progress_suggestions(tasks: list[dict], logs: list[dict], limit: int
             continue
         data, reason = {}, None
         due = task.get("due_date")
+        start = task.get("start_date")
         if due and date.fromisoformat(due) < today:
-            data["due_date"] = (today + timedelta(days=3)).isoformat()
-            reason = "기한이 지나 현실적인 새 완료일 검토가 필요합니다."
+            new_due = today + timedelta(days=3)
+            if not start or date.fromisoformat(start) <= new_due:
+                data["due_date"] = new_due.isoformat()
+                reason = "기한이 지나 현실적인 새 완료일 검토가 필요합니다."
         task_tags = {str(tag).casefold() for tag in task.get("tags") or []}
         tag_activity = any(task_tags & {str(tag).casefold() for tag in log.get("tags") or []} for log in logs)
         if (task.get("id") in recent_ids or tag_activity) and int(task.get("progress") or 0) < 90:
@@ -856,8 +859,8 @@ async def smart_changelog_summary(period: str, entries: list[dict], user_id: str
 
 async def smart_project_suggestions(tasks, logs, limit=5, user_id: str | None = None):
     fallback = project_progress_suggestions(tasks, logs, limit)
-    allowed = {int(x["id"]) for x in tasks}
-    minimal_tasks = [{k: x.get(k) for k in ("id", "title", "status", "progress", "due_date", "priority", "tags")} for x in tasks[:50]]
+    task_by_id = {int(x["id"]): x for x in tasks}
+    minimal_tasks = [{k: x.get(k) for k in ("id", "title", "status", "progress", "due_date", "start_date", "priority", "tags")} for x in tasks[:50]]
     try:
         result = await _remote_json(
             "Suggest preview-only task updates. JSON {items:[{action:'update',entity:'task',id:int,data:{progress?,status?,due_date?},confidence:number,reason:string}]}. Never create or delete.",
@@ -872,17 +875,22 @@ async def smart_project_suggestions(tasks, logs, limit=5, user_id: str | None = 
         allowed_fields = {"progress", "status", "due_date"}
         for raw in result["items"][:limit]:
             item = _normalize(raw)
-            if item["action"] != "update" or item["entity"] != "task" or item["id"] not in allowed or not set(item["data"]).issubset(allowed_fields):
-                raise ValueError
+            if item["action"] != "update" or item["entity"] != "task" or item["id"] not in task_by_id or not set(item["data"]).issubset(allowed_fields):
+                continue
             if "progress" in item["data"] and not 0 <= int(item["data"]["progress"]) <= 100:
-                raise ValueError
+                continue
             if "status" in item["data"] and item["data"]["status"] not in {"todo", "doing", "done"}:
-                raise ValueError
+                continue
             if "due_date" in item["data"]:
                 date.fromisoformat(item["data"]["due_date"])
+                start = task_by_id[item["id"]].get("start_date")
+                if start and item["data"]["due_date"] < start:
+                    continue
             output.append({"action": "update", "entity": "task", "id": item["id"], "data": item["data"],
                            "confidence": item["confidence"], "preview_only": True, "source": "remote-ai",
                            "reason": str(raw.get("reason", ""))[:500]})
+        if not output:
+            raise ValueError
         return output, "remote-ai"
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError, RuntimeError):
         return fallback, "private-rules"
