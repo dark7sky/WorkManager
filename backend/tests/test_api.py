@@ -1544,6 +1544,22 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(updated.status_code, 200, updated.text)
         self.assertEqual(updated.json()["custom_fields"], [])
 
+    def test_work_log_custom_fields_are_persisted_and_blank_labels_dropped(self):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "with custom fields", "custom_fields": [
+            {"id": "1", "label": " 고객사 ", "value": " Acme "},
+            {"id": "2", "label": "   ", "value": "ignored"},
+        ]})
+        self.assertEqual(log.status_code, 200, log.text)
+        fields = log.json()["custom_fields"]
+        self.assertEqual(len(fields), 1)
+        self.assertEqual(fields[0]["label"], "고객사")
+        self.assertEqual(fields[0]["value"], "Acme")
+        log_id = log.json()["id"]
+        updated = a.patch(f"/api/work_logs/{log_id}", json={"custom_fields": []})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertEqual(updated.json()["custom_fields"], [])
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_color_is_persisted_and_validated(self, *_):

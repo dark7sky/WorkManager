@@ -161,6 +161,7 @@ def init_db():
         _add_column(c, "work_logs", "priority", "TEXT")
         _add_column(c, "work_logs", "estimated_minutes", "INTEGER")
         _add_column(c, "work_logs", "archived_at", "TEXT")
+        _add_column(c, "work_logs", "custom_fields", "TEXT NOT NULL DEFAULT '[]'")
         _add_column(c, "task_comments", "edited_at", "TEXT")
         _add_column(c, "sessions", "user_agent", "TEXT")
         for name, definition in {

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-work-log-custom-fields',
+    timestamp: '2026-07-21T16:57:18+09:00',
+    description: '업무(Task)와 할 일(Todo)은 이미 사용자 정의 필드(예: 고객사, 계약 번호)를 등록/수정 화면 모두에서 지원했지만, 오늘 한 일(업무 기록)에는 이 기능이 전혀 없어 세 항목 유형 간 기능이 어긋나 있었습니다. `work_logs` 테이블에 `custom_fields` 컬럼을 추가하고 백엔드 검증(`WorkLogPayload`)과 오늘 화면의 기록 등록/수정 폼에 동일한 사용자 정의 필드 편집 UI를 추가했습니다(`backend/app/db.py`, `backend/app/main.py`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`, `frontend/src/logDuplicate.js`).',
+  },
+  {
     id: '2026-07-21-todo-add-form-links-custom-fields',
     timestamp: '2026-07-21T16:50:18+09:00',
     description: '오늘 화면에서 할 일(Todo)을 수정할 때는 첨부 링크와 사용자 정의 필드를 추가할 수 있었지만, 새 할 일을 등록하는 입력 폼에는 같은 기능이 없어 등록 후 다시 열어 수정해야 했습니다. 새 할 일 등록 폼에도 첨부 링크/사용자 정의 필드 입력 UI를 추가했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`의 `onAddTodo`).',
