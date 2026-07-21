@@ -179,10 +179,11 @@ def init_db():
             "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
             "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT", "public_token": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
-            "public_token_expires_at": "TEXT",
+            "public_token_expires_at": "TEXT", "recurrence_group_id": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_public_token ON tasks(public_token) WHERE public_token IS NOT NULL")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_recurrence_group ON tasks(user_id,recurrence_group_id)")
         for name, definition in {
             "google_event_id": "TEXT", "google_calendar_id": "TEXT", "updated_at": "TEXT",
             "sync_state": "TEXT NOT NULL DEFAULT 'clean'", "google_etag": "TEXT",
@@ -206,9 +207,10 @@ def init_db():
                                   "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
                                   "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
                                   "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER", "public_token": "TEXT",
-                                  "public_token_expires_at": "TEXT"}.items():
+                                  "public_token_expires_at": "TEXT", "recurrence_group_id": "TEXT"}.items():
             _add_column(c, "todos", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_todos_public_token ON todos(public_token) WHERE public_token IS NOT NULL")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_todos_recurrence_group ON todos(user_id,recurrence_group_id)")
         _migrate_scoped_kv(c)
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_tasks_trash ON tasks(user_id,deleted_at)")

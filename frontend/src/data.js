@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-recurrence-series-history',
+    timestamp: '2026-07-22T00:22:47+09:00',
+    description: '반복 업무/Todo는 회차가 완료될 때마다 새 항목이 새로 생성되는 방식이라, 지난 회차들이 서로 연결되지 않아 하나의 반복 시리즈로서 진행 이력을 한눈에 볼 방법이 없었습니다. 백엔드에 `recurrence_group_id`를 추가해 같은 반복에서 파생된 항목들을 하나로 묶고, 업무 수정 폼과 Todo 수정 폼에 "반복 이력 보기" 버튼을 추가해 같은 시리즈의 과거·현재 회차 목록과 완료 상태를 확인할 수 있도록 했습니다(백엔드 GET /api/tasks/{id}/series, GET /api/todos/{id}/series).',
+  },
+  {
     id: '2026-07-21-worklog-checklist-item-due-dates',
     timestamp: '2026-07-21T23:44:00+09:00',
     description: '업무·일정·Todo의 체크리스트 세부 항목에는 기한을 지정하고 기한이 지나면 배지로 알려주는 기능이 있었지만, 업무 기록(work log)의 체크리스트에는 같은 기능이 없어 4개 엔티티 중 유일하게 세부 항목 마감을 놓치기 쉬웠습니다. 백엔드는 이미 모든 항목의 체크리스트에 공통으로 `due` 필드를 지원하고 있어, 업무 기록 수정 폼(`frontend/src/screens/Today.jsx`)에 세부 항목 기한 입력과 지난 기한 강조 표시를 추가하고, 목록에 체크리스트 기한 지남 배지를 추가해 나머지 3개 엔티티와 동일하게 동작하도록 했습니다.',

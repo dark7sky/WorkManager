@@ -1034,19 +1034,20 @@ def spawn_recurring_task(task, user_id):
             c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                       (timestamp, task["id"], user_id))
         return None
+    group_id = task.get("recurrence_group_id") or uuid.uuid4().hex
     with connection() as c:
         # The conditional marker update makes concurrent completion requests idempotent.
-        if not c.execute("UPDATE tasks SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
-                         (timestamp, task["id"], user_id)).rowcount:
+        if not c.execute("UPDATE tasks SET recurrence_spawned_at=?, recurrence_group_id=COALESCE(recurrence_group_id,?) WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
+                         (timestamp, group_id, task["id"], user_id)).rowcount:
             return None
         cur = c.execute("""INSERT INTO tasks(user_id,title,description,status,priority,progress,start_date,due_date,start_time,due_time,tags,
           recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,parent_id,dependency_ids,created_at,updated_at,
-          estimated_minutes,link_url,checklist,color,links,custom_fields) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          estimated_minutes,link_url,checklist,color,links,custom_fields,recurrence_group_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, task["title"], task.get("description", ""), "todo", task.get("priority", "normal"), 0,
            start_date, due_date, task.get("start_time"), task.get("due_time"), json.dumps(task.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date,
            task["id"], json.dumps(task.get("dependency_ids") or []), timestamp, timestamp,
            task.get("estimated_minutes"), task.get("link_url"), json.dumps(_reset_checklist(task.get("checklist")), ensure_ascii=False), task.get("color"), json.dumps(task.get("links") or [], ensure_ascii=False),
-           json.dumps(task.get("custom_fields") or [], ensure_ascii=False)))
+           json.dumps(task.get("custom_fields") or [], ensure_ascii=False), group_id))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "tasks", next_id, {"source_task_id": task["id"], "rule": rule})
     return next_id
@@ -1066,15 +1067,16 @@ def spawn_recurring_todo(todo, user_id):
             c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
                       (timestamp, todo["id"], user_id))
         return None
+    group_id = todo.get("recurrence_group_id") or uuid.uuid4().hex
     with connection() as c:
         # The conditional marker update makes concurrent completion requests idempotent.
-        if not c.execute("UPDATE todos SET recurrence_spawned_at=? WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
-                         (timestamp, todo["id"], user_id)).rowcount:
+        if not c.execute("UPDATE todos SET recurrence_spawned_at=?, recurrence_group_id=COALESCE(recurrence_group_id,?) WHERE id=? AND user_id=? AND recurrence_spawned_at IS NULL",
+                         (timestamp, group_id, todo["id"], user_id)).rowcount:
             return None
         cur = c.execute("""INSERT INTO todos(user_id,title,todo_date,todo_time,completed,tags,recurrence_rule,recurrence_anchor_day,recurrence_anchor_month_end,recurrence_end_date,priority,link_url,memo,estimated_minutes,created_at,
-          checklist,color,links,custom_fields) VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          checklist,color,links,custom_fields,recurrence_group_id) VALUES(?,?,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
           (user_id, todo["title"], next_date, todo.get("todo_time"), json.dumps(todo.get("tags") or [], ensure_ascii=False), rule, anchor_day, int(anchor_end), end_date, todo.get("priority", "normal"), todo.get("link_url"), todo.get("memo"), todo.get("estimated_minutes"), timestamp,
-           json.dumps(_reset_checklist(todo.get("checklist")), ensure_ascii=False), todo.get("color"), json.dumps(todo.get("links") or [], ensure_ascii=False), json.dumps(todo.get("custom_fields") or [], ensure_ascii=False)))
+           json.dumps(_reset_checklist(todo.get("checklist")), ensure_ascii=False), todo.get("color"), json.dumps(todo.get("links") or [], ensure_ascii=False), json.dumps(todo.get("custom_fields") or [], ensure_ascii=False), group_id))
         next_id = cur.lastrowid
     audit(user_id, "recurrence_create", "todos", next_id, {"source_todo_id": todo["id"], "rule": rule})
     return next_id
@@ -1108,6 +1110,8 @@ def create_item(table, data, user_id, audit_extra=None):
         anchor = date.fromisoformat(data["todo_date"])
         data["recurrence_anchor_day"] = anchor.day
         data["recurrence_anchor_month_end"] = int(anchor.day == month_calendar.monthrange(anchor.year, anchor.month)[1])
+    if table in ("tasks", "todos") and data.get("recurrence_rule"):
+        data["recurrence_group_id"] = uuid.uuid4().hex
     if table == "tasks" and data.get("status") == "done":
         data["completed_at"] = timestamp
         approval_workflow_on = load_approval_workflow_setting(user_id)
@@ -1942,6 +1946,34 @@ def skip_task_recurrence(item_id: int, user=Depends(require_user)):
     if next_due:
         patch["due_date"] = next_due
     return update_item("tasks", item_id, patch, user)
+
+
+@app.get("/api/todos/{item_id}/series")
+def todo_series(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT * FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Item not found")
+        todo = row_dict(existing)
+        if not todo.get("recurrence_group_id"):
+            return {"items": [{"id": todo["id"], "title": todo["title"], "todo_date": todo["todo_date"], "completed": bool(todo["completed"])}]}
+        items = c.execute("SELECT id,title,todo_date,completed FROM todos WHERE user_id=? AND recurrence_group_id=? AND deleted_at IS NULL ORDER BY todo_date,id",
+                           (user, todo["recurrence_group_id"])).fetchall()
+    return {"items": [{"id": r["id"], "title": r["title"], "todo_date": r["todo_date"], "completed": bool(r["completed"])} for r in items]}
+
+
+@app.get("/api/tasks/{item_id}/series")
+def task_series(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        existing = c.execute("SELECT * FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not existing:
+            raise HTTPException(404, "Item not found")
+        task = row_dict(existing)
+        if not task.get("recurrence_group_id"):
+            return {"items": [{"id": task["id"], "title": task["title"], "start_date": task["start_date"], "due_date": task["due_date"], "status": task["status"], "progress": task["progress"]}]}
+        items = c.execute("SELECT id,title,start_date,due_date,status,progress FROM tasks WHERE user_id=? AND recurrence_group_id=? AND deleted_at IS NULL ORDER BY COALESCE(due_date,start_date,''),id",
+                           (user, task["recurrence_group_id"])).fetchall()
+    return {"items": [{"id": r["id"], "title": r["title"], "start_date": r["start_date"], "due_date": r["due_date"], "status": r["status"], "progress": r["progress"]} for r in items]}
 
 
 EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority"}

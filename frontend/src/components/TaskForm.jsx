@@ -23,6 +23,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
   const [customFieldLabelText, setCustomFieldLabelText] = useState('')
   const [customFieldValueText, setCustomFieldValueText] = useState('')
   const [recurrenceRule, setRecurrenceRule] = useState(() => task?.recurrence_rule || '')
+  const [seriesItems, setSeriesItems] = useState(null)
+  const [seriesLoading, setSeriesLoading] = useState(false)
   const [checklistText, setChecklistText] = useState('')
   const [checklistDueText, setChecklistDueText] = useState('')
   const [linkUrlText, setLinkUrlText] = useState('')
@@ -305,6 +307,19 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     }
   }
 
+  const loadSeries = async () => {
+    if (seriesItems) { setSeriesItems(null); return }
+    setSeriesLoading(true)
+    try {
+      const result = await api.taskSeries(task.id)
+      setSeriesItems(result.items || [])
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSeriesLoading(false)
+    }
+  }
+
   const submit = async e => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -351,6 +366,10 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`recurrence-${prefillKey}`}>반복<select name="recurrence_rule" value={recurrenceRule} onChange={e => setRecurrenceRule(e.target.value)}><option value="">반복 없음</option><option value="daily">매일</option><option value="weekly">매주</option><option value="biweekly">격주</option><option value="monthly">매월</option><option value="yearly">매년</option></select></label>
     {recurrenceRule ? <label key={`recurrence-end-${prefillKey}`}>반복 종료일<input name="recurrence_end_date" type="date" className={fieldErrors.recurrence_end_date ? 'invalid' : ''} aria-invalid={fieldErrors.recurrence_end_date ? 'true' : 'false'} defaultValue={task?.recurrence_end_date ?? ''}/>{fieldErrors.recurrence_end_date ? <small className="field-error" role="alert">{fieldErrors.recurrence_end_date}</small> : null}</label> : null}
     {recurrenceRule && nextRecurrenceDate(dueDateVal, recurrenceRule) ? <p className="span-2 muted">다음 회차 예정일: {nextRecurrenceDate(dueDateVal, recurrenceRule)}</p> : null}
+    {task?.id && task.recurrence_rule ? <div className="span-2">
+      <button type="button" className="text-button" disabled={seriesLoading} onClick={loadSeries}>{seriesItems ? '반복 이력 닫기' : '반복 이력 보기'}</button>
+      {seriesItems ? (seriesItems.length > 1 ? <ul className="task-log-list">{seriesItems.map(item => <li key={item.id}><strong>{item.due_date || item.start_date || '기한 없음'}</strong><span>{item.title}</span><small>{item.status === 'done' ? '완료' : item.progress ? `진행 ${item.progress}%` : '미완료'}</small></li>)}</ul> : <p className="muted">아직 생성된 다른 회차가 없습니다.</p>) : null}
+    </div> : null}
     <label className="span-2">상위 업무<select name="parent_id" defaultValue={task?.parent_id || ''}><option value="">최상위 업무</option>{parentOptions.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <div className="span-2 dependency-picker"><span className="dependency-picker-label">선행 업무 (완료되어야 진행 가능)</span>{dependencyOptions.length > 5 ? <input className="dependency-picker-filter" type="text" value={dependencyFilter} onChange={e => setDependencyFilter(e.target.value)} placeholder="업무 검색" aria-label="선행 업무 검색"/> : null}{dependencyOptions.length ? <div className="dependency-picker-list">{dependencyOptions.map(option => <label key={option.id} className="dependency-picker-item" style={matchesDependencyFilter(option, dependencyFilter) ? undefined : { display: 'none' }}><input type="checkbox" name="dependency_ids" value={option.id} defaultChecked={(task?.dependency_ids || []).map(String).includes(String(option.id))}/>{option.label}</label>)}</div> : <p className="muted">선택할 수 있는 업무가 없습니다.</p>}</div>
     {task?.id && dependentTasks.length ? <div className="span-2 dependency-picker"><span className="dependency-picker-label">후속 업무 (이 업무가 끝나야 진행 가능)</span><div className="dependency-picker-list">{dependentTasks.map(t => <span key={t.id} className="dependency-picker-item">{t.title}</span>)}</div></div> : null}

@@ -1943,6 +1943,39 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_series_links_completed_occurrences_to_the_newly_spawned_one(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "series check review", "start_date": "2026-07-06",
+                                           "due_date": "2026-07-06", "recurrence_rule": "weekly"}).json()
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}/series").json()["items"], [
+            {"id": task["id"], "title": "series check review", "start_date": "2026-07-06", "due_date": "2026-07-06", "status": "todo", "progress": 0}])
+        a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100})
+        next_task = next(t for t in a.get("/api/tasks").json() if t["id"] != task["id"] and t["title"] == "series check review")
+        series = a.get(f"/api/tasks/{next_task['id']}/series").json()["items"]
+        self.assertEqual([item["id"] for item in series], [task["id"], next_task["id"]])
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}/series").json()["items"], series)
+
+    def test_task_series_rejects_missing_or_other_users_task(self, *_):
+        a, b = self.client(self.token_a), self.client(self.token_b)
+        task = a.post("/api/tasks", json={"title": "solo"}).json()
+        self.assertEqual(a.get("/api/tasks/999999/series").status_code, 404)
+        self.assertEqual(b.get(f"/api/tasks/{task['id']}/series").status_code, 404)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_todo_series_links_completed_occurrences_to_the_newly_spawned_one(self, *_):
+        a = self.client(self.token_a)
+        todo = a.post("/api/todos", json={"title": "series check ferns", "todo_date": "2026-07-06", "recurrence_rule": "daily"}).json()
+        self.assertEqual(a.get(f"/api/todos/{todo['id']}/series").json()["items"], [
+            {"id": todo["id"], "title": "series check ferns", "todo_date": "2026-07-06", "completed": False}])
+        a.patch(f"/api/todos/{todo['id']}", json={"completed": True})
+        next_todo = next(t for t in a.get("/api/todos").json() if t["id"] != todo["id"] and t["title"] == "series check ferns")
+        series = a.get(f"/api/todos/{next_todo['id']}/series").json()["items"]
+        self.assertEqual([item["id"] for item in series], [todo["id"], next_todo["id"]])
+        self.assertEqual(a.get(f"/api/todos/{todo['id']}/series").json()["items"], series)
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_archive_task_hides_from_list_and_unarchive_restores_it(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "stale project"}).json()
