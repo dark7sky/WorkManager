@@ -21,6 +21,12 @@ test('tasksToExcelXml reuses the task CSV headers and row values', () => {
   assert.match(xml, /<Data ss:Type="String">지연<\/Data>/)
 })
 
+test('tasksToExcelXml marks pinned tasks in the 고정 column', () => {
+  const xml = tasksToExcelXml([{ id: 1, title: '고정 업무', status: 'todo', progress: 0 }], '2026-07-07', new Set([1]))
+  assert.match(xml, /<Data ss:Type="String">고정<\/Data>/)
+  assert.match(xml, /<Data ss:Type="String">Y<\/Data>/)
+})
+
 test('taskExcelFilename uses the .xls extension', () => {
   assert.equal(taskExcelFilename('2026-07-21'), 'workmanager-tasks-2026-07-21.xls')
 })

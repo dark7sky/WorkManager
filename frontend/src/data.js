@@ -12,6 +12,16 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-duplicate-title-warning',
+    timestamp: '2026-07-21T22:55:00+09:00',
+    description: '업무(Task)를 새로 만들거나 수정할 때는 같은 제목의 진행 중인 업무가 있으면 경고가 표시되었지만, Todo는 같은 안전장치가 없어 실수로 같은 할 일을 중복 등록하기 쉬웠습니다. `frontend/src/todoDuplicateCheck.js`의 `findDuplicateTitleTodos`로 Todo 추가/수정 폼(`frontend/src/screens/Today.jsx`)에도 동일한 실시간 중복 제목 경고를 추가했습니다.',
+  },
+  {
+    id: '2026-07-21-pinned-item-export-indicator',
+    timestamp: '2026-07-21T22:50:00+09:00',
+    description: '업무·일정·Todo·업무 기록 목록에서 항목을 상단에 고정할 수 있었지만, CSV/Excel로 내보내면 고정 여부가 파일에 표시되지 않아 내보낸 자료만으로는 어떤 항목이 고정되어 있었는지 알 수 없었습니다. 네 가지 CSV/Excel 내보내기 함수(`frontend/src/csv.js`의 `taskRows`/`eventRows`/`todoRows`/`workLogRows`, `frontend/src/xlsx.js`)에 "고정" 열(Y/공백)을 추가하고, 각 화면의 내보내기 버튼(`frontend/src/screens/Tasks.jsx`, `Calendar.jsx`, `Today.jsx`)이 현재 고정 목록을 전달하도록 연결했습니다.',
+  },
+  {
     id: '2026-07-21-checklist-item-due-dates',
     timestamp: '2026-07-21T22:45:00+09:00',
     description: '업무 체크리스트 항목은 완료 여부만 기록할 뿐 개별 기한이 없어, 하위 항목 하나가 늦어지고 있어도 업무 목록 화면에서는 알 수 없었습니다. 체크리스트 항목에 선택적 `due`(기한) 필드를 추가(`backend/app/main.py`의 `_clean_checklist`, `frontend/src/taskFormPayload.js`의 `normalizedChecklist`/`overdueChecklistCount`), 업무 편집 폼의 체크리스트 편집기에 날짜 입력과 기한 지남 강조 표시를 추가했고(`frontend/src/components/TaskForm.jsx`), 간트 목록 행에 "체크리스트 기한 N건 지남" 배지를 추가했습니다(`frontend/src/screens/Tasks.jsx`).',

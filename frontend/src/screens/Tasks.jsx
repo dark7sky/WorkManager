@@ -89,11 +89,11 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
   const reminderParts=[reminders.overdue?`지연 ${reminders.overdue}개`:null,reminders.dueToday?`오늘 마감 ${reminders.dueToday}개`:null,reminders.dueSoon?`2일 내 마감 ${reminders.dueSoon}개`:null].filter(Boolean)
   const exportRows=useMemo(()=>selectExportRows(shown,selected),[shown,selected])
   const exportShown=()=>{
-    const csv=`\ufeff${tasksToCsv(exportRows,todayIso)}`,blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a')
+    const csv=`\ufeff${tasksToCsv(exportRows,todayIso,pinnedIds)}`,blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a')
     link.href=url;link.download=taskCsvFilename(todayIso);document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url)
   }
   const exportExcel=()=>{
-    const xml=tasksToExcelXml(exportRows,todayIso),blob=new Blob([xml],{type:'application/vnd.ms-excel'}),url=URL.createObjectURL(blob),link=document.createElement('a')
+    const xml=tasksToExcelXml(exportRows,todayIso,pinnedIds),blob=new Blob([xml],{type:'application/vnd.ms-excel'}),url=URL.createObjectURL(blob),link=document.createElement('a')
     link.href=url;link.download=taskExcelFilename(todayIso);document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url)
   }
   const exportIcs=()=>{

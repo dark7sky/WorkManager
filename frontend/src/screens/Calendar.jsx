@@ -486,11 +486,11 @@ export default function Calendar({ events, tasks = [], loading, onOpenTask, onCr
     link.href = url; link.download = icsFilename(dateKey(new Date())); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportCsv = () => {
-    const csv = eventsToCsv(sorted), blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const csv = eventsToCsv(sorted, pinnedIds), blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = eventCsvFilename(dateKey(new Date())); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportExcel = () => {
-    const xml = eventsToExcelXml(sorted), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const xml = eventsToExcelXml(sorted, pinnedIds), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = eventExcelFilename(dateKey(new Date())); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const printReport = () => {

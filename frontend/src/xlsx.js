@@ -12,19 +12,19 @@ export const rowsToSpreadsheetXml = (sheetName, headers, rows) => {
   return `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="${escapeXmlText(sheetName)}"><Table>${body}</Table></Worksheet></Workbook>`
 }
 
-export const tasksToExcelXml = (tasks, todayIso) => rowsToSpreadsheetXml('업무', taskHeaders, taskRows(tasks, todayIso))
+export const tasksToExcelXml = (tasks, todayIso, pinnedIds) => rowsToSpreadsheetXml('업무', taskHeaders, taskRows(tasks, todayIso, pinnedIds))
 
 export const taskExcelFilename = date => `workmanager-tasks-${date}.xls`
 
-export const eventsToExcelXml = events => rowsToSpreadsheetXml('일정', eventHeaders, eventRows(events))
+export const eventsToExcelXml = (events, pinnedIds) => rowsToSpreadsheetXml('일정', eventHeaders, eventRows(events, pinnedIds))
 
 export const eventExcelFilename = date => `workmanager-events-${date}.xls`
 
-export const todosToExcelXml = todos => rowsToSpreadsheetXml('Todo', todoHeaders, todoRows(todos))
+export const todosToExcelXml = (todos, pinnedIds) => rowsToSpreadsheetXml('Todo', todoHeaders, todoRows(todos, pinnedIds))
 
 export const todoExcelFilename = date => `workmanager-todos-${date}.xls`
 
-export const workLogsToExcelXml = (logs, taskTitleById, hourlyRate) => rowsToSpreadsheetXml('업무 기록', workLogHeaders, workLogRows(logs, taskTitleById, hourlyRate))
+export const workLogsToExcelXml = (logs, taskTitleById, hourlyRate, pinnedIds) => rowsToSpreadsheetXml('업무 기록', workLogHeaders, workLogRows(logs, taskTitleById, hourlyRate, pinnedIds))
 
 export const workLogExcelFilename = date => `workmanager-work-logs-${date}.xls`
 
