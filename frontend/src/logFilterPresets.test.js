@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { loadLogFilterPresets, saveLogFilterPresets, buildLogFilterPreset, addLogFilterPreset, removeLogFilterPreset } from './logFilterPresets.js'
+import { loadLogFilterPresets, saveLogFilterPresets, buildLogFilterPreset, addLogFilterPreset, removeLogFilterPreset, logDeepLink } from './logFilterPresets.js'
 
 const makeStorage = () => {
   const store = new Map()
@@ -60,4 +60,8 @@ test('saveLogFilterPresets persists as JSON', () => {
   const preset = buildLogFilterPreset({ name: 'a' })
   saveLogFilterPresets([preset], storage)
   assert.deepEqual(loadLogFilterPresets(storage), [preset])
+})
+
+test('logDeepLink builds a today page URL with the log id', () => {
+  assert.equal(logDeepLink('https://app.example.com', '/', 7), 'https://app.example.com/?page=today&logId=7')
 })

@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'wm-log-filter-presets'
 const NAME_LIMIT = 100
 
+export const logDeepLink = (origin, pathname, logId) => `${origin}${pathname}?page=today&logId=${logId}`
+
 export const loadLogFilterPresets = (storage = localStorage) => {
   try {
     const parsed = JSON.parse(storage.getItem(STORAGE_KEY) || '[]')

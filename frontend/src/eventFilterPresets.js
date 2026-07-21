@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'wm-event-filter-presets'
 const NAME_LIMIT = 100
 
+export const eventDeepLink = (origin, pathname, eventId) => `${origin}${pathname}?page=calendar&eventId=${eventId}`
+
 export const loadEventFilterPresets = (storage = localStorage) => {
   try {
     const parsed = JSON.parse(storage.getItem(STORAGE_KEY) || '[]')

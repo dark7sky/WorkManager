@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { loadEventFilterPresets, saveEventFilterPresets, buildEventFilterPreset, addEventFilterPreset, removeEventFilterPreset } from './eventFilterPresets.js'
+import { loadEventFilterPresets, saveEventFilterPresets, buildEventFilterPreset, addEventFilterPreset, removeEventFilterPreset, eventDeepLink } from './eventFilterPresets.js'
 
 const makeStorage = () => {
   const store = new Map()
@@ -54,4 +54,8 @@ test('saveEventFilterPresets persists as JSON', () => {
   const preset = buildEventFilterPreset({ name: 'a' })
   saveEventFilterPresets([preset], storage)
   assert.deepEqual(loadEventFilterPresets(storage), [preset])
+})
+
+test('eventDeepLink builds a calendar page URL with the event id', () => {
+  assert.equal(eventDeepLink('https://app.example.com', '/', 42), 'https://app.example.com/?page=calendar&eventId=42')
 })

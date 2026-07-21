@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-log-deep-link',
+    timestamp: '2026-07-21T20:12:32+09:00',
+    description: '업무와 할 일에는 상세 화면으로 바로 열리는 링크를 복사하는 기능이 있었지만, 일정과 업무 기록에는 없어 특정 항목을 팀원에게 공유하려면 직접 검색해서 찾아야 했습니다. 일정 수정 폼과 업무 기록 목록에 "링크 복사" 버튼(`eventDeepLink`/`logDeepLink`, `frontend/src/eventFilterPresets.js`/`frontend/src/logFilterPresets.js`)을 추가하고, 앱이 `?page=calendar&eventId=`/`?page=today&logId=` 링크로 열리면 로그인 후 해당 항목을 자동으로 열도록 했습니다(`frontend/src/App.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-bulk-promote-event',
     timestamp: '2026-07-21T20:10:00+09:00',
     description: '할 일과 업무 기록에는 여러 개를 한 번에 업무로 전환하는 일괄 작업 버튼이 있었지만, 일정(Calendar) 화면에는 한 개씩만 전환 가능해 여러 일정을 업무로 옮기려면 하나씩 반복해야 했습니다. 일정 화면 일괄 작업 바에 "업무로 전환" 버튼(`Calendar.jsx`)을 추가하고, 기존 `buildTaskFromEventPayload` 변환 로직을 재사용하는 `onBulkPromote` 핸들러(`App.jsx`)를 연결해 세 항목(할 일/업무 기록/일정) 간 일괄 전환 기능을 동일하게 맞췄습니다.',
