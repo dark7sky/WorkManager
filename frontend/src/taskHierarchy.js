@@ -63,6 +63,15 @@ export const taskParentOptions = (tasks, currentTaskId, currentParentId) => {
   return options
 }
 
+export const taskBulkParentOptions = (tasks, selectedIds) => {
+  const selected = new Set(selectedIds)
+  const blocked = new Set(selected)
+  for (const id of selected) for (const childId of childTaskIds(tasks, id)) blocked.add(childId)
+  return orderTasksHierarchically(tasks, tasks)
+    .filter(({ task }) => !blocked.has(task.id))
+    .map(({ task, depth }) => ({ id: task.id, label: `${'-- '.repeat(depth)}${task.title || `#${task.id}`}` }))
+}
+
 export const dependentTaskIds = (tasks, taskId) => {
   if (!taskId) return new Set()
   const dependents = new Map()

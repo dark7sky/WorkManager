@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-bulk-set-parent',
+    timestamp: '2026-07-21T14:16:00+09:00',
+    description: '업무 목록에서 여러 업무를 선택했을 때 한 번에 상위 업무를 지정하거나 최상위로 이동할 수 있는 일괄 작업을 추가했습니다. 선택한 업무 자신과 그 하위 업무는 상위 업무 후보에서 제외되어 순환 관계가 만들어지지 않습니다 (`frontend/src/taskHierarchy.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/App.jsx`).',
+  },
+  {
     id: '2026-07-21-estimated-minutes-upper-bound-clamp',
     timestamp: '2026-07-21T13:57:39+09:00',
     description: '예상 소요 시간(분) 입력값이 서버 허용 상한(100,000분)을 넘으면 저장 시 422 오류가 발생하던 문제를 고쳤습니다. 이제 입력값이 자동으로 상한에 맞춰 조정되며, 업무 편집 폼에도 상한이 표시됩니다 (`frontend/src/taskFormPayload.js`, `frontend/src/components/TaskForm.jsx`).',

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions } from './taskHierarchy.js'
+import { DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -37,6 +37,12 @@ test('taskParentOptions keeps the current parent selectable even when archived/m
 test('taskDependencyOptions keeps current dependencies selectable even when archived/missing from the list', () => {
   const options = taskDependencyOptions(tasks, 3, [99])
   assert.ok(options.some(option => option.id === 99))
+})
+
+test('taskBulkParentOptions excludes every selected task and all their descendants', () => {
+  assert.deepEqual(taskBulkParentOptions(tasks, [2]).map(o => o.id), [1, 4])
+  assert.deepEqual(taskBulkParentOptions(tasks, [1]).map(o => o.id), [4])
+  assert.deepEqual(taskBulkParentOptions(tasks, [1, 4]).map(o => o.id), [])
 })
 
 test('orderTasksHierarchically places children directly below visible parents', () => {
