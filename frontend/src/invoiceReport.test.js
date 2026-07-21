@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { billableWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename } from './invoiceReport.js'
+import { billableWorkLogs, invoiceTotals, workLogsToPrintableInvoice, invoiceFilename, defaultInvoiceNumber } from './invoiceReport.js'
 
 const logs = [
   { log_date: '2026-07-01', content: '<고객> 미팅', duration_minutes: 90, billable: true, tags: ['고객사'] },
@@ -51,4 +51,18 @@ test('workLogsToPrintableInvoice handles no billable logs', () => {
 
 test('invoiceFilename uses the requested period', () => {
   assert.equal(invoiceFilename('2026-07-01', '2026-07-03'), 'workmanager-invoice-2026-07-01_2026-07-03.html')
+})
+
+test('defaultInvoiceNumber derives a stable number from the billing period', () => {
+  assert.equal(defaultInvoiceNumber('2026-07-01', '2026-07-03'), 'INV-20260701-20260703')
+})
+
+test('workLogsToPrintableInvoice shows the derived invoice number by default', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03' })
+  assert.match(html, /청구서 번호: INV-20260701-20260703/)
+})
+
+test('workLogsToPrintableInvoice honors an explicit invoice number override', () => {
+  const html = workLogsToPrintableInvoice(logs, { start: '2026-07-01', end: '2026-07-03', invoiceNumber: '<CUSTOM>-001' })
+  assert.match(html, /청구서 번호: &lt;CUSTOM&gt;-001/)
 })

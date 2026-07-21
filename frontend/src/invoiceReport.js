@@ -16,9 +16,12 @@ export const invoiceTotals = (logs, hourlyRate) => {
   return { minutes, amount: rate ? Math.round(minutes / 60 * rate) : 0 }
 }
 
-export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
+export const defaultInvoiceNumber = (start, end) => `INV-${String(start || '').replaceAll('-', '')}-${String(end || '').replaceAll('-', '')}`
+
+export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
   const billable = billableWorkLogs(logs)
   const { minutes, amount } = invoiceTotals(logs, hourlyRate)
+  const number = invoiceNumber || defaultInvoiceNumber(start, end)
   const rows = billable.map(log => `<tr>
       <td>${escapeHtml(log.log_date || '-')}</td>
       <td><strong>${escapeHtml(log.content || '')}</strong>${(log.tags || []).length ? `<small>${escapeHtml(log.tags.join(', '))}</small>` : ''}</td>
@@ -47,6 +50,7 @@ export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clien
 <body>
   <header>
     <h1>${escapeHtml(title)}</h1>
+    <p>청구서 번호: ${escapeHtml(number)}</p>
     ${clientName ? `<p>청구 대상: ${escapeHtml(clientName)}</p>` : ''}
     <p>청구 기간: ${escapeHtml(start || '-')} ~ ${escapeHtml(end || '-')}</p>
     <p>생성 시각: ${escapeHtml(generatedAt)}</p>

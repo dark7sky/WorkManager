@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-invoice-number',
+    timestamp: '2026-07-21T19:56:09+09:00',
+    description: '업무 기록(Work log) 청구서 인쇄 기능(`invoiceReport.js`)에 청구서 번호가 없어 실제 거래 증빙으로 쓰기 어려웠습니다. 청구 기간에서 파생되는 청구서 번호(`defaultInvoiceNumber`, 예: INV-20260701-20260703)를 자동 생성해 청구서 상단에 표시하도록 `workLogsToPrintableInvoice`를 확장했습니다(회귀 테스트 `invoiceReport.test.js`).',
+  },
+  {
     id: '2026-07-21-todo-deep-link',
     timestamp: '2026-07-21T19:52:42+09:00',
     description: '업무(Tasks) 화면에는 특정 항목으로 바로 이동하는 링크 복사 기능이 있었지만, 오늘 화면의 할 일에는 동일한 기능이 없어 특정 할 일을 다른 사람과 공유하거나 즐겨찾기로 저장할 수 없었습니다. `todoDeepLink`(`frontend/src/todoFilterPresets.js`)와 할 일 행의 "링크" 복사 버튼(`frontend/src/screens/Today.jsx`)을 추가하고, `todoId` URL 파라미터로 접속 시 오늘 화면으로 이동해 해당 할 일의 수정 모드를 자동으로 여는 로직을 `App.jsx`에 추가했습니다(회귀 테스트 `todoFilterPresets.test.js`).',
