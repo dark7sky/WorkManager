@@ -68,6 +68,24 @@ export const canReparentTask = (tasks, taskId, candidateParentId) => {
   return !childTaskIds(tasks, taskId).has(candidateParentId)
 }
 
+export const taskIndentTarget = (orderedRows, taskId) => {
+  const idx = orderedRows.findIndex(({ task }) => task.id === taskId)
+  if (idx <= 0) return null
+  const { depth } = orderedRows[idx]
+  for (let i = idx - 1; i >= 0; i--) {
+    if (orderedRows[i].depth < depth) return null
+    if (orderedRows[i].depth === depth) return orderedRows[i].task.id
+  }
+  return null
+}
+
+export const taskOutdentTarget = (tasks, taskId) => {
+  const task = tasks.find(t => t.id === taskId)
+  if (!task?.parent_id) return undefined
+  const parent = tasks.find(t => t.id === task.parent_id)
+  return parent?.parent_id || null
+}
+
 export const taskBulkParentOptions = (tasks, selectedIds) => {
   const selected = new Set(selectedIds)
   const blocked = new Set(selected)

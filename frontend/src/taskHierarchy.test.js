@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { canReparentTask, criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
+import { canReparentTask, criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskIndentTarget, taskOutdentTarget, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -60,6 +60,24 @@ test('taskBulkParentOptions excludes every selected task and all their descendan
   assert.deepEqual(taskBulkParentOptions(tasks, [2]).map(o => o.id), [1, 4])
   assert.deepEqual(taskBulkParentOptions(tasks, [1]).map(o => o.id), [4])
   assert.deepEqual(taskBulkParentOptions(tasks, [1, 4]).map(o => o.id), [])
+})
+
+test('taskIndentTarget offers the previous sibling as the new parent', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks)
+  assert.equal(taskIndentTarget(ordered, 4), 1)
+})
+
+test('taskIndentTarget returns null for the first row or a task already nested under its only preceding sibling', () => {
+  const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks)
+  assert.equal(taskIndentTarget(ordered, 1), null)
+  assert.equal(taskIndentTarget(ordered, 2), null)
+  assert.equal(taskIndentTarget(ordered, 3), null)
+})
+
+test('taskOutdentTarget promotes a task to its grandparent, or to top level when the parent has none', () => {
+  assert.equal(taskOutdentTarget(tasks, 3), 1)
+  assert.equal(taskOutdentTarget(tasks, 2), null)
+  assert.equal(taskOutdentTarget(tasks, 1), undefined)
 })
 
 test('orderTasksHierarchically places children directly below visible parents', () => {
