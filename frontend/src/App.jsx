@@ -67,6 +67,7 @@ export default function App(){
  useEffect(()=>{if(location.pathname.replace(/\/+$/,'')==='/changelog')return;const url=new URL(location.href);url.searchParams.set('page',page);history.replaceState(null,'',url);const pop=()=>{const p=new URLSearchParams(location.search).get('page');if(pages.includes(p))setPage(p)};addEventListener('popstate',pop);return()=>removeEventListener('popstate',pop)},[page])
  useEffect(()=>{const expired=()=>{setUser(null);setBoot(b=>({...b,error:'로그인 세션이 만료되었습니다. 다시 로그인해 주세요.'}))};window.addEventListener(AUTH_EXPIRED_EVENT,expired);return()=>window.removeEventListener(AUTH_EXPIRED_EVENT,expired)},[])
  useEffect(()=>{setModalDirty(false)},[modal])
+ useEffect(()=>{if(!modalDirty)return;const warn=e=>{e.preventDefault();e.returnValue=''};addEventListener('beforeunload',warn);return()=>removeEventListener('beforeunload',warn)},[modalDirty])
  useEffect(()=>{if(user)refresh()},[user,refresh])
  useEffect(()=>{const params=new URLSearchParams(location.search);if(user&&page==='tasks'&&params.get('action')==='new'){setModal({type:'task'});params.delete('action');history.replaceState(null,'',`${location.pathname}?${params}`)}},[user,page])
  useEffect(()=>{const params=new URLSearchParams(location.search),taskId=params.get('taskId');if(!user||!taskId||!tasks.length)return;const target=tasks.find(t=>String(t.id)===taskId);if(target)setModal({type:'task',task:target});params.delete('taskId');history.replaceState(null,'',`${location.pathname}?${params}`)},[user,tasks])

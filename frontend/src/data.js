@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-tab-close-unsaved-changes-guard',
+    timestamp: '2026-07-22T08:13:21+09:00',
+    description: '업무나 일정 수정 창에서 저장하지 않은 채 탭을 닫거나 새로고침하면 경고 없이 작성 중이던 내용이 그대로 사라졌습니다. `frontend/src/App.jsx`와 `frontend/src/screens/Calendar.jsx`에 `beforeunload` 가드를 추가해, 수정 창이 열려 있고 변경사항이 남아 있을 때 브라우저가 이탈 확인 창을 띄우도록 했습니다.',
+  },
+  {
     id: '2026-07-22-calendar-unsaved-changes-guard',
     timestamp: '2026-07-22T08:08:19+09:00',
     description: '업무 수정 창에는 저장하지 않은 변경사항 경고가 있었지만, 캘린더 일정 수정 창에서는 Esc, 바깥 영역 클릭, 닫기(X)나 취소 버튼을 누르면 작성 중이던 내용이 그대로 사라졌습니다. `frontend/src/screens/Calendar.jsx`의 `EventForm`이 입력 변경을 감지해 `Modal`의 `isDirty` 가드에 연결하도록 해, 업무 수정 창과 동일하게 닫기 시도 시 확인 창을 띄우도록 했습니다.',

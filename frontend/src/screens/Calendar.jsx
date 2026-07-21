@@ -428,6 +428,7 @@ export default function Calendar({ events, tasks = [], loading, onOpenTask, onCr
   const [view, setView] = useState('month')
   const [editing, setEditing] = useState(null)
   const [eventModalDirty, setEventModalDirty] = useState(false)
+  useEffect(() => { if (!eventModalDirty) return; const warn = e => { e.preventDefault(); e.returnValue = '' }; addEventListener('beforeunload', warn); return () => removeEventListener('beforeunload', warn) }, [eventModalDirty])
   const [commentViewed, setCommentViewed] = useState(() => loadCommentLastViewed())
   const openEvent = event => { if (hasUnseenComments(event, 'events', commentViewed)) setCommentViewed(x => { const next = markCommentsViewed(x, 'events', event.id); saveCommentLastViewed(next); return next }); openEvent(event) }
   const [newDate, setNewDate] = useState(null)
