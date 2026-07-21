@@ -6,7 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { moveEventToDay, postponeEventDates } from '../calendarDrag'
 import { eventsToIcs, icsFilename, parseIcs } from '../ics'
-import { eventCsvFilename, eventsToCsv, parseEventsCsv } from '../csv'
+import { dedupeImportedEvents, eventCsvFilename, eventsToCsv, parseEventsCsv } from '../csv'
 import { eventExcelFilename, eventsToExcelXml } from '../xlsx'
 import { eventReportFilename, eventsToPrintableReport } from '../eventReport'
 import { filterEventsByPriority, filterEventsByQuery } from '../eventSearch'
@@ -477,8 +477,11 @@ export default function Calendar({ events, tasks = [], loading, onOpenTask, onCr
     if (!file) return
     const text = await file.text(), { events: parsed, errors } = parseEventsCsv(text)
     if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 일정이 없습니다.', 'error'); return }
-    await onCreate(parsed)
-    if (errors.length) notify?.(errors.join('\n'), 'error')
+    const { events: unique, duplicates } = dedupeImportedEvents(parsed, events)
+    if (!unique.length) { notify?.('이미 동일한 일정이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onCreate(unique)
+    const messages = [...errors, ...duplicates.map(d => `중복 건너뜀: ${d.title}`)]
+    if (messages.length) notify?.(messages.join('\n'), 'error')
   }
   return <>
     <Header title="일정" subtitle="월간 달력과 모바일 일정 목록을 한눈에 확인하세요." action="새 일정" onAction={() => setNewDate(dateKey(cursor))}/>

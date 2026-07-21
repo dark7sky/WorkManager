@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { auditLogCsvFilename, auditLogsToCsv, dedupeImportedTasks, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
+import { auditLogCsvFilename, auditLogsToCsv, dedupeImportedEvents, dedupeImportedLogs, dedupeImportedTasks, dedupeImportedTodos, eventCsvFilename, eventsToCsv, parseEventsCsv, parseTasksCsv, parseTodosCsv, parseWorkLogsCsv, taskCsvFilename, tasksToCsv, timelineCsvFilename, timelineToCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from './csv.js'
 
 test('tasksToCsv exports task rows with labels and escaping', () => {
   const csv = tasksToCsv([
@@ -253,6 +253,39 @@ test('dedupeImportedTasks also skips duplicates within the same import batch', (
   ]
   const { tasks, duplicates } = dedupeImportedTasks(parsed, [])
   assert.equal(tasks.length, 1)
+  assert.equal(duplicates.length, 1)
+})
+
+test('dedupeImportedEvents skips rows matching an existing event by title/start', () => {
+  const existing = [{ title: '주간 회의', start_at: '2026-07-13T09:00:00' }]
+  const parsed = [
+    { title: '주간 회의', start_at: '2026-07-13T09:00:00' },
+    { title: '신규 일정', start_at: '2026-07-13T09:00:00' },
+  ]
+  const { events, duplicates } = dedupeImportedEvents(parsed, existing)
+  assert.deepEqual(events, [{ title: '신규 일정', start_at: '2026-07-13T09:00:00' }])
+  assert.equal(duplicates.length, 1)
+})
+
+test('dedupeImportedTodos skips rows matching an existing todo by title/date', () => {
+  const existing = [{ title: '장보기', todo_date: '2026-07-13' }]
+  const parsed = [
+    { title: '장보기', todo_date: '2026-07-13' },
+    { title: '새 할 일', todo_date: '2026-07-13' },
+  ]
+  const { todos, duplicates } = dedupeImportedTodos(parsed, existing)
+  assert.deepEqual(todos, [{ title: '새 할 일', todo_date: '2026-07-13' }])
+  assert.equal(duplicates.length, 1)
+})
+
+test('dedupeImportedLogs skips rows matching an existing log by content/date', () => {
+  const existing = [{ content: '코드 리뷰', log_date: '2026-07-13' }]
+  const parsed = [
+    { content: '코드 리뷰', log_date: '2026-07-13' },
+    { content: '새 기록', log_date: '2026-07-13' },
+  ]
+  const { logs, duplicates } = dedupeImportedLogs(parsed, existing)
+  assert.deepEqual(logs, [{ content: '새 기록', log_date: '2026-07-13' }])
   assert.equal(duplicates.length, 1)
 })
 

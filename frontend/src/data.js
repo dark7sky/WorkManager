@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-csv-import-dedup-parity',
+    timestamp: '2026-07-21T20:18:42+09:00',
+    description: '업무 CSV 가져오기는 이미 내보낸 파일을 다시 불러오거나 같은 파일을 두 번 불러올 때 중복 항목을 건너뛰도록 되어 있었지만, 일정·할 일·업무 기록 CSV 가져오기는 이 검사가 없어 매번 완전히 중복된 항목이 그대로 추가되었습니다. `dedupeImportedEvents`/`dedupeImportedTodos`/`dedupeImportedLogs`(`frontend/src/csv.js`)를 추가해 제목/날짜(또는 내용/날짜) 기준으로 기존 항목 및 같은 배치 내 중복을 건너뛰고 "중복 건너뜀" 메시지를 표시하도록 했습니다(`frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-21-event-log-deep-link',
     timestamp: '2026-07-21T20:12:32+09:00',
     description: '업무와 할 일에는 상세 화면으로 바로 열리는 링크를 복사하는 기능이 있었지만, 일정과 업무 기록에는 없어 특정 항목을 팀원에게 공유하려면 직접 검색해서 찾아야 했습니다. 일정 수정 폼과 업무 기록 목록에 "링크 복사" 버튼(`eventDeepLink`/`logDeepLink`, `frontend/src/eventFilterPresets.js`/`frontend/src/logFilterPresets.js`)을 추가하고, 앱이 `?page=calendar&eventId=`/`?page=today&logId=` 링크로 열리면 로그인 후 해당 항목을 자동으로 열도록 했습니다(`frontend/src/App.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',

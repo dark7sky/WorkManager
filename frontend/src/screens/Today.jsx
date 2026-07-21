@@ -11,7 +11,7 @@ import { loadLogSort, loadPinnedLogIds, orderLogsByPin, savePinnedLogIds, saveLo
 import { filterTodosByQuery, filterLogsByQuery, filterTodosByPriority, filterTodosByCompleted, filterLogsByPriority, filterLogsByBillable } from '../todaySearch'
 import { addTodoFilterPreset, buildTodoFilterPreset, loadTodoFilterPresets, removeTodoFilterPreset, saveTodoFilterPresets, todoDeepLink } from '../todoFilterPresets'
 import { addLogFilterPreset, buildLogFilterPreset, loadLogFilterPresets, logDeepLink, removeLogFilterPreset, saveLogFilterPresets } from '../logFilterPresets'
-import { parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
+import { dedupeImportedLogs, dedupeImportedTodos, parseTodosCsv, parseWorkLogsCsv, todoCsvFilename, todosToCsv, workLogCsvFilename, workLogsToCsv } from '../csv'
 import { todoExcelFilename, todosToExcelXml, workLogExcelFilename, workLogsToExcelXml } from '../xlsx'
 import { todoReportFilename, todosToPrintableReport } from '../todoReport'
 import { todoIcsFilename, todosToIcs, icsToTodos, logIcsFilename, logsToIcs, icsToLogs } from '../ics'
@@ -706,7 +706,9 @@ export default function Today(props) {
     if (!file || !onImportTodos) return
     const text = await file.text(), { todos: parsed, errors } = parseTodosCsv(text)
     if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
-    await onImportTodos(parsed, errors)
+    const { todos: unique, duplicates } = dedupeImportedTodos(parsed, todos)
+    if (!unique.length) { notify?.('이미 동일한 항목이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onImportTodos(unique, [...errors, ...duplicates.map(d => `중복 건너뜀: ${d.title}`)])
   }
   const importTodosIcs = async event => {
     const file = event.target.files?.[0]; event.target.value = ''
@@ -765,7 +767,9 @@ export default function Today(props) {
     if (!file || !onImportLogs) return
     const text = await file.text(), { logs: parsed, errors } = parseWorkLogsCsv(text)
     if (!parsed.length) { notify?.(errors.length ? errors.join('\n') : '가져올 항목이 없습니다.', 'error'); return }
-    await onImportLogs(parsed, errors)
+    const { logs: unique, duplicates } = dedupeImportedLogs(parsed, logs)
+    if (!unique.length) { notify?.('이미 동일한 항목이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onImportLogs(unique, [...errors, ...duplicates.map(d => `중복 건너뜀: ${d.content}`)])
   }
   const importLogsIcs = async event => {
     const file = event.target.files?.[0]; event.target.value = ''

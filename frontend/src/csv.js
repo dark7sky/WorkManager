@@ -106,19 +106,30 @@ export const parseTasksCsv = text => {
   return { tasks, errors }
 }
 
-export const dedupeImportedTasks = (parsed, existingTasks) => {
-  const key = t => `${(t.title || '').trim().toLowerCase()}|${t.start_date || ''}|${t.due_date || ''}`
-  const existingKeys = new Set((existingTasks || []).map(key))
+const dedupeImportedItems = (parsed, existingItems, key, itemsField) => {
+  const existingKeys = new Set((existingItems || []).map(key))
   const seen = new Set()
   const unique = [], duplicates = []
-  for (const task of parsed) {
-    const k = key(task)
-    if (existingKeys.has(k) || seen.has(k)) { duplicates.push(task); continue }
+  for (const item of parsed) {
+    const k = key(item)
+    if (existingKeys.has(k) || seen.has(k)) { duplicates.push(item); continue }
     seen.add(k)
-    unique.push(task)
+    unique.push(item)
   }
-  return { tasks: unique, duplicates }
+  return { [itemsField]: unique, duplicates }
 }
+
+export const dedupeImportedTasks = (parsed, existingTasks) =>
+  dedupeImportedItems(parsed, existingTasks, t => `${(t.title || '').trim().toLowerCase()}|${t.start_date || ''}|${t.due_date || ''}`, 'tasks')
+
+export const dedupeImportedEvents = (parsed, existingEvents) =>
+  dedupeImportedItems(parsed, existingEvents, e => `${(e.title || '').trim().toLowerCase()}|${e.start_at || ''}`, 'events')
+
+export const dedupeImportedTodos = (parsed, existingTodos) =>
+  dedupeImportedItems(parsed, existingTodos, t => `${(t.title || '').trim().toLowerCase()}|${t.todo_date || ''}`, 'todos')
+
+export const dedupeImportedLogs = (parsed, existingLogs) =>
+  dedupeImportedItems(parsed, existingLogs, l => `${(l.content || '').trim().toLowerCase()}|${l.log_date || ''}`, 'logs')
 
 const timelineHeaders = ['날짜', '구분', '제목', '태그', '예상 소요(분)']
 
