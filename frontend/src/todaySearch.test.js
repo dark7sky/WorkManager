@@ -68,6 +68,16 @@ test('filterLogsByQuery matches by attachment filename', () => {
   assert.deepEqual(filterLogsByQuery(withAttachment, 'report.xlsx').map(l => l.id), [4])
 })
 
+test('filterTodosByQuery matches by custom field label or value', () => {
+  const withCustomField = [...todos, { id: 6, title: '계약 갱신', custom_fields: [{ label: '거래처', value: 'acme co' }] }]
+  assert.deepEqual(filterTodosByQuery(withCustomField, 'acme co').map(t => t.id), [6])
+})
+
+test('filterLogsByQuery matches by custom field label or value', () => {
+  const withCustomField = [...logs, { id: 5, content: '견적 검토', custom_fields: [{ label: '프로젝트 코드', value: 'PRJ-2026' }] }]
+  assert.deepEqual(filterLogsByQuery(withCustomField, 'PRJ-2026').map(l => l.id), [5])
+})
+
 test('filterTodosByPriority returns all todos when priority is all', () => {
   assert.equal(filterTodosByPriority(todos, 'all').length, 3)
   assert.equal(filterTodosByPriority(todos).length, 3)

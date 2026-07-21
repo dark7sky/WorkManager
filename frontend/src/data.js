@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-custom-field-search-parity',
+    timestamp: '2026-07-21T19:45:14+09:00',
+    description: '업무 검색에는 사용자 정의 필드(라벨/값) 텍스트가 반영되지만, 오늘 화면의 할 일·업무 일지 검색과 캘린더 일정 검색에는 빠져 있어 사용자 정의 필드로만 구분되는 항목을 찾을 수 없었습니다. `filterTodosByQuery`/`filterLogsByQuery`(`frontend/src/todaySearch.js`)와 `filterEventsByQuery`(`frontend/src/eventSearch.js`)가 `custom_fields`의 라벨과 값도 검색하도록 맞췄습니다(회귀 테스트 `todaySearch.test.js`, `eventSearch.test.js`).',
+  },
+  {
     id: '2026-07-21-reminder-lead-time-csv-export',
     timestamp: '2026-07-21T19:39:50+09:00',
     description: '업무/일정/할 일에 항목별 "알림 시점(분 전)" 필드가 추가되었지만, CSV/Excel 내보내기와 가져오기에는 반영되지 않아 내보낸 파일에서 해당 값이 누락되고 스프레드시트로 일괄 설정하거나 복원할 수도 없었습니다. 업무/일정/할 일 CSV 내보내기·가져오기(및 이를 재사용하는 Excel 내보내기)에 "알림(분 전)" 열을 추가했습니다(`frontend/src/csv.js`의 `taskHeaders`/`eventHeaders`/`todoHeaders`, `taskRows`/`eventRows`/`todoRows`, `parseTasksCsv`/`parseEventsCsv`/`parseTodosCsv`), 회귀 테스트 `frontend/src/csv.test.js`.',

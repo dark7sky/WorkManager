@@ -4,7 +4,8 @@ export const filterTodosByQuery = (todos, query = '') => {
   return todos.filter(todo => {
     const checklistText = (todo.checklist || []).map(item => item?.text || '').join(' ')
     const attachmentText = (todo.attachment_names || []).join(' ')
-    return `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
+    const customFieldText = (todo.custom_fields || []).map(field => `${field?.label || ''} ${field?.value || ''}`).join(' ')
+    return `${todo.title || ''} ${todo.memo || ''} ${(todo.tags || []).join(' ')} ${checklistText} ${attachmentText} ${customFieldText}`.toLowerCase().includes(q)
   })
 }
 
@@ -14,7 +15,8 @@ export const filterLogsByQuery = (logs, query = '') => {
   return logs.filter(log => {
     const checklistText = (log.checklist || []).map(item => item?.text || '').join(' ')
     const attachmentText = (log.attachment_names || []).join(' ')
-    return `${log.content || ''} ${(log.tags || []).join(' ')} ${checklistText} ${attachmentText}`.toLowerCase().includes(q)
+    const customFieldText = (log.custom_fields || []).map(field => `${field?.label || ''} ${field?.value || ''}`).join(' ')
+    return `${log.content || ''} ${(log.tags || []).join(' ')} ${checklistText} ${attachmentText} ${customFieldText}`.toLowerCase().includes(q)
   })
 }
 

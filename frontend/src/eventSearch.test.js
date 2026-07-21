@@ -40,6 +40,11 @@ test('filterEventsByQuery matches by attachment filename', () => {
   assert.deepEqual(filterEventsByQuery(withAttachment, 'Q3_budget').map(e => e.id), [6])
 })
 
+test('filterEventsByQuery matches by custom field label or value', () => {
+  const withCustomField = [...events, { id: 7, title: '분기 리뷰', custom_fields: [{ label: '담당팀', value: 'growth squad' }] }]
+  assert.deepEqual(filterEventsByQuery(withCustomField, 'growth squad').map(e => e.id), [7])
+})
+
 test('filterEventsByPriority returns all events for "all"', () => {
   assert.equal(filterEventsByPriority(events, 'all').length, 4)
   assert.equal(filterEventsByPriority(events).length, 4)
