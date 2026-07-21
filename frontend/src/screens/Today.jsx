@@ -3,6 +3,7 @@ import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, Check, CheckCircle
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
 import { api } from '../api'
+import { deriveTagColorMap } from '../tagColors'
 import { clearWorkLogTimer, formatTimerElapsed, loadWorkLogTimer, pauseWorkLogTimer, resumeWorkLogTimer, startTimeString, startWorkLogTimer, timerElapsedMinutes } from '../workLogTimer'
 import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from '../todoPins'
 import { loadTodoManualOrder, moveTodoBefore, saveTodoManualOrder } from '../todoOrder'
@@ -526,6 +527,8 @@ export default function Today(props) {
     () => [...new Set([...tasks, ...events, ...todos, ...logs].flatMap(item => item.tags || []))].sort(),
     [tasks, events, todos, logs],
   )
+  const [tagColors, setTagColors] = useState({})
+  useEffect(() => { api.tags().then(r => setTagColors(deriveTagColorMap(r.items))).catch(() => {}) }, [])
   const matches = item => !selectedTags.length || selectedTags.every(tag => (item.tags || []).includes(tag))
   const todayEvents = events.filter(event => overlapsDay(event, now) && matches(event))
   const active = tasks.filter(task => task.status !== 'done' && matches(task))
@@ -823,7 +826,7 @@ export default function Today(props) {
       <section className="focus-panel">
         <div className="section-title"><div><h2>오늘 할 일</h2><p>오늘 예정 업무와 빠른 Todo를 함께 확인합니다.</p></div>{loading ? <span className="status-pill">동기화 중…</span> : null}</div>
         <input className="search" type="search" value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { setQuery(''); event.target.blur() } }} aria-label="할 일/기록 검색" placeholder="할 일, 업무 기록 검색"/>
-        <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags}/>
+        <TagFilter tags={allTags} selected={selectedTags} onChange={setSelectedTags} colors={tagColors}/>
         <select aria-label="Todo 우선순위 필터" value={todoPriorityFilter} onChange={event => setTodoPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
         <label className="select-all-shown"><input type="checkbox" checked={hideCompletedTodos} onChange={event => setHideCompletedTodos(event.target.checked)}/>완료 항목 숨기기</label>
         <select aria-label="Todo 정렬" value={todoSort} onChange={event => setTodoSort(event.target.value)}><option value="priority">우선순위순</option><option value="title">제목순</option><option value="time">시간순</option><option value="manual">직접 정렬</option></select>

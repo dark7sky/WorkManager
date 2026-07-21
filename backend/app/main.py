@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import re
 import secrets
 import time
 import uuid
@@ -2344,6 +2345,12 @@ def wipe_data(payload: dict = Body(...), user=Depends(require_user)):
     return {"ok": True, "deleted": counts}
 
 
+def load_tag_colors(user):
+    with connection() as c:
+        row = c.execute("SELECT value FROM app_settings WHERE user_id=? AND key=?", (user, "tag_colors")).fetchone()
+    return json.loads(row["value"]) if row else {}
+
+
 @app.get("/api/tags")
 def tag_usage(user=Depends(require_user)):
     counts = {}
@@ -2354,8 +2361,34 @@ def tag_usage(user=Depends(require_user)):
                     entry = counts.setdefault(tag, {"tag": tag, "total": 0, "tables": {t: 0 for t in IMPORT_TABLES}})
                     entry["total"] += 1
                     entry["tables"][table] += 1
+    colors = load_tag_colors(user)
+    for tag, entry in counts.items():
+        entry["color"] = colors.get(tag)
     items = sorted(counts.values(), key=lambda x: (-x["total"], x["tag"]))
     return {"items": items}
+
+
+@app.put("/api/tags/color")
+def tag_color_update(payload: dict = Body(...), user=Depends(require_user)):
+    tag = str(payload.get("tag") or "").strip()
+    if not tag:
+        raise HTTPException(422, "태그 이름(tag)이 필요합니다")
+    color = payload.get("color")
+    if color is not None:
+        color = str(color).strip()
+        if not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+            raise HTTPException(422, "색상은 #RRGGBB 형식이어야 합니다")
+    colors = load_tag_colors(user)
+    if color is None:
+        colors.pop(tag, None)
+    else:
+        colors[tag] = color
+    with connection() as c:
+        c.execute("""INSERT INTO app_settings(user_id,key,value,updated_at) VALUES(?,?,?,?)
+          ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at""",
+                  (user, "tag_colors", json.dumps(colors, ensure_ascii=False), now()))
+    audit(user, "update", "tags", tag, {"color": color})
+    return {"ok": True, "tag": tag, "color": color}
 
 
 @app.post("/api/tags/rename")

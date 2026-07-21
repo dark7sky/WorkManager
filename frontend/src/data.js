@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-tag-color-customization',
+    timestamp: '2026-07-21T21:08:38+09:00',
+    description: '업무·일정·할 일·기록 전체에서 태그를 필터·검색에 쓸 수 있었지만 태그 자체에 색을 지정할 방법이 없어, 다수 태그를 한눈에 구분하기 어려웠습니다. 설정의 태그 관리 화면에 태그별 색상 선택기를 추가하고(`PUT /api/tags/color`, `backend/app/main.py`), 업무/일정/할 일/성과 화면의 태그 필터 칩에 지정한 색상 점을 표시하도록 했습니다 (`frontend/src/components/TagManager.jsx`, `frontend/src/components/TagsInput.jsx`, `frontend/src/tagColors.js`, `frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-21-worklog-public-share-link',
     timestamp: '2026-07-21T21:10:00+09:00',
     description: '업무, 일정, 할 일에는 공유 링크 기능이 있었지만 업무 기록에는 없어, 완료한 작업 내용을 외부에 공유하려면 따로 옮겨 적어야 했습니다. 업무 기록 수정 폼에도 "공유 링크 만들기" 버튼을 추가해 `/public/work_logs/{token}` 읽기 전용 링크를 생성·복사·해제할 수 있게 했습니다 (`backend/app/main.py`, `backend/app/db.py`, `frontend/src/api.js`, `frontend/src/screens/Today.jsx`, `frontend/src/screens/PublicWorkLog.jsx`, `frontend/src/App.jsx`).',

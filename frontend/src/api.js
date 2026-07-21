@@ -100,6 +100,7 @@ export const api = {
   wipeData: confirm => request('/data/wipe',json('POST',{confirm})),
   tags: () => request('/tags'),
   renameTag: (from,to) => request('/tags/rename',json('POST',{from,to})),
+  setTagColor: (tag,color) => request('/tags/color',json('PUT',{tag,color})),
   auditLogs: (limit=100, start='', end='', offset=0) => request(`/audit-logs?limit=${limit}&offset=${offset}${start?`&start=${start}`:''}${end?`&end=${end}`:''}`),
   diagnosticsErrors: (limit=5) => request(`/diagnostics/errors?limit=${limit}`),
   trash: () => request('/trash'),

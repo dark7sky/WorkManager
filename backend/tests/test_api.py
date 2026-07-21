@@ -2235,6 +2235,25 @@ class ApiTests(unittest.TestCase):
         self.assertNotIn("회의", {item["tag"] for item in b.get("/api/tags").json()["items"]})
         self.assertEqual(b.post("/api/tags/rename", json={"to": "x"}).status_code, 422)
 
+    def test_tag_color_set_get_and_clear(self, *_):
+        b = self.client(self.token_b)
+        b.post("/api/tasks", json={"title": "색상 태그 업무", "status": "todo", "progress": 0, "tags": ["긴급색"]})
+
+        set_resp = b.put("/api/tags/color", json={"tag": "긴급색", "color": "#ff0000"})
+        self.assertEqual(set_resp.status_code, 200)
+        self.assertEqual(set_resp.json()["color"], "#ff0000")
+
+        usage = {item["tag"]: item for item in b.get("/api/tags").json()["items"]}
+        self.assertEqual(usage["긴급색"]["color"], "#ff0000")
+
+        self.assertEqual(b.put("/api/tags/color", json={"tag": "긴급색", "color": "not-a-color"}).status_code, 422)
+        self.assertEqual(b.put("/api/tags/color", json={"color": "#ff0000"}).status_code, 422)
+
+        clear_resp = b.put("/api/tags/color", json={"tag": "긴급색", "color": None})
+        self.assertIsNone(clear_resp.json()["color"])
+        usage_after = {item["tag"]: item for item in b.get("/api/tags").json()["items"]}
+        self.assertIsNone(usage_after["긴급색"]["color"])
+
     def test_import_rejects_unknown_version_and_bad_mode(self):
         a = self.client(self.token_a)
         self.assertEqual(a.post("/api/import/preview", json={"version": 2}).status_code, 422)

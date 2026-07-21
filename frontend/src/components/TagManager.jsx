@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ExternalLink, LoaderCircle, Pencil, Tags, Trash2 } from 'lucide-react'
+import { ExternalLink, LoaderCircle, Pencil, Tags, Trash2, X } from 'lucide-react'
 import { api } from '../api'
 import { pickTagTarget } from '../tagTarget'
 
@@ -28,6 +28,13 @@ export default function TagManager({ notify, onDataChanged, onTagClick }) {
     finally { setBusy(false) }
   }
 
+  const setColor = async (tag, color) => {
+    try {
+      await api.setTagColor(tag, color)
+      setItems(prev => prev.map(item => item.tag === tag ? { ...item, color } : item))
+    } catch (e) { notify(e.message, 'error') }
+  }
+
   return <section className="settings-card">
     <div className="settings-heading"><span><Tags /></span><div><h2>태그 관리</h2><p>업무·일정·할 일·기록 전체에서 태그 이름을 한 번에 바꾸거나 정리합니다.</p></div></div>
     {!items ? <div className="skeleton lines" /> : !items.length ? <p className="empty-state">사용 중인 태그가 없습니다.</p> : <div className="tag-manager">
@@ -39,7 +46,9 @@ export default function TagManager({ notify, onDataChanged, onTagClick }) {
             <button type="button" className="text-button" disabled={busy} onClick={() => setEditing(null)}>취소</button>
           </form>
         : <span key={item.tag} className="tag-manager-chip">
+            <input type="color" value={item.color || '#94a3b8'} title={`'${item.tag}' 색상`} aria-label={`'${item.tag}' 색상 선택`} onChange={e => setColor(item.tag, e.target.value)} />
             <button type="button" title={`업무 ${item.tables.tasks} · 일정 ${item.tables.events} · 할 일 ${item.tables.todos} · 기록 ${item.tables.work_logs}`} onClick={() => { setEditing(item.tag); setDraft(item.tag) }}>#{item.tag}<b>{item.total}</b><Pencil size={12} aria-hidden="true" /></button>
+            {item.color ? <button type="button" title="색상 제거" onClick={() => setColor(item.tag, null)}><X size={12} aria-hidden="true" /></button> : null}
             {onTagClick ? <button type="button" title={`이 태그로 ${tagTargetLabel(item)} 화면 이동`} onClick={() => onTagClick(item)}><ExternalLink size={12} aria-hidden="true" /></button> : null}
           </span>)}
     </div>}
