@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-event-manual-sort-order',
+    timestamp: '2026-07-21T20:40:00+09:00',
+    description: '오늘 화면의 할 일/업무 기록 목록은 드래그하거나 ▲▼ 버튼으로 순서를 직접 지정하는 "직접 정렬" 모드를 지원했지만, 캘린더 화면의 일정 목록(모바일 아젠다)에는 시간순/우선순위순/제목순만 있고 수동 정렬이 없었습니다. 동일한 패턴으로 `frontend/src/eventOrder.js`(저장/이동 로직)를 추가하고 `frontend/src/eventPins.js`에 `manual` 정렬 옵션을 더해, 캘린더 일정 목록에도 드래그 및 키보드 ▲▼ 버튼으로 순서를 저장하는 "직접 정렬" 모드를 추가했습니다 (`frontend/src/screens/Calendar.jsx`), 테스트는 `frontend/src/eventOrder.test.js`, `frontend/src/eventPins.test.js`.',
+  },
+  {
     id: '2026-07-21-recurrence-next-occurrence-preview',
     timestamp: '2026-07-21T20:25:11+09:00',
     description: '업무와 할 일에 반복 주기(매일/매주/격주/매월/매년)를 설정할 때, 저장 전까지는 다음 회차가 언제인지 알 수 없었습니다. 새 순수 함수 `nextRecurrenceDate`(`frontend/src/recurrencePreview.js`)를 추가해 업무 작성/수정 폼(`frontend/src/components/TaskForm.jsx`)과 오늘 화면의 할 일 추가/수정 폼(`frontend/src/screens/Today.jsx`)에 "다음 회차" 예정일을 실시간으로 표시하도록 했습니다.',

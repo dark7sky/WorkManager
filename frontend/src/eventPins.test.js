@@ -79,3 +79,8 @@ test('loadEventSort falls back to the default for an unknown stored value', () =
   storage.setItem('wm-event-sort', 'bogus')
   assert.equal(loadEventSort(storage), 'time')
 })
+
+test('orderEventsByPin sorts by stored manual order when sortBy is "manual"', () => {
+  const events = [{ id: 1 }, { id: 2 }, { id: 3 }]
+  assert.deepEqual(orderEventsByPin(events, new Set(), 'manual', { 2: 0, 1: 1 }).map(e => e.id), [2, 1, 3])
+})
