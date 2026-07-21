@@ -51,3 +51,14 @@ test('moveLogBefore returns the order unchanged for unknown ids', () => {
   const order = { 1: 0, 2: 1 }
   assert.equal(moveLogBefore([1, 2], order, 9, 2), order)
 })
+
+test('moveLogBefore(id, prevId) swaps an item up with its immediate predecessor (keyboard move-up)', () => {
+  const order = moveLogBefore([1, 2, 3], {}, 2, 1)
+  assert.deepEqual(order, { 2: 0, 1: 1, 3: 2 })
+})
+
+test('moveLogBefore(nextId, id) swaps an item down with its immediate successor (keyboard move-down)', () => {
+  const order = moveLogBefore([1, 2, 3], {}, 2, 1)
+  const swappedBack = moveLogBefore([2, 1, 3], order, 1, 2)
+  assert.deepEqual(swappedBack, { 1: 0, 2: 1, 3: 2 })
+})

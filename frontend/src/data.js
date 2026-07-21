@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-todo-log-manual-order-keyboard',
+    timestamp: '2026-07-21T15:07:07+09:00',
+    description: '오늘 화면에서 할 일/업무 기록을 "직접 정렬"로 바꾸면 순서를 드래그로만 바꿀 수 있어, 키보드나 스크린 리더 사용자는 순서를 조정할 방법이 없었습니다. 체크리스트 항목의 위/아래 이동 버튼과 같은 패턴으로, 직접 정렬 모드일 때 각 할 일/기록 행에 "위로 이동"/"아래로 이동" 버튼을 추가했습니다(`frontend/src/screens/Today.jsx`, 기존 `moveTodoBefore`/`moveLogBefore` 재사용).',
+  },
+  {
     id: '2026-07-21-progress-input-range-fix',
     timestamp: '2026-07-21T15:03:56+09:00',
     description: '진행률이 0~100 범위를 벗어난 레거시 업무(예: 과거 버그로 150%가 저장된 항목)를 수정 화면에서 열면, 진행률 입력란의 브라우저 range 유효성 검사에 걸려 저장 버튼을 눌러도 아무 반응 없이 조용히 실패했습니다. 업무 수정 폼(`frontend/src/components/TaskForm.jsx`)이 진행률 기본값을 0~100 사이로 보정(`clampedTaskProgress`, `frontend/src/taskFormPayload.js`)하도록 수정했습니다.',
