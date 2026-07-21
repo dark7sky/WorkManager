@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { validateEventForm, validateLogForm, validateTaskForm, validateTodoForm } from './formValidation.js'
+import { suppressStaleTaskDateErrors, validateEventForm, validateLogForm, validateTaskForm, validateTodoForm } from './formValidation.js'
 
 test('flags empty title', () => {
   const errors = validateTaskForm({ title: '  ', start_date: '', due_date: '' })
@@ -47,6 +47,20 @@ test('flags title over 300 characters', () => {
 test('allows title at exactly 300 characters', () => {
   const errors = validateTaskForm({ title: 'a'.repeat(300) })
   assert.deepEqual(errors, {})
+})
+
+test('suppresses stale recurrence_end_date error when only due_date changed', () => {
+  const task = { due_date: '2026-07-10', recurrence_end_date: '2026-07-15' }
+  const data = { title: '업무', due_date: '2026-07-20', recurrence_rule: 'weekly', recurrence_end_date: '2026-07-15' }
+  const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
+  assert.deepEqual(errors, {})
+})
+
+test('keeps recurrence_end_date error when the field itself was edited to an invalid value', () => {
+  const task = { due_date: '2026-07-10', recurrence_end_date: '2026-07-15' }
+  const data = { title: '업무', due_date: '2026-07-10', recurrence_rule: 'weekly', recurrence_end_date: '2026-07-01' }
+  const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
+  assert.equal(errors.recurrence_end_date, '반복 종료일은 시작일/완료 예정일보다 빠를 수 없습니다.')
 })
 
 test('event form flags empty title', () => {

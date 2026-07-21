@@ -3,7 +3,7 @@ import { AlertTriangle } from 'lucide-react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
-import { validateTaskForm } from '../formValidation'
+import { suppressStaleTaskDateErrors, validateTaskForm } from '../formValidation'
 import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
 import { dropZoneHandlers } from '../fileDrop'
@@ -284,10 +284,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     data.dependency_ids = formData.getAll('dependency_ids')
     data.checklist = checklist
     data.links = links
-    const startChanged = data.start_date !== (task?.start_date || '')
-    const dueChanged = data.due_date !== (task?.due_date || '')
-    const errors = validateTaskForm(data)
-    if (errors.due_date && !startChanged && !dueChanged) delete errors.due_date
+    const errors = suppressStaleTaskDateErrors(validateTaskForm(data), data, task)
     if (Object.keys(errors).length) {
       setFieldErrors(errors)
       setError(Object.values(errors)[0])

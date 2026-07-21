@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-form-stale-recurrence-end-date-validation-fix',
+    timestamp: '2026-07-21T13:57:00+09:00',
+    description: '업무 편집 폼이 백엔드의 반복 종료일 자동 정리 로직보다 먼저 클라이언트에서 검증을 막아, 반복 업무의 마감일만 바꿔도 "변경사항 저장" 버튼을 눌렀을 때 오류가 나던 문제를 고쳤습니다. 이제 반복 종료일 값 자체를 건드리지 않았다면 저장이 정상적으로 진행됩니다 (`frontend/src/components/TaskForm.jsx`, `frontend/src/formValidation.js`).',
+  },
+  {
     id: '2026-07-21-recurrence-end-date-save-fix',
     timestamp: '2026-07-21T13:41:19+09:00',
     description: '반복 업무의 마감일을 늦춰서 저장하면, 편집 폼이 예전 반복 종료일 값을 그대로 다시 보내는 바람에 "반복 종료일" 검증 오류로 저장이 실패하던 문제를 고쳤습니다. 이제 반복 종료일이 실제로 바뀌지 않았다면 새 마감일에 맞춰 자동으로 정리됩니다 (`backend/app/main.py`).',
