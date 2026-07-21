@@ -1335,8 +1335,11 @@ for _table in CONFIG:
             with connection() as c:
                 counts = dict(c.execute(
                     f"SELECT {fk}, COUNT(*) FROM {comment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
+                latest = dict(c.execute(
+                    f"SELECT {fk}, MAX(created_at) FROM {comment_table} WHERE user_id=? GROUP BY {fk}", (user,)).fetchall())
             for item in items:
                 item["comment_count"] = counts.get(item["id"], 0)
+                item["latest_comment_at"] = latest.get(item["id"])
         attachment_table = {"tasks": "task_attachments", "todos": "todo_attachments", "work_logs": "work_log_attachments", "events": "event_attachments"}.get(table)
         if attachment_table and items:
             fk = {"task_attachments": "task_id", "todo_attachments": "todo_id", "work_log_attachments": "work_log_id", "event_attachments": "event_id"}[attachment_table]

@@ -665,7 +665,9 @@ class ApiTests(unittest.TestCase):
         a.post(f"/api/tasks/{with_comments['id']}/comments", json={"body": "댓글2"})
         listed = {t["id"]: t for t in a.get("/api/tasks").json()}
         self.assertEqual(listed[with_comments["id"]]["comment_count"], 2)
+        self.assertIsNotNone(listed[with_comments["id"]]["latest_comment_at"])
         self.assertEqual(listed[without_comments["id"]]["comment_count"], 0)
+        self.assertIsNone(listed[without_comments["id"]]["latest_comment_at"])
         b_task = b.post("/api/tasks", json={"title": "other user task"}).json()
         b.post(f"/api/tasks/{b_task['id']}/comments", json={"body": "몰래"})
         self.assertNotIn(b_task["id"], {t["id"] for t in a.get("/api/tasks").json()})

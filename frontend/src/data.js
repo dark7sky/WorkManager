@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-task-new-comment-indicator',
+    timestamp: '2026-07-21T21:57:00+09:00',
+    description: '업무 목록에서 댓글이 새로 달려도 알아채기 어려웠던 문제를 개선했습니다. 목록 조회 API가 각 업무의 최신 댓글 시각(`latest_comment_at`)을 함께 내려주고, 업무 화면은 이 값을 마지막으로 확인한 시각과 비교해 아직 보지 않은 댓글이 있으면 댓글 배지에 강조 표시와 점(dot)을 붙입니다. 업무를 열어 보면 확인 시각이 갱신되어 표시가 사라집니다.',
+  },
+  {
     id: '2026-07-21-ai-progress-suggestion-date-guard',
     timestamp: '2026-07-21T21:46:00+09:00',
     description: '성과 화면의 "AI 진행률 제안"이 업무의 시작일보다 이른 완료일을 제안하는 경우가 있어, 제안을 확인 후 적용하면 서버 검증에 걸려 원인을 알기 어려운 오류가 발생했습니다. 로컬 규칙 기반 제안(`project_progress_suggestions`)과 원격 AI 제안(`smart_project_suggestions`, `backend/app/ai.py`) 모두 업무의 시작일을 확인해 시작일보다 이른 완료일 제안은 만들지 않도록 했고, 원격 AI 응답에 잘못된 항목이 섞여 있어도 나머지 유효한 제안은 버리지 않고 그대로 보여주도록 했습니다.',
