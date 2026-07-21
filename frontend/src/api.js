@@ -73,6 +73,8 @@ export const api = {
   deleteEventSeries: (groupId,fromStartAt) => request(`/events/series/${groupId}?from_start_at=${encodeURIComponent(fromStartAt)}`,{method:'DELETE'}),
   archivedEvents: (limit,offset=0) => request(`/events/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveEvent: id => request(`/events/${id}/archive`,{method:'POST'}), unarchiveEvent: id => request(`/events/${id}/unarchive`,{method:'POST'}),
+  shareEvent: id => request(`/events/${id}/share`,{method:'POST'}), unshareEvent: id => request(`/events/${id}/share`,{method:'DELETE'}),
+  publicEvent: token => request(`/public/events/${token}`, { suppressAuthEvent: true }),
   createLog: data => request('/work_logs',json('POST',data)), updateLog: (id,data) => request(`/work_logs/${id}`,json('PATCH',data)), deleteLog: id => request(`/work_logs/${id}`,{method:'DELETE'}),
   workLogs: () => request('/work_logs'),
   archivedLogs: (limit,offset=0) => request(`/work_logs/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),

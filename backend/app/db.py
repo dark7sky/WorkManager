@@ -188,8 +188,10 @@ def init_db():
             "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
             "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
+            "public_token": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
+        c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_public_token ON events(public_token) WHERE public_token IS NOT NULL")
         c.execute("UPDATE events SET local_uid=lower(hex(randomblob(16))) WHERE local_uid IS NULL")
         c.execute("CREATE INDEX IF NOT EXISTS idx_events_recurrence_group ON events(user_id,recurrence_group_id)")
         for name, definition in {"lease_owner": "TEXT", "lease_until": "TEXT"}.items():

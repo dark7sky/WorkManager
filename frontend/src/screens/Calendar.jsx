@@ -84,6 +84,25 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const estimateRef = useRef(null)
   const priorityRef = useRef(null)
   const [aiEstimating, setAiEstimating] = useState(false)
+  const [shareToken, setShareToken] = useState(() => event?.public_token || '')
+  const [shareBusy, setShareBusy] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
+  const shareUrl = shareToken ? `${location.origin}/public/events/${shareToken}` : ''
+  const createShareLink = async () => {
+    setShareBusy(true); setShareCopied(false)
+    try { const res = await api.shareEvent(event.id); setShareToken(res.public_token) }
+    catch (e) { setError(e.message) }
+    finally { setShareBusy(false) }
+  }
+  const revokeShareLink = async () => {
+    setShareBusy(true)
+    try { await api.unshareEvent(event.id); setShareToken(''); setShareCopied(false) }
+    catch (e) { setError(e.message) }
+    finally { setShareBusy(false) }
+  }
+  const copyShareLink = async () => {
+    try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { /* clipboard unavailable */ }
+  }
   const applyTemplate = id => {
     const template = templates.find(t => t.id === id)
     if (!template) return
@@ -312,6 +331,12 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
       </div>)}
       <div className="checklist-editor-add"><input type="text" maxLength={100} value={customFieldLabelText} placeholder="필드 이름 (예: 고객사)" onChange={e => setCustomFieldLabelText(e.target.value)}/><input type="text" maxLength={500} value={customFieldValueText} placeholder="값" onChange={e => setCustomFieldValueText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomField() } }}/><button type="button" className="text-button" onClick={addCustomField}>추가</button></div>
     </div>
+    {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
+      {shareToken
+        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
+        : <div className="checklist-editor-add"><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
+      <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 일정을 읽기 전용으로 볼 수 있습니다.</p>
+    </div> : null}
     {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>
       {comments.map(item => <div key={item.id} className="checklist-editor-item">
         {editingCommentId === item.id

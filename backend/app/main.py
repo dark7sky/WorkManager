@@ -2020,6 +2020,29 @@ def unshare_task(item_id: int, user=Depends(require_user)):
     return {"ok": True}
 
 
+@app.post("/api/events/{item_id}/share")
+def share_event(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT public_token FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        token = item["public_token"] or secrets.token_urlsafe(16)
+        c.execute("UPDATE events SET public_token=? WHERE id=? AND user_id=?", (token, item_id, user))
+    audit(user, "share", "events", item_id)
+    return {"public_token": token}
+
+
+@app.delete("/api/events/{item_id}/share")
+def unshare_event(item_id: int, user=Depends(require_user)):
+    with connection() as c:
+        item = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
+        if not item:
+            raise HTTPException(404, "Item not found")
+        c.execute("UPDATE events SET public_token=NULL WHERE id=? AND user_id=?", (item_id, user))
+    audit(user, "unshare", "events", item_id)
+    return {"ok": True}
+
+
 @app.post("/api/todos/{item_id}/archive")
 def archive_todo(item_id: int, user=Depends(require_user)):
     with connection() as c:
@@ -2356,6 +2379,18 @@ def public_task(token: str, request: Request):
     with connection() as c:
         item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
           assignee_name,tags,created_at,updated_at FROM tasks
+          WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
+    if not item:
+        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+    return row_dict(item)
+
+
+@app.get("/api/public/events/{token}")
+def public_event(token: str, request: Request):
+    """Public, read-only view of an event shared via a share link. No auth required."""
+    enforce_rate(request.client.host if request.client else "unknown", "public-event", 60, 60)
+    with connection() as c:
+        item = c.execute("""SELECT title,description,location,start_at,end_at,tags,created_at,updated_at FROM events
           WHERE public_token=? AND deleted_at IS NULL""", (token,)).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
