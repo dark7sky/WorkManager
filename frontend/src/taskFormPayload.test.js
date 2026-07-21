@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
+import { buildTaskDuplicatePayload, buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem } from './taskFormPayload.js'
 
 const baseData = {
   title: ' 업무 수정 ',
@@ -33,6 +33,13 @@ test('buildTaskPayload treats numeric and string parent IDs as unchanged on edit
   const payload = buildTaskPayload({ ...baseData, parent_id: '7' }, { task: { id: 1, parent_id: '7' } })
 
   assert.equal(Object.hasOwn(payload, 'parent_id'), false)
+})
+
+test('clampedTaskProgress keeps out-of-range legacy values inside the 0-100 input bounds', () => {
+  assert.equal(clampedTaskProgress(150), 100)
+  assert.equal(clampedTaskProgress(-10), 0)
+  assert.equal(clampedTaskProgress(40), 40)
+  assert.equal(clampedTaskProgress(null), 0)
 })
 
 test('buildTaskPayload never sends the edited task as its own parent', () => {

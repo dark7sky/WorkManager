@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-progress-input-range-fix',
+    timestamp: '2026-07-21T15:03:56+09:00',
+    description: '진행률이 0~100 범위를 벗어난 레거시 업무(예: 과거 버그로 150%가 저장된 항목)를 수정 화면에서 열면, 진행률 입력란의 브라우저 range 유효성 검사에 걸려 저장 버튼을 눌러도 아무 반응 없이 조용히 실패했습니다. 업무 수정 폼(`frontend/src/components/TaskForm.jsx`)이 진행률 기본값을 0~100 사이로 보정(`clampedTaskProgress`, `frontend/src/taskFormPayload.js`)하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-21-custom-field-search',
     timestamp: '2026-07-21T15:03:00+09:00',
     description: '업무의 체크리스트 항목·첨부파일명은 검색과 Ctrl/⌘+K 빠른 입력에서 찾을 수 있었지만, 방금 추가된 사용자 정의 필드(예: 고객사 "어크미")는 제목/메모에 없으면 검색으로 찾을 수 없었습니다. 업무 검색(`frontend/src/taskFilters.js`)과 명령 팔레트(`frontend/src/commandPalette.js`)가 사용자 정의 필드의 이름과 값도 함께 검색하도록 했습니다.',

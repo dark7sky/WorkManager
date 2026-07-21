@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { api } from '../api'
 import { EVENT_COLORS } from '../eventColors'
-import { buildTaskPayload, checklistProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
+import { buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
 import { suppressStaleTaskDateErrors, validateTaskForm } from '../formValidation'
 import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
@@ -327,7 +327,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete 
     <label key={`due-time-${prefillKey}`}>완료 예정 시각<input name="due_time" type="time" defaultValue={prefill?.due_time ?? task?.due_time ?? ''} onChange={e => setDueTimeVal(e.target.value)}/></label>
     {overlapping.length ? <p className="form-warning span-2" role="alert"><AlertTriangle size={14} aria-hidden="true"/> 같은 기간에 이미 업무가 있습니다: {overlapping.map(t => t.title).join(', ')}</p> : null}
     <label>상태<select name="status" defaultValue={task?.status === 'doing' ? 'in_progress' : task?.status || 'todo'}><option value="todo">할 일</option><option value="in_progress">진행 중</option><option value="done">완료</option></select></label>
-    <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={task?.progress ?? 0}/></label>
+    <label>진행률<input ref={progressRef} name="progress" type="number" min="0" max="100" defaultValue={clampedTaskProgress(task?.progress ?? 0)}/></label>
     <label key={`estimate-${prefillKey}`}>예상 소요 시간(분)<input ref={estimateRef} name="estimated_minutes" type="number" min="0" max="100000" step="1" placeholder="예: 120" defaultValue={prefill?.estimated_minutes ?? task?.estimated_minutes ?? ''}/></label>
     <label className="span-2" key={`link-url-${prefillKey}`}>관련 링크<input name="link_url" type="url" placeholder="https://..." defaultValue={prefill?.link_url ?? task?.link_url ?? ''}/></label>
     <label key={`priority-${prefillKey}`}>우선순위<select ref={priorityRef} name="priority" defaultValue={prefill?.priority ?? task?.priority ?? 'normal'}><option value="normal">보통</option><option value="high">높음</option><option value="low">낮음</option></select></label>

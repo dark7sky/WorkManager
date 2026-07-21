@@ -37,6 +37,10 @@ export const normalizedEstimatedMinutes = value => {
   const number = Number(value)
   return Number.isFinite(number) && number >= 0 ? Math.min(ESTIMATED_MINUTES_MAX, Math.round(number)) : null
 }
+export const clampedTaskProgress = value => {
+  const number = Number(value)
+  return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number))) : 0
+}
 const normalizedLinkUrl = value => {
   const trimmed = trimField(value).slice(0, 2000)
   return trimmed && /^https?:\/\//.test(trimmed) ? trimmed : null
