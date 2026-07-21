@@ -765,8 +765,26 @@ def validate_task_links(data, user_id, current_id=None):
             found = {r["id"] for r in c.execute(
                 f"SELECT id FROM tasks WHERE user_id=? AND deleted_at IS NULL AND id IN ({marks})",
                 (user_id, *ids)).fetchall()}
-        if found != ids:
+            missing = ids - found
+            # A missing id may belong to this same user but have been soft-deleted
+            # since the edit form was opened (stale reference) - drop it silently.
+            # An id that isn't owned by this user at all is a cross-user link
+            # attempt and must still be rejected.
+            owned_but_deleted = set()
+            if missing:
+                missing_marks = ",".join("?" for _ in missing)
+                owned_but_deleted = {r["id"] for r in c.execute(
+                    f"SELECT id FROM tasks WHERE user_id=? AND id IN ({missing_marks})",
+                    (user_id, *missing)).fetchall()}
+        still_invalid = missing - owned_but_deleted
+        if still_invalid:
             raise HTTPException(422, "A linked task does not belong to this user or is deleted")
+        if owned_but_deleted:
+            if data.get("parent_id") in owned_but_deleted:
+                data["parent_id"] = None
+            if "dependency_ids" in data:
+                remaining = [i for i in json.loads(data["dependency_ids"]) if i not in owned_but_deleted]
+                data["dependency_ids"] = json.dumps(sorted(remaining))
     if current_id is not None and "dependency_ids" in data:
         proposed = set(json.loads(data["dependency_ids"]))
         with connection() as c:

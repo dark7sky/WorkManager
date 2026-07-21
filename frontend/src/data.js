@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-21-stale-task-link-save-fix',
+    timestamp: '2026-07-21T12:55:00+09:00',
+    description: '업무 상세에서 부모 업무나 선행 업무가 이미 삭제된 상태로 저장을 누르면 오류로 저장이 실패하던 문제를 고쳤습니다. 이제 삭제된 연결만 자동으로 해제하고 저장은 정상 진행되며, 다른 사용자의 업무를 연결하려는 시도는 이전처럼 차단됩니다 (`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-21-bulk-archive',
     timestamp: '2026-07-21T12:08:00+09:00',
     description: '업무/일정/할 일/업무 기록 목록에서 여러 항목을 선택해 한 번에 보관 처리할 수 있는 "보관" 일괄 작업 버튼을 추가했습니다 (`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, `frontend/src/App.jsx`).',

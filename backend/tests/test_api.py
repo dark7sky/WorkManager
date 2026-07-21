@@ -362,6 +362,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_editing_a_task_drops_a_stale_deleted_parent_and_dependency(self, *_):
+        a = self.client(self.token_a)
+        parent = a.post("/api/tasks", json={"title": "old parent"}).json()
+        dep = a.post("/api/tasks", json={"title": "old dependency"}).json()
+        child = a.post("/api/tasks", json={"title": "child", "parent_id": parent["id"], "dependency_ids": [dep["id"]]}).json()
+        a.delete(f"/api/tasks/{parent['id']}")
+        a.delete(f"/api/tasks/{dep['id']}")
+        updated = a.patch(f"/api/tasks/{child['id']}", json={
+            "title": "child edited", "parent_id": parent["id"], "dependency_ids": [dep["id"]]})
+        self.assertEqual(updated.status_code, 200, updated.text)
+        self.assertIsNone(updated.json()["parent_id"])
+        self.assertEqual(updated.json()["dependency_ids"], [])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_rejects_unknown_assignee_field(self, *_):
         a = self.client(self.token_a)
         created = a.post("/api/tasks", json={"title": "handoff", "assignee_name": "Dana"})
