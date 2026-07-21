@@ -87,6 +87,7 @@ export const api = {
   createTodo: data => request('/todos',json('POST',data)), updateTodo: (id,data) => request(`/todos/${id}`,json('PATCH',data)), deleteTodo: id => request(`/todos/${id}`,{method:'DELETE'}),
   skipTodoRecurrence: id => request(`/todos/${id}/skip-recurrence`,{method:'POST'}),
   todoSeries: id => request(`/todos/${id}/series`),
+  updateTodoSeries: (groupId,fromTodoDate,data) => request(`/todos/series/${groupId}?from_todo_date=${encodeURIComponent(fromTodoDate)}`,json('PATCH',data)),
   archivedTodos: (limit,offset=0) => request(`/todos/archived${limit?`?limit=${limit}&offset=${offset}`:''}`),
   archiveTodo: id => request(`/todos/${id}/archive`,{method:'POST'}), unarchiveTodo: id => request(`/todos/${id}/unarchive`,{method:'POST'}),
   shareTodo: (id,expiresInDays) => request(`/todos/${id}/share${expiresInDays?`?expires_in_days=${expiresInDays}`:''}`,{method:'POST'}), unshareTodo: id => request(`/todos/${id}/share`,{method:'DELETE'}),

@@ -2022,6 +2022,38 @@ class ApiTests(unittest.TestCase):
         self.assertEqual([item["id"] for item in series], [todo["id"], next_todo["id"]])
         self.assertEqual(a.get(f"/api/todos/{todo['id']}/series").json()["items"], series)
 
+    def test_todo_series_update_applies_to_future_occurrences_only(self):
+        from app.db import connection
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "todo-rec-test-group-1"
+        occurrences = []
+        for day in ("2026-09-01", "2026-09-08", "2026-09-15"):
+            created = b.post("/api/todos", json={"title": "주간 정리", "todo_date": day})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/todos", json={"title": "지난 정리", "todo_date": "2026-08-25"})
+        self.assertEqual(past.status_code, 200, past.text)
+        with connection() as c:
+            c.execute("UPDATE todos SET recurrence_group_id=? WHERE id IN (?,?,?,?)",
+                       (group_id, *[o["id"] for o in occurrences], past.json()["id"]))
+        other_user_conflict = a.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={"title": "몰래 변경"})
+        self.assertEqual(other_user_conflict.status_code, 404)
+        response = b.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={"title": "주간 정리 (변경)", "memo": "새 메모", "todo_date": "1999-01-01"})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["updated"], 3)
+        for occurrence in occurrences:
+            refreshed = b.get("/api/todos").json()
+            match = next(t for t in refreshed if t["id"] == occurrence["id"])
+            self.assertEqual(match["title"], "주간 정리 (변경)")
+            self.assertEqual(match["memo"], "새 메모")
+            self.assertEqual(match["todo_date"], occurrence["todo_date"])
+        untouched = next(t for t in b.get("/api/todos").json() if t["id"] == past.json()["id"])
+        self.assertEqual(untouched["title"], "지난 정리")
+        no_op = b.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={"todo_date": "1999-01-01"})
+        self.assertEqual(no_op.status_code, 422)
+        missing_group = b.patch("/api/todos/series/does-not-exist?from_todo_date=2026-09-01", json={"title": "x"})
+        self.assertEqual(missing_group.status_code, 404)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_archive_task_hides_from_list_and_unarchive_restores_it(self, *_):

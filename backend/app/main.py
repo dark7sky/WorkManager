@@ -1984,6 +1984,24 @@ def todo_series(item_id: int, user=Depends(require_user)):
     return {"items": [{"id": r["id"], "title": r["title"], "todo_date": r["todo_date"], "completed": bool(r["completed"])} for r in items]}
 
 
+TODO_SERIES_EDITABLE_FIELDS = {"title", "memo", "tags", "link_url", "color", "priority", "todo_time"}
+
+
+@app.patch("/api/todos/series/{group_id}")
+def update_todo_series(group_id: str, from_todo_date: str, payload: dict = Body(...), user=Depends(require_user)):
+    data = {k: v for k, v in payload.items() if k in TODO_SERIES_EDITABLE_FIELDS}
+    if not data:
+        raise HTTPException(422, "수정할 필드가 없습니다.")
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM todos WHERE user_id=? AND recurrence_group_id=? AND todo_date>=? AND deleted_at IS NULL ORDER BY todo_date",
+            (user, group_id, from_todo_date)).fetchall()]
+    if not ids:
+        raise HTTPException(404, "반복 할일을 찾을 수 없습니다.")
+    items = [update_item("todos", item_id, dict(data), user) for item_id in ids]
+    return {"ok": True, "updated": len(items), "items": items}
+
+
 @app.get("/api/tasks/{item_id}/series")
 def task_series(item_id: int, user=Depends(require_user)):
     with connection() as c:
