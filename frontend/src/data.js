@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-priority-null-reset',
+    timestamp: '2026-07-22T18:32:00+09:00',
+    description: '업무/할 일의 우선순위 필드를 명시적으로 비우려고 하면(예: API로 priority: null 전송) "Fields cannot be null" 오류가 발생했습니다(일정/업무 기록은 정상적으로 비워짐). 업무/할 일은 우선순위 값이 비어 있을 수 없는 구조라, null 전송 시 오류 대신 기본값(보통)으로 재설정되도록 수정했습니다(`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-22-worklog-client-rate-autofill',
     timestamp: '2026-07-22T18:11:00+09:00',
     description: '업무 기록에서 청구 고객명을 자동완성 목록에서 선택해도 시급 재정의 값은 매번 다시 입력해야 했습니다. 이제 이전에 같은 고객으로 청구한 기록이 있으면 가장 최근 시급을 자동으로 채워주며(직접 입력한 값은 덮어쓰지 않음), 새 기록 작성과 수정 화면 모두에 적용됩니다(`frontend/src/logClientRate.js`, `frontend/src/screens/Today.jsx`).',

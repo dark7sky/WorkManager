@@ -469,7 +469,7 @@ class TaskPayload(StrictPayload):
     @field_validator("priority", mode="before")
     @classmethod
     def normalize_priority_alias(cls, value):
-        return "normal" if value == "medium" else value
+        return "normal" if value in (None, "medium") else value
 
     @model_validator(mode="after")
     def dates_in_order(self):
@@ -565,6 +565,11 @@ class TodoPayload(StrictPayload):
     @classmethod
     def empty_clearable_fields_to_null(cls, value):
         return None if value == "" else value
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def normalize_priority_alias(cls, value):
+        return "normal" if value in (None, "medium") else value
 
     @field_validator("link_url")
     @classmethod

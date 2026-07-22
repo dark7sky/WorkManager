@@ -1584,6 +1584,15 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(cleared.json()["link_url"])
         self.assertEqual(a.post("/api/tasks", json={"title": "bad link", "link_url": "not-a-url"}).status_code, 422)
 
+    def test_task_priority_null_resets_to_default_instead_of_422(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "urgent task", "priority": "high"})
+        self.assertEqual(task.status_code, 200, task.text)
+        self.assertEqual(task.json()["priority"], "high")
+        reset = a.patch(f"/api/tasks/{task.json()['id']}", json={"priority": None})
+        self.assertEqual(reset.status_code, 200, reset.text)
+        self.assertEqual(reset.json()["priority"], "normal")
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_start_time_and_due_time_are_persisted_and_validated(self, *_):
@@ -2307,6 +2316,9 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(spawned["priority"], "high")
         lowered = a.patch(f"/api/todos/{high['id']}", json={"priority": "low"}).json()
         self.assertEqual(lowered["priority"], "low")
+        reset = a.patch(f"/api/todos/{high['id']}", json={"priority": None})
+        self.assertEqual(reset.status_code, 200, reset.text)
+        self.assertEqual(reset.json()["priority"], "normal")
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
