@@ -7,6 +7,7 @@ export const TODO_BADGE_OPTIONS = [
   { key: 'estimate', label: '예상 소요시간' },
   { key: 'comments', label: '댓글' },
   { key: 'attachments', label: '첨부파일' },
+  { key: 'shareLink', label: '공유 링크' },
 ]
 
 const ALL_KEYS = TODO_BADGE_OPTIONS.map(o => o.key)

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-share-link-badge-parity',
+    timestamp: '2026-07-23T00:38:00+09:00',
+    description: '공유 링크가 걸려 있는 항목을 목록에서 바로 알아볼 수 있는 "공유 중" 배지가 업무 화면에만 있어, 일정·할 일·업무일지는 편집 화면까지 들어가야 확인할 수 있었던 것을 수정해 캘린더(일정)와 오늘 화면(할 일·업무일지)에도 같은 배지를 추가했습니다(`frontend/src/eventBadgeVisibility.js`, `frontend/src/todoBadgeVisibility.js`, `frontend/src/workLogBadgeVisibility.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, 표시 항목 설정에서 켜고 끌 수 있음).',
+  },
+  {
     id: '2026-07-23-overdue-escalation-test-fix',
     timestamp: '2026-07-23T00:15:00+09:00',
     description: '지연 업무 자동 우선순위 상향 회귀 테스트(`test_overdue_task_is_auto_escalated_to_high_priority_on_list`)가 마감일을 고정된 과거 날짜 문자열로 하드코딩해 두어, 그 날짜가 실제로 지나가면 "곧 마감" 업무가 스스로 "지연" 상태가 되어 테스트가 오탐(false fail)하는 문제가 있었습니다. 고정 날짜 대신 실행 시점 기준 내일 날짜를 계산하도록 수정했습니다(`backend/tests/test_api.py`).',
