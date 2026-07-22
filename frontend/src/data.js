@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-global-search-checklist',
+    timestamp: '2026-07-22T19:11:00+09:00',
+    description: '전역 검색(Ctrl+/)이 링크·태그·사용자 정의 필드까지는 검색했지만 체크리스트 항목 문구는 검색하지 못해, 체크리스트에만 적힌 내용은 검색으로 찾을 수 없었던 것을 수정해 업무/일정/할 일/업무일지의 체크리스트 텍스트도 함께 검색되도록 개선했습니다(`frontend/src/globalSearch.js`).',
+  },
+  {
     id: '2026-07-22-ai-reminder-lead-time-extraction',
     timestamp: '2026-07-22T19:04:00+09:00',
     description: 'AI 없이 동작하는 빠른 입력(QuickCapture)의 규칙 기반 파서가 업무/일정/할 일/업무일지 모두에서 예상 소요시간·태그 등은 인식하면서도 "30분 전 알림" 같은 리마인더 시점 표현은 전혀 인식하지 못해 수동으로 다시 설정해야 했던 것을, `_reminder_minutes` 추출기를 추가해 4개 엔티티 생성 시 `reminder_minutes_before`를 자동으로 채우도록 개선했습니다(`backend/app/ai.py`의 `rule_parse`).',

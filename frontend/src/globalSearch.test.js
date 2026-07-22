@@ -51,3 +51,14 @@ test('searchAll matches link_url and custom_fields across entities', () => {
   assert.equal(globalSearchResultCount(searchAll(extra, 'spec-doc')), 1)
   assert.equal(globalSearchResultCount(searchAll(extra, '재무')), 3)
 })
+
+test('searchAll matches checklist item text across entities', () => {
+  const withChecklist = {
+    tasks: [{ id: 1, title: '작업', checklist: [{ text: '계약서 검토', done: false }] }],
+    events: [{ id: 1, title: '일정', checklist: [{ text: '장소 예약 확인', done: false }] }],
+    todos: [{ id: 1, title: '할일', checklist: [{ text: '계약서 서명', done: true }] }],
+    logs: [{ id: 1, content: '기록', checklist: [{ text: '결과 보고', done: false }] }],
+  }
+  assert.equal(globalSearchResultCount(searchAll(withChecklist, '계약서')), 2)
+  assert.equal(globalSearchResultCount(searchAll(withChecklist, '장소 예약')), 1)
+})

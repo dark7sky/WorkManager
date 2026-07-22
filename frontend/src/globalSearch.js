@@ -12,8 +12,12 @@ function matchesCustomFields(item, query) {
   return Array.isArray(item.custom_fields) && item.custom_fields.some(f => matches(f.label, query) || matches(f.value, query))
 }
 
+function matchesChecklist(item, query) {
+  return Array.isArray(item.checklist) && item.checklist.some(c => matches(c.text, query))
+}
+
 function matchesExtra(item, query) {
-  return matches(item.link_url, query) || matchesTags(item, query) || matchesCustomFields(item, query)
+  return matches(item.link_url, query) || matchesTags(item, query) || matchesCustomFields(item, query) || matchesChecklist(item, query)
 }
 
 export function searchAll({ tasks = [], events = [], todos = [], logs = [] } = {}, query) {
