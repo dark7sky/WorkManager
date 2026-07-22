@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-new-entry-rate-client-parity',
+    timestamp: '2026-07-22T12:58:30+09:00',
+    description: '업무 기록 수정 화면에서는 청구 가능 항목에 시급 재정의(hourly_rate_override)와 청구 고객명(client_name)을 입력할 수 있었지만, 새 업무 기록 작성 폼에는 해당 입력란이 연결되어 있지 않아 처음 기록할 때는 값을 넣을 수 없었습니다. `frontend/src/App.jsx`의 onAddLog 핸들러가 두 값을 api.createLog로 전달하도록 하여 신규 작성과 수정 화면의 입력 항목을 통일했습니다.',
+  },
+  {
     id: '2026-07-22-public-share-link-url-parity',
     timestamp: '2026-07-22T08:56:40+09:00',
     description: '업무/일정/할 일/업무 기록의 공개 공유 링크 화면(로그인 없이 보는 읽기 전용 화면)에 관련 링크(link_url) 필드가 누락되어 있었습니다. 백엔드 공개 조회 API(/api/public/{tasks,events,todos,work_logs}/{token})의 SELECT에 link_url을 추가하고, 4개의 PublicXxx.jsx 화면에 "관련 링크" 버튼을 표시하도록 하여 공유 필드 노출 범위를 통일했습니다.',
