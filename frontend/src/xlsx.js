@@ -1,4 +1,4 @@
-import { auditHeaders, auditRows, eventHeaders, eventRows, taskHeaders, taskRows, todoHeaders, todoRows, workLogHeaders, workLogRows } from './csv.js'
+import { auditHeaders, auditRows, eventHeaders, eventRows, taskHeaders, taskRows, timelineHeaders, timelineRows, todoHeaders, todoRows, workLogHeaders, workLogRows } from './csv.js'
 
 const escapeXmlText = value => {
   const text = value == null ? '' : String(value)
@@ -31,3 +31,7 @@ export const workLogExcelFilename = date => `workmanager-work-logs-${date}.xls`
 export const auditLogsToExcelXml = logs => rowsToSpreadsheetXml('감사 로그', auditHeaders, auditRows(logs))
 
 export const auditLogExcelFilename = date => `workmanager-audit-log-${date}.xls`
+
+export const timelineToExcelXml = items => rowsToSpreadsheetXml('활동 타임라인', timelineHeaders, timelineRows(items))
+
+export const timelineExcelFilename = (start, end) => `workmanager-report-${start}_${end}.xls`

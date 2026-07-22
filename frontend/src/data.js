@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-performance-report-excel-export',
+    timestamp: '2026-07-23T05:20:00+09:00',
+    description: '성과 리포트(활동 타임라인)에 Excel 내보내기 버튼을 추가했습니다. 업무·일정·할 일·업무일지·감사 로그는 이미 CSV와 Excel을 모두 지원했지만 성과 리포트는 CSV/Markdown만 가능했던 마지막 내보내기 형식 공백을 맞췄습니다(`frontend/src/xlsx.js`, `frontend/src/screens/Performance.jsx`).',
+  },
+  {
     id: '2026-07-23-csv-excel-attached-links-column',
     timestamp: '2026-07-23T05:10:00+09:00',
     description: '업무·일정·할 일·업무일지 CSV/Excel 내보내기·가져오기에 첨부 링크(links) 열을 추가했습니다. 사용자 정의 필드·체크리스트는 이미 열로 노출되고 있었는데 폼에서 편집 가능한 첨부 링크만 내보내기에서 빠져 있어 백업/재가져오기 시 유실되던 문제를 맞췄습니다(`frontend/src/csv.js`).',

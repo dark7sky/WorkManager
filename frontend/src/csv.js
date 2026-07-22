@@ -177,18 +177,17 @@ export const dedupeImportedTodos = (parsed, existingTodos) =>
 export const dedupeImportedLogs = (parsed, existingLogs) =>
   dedupeImportedItems(parsed, existingLogs, l => `${(l.content || '').trim().toLowerCase()}|${l.log_date || ''}`, 'logs')
 
-const timelineHeaders = ['날짜', '구분', '제목', '태그', '예상 소요(분)']
+export const timelineHeaders = ['날짜', '구분', '제목', '태그', '예상 소요(분)']
 
-export const timelineToCsv = items => {
-  const rows = items.map(item => [
-    item.date,
-    item.type_label || item.type,
-    item.title || item.content,
-    (item.tags || []).join('; '),
-    item.estimated_minutes ?? '',
-  ])
-  return [timelineHeaders, ...rows].map(row => row.map(escapeCsvCell).join(',')).join('\n')
-}
+export const timelineRows = items => items.map(item => [
+  item.date,
+  item.type_label || item.type,
+  item.title || item.content,
+  (item.tags || []).join('; '),
+  item.estimated_minutes ?? '',
+])
+
+export const timelineToCsv = items => [timelineHeaders, ...timelineRows(items)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
 
 export const timelineCsvFilename = (start, end) => `workmanager-report-${start}_${end}.csv`
 
