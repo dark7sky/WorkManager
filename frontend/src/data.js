@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-series-edit-reminder-links-customfields',
+    timestamp: '2026-07-23T05:35:00+09:00',
+    description: '반복 업무·할 일·일정을 "이후 항목 모두 적용"으로 수정할 때 알림 시간(reminder_minutes_before), 관련 링크(links), 사용자 정의 필드(custom_fields)가 조용히 무시되고 저장되지 않던 문제를 수정했습니다. 이제 세 필드 모두 시리즈 일괄 수정 시 정상적으로 반영됩니다(`backend/app/main.py`의 TASK_SERIES_EDITABLE_FIELDS, TODO_SERIES_EDITABLE_FIELDS, EVENT_SERIES_EDITABLE_FIELDS).',
+  },
+  {
     id: '2026-07-23-keyboard-shortcuts-today-row-nav-doc',
     timestamp: '2026-07-23T05:20:00+09:00',
     description: '단축키 안내(`?`)에 표시되는 ↑/↓ 행 이동 설명이 업무 관리 화면 전용인 것처럼 되어 있었지만, 실제로는 오늘 화면의 할 일·업무 기록 목록에서도 동일한 행 이동 키보드 조작(`rowKeyDown`)이 이미 동작하고 있었습니다. 안내 문구를 두 화면 모두를 포함하도록 수정해 사용자가 이 기능을 놓치지 않도록 했습니다(`frontend/src/components/KeyboardShortcuts.jsx`).',
