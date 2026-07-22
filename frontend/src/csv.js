@@ -342,13 +342,14 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정', '사용자 정의 필드']
+export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '알림(분 전)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정', '사용자 정의 필드']
 
 export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.map(log => [
   log.log_date,
   log.content,
   log.duration_minutes ?? '',
   log.estimated_minutes ?? '',
+  log.reminder_minutes_before ?? '',
   priorityValueToLabel[log.priority] || log.priority,
   log.task_id ? (taskTitleById?.get(log.task_id) ? `#${log.task_id} ${taskTitleById.get(log.task_id)}` : `#${log.task_id}`) : '',
   (log.tags || []).join('; '),
@@ -373,7 +374,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iClientName = col('청구 고객'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트'), iCustomFields = col('사용자 정의 필드')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iClientName = col('청구 고객'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트'), iCustomFields = col('사용자 정의 필드')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -382,6 +383,7 @@ export const parseWorkLogsCsv = text => {
     if (iDate >= 0 && cells[iDate]) log.log_date = cells[iDate].trim()
     if (iDuration >= 0 && cells[iDuration] && !Number.isNaN(Number(cells[iDuration]))) log.duration_minutes = Number(cells[iDuration])
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) log.estimated_minutes = Number(cells[iEstimate])
+    if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) log.reminder_minutes_before = Number(cells[iReminder])
     if (iPriority >= 0 && cells[iPriority]) log.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iTaskLink >= 0 && cells[iTaskLink]) { const m = cells[iTaskLink].trim().match(/^#(\d+)/); if (m) log.task_id = Number(m[1]) }
     if (iTags >= 0 && cells[iTags]) log.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)

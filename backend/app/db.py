@@ -167,6 +167,7 @@ def init_db():
         _add_column(c, "work_logs", "invoiced_at", "TEXT")
         _add_column(c, "work_logs", "hourly_rate_override", "REAL")
         _add_column(c, "work_logs", "client_name", "TEXT")
+        _add_column(c, "work_logs", "reminder_minutes_before", "INTEGER")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_work_logs_public_token ON work_logs(public_token) WHERE public_token IS NOT NULL")
         _add_column(c, "task_comments", "edited_at", "TEXT")
         _add_column(c, "sessions", "user_agent", "TEXT")

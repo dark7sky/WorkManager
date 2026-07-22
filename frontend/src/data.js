@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-reminder-lead-time',
+    timestamp: '2026-07-22T18:20:47+09:00',
+    description: '업무/일정/할 일에는 있던 항목별 "알림 시점(분 전)" 기능이 업무 기록(오늘 한 일)에는 없어서, 시각을 지정해도 알림을 받을 수 없었습니다. 업무 기록에도 개별 알림 시점 필드를 추가하고 설정 화면에 전역 알림 시점 선택을 더했으며, CSV/Excel 내보내기·가져오기와 캘린더(.ics) 내보내기에도 반영했습니다(`backend/app/main.py`, `backend/app/db.py`, `frontend/src/logAlerts.js`, `frontend/src/screens/Settings.jsx`, `frontend/src/csv.js`, `frontend/src/ics.js`).',
+  },
+  {
     id: '2026-07-22-bulk-remove-tag',
     timestamp: '2026-07-22T13:48:36+09:00',
     description: '업무/일정/할 일/업무 기록의 일괄 작업 바에는 여러 항목에 태그를 한 번에 "추가"하는 기능만 있고 "제거"하는 기능은 없었습니다. 같은 태그 입력창에서 제거 버튼을 눌러 선택한 항목들에서 태그를 한 번에 뗄 수 있도록 했고, 실행 취소도 지원합니다.',

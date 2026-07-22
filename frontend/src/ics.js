@@ -140,6 +140,7 @@ export const logsToIcs = logs => {
     if (log.link_url) lines.push(`URL:${escapeIcsText(log.link_url)}`)
     if (log.color) lines.push(`X-WM-COLOR:${log.color}`)
     if (log.checklist?.length) lines.push(`X-WM-CHECKLIST:${escapeIcsText(JSON.stringify(log.checklist))}`)
+    if (log.log_time) pushValarm(lines, log.reminder_minutes_before)
     lines.push('END:VEVENT')
   }
   lines.push('END:VCALENDAR')

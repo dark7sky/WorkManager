@@ -1870,6 +1870,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(todo.status_code, 200, todo.text)
         self.assertEqual(todo.json()["reminder_minutes_before"], 10)
 
+        log = a.post("/api/work_logs", json={"content": "reminder log", "log_date": "2026-08-01", "reminder_minutes_before": 25})
+        self.assertEqual(log.status_code, 200, log.text)
+        self.assertEqual(log.json()["reminder_minutes_before"], 25)
+        cleared_log = a.patch(f"/api/work_logs/{log.json()['id']}", json={"reminder_minutes_before": ""})
+        self.assertEqual(cleared_log.status_code, 200, cleared_log.text)
+        self.assertIsNone(cleared_log.json()["reminder_minutes_before"])
+        invalid_log = a.post("/api/work_logs", json={"content": "bad reminder log", "log_date": "2026-08-01", "reminder_minutes_before": 1441})
+        self.assertEqual(invalid_log.status_code, 422)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_color_is_persisted_and_validated(self, *_):
