@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-invoiced-edit-warning',
+    timestamp: '2026-07-22T13:35:00+09:00',
+    description: '이미 청구 완료 처리된 업무 기록도 내용/시간/청구 금액을 아무 경고 없이 수정할 수 있어, 실제 기록과 청구된 금액이 조용히 어긋나는 문제가 있었습니다. 청구 완료(invoiced_at)된 기록을 수정할 때 편집 폼에 경고 문구를 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-22-task-todo-series-delete',
     timestamp: '2026-07-22T13:28:49+09:00',
     description: '반복 일정은 "이 일정과 이후 반복 일정에 모두 적용" 옵션으로 한 번에 삭제할 수 있었지만, 반복 업무와 반복 할 일은 삭제 시 회차마다 하나씩 지워야 했습니다. 업무/할 일 삭제 확인창에도 이후 반복 항목을 함께 삭제하는 체크박스를 추가해 세 유형 모두 일관된 반복 삭제를 지원합니다.',
