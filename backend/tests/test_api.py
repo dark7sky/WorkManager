@@ -381,7 +381,7 @@ class ApiTests(unittest.TestCase):
             "title": "weekly review", "start_date": "2026-07-06", "due_date": "2026-07-06",
             "recurrence_rule": "weekly", "estimated_minutes": 45, "link_url": "https://example.com",
             "color": "purple", "links": [{"url": "https://example.com/doc", "label": "doc"}],
-            "checklist": [{"text": "prep agenda", "done": True}],
+            "checklist": [{"text": "prep agenda", "done": True}], "reminder_minutes_before": 30,
         }).json()
         a.patch(f"/api/tasks/{task['id']}", json={"status": "done", "progress": 100})
         child = next(x for x in a.get("/api/tasks").json() if x.get("parent_id") == task["id"])
@@ -392,6 +392,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(child["links"][0]["url"], "https://example.com/doc")
         self.assertEqual(len(child["checklist"]), 1)
         self.assertFalse(child["checklist"][0]["done"])
+        self.assertEqual(child["reminder_minutes_before"], 30)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
@@ -2504,7 +2505,7 @@ class ApiTests(unittest.TestCase):
         todo = a.post("/api/todos", json={
             "title": "recurring todo", "todo_date": "2026-07-06", "recurrence_rule": "daily",
             "color": "green", "links": [{"url": "https://example.com/doc", "label": "doc"}],
-            "checklist": [{"text": "step one", "done": True}],
+            "checklist": [{"text": "step one", "done": True}], "reminder_minutes_before": 15,
         }).json()
         completed = a.patch(f"/api/todos/{todo['id']}", json={"completed": True}).json()
         spawned = next(t for t in a.get("/api/todos").json() if t["id"] == completed["next_recurrence_id"])
@@ -2513,6 +2514,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(spawned["links"][0]["url"], "https://example.com/doc")
         self.assertEqual(len(spawned["checklist"]), 1)
         self.assertFalse(spawned["checklist"][0]["done"])
+        self.assertEqual(spawned["reminder_minutes_before"], 15)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})

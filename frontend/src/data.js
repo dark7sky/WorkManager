@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-recurring-spawn-reminder-carryover',
+    timestamp: '2026-07-23T05:13:53+09:00',
+    description: '반복 업무·할 일이 완료되어 다음 회차가 자동 생성될 때 개별 알림 시간(reminder_minutes_before) 설정이 사라지던 문제를 수정했습니다. estimated_minutes·color·links·checklist 등 다른 필드는 그대로 이어졌지만 알림 시간만 누락되어, 반복 항목은 첫 회차 이후로 알림이 조용히 꺼지는 문제가 있었습니다(`backend/app/main.py`의 `spawn_recurring_task`/`spawn_recurring_todo`).',
+  },
+  {
     id: '2026-07-23-public-share-attached-links',
     timestamp: '2026-07-23T05:35:00+09:00',
     description: '공유 링크로 공개된 업무·일정·할 일·업무일지 화면에 첨부 링크(links) 목록이 표시되지 않던 것을 수정했습니다. 목록 배지·CSV/Excel·수정 폼에는 이미 노출되던 다중 첨부 링크가 공개 조회 API/화면에서만 빠져 있어, 공유 링크를 받은 사람이 관련 링크(link_url) 외의 추가 참고 링크를 볼 수 없던 문제를 맞췄습니다(`backend/app/main.py`의 4개 `/api/public/*` 엔드포인트, `frontend/src/screens/Public*.jsx`).',
