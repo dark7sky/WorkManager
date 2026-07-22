@@ -35,7 +35,7 @@ const parseCustomFieldsCell = cell => {
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
 
-export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '반복', '반복 종료일', '고정', '첨부파일 수', '사용자 정의 필드']
+export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '반복', '반복 종료일', '고정', '첨부파일 수', '댓글 수', '사용자 정의 필드']
 const taskRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
 const taskRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', 평일마다: 'weekdays', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly', weekdays: 'weekdays' }
 
@@ -70,6 +70,7 @@ export const taskRows = (tasks, todayIso, pinnedIds) => tasks.map(task => [
   task.recurrence_end_date || '',
   pinnedIds?.has(task.id) ? 'Y' : '',
   task.attachment_count || '',
+  task.comment_count || '',
   customFieldsSummary(task.custom_fields),
 ])
 
@@ -235,7 +236,7 @@ export const auditLogsToCsv = logs => [auditHeaders, ...auditRows(logs)].map(row
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '첨부파일 수', '사용자 정의 필드']
+export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '첨부파일 수', '댓글 수', '사용자 정의 필드']
 
 export const eventRows = (events, pinnedIds) => events.map(event => [
   event.title,
@@ -253,6 +254,7 @@ export const eventRows = (events, pinnedIds) => events.map(event => [
   checklistSummary(event.checklist),
   pinnedIds?.has(event.id) ? 'Y' : '',
   event.attachment_count || '',
+  event.comment_count || '',
   customFieldsSummary(event.custom_fields),
 ])
 
@@ -289,7 +291,7 @@ export const parseEventsCsv = text => {
   return { events, errors }
 }
 
-export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '첨부파일 수', '사용자 정의 필드']
+export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '첨부파일 수', '댓글 수', '사용자 정의 필드']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
 
 export const todoRows = (todos, pinnedIds) => todos.map(todo => [
@@ -308,6 +310,7 @@ export const todoRows = (todos, pinnedIds) => todos.map(todo => [
   checklistSummary(todo.checklist),
   pinnedIds?.has(todo.id) ? 'Y' : '',
   todo.attachment_count || '',
+  todo.comment_count || '',
   customFieldsSummary(todo.custom_fields),
 ])
 
@@ -345,7 +348,7 @@ export const parseTodosCsv = text => {
   return { todos, errors }
 }
 
-export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '알림(분 전)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정', '첨부파일 수', '사용자 정의 필드']
+export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '알림(분 전)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정', '첨부파일 수', '댓글 수', '사용자 정의 필드']
 
 export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.map(log => [
   log.log_date,
@@ -366,6 +369,7 @@ export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.
   checklistSummary(log.checklist),
   pinnedIds?.has(log.id) ? 'Y' : '',
   log.attachment_count || '',
+  log.comment_count || '',
   customFieldsSummary(log.custom_fields),
 ])
 

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-csv-excel-comment-count-column',
+    timestamp: '2026-07-23T04:52:00+09:00',
+    description: '업무·일정·할 일·업무일지 CSV/Excel 내보내기에 댓글 수(comment_count) 열을 추가했습니다. 첨부파일 수는 이미 노출되고 있었는데 목록 화면 배지로 표시되는 댓글 수는 내보내기에서 빠져 있던 것을 맞췄습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-23-series-edit-estimated-minutes-parity',
     timestamp: '2026-07-23T05:05:00+09:00',
     description: '반복 일정/할 일에서 "이후 반복 항목에 모두 적용"으로 예상 소요 시간을 수정하면 값이 저장되지 않고 조용히 무시되던 것을 수정했습니다. 반복 업무는 이미 정상 동작했는데 반복 일정·할 일만 빠져 있던 것을 맞췄습니다(`backend/app/main.py`의 `TODO_SERIES_EDITABLE_FIELDS`/`EVENT_SERIES_EDITABLE_FIELDS`).',
