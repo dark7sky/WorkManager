@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-series-edit-estimated-minutes-parity',
+    timestamp: '2026-07-23T05:05:00+09:00',
+    description: '반복 일정/할 일에서 "이후 반복 항목에 모두 적용"으로 예상 소요 시간을 수정하면 값이 저장되지 않고 조용히 무시되던 것을 수정했습니다. 반복 업무는 이미 정상 동작했는데 반복 일정·할 일만 빠져 있던 것을 맞췄습니다(`backend/app/main.py`의 `TODO_SERIES_EDITABLE_FIELDS`/`EVENT_SERIES_EDITABLE_FIELDS`).',
+  },
+  {
     id: '2026-07-23-duplicate-reminder-customfields-parity',
     timestamp: '2026-07-23T04:45:00+09:00',
     description: '업무·일정·할 일·업무일지를 "복제"할 때 알림 시점(reminder_minutes_before)이 항상 초기화되어 복제 후 알림을 다시 설정해야 했던 문제를 수정했습니다. 또한 일정·할 일 복제 시 사용자 정의 필드가 누락되던 것도 함께 맞췄습니다(`frontend/src/taskFormPayload.js`, `eventDuplicate.js`, `todoDuplicate.js`, `logDuplicate.js`).',
