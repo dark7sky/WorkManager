@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-quick-capture-dismiss-item',
+    timestamp: '2026-07-22T13:40:39+09:00',
+    description: '빠른 입력(Ctrl/⌘+K)으로 여러 건을 한 번에 분석했을 때, 불필요한 제안 하나만 빼고 싶어도 전체를 지우고 다시 입력해야 했습니다. AI 어시스턴트 화면처럼 카드별 무시(X) 버튼을 추가해 개별 제안만 제거할 수 있도록 했습니다.',
+  },
+  {
     id: '2026-07-22-performance-estimate-variance',
     timestamp: '2026-07-22T13:44:00+09:00',
     description: '성과 화면의 태그별 소요 시간에서 완료 업무의 예상 소요 시간이 서버에서 계산되고도 화면에는 표시되지 않아, 어떤 태그가 예상보다 오래 걸리는지 알 수 없었습니다. 태그별 항목에 "예상 X 대비 +N%/-N%" 편차를 표시하도록 했습니다.',

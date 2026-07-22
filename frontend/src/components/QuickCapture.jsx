@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, ArrowRight, CornerDownLeft, LoaderCircle, Search } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CornerDownLeft, LoaderCircle, Search, X } from 'lucide-react'
 import Modal from './Modal'
 import { api } from '../api'
 import { searchItems, searchScreens } from '../commandPalette'
@@ -57,6 +57,12 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
     finally { setBusy(false) }
   }
 
+  const dismissItem = index => {
+    const remaining = items.filter((_, i) => i !== index)
+    setItems(remaining)
+    if (!remaining.length) onClose()
+  }
+
   const applyAll = async () => {
     setBusy(true)
     let succeeded = 0
@@ -85,10 +91,14 @@ export default function QuickCapture({ open, onClose, notify, onApplied, data, o
       {items.map((item, index) => {
         const data = item?.data || {}
         return <div className="quick-capture-preview" key={`${item.action}-${item.entity}-${index}`}>
-          <small>{ACTION_LABELS[item.action] || item.action} · {ENTITY_LABELS[item.entity] || item.entity}</small>
+          <div className="quick-capture-preview-head">
+            <small>{ACTION_LABELS[item.action] || item.action} · {ENTITY_LABELS[item.entity] || item.entity}</small>
+            <button type="button" className="preview-dismiss" title="이 제안 무시" aria-label="이 제안 무시" disabled={busy} onClick={() => dismissItem(index)}><X aria-hidden="true"/></button>
+          </div>
           <strong>{data.title || data.content || '제목 없음'}</strong>
           {data.start_at || data.due_date || data.log_date ? <span>{data.start_at || data.due_date || data.log_date}</span> : null}
           <div className="form-actions">
+            <button type="button" className="secondary" disabled={busy} onClick={() => dismissItem(index)}>무시</button>
             <button type="button" className="primary" disabled={busy} onClick={() => applyItem(index)}>{busy ? <LoaderCircle className="spin"/> : null} 추가</button>
           </div>
         </div>
