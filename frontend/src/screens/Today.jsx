@@ -29,7 +29,7 @@ import { moveChecklistItem, normalizedChecklist, normalizedCustomFields, normali
 import { addTodoTemplate, applyTodoTemplate, buildTodoTemplate, loadTodoTemplates, removeTodoTemplate, saveTodoTemplates } from '../todoTemplates'
 import { nextRowIndex } from '../rowNavigation'
 import { addLogTemplate, applyLogTemplate, buildLogTemplate, loadLogTemplates, removeLogTemplate, saveLogTemplates } from '../logTemplates'
-import { allIdsSelected, toggleSelectAllIds } from '../taskFilters'
+import { allIdsSelected, selectExportRows, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingWorkLogs } from '../workLogOverlap'
 import { findOverlappingTodos } from '../todoOverlap'
 import { findDuplicateTitleTodos } from '../todoDuplicateCheck'
@@ -588,6 +588,8 @@ export default function Today(props) {
   const completedTodos = filteredTodos.filter(todo => todo.completed)
   const shownTodos = orderTodosByPin(filterTodosByCompleted(filteredTodos, hideCompletedTodos), pinnedTodoIds, todoSort, todoManualOrder)
   const shownLogs = orderLogsByPin(filterLogsByPriority(filterLogsByBillable(filterLogsByQuery(logs.filter(matches), query), logBillableFilter), logPriorityFilter), pinnedLogIds, logSort, logManualOrder)
+  const exportTodoRows = selectExportRows(shownTodos, selectedTodoIds)
+  const exportLogRows = selectExportRows(shownLogs, selectedLogIds)
   const todayKey = now.toLocaleDateString('en-CA')
   const overlappingNewLog = useMemo(() => findOverlappingWorkLogs(todayKey, logTime, logMinutes, logs, null), [todayKey, logTime, logMinutes, logs])
   const editingLog = edit?.type === 'log' ? logs.find(l => l.id === edit.id) : null
@@ -804,21 +806,21 @@ export default function Today(props) {
     finally { setSaving('') }
   }
   const exportTodos = () => {
-    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(shownTodos, pinnedTodoIds), todoCsvColumns)
+    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(exportTodoRows, pinnedTodoIds), todoCsvColumns)
     const csv = `﻿${rowsToCsv(headers, rows)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportTodosExcel = () => {
-    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(shownTodos, pinnedTodoIds), todoCsvColumns)
+    const { headers, rows } = filterCsvColumns(todoHeaders, todoRows(exportTodoRows, pinnedTodoIds), todoCsvColumns)
     const xml = rowsToSpreadsheetXml('Todo', headers, rows), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportTodosIcs = () => {
-    const ics = todosToIcs(shownTodos), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const ics = todosToIcs(exportTodoRows), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = todoIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const printTodosReport = () => {
-    const html = todosToPrintableReport(shownTodos), win = window.open('', '_blank')
+    const html = todosToPrintableReport(exportTodoRows), win = window.open('', '_blank')
     if (!win) return
     win.document.open();win.document.write(html);win.document.close();win.document.title=todoReportFilename(now.toLocaleDateString('en-CA'));win.focus();win.print()
   }
@@ -869,21 +871,21 @@ export default function Today(props) {
   const bulkChangeLogColor = async () => { await onBulkColorLog([...selectedLogIds], bulkLogColor); clearSelectedLogs() }
   const bulkChangeLogBillable = async () => { await onBulkBillableLog([...selectedLogIds], bulkLogBillable === 'billable'); clearSelectedLogs() }
   const exportLogsIcs = () => {
-    const ics = logsToIcs(shownLogs), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
+    const ics = logsToIcs(exportLogRows), blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = logIcsFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportLogs = () => {
-    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
+    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(exportLogRows, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
     const csv = `﻿${rowsToCsv(headers, rows)}`, blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogCsvFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const exportLogsExcel = () => {
-    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(shownLogs, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
+    const { headers, rows } = filterCsvColumns(workLogHeaders, workLogRows(exportLogRows, taskTitle, billingHourlyRate, pinnedLogIds), logCsvColumns)
     const xml = rowsToSpreadsheetXml('업무 기록', headers, rows), blob = new Blob([xml], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = workLogExcelFilename(now.toLocaleDateString('en-CA')); document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url)
   }
   const printLogsReport = () => {
-    const html = workLogsToPrintableReport(shownLogs, taskTitle, billingHourlyRate), win = window.open('', '_blank')
+    const html = workLogsToPrintableReport(exportLogRows, taskTitle, billingHourlyRate), win = window.open('', '_blank')
     if (!win) return
     win.document.open();win.document.write(html);win.document.close();win.document.title=workLogReportFilename(now.toLocaleDateString('en-CA'));win.focus();win.print()
   }
@@ -931,12 +933,12 @@ export default function Today(props) {
           <TagsInput label="Todo 태그" value={todoTags} onChange={setTodoTags}/><div className="tag-recommend"><button type="button" className="text-button" onClick={() => recommendTags('todo-new', 'todo', todoDraft)}>AI 태그 추천</button>{recommendationButtons('todo-new', todoTags, setTodoTags)}<button type="button" className="text-button" disabled={saving === 'estimate-todo'} onClick={recommendTodoEstimate}>AI 우선순위·예상시간 추천</button></div>
         </form>
         {completedTodos.length ? <button type="button" className="text-button" onClick={() => onClearCompletedTodos(completedTodos.map(todo => todo.id))}>완료된 항목 정리 ({completedTodos.length})</button> : null}
-        {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport}><FileText size={14}/> PDF</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={printTodosReport} title={selectedTodoIds.size?`선택한 ${selectedTodoIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><FileText size={14}/> PDF</button> : null}
         {shownTodos.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setTodoBadgeMenuOpen(o => !o)} aria-expanded={todoBadgeMenuOpen} aria-label="표시 항목 설정"><SlidersHorizontal size={14}/> 표시 항목</button>{todoBadgeMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{TODO_BADGE_OPTIONS.map(opt => <label key={opt.key}><input type="checkbox" checked={visibleTodoBadges.has(opt.key)} onChange={() => toggleTodoBadge(opt.key)}/>{opt.label}</label>)}</div> : null}</div> : null}
         {shownTodos.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setTodoCsvColumnMenuOpen(o => !o)} aria-expanded={todoCsvColumnMenuOpen} aria-label="내보낼 열 설정"><SlidersHorizontal size={14}/> 내보낼 열</button>{todoCsvColumnMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{TODO_CSV_COLUMN_OPTIONS.map(opt => <label key={opt.index}><input type="checkbox" checked={todoCsvColumns.has(opt.index)} onChange={() => toggleTodoCsvCol(opt.index)}/>{opt.label}</label>)}</div> : null}</div> : null}
-        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos}><Download size={14}/> CSV 내보내기</button> : null}
-        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosExcel}><Download size={14}/> Excel</button> : null}
-        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs}><Download size={14}/> ICS</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodos} title={selectedTodoIds.size?`선택한 ${selectedTodoIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> CSV 내보내기</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosExcel} title={selectedTodoIds.size?`선택한 ${selectedTodoIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> Excel</button> : null}
+        {shownTodos.length ? <button type="button" className="text-button" onClick={exportTodosIcs} title={selectedTodoIds.size?`선택한 ${selectedTodoIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> ICS</button> : null}
         {onImportTodos ? <><button type="button" className="text-button" onClick={() => todoImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={todoImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importTodosCsv}/><button type="button" className="text-button" onClick={() => todoIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={todoIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importTodosIcs}/></> : null}
         {overdueTodos.length ? <div className="carryover-banner"><span>지난 할 일 {overdueTodos.length}개가 남아 있습니다.</span><button type="button" className="text-button" onClick={() => onCarryOverTodos(overdueTodos.map(todo => todo.id))}>오늘로 이월</button></div> : null}
         {shownTodos.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="할 일 전체 선택" checked={allShownTodosSelected} onChange={toggleSelectAllTodos}/>전체 선택</label> : null}
@@ -962,12 +964,12 @@ export default function Today(props) {
         <select aria-label="업무 기록 우선순위 필터" value={logPriorityFilter} onChange={event => setLogPriorityFilter(event.target.value)}><option value="all">모든 우선순위</option><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select>
         <select aria-label="업무 기록 정렬" value={logSort} onChange={event => setLogSort(event.target.value)}><option value="none">기본순</option><option value="time">시각순</option><option value="duration">소요 시간순</option><option value="content">내용순</option><option value="priority">우선순위순</option><option value="manual">직접 정렬</option></select>
         <div className="filter-preset-bar">{logFilterPresets.length ? <select aria-label="저장된 기록 필터" defaultValue="" onChange={e => { applyLogFilterPreset(e.target.value); e.target.value = '' }}><option value="" disabled>필터 선택</option>{logFilterPresets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select> : null}<button type="button" className="text-button" onClick={saveLogFilterPreset}>필터 저장</button>{logFilterPresets.length ? <button type="button" className="text-button" onClick={deleteLogFilterPreset}>필터 삭제</button> : null}{logFiltersActive ? <button type="button" className="text-button" onClick={resetLogFilters}>필터 초기화</button> : null}</div>
-        {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport}><FileText size={14}/> PDF</button> : null}
-        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs}><Download size={14}/> ICS</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={printLogsReport} title={selectedLogIds.size?`선택한 ${selectedLogIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><FileText size={14}/> PDF</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsIcs} title={selectedLogIds.size?`선택한 ${selectedLogIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> ICS</button> : null}
         {shownLogs.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setLogBadgeMenuOpen(o => !o)} aria-expanded={logBadgeMenuOpen} aria-label="표시 항목 설정"><SlidersHorizontal size={14}/> 표시 항목</button>{logBadgeMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{WORK_LOG_BADGE_OPTIONS.map(opt => <label key={opt.key}><input type="checkbox" checked={visibleLogBadges.has(opt.key)} onChange={() => toggleLogBadge(opt.key)}/>{opt.label}</label>)}</div> : null}</div> : null}
         {shownLogs.length ? <div className="badge-visibility-menu"><button type="button" className="text-button" onClick={() => setLogCsvColumnMenuOpen(o => !o)} aria-expanded={logCsvColumnMenuOpen} aria-label="내보낼 열 설정"><SlidersHorizontal size={14}/> 내보낼 열</button>{logCsvColumnMenuOpen ? <div className="badge-visibility-dropdown" role="menu">{WORK_LOG_CSV_COLUMN_OPTIONS.map(opt => <label key={opt.index}><input type="checkbox" checked={logCsvColumns.has(opt.index)} onChange={() => toggleLogCsvCol(opt.index)}/>{opt.label}</label>)}</div> : null}</div> : null}
-        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs}><Download size={14}/> CSV 내보내기</button> : null}
-        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsExcel}><Download size={14}/> Excel</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogs} title={selectedLogIds.size?`선택한 ${selectedLogIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> CSV 내보내기</button> : null}
+        {shownLogs.length ? <button type="button" className="text-button" onClick={exportLogsExcel} title={selectedLogIds.size?`선택한 ${selectedLogIds.size}개만 내보내기`:'표시된 항목 전체 내보내기'}><Download size={14}/> Excel</button> : null}
         {onImportLogs ? <><button type="button" className="text-button" onClick={() => logImportInputRef.current?.click()}><Upload size={14}/> CSV 가져오기</button><input ref={logImportInputRef} type="file" accept=".csv,text/csv" hidden onChange={importLogsCsv}/><button type="button" className="text-button" onClick={() => logIcsImportInputRef.current?.click()}><Upload size={14}/> ICS 가져오기</button><input ref={logIcsImportInputRef} type="file" accept=".ics,text/calendar" hidden onChange={importLogsIcs}/></> : null}
         {shownLogs.length > 1 ? <label className="select-all-shown"><input type="checkbox" aria-label="업무 기록 전체 선택" checked={allShownLogsSelected} onChange={toggleSelectAllLogs}/>전체 선택</label> : null}
         {selectedLogIds.size ? <div className="bulk-action-bar" role="toolbar" aria-label="선택 업무 기록 일괄 작업"><span>{selectedLogIds.size}개 선택됨</span><form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkAddTagLogs() }}><Tag size={14}/><input aria-label="추가/제거할 태그" value={bulkLogTag} onChange={e => setBulkLogTag(e.target.value)} placeholder="태그 추가/제거"/><button type="submit" className="secondary" disabled={!bulkLogTag.trim()}>추가</button>{onBulkRemoveTagLog ? <button type="button" className="secondary" onClick={bulkRemoveTagLogs} disabled={!bulkLogTag.trim()}>제거</button> : null}</form>{onBulkPostponeLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkPostponeLogs() }}><CalendarClock size={14}/><input aria-label="연기할 일수" type="number" min="1" value={bulkLogPostponeDays} onChange={e => setBulkLogPostponeDays(e.target.value)} style={{ width: '3.5rem' }}/><button type="submit" className="secondary" disabled={!Number(bulkLogPostponeDays)}>연기</button></form> : null}{onBulkPriorityLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogPriority() }}><Flag size={14}/><select aria-label="변경할 우선순위" value={bulkLogPriority} onChange={e => setBulkLogPriority(e.target.value)}><option value="high">높음</option><option value="normal">보통</option><option value="low">낮음</option></select><button type="submit" className="secondary">우선순위 변경</button></form> : null}{onBulkColorLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogColor() }}><Palette size={14}/><select aria-label="변경할 색상" value={bulkLogColor} onChange={e => setBulkLogColor(e.target.value)}>{EVENT_COLORS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select><button type="submit" className="secondary">색상 변경</button></form> : null}{onBulkBillableLog ? <form className="bulk-tag-form" onSubmit={e => { e.preventDefault(); bulkChangeLogBillable() }}><DollarSign size={14}/><select aria-label="변경할 청구 여부" value={bulkLogBillable} onChange={e => setBulkLogBillable(e.target.value)}><option value="billable">청구 가능</option><option value="non-billable">청구 불가</option></select><button type="submit" className="secondary">청구 여부 변경</button></form> : null}{onBulkDuplicateLog ? <button type="button" className="secondary" onClick={bulkDuplicateLogs}><Copy size={16}/>복제</button> : null}{onBulkArchiveLog ? <button type="button" className="secondary" onClick={bulkArchiveLogs}><Archive size={16}/>보관</button> : null}{onBulkPromoteLog ? <button type="button" className="secondary" onClick={bulkPromoteLogs}><ArrowUpRight size={16}/>업무로 전환</button> : null}<button type="button" className="danger-button" onClick={bulkDeleteLogs}>삭제</button><button type="button" className="text-button" onClick={clearSelectedLogs}>선택 해제</button></div> : null}

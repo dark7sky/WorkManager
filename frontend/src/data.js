@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-export-selected-only-parity',
+    timestamp: '2026-07-22T18:22:18+09:00',
+    description: '업무(Tasks) 화면에서는 항목을 체크박스로 선택한 뒤 CSV/Excel/ICS/PDF로 내보내면 선택한 항목만 내보내졌지만, 할 일/업무 기록/일정 화면은 선택 여부와 무관하게 항상 화면에 표시된 전체 목록을 내보냈습니다. 세 화면 모두 선택된 항목이 있으면 그 항목만, 없으면 기존처럼 전체를 내보내도록 통일했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`).',
+  },
+  {
     id: '2026-07-22-priority-null-reset',
     timestamp: '2026-07-22T18:32:00+09:00',
     description: '업무/할 일의 우선순위 필드를 명시적으로 비우려고 하면(예: API로 priority: null 전송) "Fields cannot be null" 오류가 발생했습니다(일정/업무 기록은 정상적으로 비워짐). 업무/할 일은 우선순위 값이 비어 있을 수 없는 구조라, null 전송 시 오류 대신 기본값(보통)으로 재설정되도록 수정했습니다(`backend/app/main.py`).',
