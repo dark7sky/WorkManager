@@ -1,4 +1,4 @@
-import { normalizedEstimatedMinutes, normalizedChecklist, normalizedLinks } from './taskFormPayload.js'
+import { normalizedEstimatedMinutes, normalizedChecklist, normalizedLinks, normalizedCustomFields, normalizedReminderMinutesBefore } from './taskFormPayload.js'
 
 export const buildEventDuplicatePayload = event => ({
   title: `${(event?.title || '').trim()} (사본)`,
@@ -14,6 +14,8 @@ export const buildEventDuplicatePayload = event => ({
   links: normalizedLinks(event?.links),
   checklist: normalizedChecklist(event?.checklist).map(item => ({ ...item, done: false })),
   google_is_all_day: !!event?.google_is_all_day,
+  custom_fields: normalizedCustomFields(event?.custom_fields),
+  reminder_minutes_before: normalizedReminderMinutesBefore(event?.reminder_minutes_before),
 })
 
 const EVENT_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }

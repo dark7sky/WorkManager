@@ -179,5 +179,6 @@ export const buildTaskDuplicatePayload = task => {
     tags: normalizedTaskTags(task?.tags),
     parent_id: normalizedOptionalId(task?.parent_id),
     dependency_ids: normalizedDependencyIds(task?.dependency_ids, sourceId),
+    reminder_minutes_before: normalizedReminderMinutesBefore(task?.reminder_minutes_before),
   }
 }

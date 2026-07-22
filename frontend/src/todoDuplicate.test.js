@@ -100,3 +100,16 @@ test('buildTaskFromTodoPayload carries estimated_minutes', () => {
   assert.equal(buildTaskFromTodoPayload(todo).estimated_minutes, 90)
   assert.equal(buildTaskFromTodoPayload({ title: '무제' }).estimated_minutes, null)
 })
+
+test('buildTodoDuplicatePayload copies reminder_minutes_before and custom_fields', () => {
+  const todo = { title: '보고서 작성', reminder_minutes_before: 30, custom_fields: [{ id: 'f1', label: '고객', value: 'ACME' }] }
+  const result = buildTodoDuplicatePayload(todo)
+  assert.equal(result.reminder_minutes_before, 30)
+  assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '고객', value: 'ACME' }])
+})
+
+test('buildTodoDuplicatePayload defaults reminder_minutes_before and custom_fields when missing', () => {
+  const result = buildTodoDuplicatePayload({ title: '무제' })
+  assert.equal(result.reminder_minutes_before, null)
+  assert.deepEqual(result.custom_fields, [])
+})

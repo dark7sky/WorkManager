@@ -1,4 +1,4 @@
-import { normalizedEstimatedMinutes } from './taskFormPayload.js'
+import { normalizedEstimatedMinutes, normalizedCustomFields, normalizedReminderMinutesBefore } from './taskFormPayload.js'
 
 export const buildTodoDuplicatePayload = todo => ({
   title: `${(todo?.title || '').trim()} (사본)`,
@@ -15,6 +15,8 @@ export const buildTodoDuplicatePayload = todo => ({
   color: todo?.color || null,
   checklist: Array.isArray(todo?.checklist) ? todo.checklist.map(item => ({ ...item, done: false })) : [],
   estimated_minutes: normalizedEstimatedMinutes(todo?.estimated_minutes),
+  custom_fields: normalizedCustomFields(todo?.custom_fields),
+  reminder_minutes_before: normalizedReminderMinutesBefore(todo?.reminder_minutes_before),
 })
 
 const TODO_PRIORITY_TO_TASK = { high: 'high', normal: 'normal', low: 'low' }

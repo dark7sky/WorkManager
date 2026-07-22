@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-duplicate-reminder-customfields-parity',
+    timestamp: '2026-07-23T04:45:00+09:00',
+    description: '업무·일정·할 일·업무일지를 "복제"할 때 알림 시점(reminder_minutes_before)이 항상 초기화되어 복제 후 알림을 다시 설정해야 했던 문제를 수정했습니다. 또한 일정·할 일 복제 시 사용자 정의 필드가 누락되던 것도 함께 맞췄습니다(`frontend/src/taskFormPayload.js`, `eventDuplicate.js`, `todoDuplicate.js`, `logDuplicate.js`).',
+  },
+  {
     id: '2026-07-23-csv-excel-attachment-count-column',
     timestamp: '2026-07-23T00:27:51+09:00',
     description: 'CSV/Excel 내보내기에 첨부파일 개수가 표시되지 않아, 목록을 훑어봐야만 어떤 업무·일정·할 일·업무일지에 첨부파일이 있는지 알 수 있었던 것을 수정해 4개 항목 모두의 내보내기에 "첨부파일 수" 열을 추가했습니다(`frontend/src/csv.js`, 내보내기 전용이며 가져오기 시 사용되지 않음).',

@@ -48,6 +48,18 @@ test('buildEventDuplicatePayload copies estimated_minutes', () => {
   assert.equal(result.estimated_minutes, 90)
 })
 
+test('buildEventDuplicatePayload copies reminder_minutes_before and custom_fields', () => {
+  const result = buildEventDuplicatePayload({ title: '워크숍', reminder_minutes_before: 15, custom_fields: [{ id: 'f1', label: '담당', value: '홍길동' }] })
+  assert.equal(result.reminder_minutes_before, 15)
+  assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '담당', value: '홍길동' }])
+})
+
+test('buildEventDuplicatePayload defaults reminder_minutes_before and custom_fields when missing', () => {
+  const result = buildEventDuplicatePayload({ title: '휴가' })
+  assert.equal(result.reminder_minutes_before, null)
+  assert.deepEqual(result.custom_fields, [])
+})
+
 test('buildTaskFromEventPayload maps event fields into a task payload', () => {
   const event = { title: '주간 회의', priority: 'high', start_at: '2026-07-14T09:00:00', description: '메모', link_url: 'https://x.com', estimated_minutes: 30, checklist: [{ id: 'c1', text: '준비', done: true }] }
   const result = buildTaskFromEventPayload(event)

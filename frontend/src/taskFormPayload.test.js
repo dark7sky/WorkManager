@@ -213,6 +213,11 @@ test('buildTaskDuplicatePayload copies estimated_minutes', () => {
   assert.equal(payload.estimated_minutes, 60)
 })
 
+test('buildTaskDuplicatePayload copies reminder_minutes_before, defaulting to null when missing', () => {
+  assert.equal(buildTaskDuplicatePayload({ id: 1, title: '업무', reminder_minutes_before: 10 }).reminder_minutes_before, 10)
+  assert.equal(buildTaskDuplicatePayload({ id: 1, title: '업무' }).reminder_minutes_before, null)
+})
+
 test('buildTaskPayload normalizes link_url, rejecting blank or non-http values', () => {
   assert.equal(buildTaskPayload({ ...baseData, link_url: 'https://example.com/doc' }, { task: { id: 1 } }).link_url, 'https://example.com/doc')
   assert.equal(buildTaskPayload({ ...baseData, link_url: '' }, { task: { id: 1 } }).link_url, null)
