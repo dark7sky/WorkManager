@@ -8,7 +8,7 @@ import uuid
 import calendar as month_calendar
 from datetime import date, datetime, timedelta
 from typing import Literal
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import httpx
 from fastapi import Body, Cookie, Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
@@ -147,6 +147,11 @@ def load_billing_vat_included_setting(user_id):
 
 def _ics_escape(value):
     return str(value or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+
+
+def attachment_content_disposition(filename):
+    safe = (filename or "attachment").replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", "")
+    return f'attachment; filename="{safe}"; filename*=UTF-8\'\'{quote(filename or "attachment")}'
 
 
 def _ics_fold(line):
@@ -1571,7 +1576,7 @@ def task_attachments_download(task_id: int, attachment_id: int, user=Depends(req
         item = row_dict(row)
     data = base64.b64decode(item["data_base64"])
     return Response(content=data, media_type=item["content_type"], headers={
-        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+        "Content-Disposition": attachment_content_disposition(item["filename"])})
 
 
 @app.delete("/api/tasks/{task_id}/attachments/{attachment_id}")
@@ -1635,7 +1640,7 @@ def event_attachments_download(event_id: int, attachment_id: int, user=Depends(r
         item = row_dict(row)
     data = base64.b64decode(item["data_base64"])
     return Response(content=data, media_type=item["content_type"], headers={
-        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+        "Content-Disposition": attachment_content_disposition(item["filename"])})
 
 
 @app.delete("/api/events/{event_id}/attachments/{attachment_id}")
@@ -1699,7 +1704,7 @@ def todo_attachments_download(todo_id: int, attachment_id: int, user=Depends(req
         item = row_dict(row)
     data = base64.b64decode(item["data_base64"])
     return Response(content=data, media_type=item["content_type"], headers={
-        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+        "Content-Disposition": attachment_content_disposition(item["filename"])})
 
 
 @app.delete("/api/todos/{todo_id}/attachments/{attachment_id}")
@@ -1763,7 +1768,7 @@ def work_log_attachments_download(log_id: int, attachment_id: int, user=Depends(
         item = row_dict(row)
     data = base64.b64decode(item["data_base64"])
     return Response(content=data, media_type=item["content_type"], headers={
-        "Content-Disposition": f'attachment; filename="{item["filename"]}"'})
+        "Content-Disposition": attachment_content_disposition(item["filename"])})
 
 
 @app.delete("/api/work_logs/{log_id}/attachments/{attachment_id}")

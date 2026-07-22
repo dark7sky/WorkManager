@@ -803,6 +803,11 @@ class ApiTests(unittest.TestCase):
         logs = a.get("/api/audit-logs?limit=500").json()["items"]
         self.assertTrue(any(x["entity_type"] == "task_attachment" and x["action"] == "delete" and x["entity_id"] == str(attachment_id) for x in logs))
 
+    def test_attachment_content_disposition_escapes_quotes_in_filename(self, *_):
+        from app.main import attachment_content_disposition
+        header = attachment_content_disposition('my "notes".txt')
+        self.assertEqual(header, 'attachment; filename="my \\"notes\\".txt"; filename*=UTF-8\'\'my%20%22notes%22.txt')
+
     def test_event_attachments_upload_download_delete_and_size_limit(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         event = a.post("/api/events", json={"title": "event with attachments", "start_at": "2026-06-01T09:00:00", "end_at": "2026-06-01T10:00:00"}).json()

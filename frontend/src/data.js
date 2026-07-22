@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-attachment-filename-quote-escaping',
+    timestamp: '2026-07-22T18:36:05+09:00',
+    description: '업무/일정/할 일/업무 기록 첨부파일 다운로드 시, 파일 이름에 큰따옴표(")가 포함되어 있으면 Content-Disposition 헤더가 깨져 브라우저가 파일명을 잘못 인식하거나 다운로드가 실패할 수 있었습니다. 네 엔티티의 다운로드 엔드포인트가 공통 헬퍼로 파일명을 이스케이프하고 비ASCII 파일명을 위한 filename* 대체 값도 함께 내려주도록 수정했습니다(`backend/app/main.py`).',
+  },
+  {
     id: '2026-07-22-share-link-copy-failure-feedback',
     timestamp: '2026-07-22T18:38:00+09:00',
     description: '업무/일정 상세의 "공유 링크 만들기" 복사 버튼과 할 일/업무 기록의 공유 링크 복사 버튼은 클립보드 복사가 실패해도(권한 거부, 포커스 이탈 등) 아무 안내 없이 조용히 실패했습니다. 이미 같은 화면의 "링크" 딥링크 복사 버튼들이 사용하던 것과 동일한 실패 안내(오류 메시지/토스트)를 네 곳 모두에 추가했습니다(`frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
