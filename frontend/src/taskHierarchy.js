@@ -14,7 +14,7 @@ const byProgress = (a, b) => {
   return ap !== bp ? bp - ap : bySchedule(a, b)
 }
 
-export const TASK_SORT_COMPARATORS = { schedule: bySchedule, priority: byPriority, progress: byProgress, title: byTitle }
+export const TASK_SORT_COMPARATORS = { schedule: bySchedule, priority: byPriority, progress: byProgress, title: byTitle, manual: bySchedule }
 export const DEFAULT_TASK_SORT = 'schedule'
 export const TASK_SORT_STORAGE_KEY = 'wm-task-sort'
 
@@ -208,8 +208,24 @@ export const subtaskRowClass = depth => depth > 0 ? ` subtask-row subtask-depth-
 
 export const taskIndent = depth => `${8 + Math.min(depth, 5) * 18}px`
 
-export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, sortBy = DEFAULT_TASK_SORT, pinnedIds = null, collapsedIds = null) => {
-  const compare = TASK_SORT_COMPARATORS[sortBy] || bySchedule
+export const taskSiblingIds = (visibleTasks, taskId) => {
+  const visible = new Set(visibleTasks.map(t => t.id))
+  const task = visibleTasks.find(t => t.id === taskId)
+  if (!task) return []
+  const parent = visible.has(task.parent_id) ? task.parent_id : null
+  return visibleTasks.filter(t => (visible.has(t.parent_id) ? t.parent_id : null) === parent).map(t => t.id)
+}
+
+export const orderTasksHierarchically = (visibleTasks, allTasks = visibleTasks, sortBy = DEFAULT_TASK_SORT, pinnedIds = null, collapsedIds = null, manualOrder = null) => {
+  const compare = sortBy === 'manual' && manualOrder
+    ? (a, b) => {
+      const ao = manualOrder[a.id], bo = manualOrder[b.id]
+      if (ao != null && bo != null) return ao - bo
+      if (ao != null) return -1
+      if (bo != null) return 1
+      return bySchedule(a, b)
+    }
+    : TASK_SORT_COMPARATORS[sortBy] || bySchedule
   const rank = pinnedIds && pinnedIds.size ? (a, b) => {
     const ap = pinnedIds.has(a.id) ? 0 : 1, bp = pinnedIds.has(b.id) ? 0 : 1
     return ap !== bp ? ap - bp : compare(a, b)

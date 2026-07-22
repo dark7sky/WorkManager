@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { canReparentTask, criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskIndentTarget, taskOutdentTarget, taskParentOptions, taskDependencyOptions, taskBulkParentOptions } from './taskHierarchy.js'
+import { canReparentTask, criticalPathTaskIds, DEFAULT_TASK_SORT, directDependentTasks, loadTaskSort, matchesDependencyFilter, orderTasksHierarchically, saveTaskSort, subtaskCompletionSummary, subtaskRowClass, taskIndent, taskIndentTarget, taskOutdentTarget, taskParentOptions, taskDependencyOptions, taskBulkParentOptions, taskSiblingIds } from './taskHierarchy.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -222,6 +222,31 @@ test('orderTasksHierarchically sorts siblings by title when sortBy is title', ()
 test('orderTasksHierarchically keeps children grouped under their parent regardless of sortBy', () => {
   const ordered = orderTasksHierarchically([tasks[3], tasks[2], tasks[1], tasks[0]], tasks, 'title')
   assert.deepEqual(ordered.map(item => [item.task.id, item.depth]), [[1, 0], [2, 1], [3, 2], [4, 0]])
+})
+
+test('orderTasksHierarchically sorts top-level siblings by manual order when sortBy is manual', () => {
+  const items = [
+    { id: 1, title: 'Zeta' },
+    { id: 2, title: 'Alpha' },
+    { id: 3, title: 'Beta' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'manual', null, null, { 1: 2, 2: 0, 3: 1 })
+  assert.deepEqual(ordered.map(item => item.task.id), [2, 3, 1])
+})
+
+test('orderTasksHierarchically falls back to schedule order for tasks missing a manual order entry', () => {
+  const items = [
+    { id: 1, title: 'Zeta', start_date: '2026-07-01' },
+    { id: 2, title: 'Alpha', start_date: '2026-07-02' },
+  ]
+  const ordered = orderTasksHierarchically(items, items, 'manual', null, null, {})
+  assert.deepEqual(ordered.map(item => item.task.id), [1, 2])
+})
+
+test('taskSiblingIds returns only tasks sharing the same visible parent', () => {
+  assert.deepEqual(taskSiblingIds(tasks, 2), [2])
+  assert.deepEqual(taskSiblingIds(tasks, 1), [1, 4])
+  assert.deepEqual(taskSiblingIds([tasks[1], tasks[2]], 3), [3])
 })
 
 test('orderTasksHierarchically puts pinned siblings first regardless of sortBy', () => {

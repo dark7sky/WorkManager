@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-task-manual-sort-order',
+    timestamp: '2026-07-22T13:57:12+09:00',
+    description: '할 일, 업무 기록, 일정에는 있던 "직접 정렬" 기능이 업무(Tasks) 화면에는 없어서 순서를 내 마음대로 바꿀 수 없었습니다. 업무 정렬 옵션에 "직접 정렬"을 추가하고, 같은 상위 업무 아래 항목끼리 드래그 또는 ▲▼ 버튼으로 순서를 바꿀 수 있도록 했습니다.',
+  },
+  {
     id: '2026-07-22-quick-capture-dismiss-item',
     timestamp: '2026-07-22T13:40:39+09:00',
     description: '빠른 입력(Ctrl/⌘+K)으로 여러 건을 한 번에 분석했을 때, 불필요한 제안 하나만 빼고 싶어도 전체를 지우고 다시 입력해야 했습니다. AI 어시스턴트 화면처럼 카드별 무시(X) 버튼을 추가해 개별 제안만 제거할 수 있도록 했습니다.',
