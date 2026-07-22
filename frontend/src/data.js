@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-keyboard-shortcuts-day-view-text',
+    timestamp: '2026-07-23T00:52:10+09:00',
+    description: '단축키 안내(`?`)의 ←/→ 설명이 캘린더 "일" 보기 추가 이전 문구("이전/다음 달·주·년")로 남아 있던 것을 고쳐, 일/주/달/년 보기에 따라 이동한다는 내용을 정확히 안내하도록 했습니다(`frontend/src/components/KeyboardShortcuts.jsx`).',
+  },
+  {
     id: '2026-07-23-public-share-custom-fields',
     timestamp: '2026-07-23T00:16:38+09:00',
     description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)에 사용자 정의 필드(custom_fields)가 표시되지 않던 것을 수정해, 체크리스트·태그처럼 공유 화면에도 함께 노출되도록 했습니다(`backend/app/main.py`의 4개 public 엔드포인트, `frontend/src/screens/PublicTask.jsx`/`PublicEvent.jsx`/`PublicTodo.jsx`/`PublicWorkLog.jsx`).',
