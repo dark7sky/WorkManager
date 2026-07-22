@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { clearNotificationHistory, loadNotificationHistory, pushNotificationHistory } from './notificationHistory.js'
+import { clearNotificationHistory, loadNotificationHistory, markNotificationHistoryRead, pushNotificationHistory, unreadNotificationCount } from './notificationHistory.js'
 
 class MemoryStorage {
   constructor() { this.store = new Map() }
@@ -43,4 +43,21 @@ test('clearNotificationHistory empties the stored list', () => {
   pushNotificationHistory('t', 'b', storage)
   clearNotificationHistory(storage)
   assert.deepEqual(loadNotificationHistory(storage), [])
+})
+
+test('new entries default to unread and count toward unreadNotificationCount', () => {
+  const storage = new MemoryStorage()
+  pushNotificationHistory('t1', 'b1', storage)
+  pushNotificationHistory('t2', 'b2', storage)
+  assert.equal(unreadNotificationCount(storage), 2)
+  assert.equal(loadNotificationHistory(storage).every(entry => entry.read === false), true)
+})
+
+test('markNotificationHistoryRead clears unread count without deleting entries', () => {
+  const storage = new MemoryStorage()
+  pushNotificationHistory('t1', 'b1', storage)
+  pushNotificationHistory('t2', 'b2', storage)
+  markNotificationHistoryRead(storage)
+  assert.equal(unreadNotificationCount(storage), 0)
+  assert.equal(loadNotificationHistory(storage).length, 2)
 })

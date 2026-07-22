@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-notification-unread-badge',
+    timestamp: '2026-07-22T18:53:00+09:00',
+    description: '설정 화면 안에 묻혀 있던 알림 기록을 새 알림이 와도 알아챌 방법이 없었던 것을, 사이드바 설정 메뉴에 안 읽은 알림 수 배지를 표시하고 설정 화면을 열면 자동으로 읽음 처리되도록 개선했습니다(`frontend/src/notificationHistory.js`의 `unreadNotificationCount`/`markNotificationHistoryRead`, `App.jsx`, `screens/Settings.jsx`).',
+  },
+  {
     id: '2026-07-22-attachment-size-precheck',
     timestamp: '2026-07-22T18:47:00+09:00',
     description: '업무/일정/할 일/업무 기록에 5MB를 초과하는 파일을 첨부하면 서버 응답을 기다린 뒤에야 오류가 표시되던 것을, 파일 선택 즉시 클라이언트에서 크기를 확인해 바로 안내하도록 개선했습니다(`frontend/src/api.js`의 `attachmentSizeError`, `TaskForm.jsx`/`Calendar.jsx`/`Today.jsx`).',

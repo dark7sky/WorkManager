@@ -11,10 +11,18 @@ export const loadNotificationHistory = (storage = localStorage) => {
 }
 
 export const pushNotificationHistory = (title, body, storage = localStorage) => {
-  const entry = { title, body, firedAt: new Date().toISOString() }
+  const entry = { title, body, firedAt: new Date().toISOString(), read: false }
   const next = [entry, ...loadNotificationHistory(storage)].slice(0, MAX_ENTRIES)
   storage.setItem(NOTIFICATION_HISTORY_STORAGE_KEY, JSON.stringify(next))
   return next
 }
 
 export const clearNotificationHistory = (storage = localStorage) => storage.setItem(NOTIFICATION_HISTORY_STORAGE_KEY, '[]')
+
+export const unreadNotificationCount = (storage = localStorage) => loadNotificationHistory(storage).filter(entry => !entry.read).length
+
+export const markNotificationHistoryRead = (storage = localStorage) => {
+  const next = loadNotificationHistory(storage).map(entry => entry.read ? entry : { ...entry, read: true })
+  storage.setItem(NOTIFICATION_HISTORY_STORAGE_KEY, JSON.stringify(next))
+  return next
+}

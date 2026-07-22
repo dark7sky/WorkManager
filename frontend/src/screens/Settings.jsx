@@ -11,7 +11,7 @@ import { EVENT_ALERT_LEAD_OPTIONS, EVENT_ALERT_LEAD_STORAGE_KEY, loadEventAlertL
 import { TODO_ALERT_LEAD_OPTIONS, TODO_ALERT_LEAD_STORAGE_KEY, loadTodoAlertLeadMinutes } from '../todoAlerts'
 import { TASK_ALERT_LEAD_OPTIONS, TASK_ALERT_LEAD_STORAGE_KEY, loadTaskAlertLeadMinutes } from '../taskAlerts'
 import { LOG_ALERT_LEAD_OPTIONS, LOG_ALERT_LEAD_STORAGE_KEY, loadLogAlertLeadMinutes } from '../logAlerts'
-import { clearNotificationHistory, loadNotificationHistory } from '../notificationHistory'
+import { clearNotificationHistory, loadNotificationHistory, markNotificationHistoryRead } from '../notificationHistory'
 
 const themes = [['auto', Monitor, '시스템'], ['light', Sun, '라이트'], ['dark', Moon, '다크']]
 
@@ -43,6 +43,7 @@ export default function Settings({ theme, setTheme, notify, onDataChanged, canIn
   const [logAlertLead, setLogAlertLead] = useState(loadLogAlertLeadMinutes)
   const [quietHours, setQuietHours] = useState(loadQuietHours)
   const [notificationHistory, setNotificationHistory] = useState(loadNotificationHistory)
+  useEffect(() => { markNotificationHistoryRead() }, [])
   const aiLoadSeq = useRef(0)
   const importFileRef = useRef(null)
 
