@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-worklog-client-rate-autofill',
+    timestamp: '2026-07-22T18:11:00+09:00',
+    description: '업무 기록에서 청구 고객명을 자동완성 목록에서 선택해도 시급 재정의 값은 매번 다시 입력해야 했습니다. 이제 이전에 같은 고객으로 청구한 기록이 있으면 가장 최근 시급을 자동으로 채워주며(직접 입력한 값은 덮어쓰지 않음), 새 기록 작성과 수정 화면 모두에 적용됩니다(`frontend/src/logClientRate.js`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-22-worklog-reminder-lead-time',
     timestamp: '2026-07-22T18:20:47+09:00',
     description: '업무/일정/할 일에는 있던 항목별 "알림 시점(분 전)" 기능이 업무 기록(오늘 한 일)에는 없어서, 시각을 지정해도 알림을 받을 수 없었습니다. 업무 기록에도 개별 알림 시점 필드를 추가하고 설정 화면에 전역 알림 시점 선택을 더했으며, CSV/Excel 내보내기·가져오기와 캘린더(.ics) 내보내기에도 반영했습니다(`backend/app/main.py`, `backend/app/db.py`, `frontend/src/logAlerts.js`, `frontend/src/screens/Settings.jsx`, `frontend/src/csv.js`, `frontend/src/ics.js`).',
