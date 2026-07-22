@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import os
 import re
@@ -2241,17 +2242,31 @@ def _share_expiry(expires_in_days: int | None):
     return (datetime.now() + timedelta(days=expires_in_days)).isoformat(timespec="seconds")
 
 
+def _hash_share_password(password: str | None):
+    if not password:
+        return None
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def _check_share_password(stored_hash: str | None, password: str | None):
+    if not stored_hash:
+        return
+    if not password or hashlib.sha256(password.encode()).hexdigest() != stored_hash:
+        raise HTTPException(401 if not password else 403, "비밀번호가 필요합니다." if not password else "비밀번호가 올바르지 않습니다.")
+
+
 @app.post("/api/tasks/{item_id}/share")
-def share_task(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+def share_task(item_id: int, expires_in_days: int | None = None, password: str | None = None, user=Depends(require_user)):
     expires_at = _share_expiry(expires_in_days)
+    pw_hash = _hash_share_password(password)
     with connection() as c:
         item = c.execute("SELECT public_token FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE tasks SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
+        c.execute("UPDATE tasks SET public_token=?, public_token_expires_at=?, public_token_password_hash=? WHERE id=? AND user_id=?", (token, expires_at, pw_hash, item_id, user))
     audit(user, "share", "tasks", item_id)
-    return {"public_token": token, "public_token_expires_at": expires_at}
+    return {"public_token": token, "public_token_expires_at": expires_at, "has_password": bool(pw_hash)}
 
 
 @app.delete("/api/tasks/{item_id}/share")
@@ -2260,22 +2275,23 @@ def unshare_task(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM tasks WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE tasks SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE tasks SET public_token=NULL, public_token_expires_at=NULL, public_token_password_hash=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "tasks", item_id)
     return {"ok": True}
 
 
 @app.post("/api/events/{item_id}/share")
-def share_event(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+def share_event(item_id: int, expires_in_days: int | None = None, password: str | None = None, user=Depends(require_user)):
     expires_at = _share_expiry(expires_in_days)
+    pw_hash = _hash_share_password(password)
     with connection() as c:
         item = c.execute("SELECT public_token FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE events SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
+        c.execute("UPDATE events SET public_token=?, public_token_expires_at=?, public_token_password_hash=? WHERE id=? AND user_id=?", (token, expires_at, pw_hash, item_id, user))
     audit(user, "share", "events", item_id)
-    return {"public_token": token, "public_token_expires_at": expires_at}
+    return {"public_token": token, "public_token_expires_at": expires_at, "has_password": bool(pw_hash)}
 
 
 @app.delete("/api/events/{item_id}/share")
@@ -2284,22 +2300,23 @@ def unshare_event(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM events WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE events SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE events SET public_token=NULL, public_token_expires_at=NULL, public_token_password_hash=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "events", item_id)
     return {"ok": True}
 
 
 @app.post("/api/todos/{item_id}/share")
-def share_todo(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+def share_todo(item_id: int, expires_in_days: int | None = None, password: str | None = None, user=Depends(require_user)):
     expires_at = _share_expiry(expires_in_days)
+    pw_hash = _hash_share_password(password)
     with connection() as c:
         item = c.execute("SELECT public_token FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE todos SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
+        c.execute("UPDATE todos SET public_token=?, public_token_expires_at=?, public_token_password_hash=? WHERE id=? AND user_id=?", (token, expires_at, pw_hash, item_id, user))
     audit(user, "share", "todos", item_id)
-    return {"public_token": token, "public_token_expires_at": expires_at}
+    return {"public_token": token, "public_token_expires_at": expires_at, "has_password": bool(pw_hash)}
 
 
 @app.delete("/api/todos/{item_id}/share")
@@ -2308,22 +2325,23 @@ def unshare_todo(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM todos WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE todos SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE todos SET public_token=NULL, public_token_expires_at=NULL, public_token_password_hash=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "todos", item_id)
     return {"ok": True}
 
 
 @app.post("/api/work_logs/{item_id}/share")
-def share_work_log(item_id: int, expires_in_days: int | None = None, user=Depends(require_user)):
+def share_work_log(item_id: int, expires_in_days: int | None = None, password: str | None = None, user=Depends(require_user)):
     expires_at = _share_expiry(expires_in_days)
+    pw_hash = _hash_share_password(password)
     with connection() as c:
         item = c.execute("SELECT public_token FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
         token = item["public_token"] or secrets.token_urlsafe(16)
-        c.execute("UPDATE work_logs SET public_token=?, public_token_expires_at=? WHERE id=? AND user_id=?", (token, expires_at, item_id, user))
+        c.execute("UPDATE work_logs SET public_token=?, public_token_expires_at=?, public_token_password_hash=? WHERE id=? AND user_id=?", (token, expires_at, pw_hash, item_id, user))
     audit(user, "share", "work_logs", item_id)
-    return {"public_token": token, "public_token_expires_at": expires_at}
+    return {"public_token": token, "public_token_expires_at": expires_at, "has_password": bool(pw_hash)}
 
 
 @app.delete("/api/work_logs/{item_id}/share")
@@ -2332,7 +2350,7 @@ def unshare_work_log(item_id: int, user=Depends(require_user)):
         item = c.execute("SELECT id FROM work_logs WHERE id=? AND user_id=? AND deleted_at IS NULL", (item_id, user)).fetchone()
         if not item:
             raise HTTPException(404, "Item not found")
-        c.execute("UPDATE work_logs SET public_token=NULL, public_token_expires_at=NULL WHERE id=? AND user_id=?", (item_id, user))
+        c.execute("UPDATE work_logs SET public_token=NULL, public_token_expires_at=NULL, public_token_password_hash=NULL WHERE id=? AND user_id=?", (item_id, user))
     audit(user, "unshare", "work_logs", item_id)
     return {"ok": True}
 
@@ -2699,56 +2717,68 @@ def feature_request_list(status: Literal["pending", "in_progress", "done", "dism
 
 
 @app.get("/api/public/tasks/{token}")
-def public_task(token: str, request: Request):
+def public_task(token: str, request: Request, password: str | None = None):
     """Public, read-only view of a task shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-task", 60, 60)
     with connection() as c:
         item = c.execute("""SELECT title,description,status,priority,progress,start_date,due_date,
-          tags,link_url,checklist,created_at,updated_at FROM tasks
+          tags,link_url,checklist,created_at,updated_at,public_token_password_hash FROM tasks
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    return row_dict(item)
+    _check_share_password(item["public_token_password_hash"], password)
+    result = row_dict(item)
+    result.pop("public_token_password_hash", None)
+    return result
 
 
 @app.get("/api/public/events/{token}")
-def public_event(token: str, request: Request):
+def public_event(token: str, request: Request, password: str | None = None):
     """Public, read-only view of an event shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-event", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT title,description,location,start_at,end_at,tags,link_url,checklist,created_at,updated_at FROM events
+        item = c.execute("""SELECT title,description,location,start_at,end_at,tags,link_url,checklist,created_at,updated_at,public_token_password_hash FROM events
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    return row_dict(item)
+    _check_share_password(item["public_token_password_hash"], password)
+    result = row_dict(item)
+    result.pop("public_token_password_hash", None)
+    return result
 
 
 @app.get("/api/public/todos/{token}")
-def public_todo(token: str, request: Request):
+def public_todo(token: str, request: Request, password: str | None = None):
     """Public, read-only view of a todo shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-todo", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,link_url,checklist,created_at FROM todos
+        item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,link_url,checklist,created_at,public_token_password_hash FROM todos
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    return row_dict(item)
+    _check_share_password(item["public_token_password_hash"], password)
+    result = row_dict(item)
+    result.pop("public_token_password_hash", None)
+    return result
 
 
 @app.get("/api/public/work_logs/{token}")
-def public_work_log(token: str, request: Request):
+def public_work_log(token: str, request: Request, password: str | None = None):
     """Public, read-only view of a work log shared via a share link. No auth required."""
     enforce_rate(request.client.host if request.client else "unknown", "public-work-log", 60, 60)
     with connection() as c:
-        item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,link_url,checklist,created_at FROM work_logs
+        item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,link_url,checklist,created_at,public_token_password_hash FROM work_logs
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
     if not item:
         raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    return row_dict(item)
+    _check_share_password(item["public_token_password_hash"], password)
+    result = row_dict(item)
+    result.pop("public_token_password_hash", None)
+    return result
 
 
 @app.get("/api/public/changelog")

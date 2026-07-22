@@ -472,6 +472,25 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_share_link_can_be_password_protected(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "protected plan"}).json()
+        no_auth = TestClient(self.app)
+        shared = a.post(f"/api/tasks/{task['id']}/share", params={"password": "sesame"})
+        self.assertEqual(shared.status_code, 200, shared.text)
+        self.assertTrue(shared.json()["has_password"])
+        token = shared.json()["public_token"]
+        no_password = no_auth.get(f"/api/public/tasks/{token}")
+        self.assertEqual(no_password.status_code, 401, no_password.text)
+        wrong_password = no_auth.get(f"/api/public/tasks/{token}", params={"password": "wrong"})
+        self.assertEqual(wrong_password.status_code, 403, wrong_password.text)
+        correct = no_auth.get(f"/api/public/tasks/{token}", params={"password": "sesame"})
+        self.assertEqual(correct.status_code, 200, correct.text)
+        self.assertEqual(correct.json()["title"], "protected plan")
+        self.assertNotIn("public_token_password_hash", correct.json())
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_event_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
         event = a.post("/api/events", json={

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-share-link-password',
+    timestamp: '2026-07-22T23:54:00+09:00',
+    description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)를 아는 사람 누구나 URL만으로 열람할 수 있어 민감한 내용을 공유하기엔 불안했던 것을, 공유 링크 생성 시 선택적으로 비밀번호를 설정해 열람 전 비밀번호 확인을 요구하도록 개선했습니다(`backend/app/main.py`의 `_hash_share_password`/`_check_share_password`, `frontend/src/screens/PublicTask.jsx` 등 4개 공개 화면).',
+  },
+  {
     id: '2026-07-22-public-share-checklist',
     timestamp: '2026-07-22T19:12:00+09:00',
     description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)에 체크리스트가 전혀 표시되지 않아, 링크를 받은 사람이 진행 상황을 확인할 수 없던 것을 수정해 체크리스트 진행률과 항목 목록을 함께 보여주도록 개선했습니다(`backend/app/main.py`의 공개 조회 API, `frontend/src/screens/PublicTask.jsx` 등 4개 화면).',

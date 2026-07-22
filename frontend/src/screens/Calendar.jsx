@@ -98,19 +98,21 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   const [shareToken, setShareToken] = useState(() => event?.public_token || '')
   const [shareExpiresAt, setShareExpiresAt] = useState(() => event?.public_token_expires_at || '')
   const [shareExpiryDays, setShareExpiryDays] = useState('')
+  const [sharePassword, setSharePassword] = useState('')
+  const [shareHasPassword, setShareHasPassword] = useState(false)
   const [shareBusy, setShareBusy] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const shareUrl = shareToken ? `${location.origin}/public/events/${shareToken}` : ''
   const todayIso = new Date().toISOString().slice(0, 10)
   const createShareLink = async () => {
     setShareBusy(true); setShareCopied(false)
-    try { const res = await api.shareEvent(event.id, shareExpiryDays ? Number(shareExpiryDays) : undefined); setShareToken(res.public_token); setShareExpiresAt(res.public_token_expires_at || '') }
+    try { const res = await api.shareEvent(event.id, shareExpiryDays ? Number(shareExpiryDays) : undefined, sharePassword || undefined); setShareToken(res.public_token); setShareExpiresAt(res.public_token_expires_at || ''); setShareHasPassword(!!res.has_password) }
     catch (e) { setError(e.message) }
     finally { setShareBusy(false) }
   }
   const revokeShareLink = async () => {
     setShareBusy(true)
-    try { await api.unshareEvent(event.id); setShareToken(''); setShareCopied(false); setShareExpiresAt('') }
+    try { await api.unshareEvent(event.id); setShareToken(''); setShareCopied(false); setShareExpiresAt(''); setSharePassword(''); setShareHasPassword(false) }
     catch (e) { setError(e.message) }
     finally { setShareBusy(false) }
   }
@@ -377,8 +379,8 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
       {shareToken
         ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
-        : <div className="checklist-editor-add"><select value={shareExpiryDays} onChange={e => setShareExpiryDays(e.target.value)} aria-label="공유 링크 만료 기간"><option value="">무제한</option><option value="7">7일 후 만료</option><option value="30">30일 후 만료</option><option value="90">90일 후 만료</option></select><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
-      {shareToken ? <p className="muted">{shareExpiresAt ? `${new Date(shareExpiresAt).toLocaleDateString('ko-KR')}에 만료됩니다.` : '만료 없이 유지됩니다.'}</p> : null}
+        : <div className="checklist-editor-add"><select value={shareExpiryDays} onChange={e => setShareExpiryDays(e.target.value)} aria-label="공유 링크 만료 기간"><option value="">무제한</option><option value="7">7일 후 만료</option><option value="30">30일 후 만료</option><option value="90">90일 후 만료</option></select><input type="password" value={sharePassword} onChange={e => setSharePassword(e.target.value)} placeholder="비밀번호(선택)" aria-label="공유 링크 비밀번호" autoComplete="new-password"/><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
+      {shareToken ? <p className="muted">{shareExpiresAt ? `${new Date(shareExpiresAt).toLocaleDateString('ko-KR')}에 만료됩니다.` : '만료 없이 유지됩니다.'}{shareHasPassword ? ' · 비밀번호로 보호됨' : ''}</p> : null}
       <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 일정을 읽기 전용으로 볼 수 있습니다.</p>
     </div> : null}
     {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">댓글{comments.length ? ` (${comments.length})` : ''}</span>

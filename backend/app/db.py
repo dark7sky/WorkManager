@@ -168,6 +168,7 @@ def init_db():
         _add_column(c, "work_logs", "hourly_rate_override", "REAL")
         _add_column(c, "work_logs", "client_name", "TEXT")
         _add_column(c, "work_logs", "reminder_minutes_before", "INTEGER")
+        _add_column(c, "work_logs", "public_token_password_hash", "TEXT")
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_work_logs_public_token ON work_logs(public_token) WHERE public_token IS NOT NULL")
         _add_column(c, "task_comments", "edited_at", "TEXT")
         _add_column(c, "sessions", "user_agent", "TEXT")
@@ -182,6 +183,7 @@ def init_db():
             "start_time": "TEXT", "due_time": "TEXT", "archived_at": "TEXT", "public_token": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
             "public_token_expires_at": "TEXT", "recurrence_group_id": "TEXT",
+            "public_token_password_hash": "TEXT",
         }.items():
             _add_column(c, "tasks", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_public_token ON tasks(public_token) WHERE public_token IS NOT NULL")
@@ -197,7 +199,7 @@ def init_db():
             "links": "TEXT NOT NULL DEFAULT '[]'", "priority": "TEXT", "recurrence_group_id": "TEXT",
             "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
             "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER",
-            "public_token": "TEXT", "public_token_expires_at": "TEXT",
+            "public_token": "TEXT", "public_token_expires_at": "TEXT", "public_token_password_hash": "TEXT",
         }.items():
             _add_column(c, "events", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_events_public_token ON events(public_token) WHERE public_token IS NOT NULL")
@@ -209,7 +211,8 @@ def init_db():
                                   "recurrence_anchor_day": "INTEGER", "recurrence_anchor_month_end": "INTEGER NOT NULL DEFAULT 0", "color": "TEXT", "links": "TEXT NOT NULL DEFAULT '[]'",
                                   "todo_time": "TEXT", "checklist": "TEXT NOT NULL DEFAULT '[]'", "estimated_minutes": "INTEGER", "archived_at": "TEXT",
                                   "custom_fields": "TEXT NOT NULL DEFAULT '[]'", "reminder_minutes_before": "INTEGER", "public_token": "TEXT",
-                                  "public_token_expires_at": "TEXT", "recurrence_group_id": "TEXT"}.items():
+                                  "public_token_expires_at": "TEXT", "recurrence_group_id": "TEXT",
+                                  "public_token_password_hash": "TEXT"}.items():
             _add_column(c, "todos", name, definition)
         c.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_todos_public_token ON todos(public_token) WHERE public_token IS NOT NULL")
         c.execute("CREATE INDEX IF NOT EXISTS idx_todos_recurrence_group ON todos(user_id,recurrence_group_id)")
