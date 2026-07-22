@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-global-search-arrow-key-nav',
+    timestamp: '2026-07-22T18:41:00+09:00',
+    description: '전체 검색(Ctrl+/) 모달에서 마우스로 항목을 일일이 클릭해야 했던 것을, 검색어 입력 후 방향키(↑/↓)로 업무/일정/할 일/업무 기록 검색 결과 사이를 이동하며 Enter/클릭으로 바로 열 수 있도록 개선했습니다(`frontend/src/components/GlobalSearch.jsx`).',
+  },
+  {
     id: '2026-07-22-attachment-filename-quote-escaping',
     timestamp: '2026-07-22T18:36:05+09:00',
     description: '업무/일정/할 일/업무 기록 첨부파일 다운로드 시, 파일 이름에 큰따옴표(")가 포함되어 있으면 Content-Disposition 헤더가 깨져 브라우저가 파일명을 잘못 인식하거나 다운로드가 실패할 수 있었습니다. 네 엔티티의 다운로드 엔드포인트가 공통 헬퍼로 파일명을 이스케이프하고 비ASCII 파일명을 위한 filename* 대체 값도 함께 내려주도록 수정했습니다(`backend/app/main.py`).',
