@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-calendar-feed-worklogs',
+    timestamp: '2026-07-22T18:59:00+09:00',
+    description: '구독형 캘린더 피드(webcal)에 업무, 일정, 할 일만 포함되고 업무일지는 빠져 있던 것을, 업무일지도 날짜/시간과 리마인더 알림을 반영해 VEVENT로 함께 내보내도록 수정했습니다(`backend/app/main.py`의 `build_calendar_feed`).',
+  },
+  {
     id: '2026-07-22-notification-unread-badge',
     timestamp: '2026-07-22T18:53:00+09:00',
     description: '설정 화면 안에 묻혀 있던 알림 기록을 새 알림이 와도 알아챌 방법이 없었던 것을, 사이드바 설정 메뉴에 안 읽은 알림 수 배지를 표시하고 설정 화면을 열면 자동으로 읽음 처리되도록 개선했습니다(`frontend/src/notificationHistory.js`의 `unreadNotificationCount`/`markNotificationHistoryRead`, `App.jsx`, `screens/Settings.jsx`).',

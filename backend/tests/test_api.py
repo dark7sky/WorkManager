@@ -2662,6 +2662,7 @@ class ApiTests(unittest.TestCase):
         a.post("/api/events", json={"title": "feed event", "start_at": "2026-07-21T10:00:00",
                                     "end_at": "2026-07-21T11:00:00"})
         a.post("/api/todos", json={"title": "feed todo", "todo_date": "2026-07-22"})
+        a.post("/api/work_logs", json={"content": "feed log", "log_date": "2026-07-22"})
         first = a.post("/api/settings/calendar-feed/rotate")
         self.assertEqual(first.status_code, 200, first.text)
         first_url = first.json()["feed_url"]
@@ -2674,6 +2675,7 @@ class ApiTests(unittest.TestCase):
         self.assertIn("SUMMARY:feed event", feed.text)
         self.assertIn("SUMMARY:[업무] feed task", feed.text)
         self.assertIn("SUMMARY:[할 일] feed todo", feed.text)
+        self.assertIn("SUMMARY:[업무일지] feed log", feed.text)
         self.assertEqual(TestClient(self.app).get("/api/calendar-feed/not-a-real-token.ics").status_code, 404)
         second = a.post("/api/settings/calendar-feed/rotate").json()
         self.assertNotEqual(second["feed_url"], first_url)
@@ -2694,14 +2696,17 @@ class ApiTests(unittest.TestCase):
                                      "end_at": "2026-07-21T11:00:00", "reminder_minutes_before": 15})
         a.post("/api/todos", json={"title": "reminded todo", "todo_date": "2026-07-22", "todo_time": "08:00",
                                     "reminder_minutes_before": 5})
+        a.post("/api/work_logs", json={"content": "reminded log", "log_date": "2026-07-22", "log_time": "07:00",
+                                        "reminder_minutes_before": 10})
         feed_url = a.post("/api/settings/calendar-feed/rotate").json()["feed_url"]
         path = "/" + feed_url.split("/", 3)[3]
         text = TestClient(self.app).get(path).text
         self.assertIn("TRIGGER:-PT30M", text)
         self.assertIn("TRIGGER:-PT15M", text)
         self.assertIn("TRIGGER:-PT5M", text)
+        self.assertIn("TRIGGER:-PT10M", text)
         # all-day task with no due_time has no meaningful alert moment, so no VALARM for it
-        self.assertEqual(text.count("BEGIN:VALARM"), 3)
+        self.assertEqual(text.count("BEGIN:VALARM"), 4)
         a.delete("/api/settings/calendar-feed")
 
     @patch("app.main.google_calendar.selected_calendar", return_value="cal-1")

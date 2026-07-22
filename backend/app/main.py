@@ -209,6 +209,19 @@ def build_calendar_feed(user_id):
         if td.get("memo"): lines.append(f"DESCRIPTION:{_ics_escape(td['memo'])}")
         if td.get("todo_time"): _ics_valarm(lines, td.get("reminder_minutes_before"))
         lines.append("END:VEVENT")
+    for l in rows("work_logs", user_id):
+        if not l.get("log_date"): continue
+        if l.get("log_time"):
+            due_datetime = f"{l['log_date']}T{l['log_time']}:00"
+            dtstart = f"DTSTART:{_ics_datetime(due_datetime)}"
+        else:
+            dtstart = f"DTSTART;VALUE=DATE:{l['log_date'].replace('-', '')}"
+        lines += ["BEGIN:VEVENT", f"UID:worklog-{l['id']}@workmanager", f"DTSTAMP:{_ics_datetime(now())}",
+                  dtstart,
+                  f"SUMMARY:{_ics_escape('[업무일지] ' + l['content'])}"]
+        if l.get("client_name"): lines.append(f"DESCRIPTION:{_ics_escape(l['client_name'])}")
+        if l.get("log_time"): _ics_valarm(lines, l.get("reminder_minutes_before"))
+        lines.append("END:VEVENT")
     lines.append("END:VCALENDAR")
     return "\r\n".join(_ics_fold(line) for line in lines)
 
