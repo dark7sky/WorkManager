@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-public-share-custom-fields',
+    timestamp: '2026-07-23T00:16:38+09:00',
+    description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)에 사용자 정의 필드(custom_fields)가 표시되지 않던 것을 수정해, 체크리스트·태그처럼 공유 화면에도 함께 노출되도록 했습니다(`backend/app/main.py`의 4개 public 엔드포인트, `frontend/src/screens/PublicTask.jsx`/`PublicEvent.jsx`/`PublicTodo.jsx`/`PublicWorkLog.jsx`).',
+  },
+  {
     id: '2026-07-23-share-link-badge-parity',
     timestamp: '2026-07-23T00:38:00+09:00',
     description: '공유 링크가 걸려 있는 항목을 목록에서 바로 알아볼 수 있는 "공유 중" 배지가 업무 화면에만 있어, 일정·할 일·업무일지는 편집 화면까지 들어가야 확인할 수 있었던 것을 수정해 캘린더(일정)와 오늘 화면(할 일·업무일지)에도 같은 배지를 추가했습니다(`frontend/src/eventBadgeVisibility.js`, `frontend/src/todoBadgeVisibility.js`, `frontend/src/workLogBadgeVisibility.js`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`, 표시 항목 설정에서 켜고 끌 수 있음).',

@@ -433,7 +433,7 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_share_link_exposes_read_only_view_and_can_be_revoked(self, *_):
         a, b = self.client(self.token_a), self.client(self.token_b)
-        task = a.post("/api/tasks", json={"title": "shared plan", "description": "secret-ish detail", "link_url": "https://example.com/spec", "checklist": [{"id": "1", "text": "draft outline", "done": True}]}).json()
+        task = a.post("/api/tasks", json={"title": "shared plan", "description": "secret-ish detail", "link_url": "https://example.com/spec", "checklist": [{"id": "1", "text": "draft outline", "done": True}], "custom_fields": [{"label": "고객사", "value": "삼성"}]}).json()
         no_auth = TestClient(self.app)
         self.assertEqual(no_auth.get("/api/public/tasks/does-not-exist").status_code, 404)
         shared = a.post(f"/api/tasks/{task['id']}/share")
@@ -445,6 +445,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(public.json()["title"], "shared plan")
         self.assertEqual(public.json()["link_url"], "https://example.com/spec")
         self.assertEqual(public.json()["checklist"], [{"id": "1", "text": "draft outline", "done": True}])
+        self.assertEqual([{"label": f["label"], "value": f["value"]} for f in public.json()["custom_fields"]], [{"label": "고객사", "value": "삼성"}])
         self.assertNotIn("user_id", public.json())
         self.assertNotIn("assignee_name", public.json())
         self.assertEqual(b.get(f"/api/public/tasks/{token}").status_code, 200)
