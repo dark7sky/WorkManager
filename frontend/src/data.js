@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-calendar-agenda-arrow-key-navigation',
+    timestamp: '2026-07-22T13:12:00+09:00',
+    description: '업무 화면과 오늘 화면의 할 일/업무 기록 목록은 방향키(↑/↓)로 행 사이를 이동할 수 있었지만, 캘린더 일정 목록(모바일 아젠다)에는 이 키보드 탐색 기능이 빠져 있었습니다. `frontend/src/screens/Calendar.jsx`에서 공용 nextRowIndex 헬퍼를 재사용해 일정 열기 버튼에 방향키 이동을 추가하여 목록 화면 전반의 키보드 탐색 방식을 통일했습니다.',
+  },
+  {
     id: '2026-07-22-worklog-new-entry-rate-client-parity',
     timestamp: '2026-07-22T12:58:30+09:00',
     description: '업무 기록 수정 화면에서는 청구 가능 항목에 시급 재정의(hourly_rate_override)와 청구 고객명(client_name)을 입력할 수 있었지만, 새 업무 기록 작성 폼에는 해당 입력란이 연결되어 있지 않아 처음 기록할 때는 값을 넣을 수 없었습니다. `frontend/src/App.jsx`의 onAddLog 핸들러가 두 값을 api.createLog로 전달하도록 하여 신규 작성과 수정 화면의 입력 항목을 통일했습니다.',
