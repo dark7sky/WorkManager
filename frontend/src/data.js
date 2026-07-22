@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-csv-excel-attachment-count-column',
+    timestamp: '2026-07-23T00:27:51+09:00',
+    description: 'CSV/Excel 내보내기에 첨부파일 개수가 표시되지 않아, 목록을 훑어봐야만 어떤 업무·일정·할 일·업무일지에 첨부파일이 있는지 알 수 있었던 것을 수정해 4개 항목 모두의 내보내기에 "첨부파일 수" 열을 추가했습니다(`frontend/src/csv.js`, 내보내기 전용이며 가져오기 시 사용되지 않음).',
+  },
+  {
     id: '2026-07-23-keyboard-shortcuts-day-view-text',
     timestamp: '2026-07-23T00:52:10+09:00',
     description: '단축키 안내(`?`)의 ←/→ 설명이 캘린더 "일" 보기 추가 이전 문구("이전/다음 달·주·년")로 남아 있던 것을 고쳐, 일/주/달/년 보기에 따라 이동한다는 내용을 정확히 안내하도록 했습니다(`frontend/src/components/KeyboardShortcuts.jsx`).',
