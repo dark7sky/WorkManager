@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-performance-report-pdf-export',
+    timestamp: '2026-07-23T05:41:00+09:00',
+    description: '성과 화면에서 Markdown/CSV/Excel 내보내기만 가능하고, 청구서 PDF는 청구 가능한 업무 기록이 있을 때만 노출되어 요약·목표·태그별/고객별 소요 시간 등 전체 성과 데이터를 인쇄용 PDF로 공유할 방법이 없었습니다. Tasks/Calendar 화면과 동일한 인쇄창 방식으로 "PDF 내보내기" 버튼을 추가했습니다(`frontend/src/performanceReport.js`의 performanceReportToPrintableReport, `frontend/src/screens/Performance.jsx`). 테스트는 `frontend/src/performanceReport.test.js`에 추가.',
+  },
+  {
     id: '2026-07-23-series-edit-reminder-links-customfields',
     timestamp: '2026-07-23T05:35:00+09:00',
     description: '반복 업무·할 일·일정을 "이후 항목 모두 적용"으로 수정할 때 알림 시간(reminder_minutes_before), 관련 링크(links), 사용자 정의 필드(custom_fields)가 조용히 무시되고 저장되지 않던 문제를 수정했습니다. 이제 세 필드 모두 시리즈 일괄 수정 시 정상적으로 반영됩니다(`backend/app/main.py`의 TASK_SERIES_EDITABLE_FIELDS, TODO_SERIES_EDITABLE_FIELDS, EVENT_SERIES_EDITABLE_FIELDS).',

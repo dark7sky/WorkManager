@@ -145,6 +145,81 @@ export const performanceReportMarkdown = (data, { start, end, tags = [], summary
 
 export const performanceReportFilename = (start, end) => `workmanager-report-${start}_${end}.md`
 
+const escapeHtml = value => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#39;')
+
+export const performanceReportToPrintableReport = (data, { start, end, tags = [], summary = null, generatedAt = new Date().toISOString(), title = 'WorkManager 성과 보고서' } = {}) => {
+  const stats = data?.summary || {}
+  const items = data?.timeline || []
+  const tagBreakdown = data?.tag_breakdown || []
+  const clientBreakdown = data?.client_breakdown || []
+
+  const statRows = [
+    ['완료 업무', stats.completed_tasks || 0],
+    ['업무 기록', stats.work_logs || 0],
+    ['기록된 소요 시간', formatDuration(stats.tracked_minutes)],
+    ['청구 가능 시간', formatDuration(stats.billable_minutes)],
+    ...(stats.billable_amount != null ? [['청구 예상 금액', `${Math.round(stats.billable_amount).toLocaleString('ko-KR')}원`]] : []),
+    ['완료 업무 예상 소요 시간', formatDuration(stats.estimated_minutes)],
+    ['일정', stats.events || 0],
+    ['진행 중 업무', stats.active_tasks || 0],
+    ['완료한 오늘 할 일', stats.completed_todos || 0],
+  ]
+
+  const timelineRows = items.map(item => `<tr>
+      <td>${escapeHtml(item.date)}</td>
+      <td>${escapeHtml(item.type_label || item.type || '')}</td>
+      <td><strong>${escapeHtml(item.title || item.content || '')}</strong></td>
+      <td>${escapeHtml((item.tags || []).join(', '))}</td>
+    </tr>`).join('')
+
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body{font-family:Segoe UI,Noto Sans KR,Arial,sans-serif;color:#202124;margin:32px}
+    header{border-bottom:2px solid #202124;padding-bottom:16px;margin-bottom:20px}
+    h1{font-size:24px;margin:0 0 8px}
+    h2{font-size:16px;margin:24px 0 8px}
+    p{margin:0;color:#5f6670}
+    .stats{display:flex;flex-wrap:wrap;gap:16px;margin:18px 0}
+    .stats div{min-width:140px}
+    .stats strong{display:block;font-size:18px;color:#202124}
+    .stats span{font-size:12px;color:#5f6670}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+    th,td{border:1px solid #dfe3e8;padding:8px;text-align:left;vertical-align:top}
+    th{background:#f5f7fa}
+    .summary-text{margin-top:6px;color:#202124;white-space:pre-wrap}
+    @media print{body{margin:18mm}.no-print{display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${escapeHtml(title)}</h1>
+    <p>기간: ${escapeHtml(start || '-')} ~ ${escapeHtml(end || '-')}${tags.length ? ` · 태그: ${escapeHtml(tags.join(', '))}` : ''}</p>
+    <p>생성 시각: ${escapeHtml(generatedAt)}</p>
+  </header>
+  <div class="stats">${statRows.map(([label, value]) => `<div><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`).join('')}</div>
+  ${tagBreakdown.length ? `<h2>태그별 소요 시간</h2><table><thead><tr><th>태그</th><th>소요 시간</th><th>완료 업무</th></tr></thead><tbody>${tagBreakdown.map(t => `<tr><td>${escapeHtml(t.tag)}</td><td>${escapeHtml(formatDuration(t.tracked_minutes))}</td><td>${escapeHtml(t.completed_tasks)}</td></tr>`).join('')}</tbody></table>` : ''}
+  ${clientBreakdown.length ? `<h2>고객별 소요 시간</h2><table><thead><tr><th>고객</th><th>소요 시간</th><th>청구 금액</th></tr></thead><tbody>${clientBreakdown.map(c => `<tr><td>${escapeHtml(c.client_name)}</td><td>${escapeHtml(formatDuration(c.tracked_minutes))}</td><td>${c.billable_amount ? `${escapeHtml(Math.round(c.billable_amount).toLocaleString('ko-KR'))}원` : '-'}</td></tr>`).join('')}</tbody></table>` : ''}
+  ${summary && (summary.headline || summary.narrative) ? `<h2>AI 성과 요약</h2><p><strong>${escapeHtml(summary.headline || '')}</strong><br><span class="summary-text">${escapeHtml(summary.narrative || '')}</span></p>` : ''}
+  <h2>활동 타임라인 (${items.length}건)</h2>
+  <table>
+    <thead><tr><th>날짜</th><th>구분</th><th>내용</th><th>태그</th></tr></thead>
+    <tbody>${timelineRows || '<tr><td colspan="4">선택한 기간과 태그에 해당하는 활동이 없습니다.</td></tr>'}</tbody>
+  </table>
+</body>
+</html>`
+}
+
+export const performanceReportPrintFilename = (start, end) => `workmanager-report-${start}_${end}.html`
+
 export const loadReportPresets = storage => {
   try {
     const data = storage.getItem(REPORT_PRESETS_KEY)

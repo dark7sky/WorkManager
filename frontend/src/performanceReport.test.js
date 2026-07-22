@@ -1,6 +1,27 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison, estimateVariancePercent } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, performanceReportToPrintableReport, performanceReportPrintFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison, estimateVariancePercent } from './performanceReport.js'
+
+test('performanceReportToPrintableReport: includes stats, timeline rows and title', () => {
+  const data = { summary: { completed_tasks: 5, tracked_minutes: 125, billable_amount: 40000 }, timeline: [{ date: '2026-01-05', type: 'task', title: '설계 문서 작성', tags: ['design'] }], tag_breakdown: [{ tag: 'design', tracked_minutes: 60, completed_tasks: 1 }] }
+  const html = performanceReportToPrintableReport(data, { start: '2026-01-01', end: '2026-01-31', tags: ['design'], generatedAt: '2026-01-31T10:00:00Z' })
+
+  assert(html.includes('WorkManager 성과 보고서'))
+  assert(html.includes('2026-01-01 ~ 2026-01-31'))
+  assert(html.includes('설계 문서 작성'))
+  assert(html.includes('2시간 5분'))
+  assert(html.includes('40,000원'))
+  assert(html.includes('태그별 소요 시간'))
+})
+
+test('performanceReportToPrintableReport: shows empty-state row when timeline is empty', () => {
+  const html = performanceReportToPrintableReport({ summary: {}, timeline: [] }, { start: '2026-01-01', end: '2026-01-31', generatedAt: '2026-01-31T10:00:00Z' })
+  assert(html.includes('선택한 기간과 태그에 해당하는 활동이 없습니다.'))
+})
+
+test('performanceReportPrintFilename: builds an html filename from the date range', () => {
+  assert.strictEqual(performanceReportPrintFilename('2026-01-01', '2026-01-31'), 'workmanager-report-2026-01-01_2026-01-31.html')
+})
 
 test('formatDuration: formats minutes as hours/minutes in Korean', () => {
   assert.strictEqual(formatDuration(0), '0분')
