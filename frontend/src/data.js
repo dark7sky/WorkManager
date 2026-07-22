@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-public-share-checklist',
+    timestamp: '2026-07-22T19:12:00+09:00',
+    description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)에 체크리스트가 전혀 표시되지 않아, 링크를 받은 사람이 진행 상황을 확인할 수 없던 것을 수정해 체크리스트 진행률과 항목 목록을 함께 보여주도록 개선했습니다(`backend/app/main.py`의 공개 조회 API, `frontend/src/screens/PublicTask.jsx` 등 4개 화면).',
+  },
+  {
     id: '2026-07-22-global-search-checklist',
     timestamp: '2026-07-22T19:11:00+09:00',
     description: '전역 검색(Ctrl+/)이 링크·태그·사용자 정의 필드까지는 검색했지만 체크리스트 항목 문구는 검색하지 못해, 체크리스트에만 적힌 내용은 검색으로 찾을 수 없었던 것을 수정해 업무/일정/할 일/업무일지의 체크리스트 텍스트도 함께 검색되도록 개선했습니다(`frontend/src/globalSearch.js`).',
