@@ -575,9 +575,11 @@ class ApiTests(unittest.TestCase):
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_overdue_task_is_auto_escalated_to_high_priority_on_list(self, *_):
+        from datetime import date, timedelta
         a = self.client(self.token_a)
         overdue = a.post("/api/tasks", json={"title": "way overdue", "due_date": "2020-01-01", "priority": "normal"}).json()
-        due_soon = a.post("/api/tasks", json={"title": "due today", "due_date": "2026-07-21", "priority": "normal"}).json()
+        future_due = (date.today() + timedelta(days=1)).isoformat()
+        due_soon = a.post("/api/tasks", json={"title": "due today", "due_date": future_due, "priority": "normal"}).json()
         already_high = a.post("/api/tasks", json={"title": "already urgent", "due_date": "2020-01-01", "priority": "high"}).json()
         listing = {item["id"]: item for item in a.get("/api/tasks").json()}
         self.assertEqual(listing[overdue["id"]]["priority"], "high")

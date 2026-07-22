@@ -12,6 +12,16 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-overdue-escalation-test-fix',
+    timestamp: '2026-07-23T00:15:00+09:00',
+    description: '지연 업무 자동 우선순위 상향 회귀 테스트(`test_overdue_task_is_auto_escalated_to_high_priority_on_list`)가 마감일을 고정된 과거 날짜 문자열로 하드코딩해 두어, 그 날짜가 실제로 지나가면 "곧 마감" 업무가 스스로 "지연" 상태가 되어 테스트가 오탐(false fail)하는 문제가 있었습니다. 고정 날짜 대신 실행 시점 기준 내일 날짜를 계산하도록 수정했습니다(`backend/tests/test_api.py`).',
+  },
+  {
+    id: '2026-07-23-task-share-link-badge',
+    timestamp: '2026-07-23T00:00:34+09:00',
+    description: '업무에 공유 링크가 걸려 있는지 확인하려면 항목을 열어 편집 화면까지 들어가야 했던 것을, 업무 목록(간트) 행에 "공유 중" 배지를 추가해 만료되지 않은 공유 링크가 있는 업무를 목록에서 바로 알아볼 수 있게 했습니다(`frontend/src/shareLink.js`, `frontend/src/taskBadgeVisibility.js`, `frontend/src/screens/Tasks.jsx`, 표시 항목 설정에서 켜고 끌 수 있음).',
+  },
+  {
     id: '2026-07-22-share-link-password',
     timestamp: '2026-07-22T23:54:00+09:00',
     description: '업무·일정·할 일·업무일지의 공유 링크(로그인 없이 보는 읽기 전용 화면)를 아는 사람 누구나 URL만으로 열람할 수 있어 민감한 내용을 공유하기엔 불안했던 것을, 공유 링크 생성 시 선택적으로 비밀번호를 설정해 열람 전 비밀번호 확인을 요구하도록 개선했습니다(`backend/app/main.py`의 `_hash_share_password`/`_check_share_password`, `frontend/src/screens/PublicTask.jsx` 등 4개 공개 화면).',

@@ -12,6 +12,7 @@ export const TASK_BADGE_OPTIONS = [
   { key: 'blocked', label: '선행 업무 대기' },
   { key: 'dependents', label: '후속 업무 영향' },
   { key: 'criticalPath', label: '핵심 경로' },
+  { key: 'shareLink', label: '공유 링크' },
 ]
 
 const ALL_KEYS = TASK_BADGE_OPTIONS.map(o => o.key)
