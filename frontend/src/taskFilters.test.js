@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, selectExportRows, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, taskDependentTasks, toggleSelectAllIds, withAddedTag } from './taskFilters.js'
+import { allIdsSelected, DEFAULT_TASK_FILTERS, filterTasks, groupTasksByStatus, hasActiveTaskFilters, newlyUnblockedTasks, pendingApprovalCount, reminderDigestTasks, selectExportRows, summarizeBlockedTasks, summarizeDueReminders, taskBlockingDependencies, taskDeepLink, taskDependentTasks, toggleSelectAllIds, withAddedTag, withRemovedTag } from './taskFilters.js'
 
 const tasks = [
   { id: 1, title: '보고서 작성', status: 'todo', due_date: '2026-07-08', progress: 0, priority: 'high', tags: ['보고'] },
@@ -249,6 +249,17 @@ test('groupTasksByStatus buckets tasks into todo/doing/done, folding legacy in_p
 test('withAddedTag ignores a blank tag and handles a missing tag list', () => {
   assert.deepEqual(withAddedTag(undefined, '  '), [])
   assert.deepEqual(withAddedTag(undefined, '긴급'), ['긴급'])
+})
+
+test('withRemovedTag removes a matching tag case-insensitively and trims whitespace', () => {
+  assert.deepEqual(withRemovedTag(['기획', 'Urgent'], 'urgent '), ['기획'])
+})
+
+test('withRemovedTag returns the same list when the tag is blank, missing, or absent', () => {
+  const tags = ['기획']
+  assert.equal(withRemovedTag(tags, '  '), tags)
+  assert.equal(withRemovedTag(tags, '긴급'), tags)
+  assert.deepEqual(withRemovedTag(undefined, '긴급'), [])
 })
 
 test('allIdsSelected is false for an empty id list and true only when every id is in the selection', () => {

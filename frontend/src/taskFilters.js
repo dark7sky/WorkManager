@@ -10,6 +10,13 @@ export const withAddedTag = (tags, tag) => {
   return [...existing, trimmed]
 }
 
+export const withRemovedTag = (tags, tag) => {
+  const trimmed = (tag || '').trim()
+  const existing = tags || []
+  if (!trimmed || !existing.some(x => x.toLowerCase() === trimmed.toLowerCase())) return existing
+  return existing.filter(x => x.toLowerCase() !== trimmed.toLowerCase())
+}
+
 export const pendingApprovalCount = tasks => tasks.filter(task => (task.status === 'done' && task.approval_status === 'pending') || task.schedule_approval_status === 'pending').length
 
 export const taskBlockingDependencies = (task, tasks) => {
