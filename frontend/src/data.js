@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-keyboard-shortcuts-today-row-nav-doc',
+    timestamp: '2026-07-23T05:20:00+09:00',
+    description: '단축키 안내(`?`)에 표시되는 ↑/↓ 행 이동 설명이 업무 관리 화면 전용인 것처럼 되어 있었지만, 실제로는 오늘 화면의 할 일·업무 기록 목록에서도 동일한 행 이동 키보드 조작(`rowKeyDown`)이 이미 동작하고 있었습니다. 안내 문구를 두 화면 모두를 포함하도록 수정해 사용자가 이 기능을 놓치지 않도록 했습니다(`frontend/src/components/KeyboardShortcuts.jsx`).',
+  },
+  {
     id: '2026-07-23-recurring-spawn-reminder-carryover',
     timestamp: '2026-07-23T05:13:53+09:00',
     description: '반복 업무·할 일이 완료되어 다음 회차가 자동 생성될 때 개별 알림 시간(reminder_minutes_before) 설정이 사라지던 문제를 수정했습니다. estimated_minutes·color·links·checklist 등 다른 필드는 그대로 이어졌지만 알림 시간만 누락되어, 반복 항목은 첫 회차 이후로 알림이 조용히 꺼지는 문제가 있었습니다(`backend/app/main.py`의 `spawn_recurring_task`/`spawn_recurring_todo`).',
