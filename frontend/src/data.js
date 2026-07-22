@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-csv-excel-custom-fields-column',
+    timestamp: '2026-07-22T13:25:00+09:00',
+    description: '업무·일정·할 일·업무 기록 모두 사용자 정의 필드(예: 고객사, 계약 번호)를 등록/수정 화면에서 지원했지만, CSV/Excel 내보내기·가져오기에는 이 데이터가 반영되지 않아 백업이나 일괄 편집 시 값이 누락됐습니다. `frontend/src/csv.js`의 네 항목 헤더/행/파서에 "사용자 정의 필드" 열을 추가해 내보내기·가져오기·열 표시 토글(Excel 내보내기 포함)에서 모두 왕복되도록 했습니다.',
+  },
+  {
     id: '2026-07-22-calendar-agenda-arrow-key-navigation',
     timestamp: '2026-07-22T13:12:00+09:00',
     description: '업무 화면과 오늘 화면의 할 일/업무 기록 목록은 방향키(↑/↓)로 행 사이를 이동할 수 있었지만, 캘린더 일정 목록(모바일 아젠다)에는 이 키보드 탐색 기능이 빠져 있었습니다. `frontend/src/screens/Calendar.jsx`에서 공용 nextRowIndex 헬퍼를 재사용해 일정 열기 버튼에 방향키 이동을 추가하여 목록 화면 전반의 키보드 탐색 방식을 통일했습니다.',

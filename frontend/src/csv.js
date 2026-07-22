@@ -19,10 +19,23 @@ const parseChecklistCell = cell => {
   return items.length ? items : undefined
 }
 
+const customFieldsSummary = fields => fields?.length ? fields.map(f => `${f.label}: ${f.value}`).join('; ') : ''
+
+const parseCustomFieldsCell = cell => {
+  if (!cell) return undefined
+  const fields = cell.split(';').map(part => {
+    const i = part.indexOf(':')
+    if (i < 0) return null
+    const label = part.slice(0, i).trim(), value = part.slice(i + 1).trim()
+    return label ? { label, value } : null
+  }).filter(Boolean)
+  return fields.length ? fields : undefined
+}
+
 const colorValueToLabel = { red: '빨강', orange: '주황', yellow: '노랑', green: '초록', purple: '보라', gray: '회색' }
 const colorLabelToValue = Object.fromEntries(Object.entries(colorValueToLabel).flatMap(([value, label]) => [[label, value], [value, value]]))
 
-export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '반복', '반복 종료일', '고정']
+export const taskHeaders = ['제목', '상태', '우선순위', '시작일', '시작 시각', '기한', '완료 시각', '진행률', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '반복', '반복 종료일', '고정', '사용자 정의 필드']
 const taskRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
 const taskRecurrenceLabelToValue = { 매일: 'daily', 매주: 'weekly', 격주: 'biweekly', 매월: 'monthly', 매년: 'yearly', 평일마다: 'weekdays', daily: 'daily', weekly: 'weekly', biweekly: 'biweekly', monthly: 'monthly', yearly: 'yearly', weekdays: 'weekdays' }
 
@@ -56,6 +69,7 @@ export const taskRows = (tasks, todayIso, pinnedIds) => tasks.map(task => [
   taskRecurrenceLabels[task.recurrence_rule] || '',
   task.recurrence_end_date || '',
   pinnedIds?.has(task.id) ? 'Y' : '',
+  customFieldsSummary(task.custom_fields),
 ])
 
 export const tasksToCsv = (tasks, todayIso, pinnedIds) => [taskHeaders, ...taskRows(tasks, todayIso, pinnedIds)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -95,7 +109,7 @@ export const parseTasksCsv = text => {
   if (!rows.length) return { tasks: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트'), iRecurrence = col('반복'), iRecurrenceEnd = col('반복 종료일')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iStart = col('시작일'), iStartTime = col('시작 시각'), iDue = col('기한'), iDueTime = col('완료 시각'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트'), iRecurrence = col('반복'), iRecurrenceEnd = col('반복 종료일'), iCustomFields = col('사용자 정의 필드')
   const tasks = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -115,6 +129,7 @@ export const parseTasksCsv = text => {
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) task.checklist = c }
     if (iRecurrence >= 0 && cells[iRecurrence]) task.recurrence_rule = taskRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
     if (iRecurrenceEnd >= 0 && cells[iRecurrenceEnd]) task.recurrence_end_date = cells[iRecurrenceEnd].trim()
+    if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) task.custom_fields = f }
     tasks.push(task)
   })
   return { tasks, errors }
@@ -219,7 +234,7 @@ export const auditLogsToCsv = logs => [auditHeaders, ...auditRows(logs)].map(row
 
 export const auditLogCsvFilename = date => `workmanager-audit-log-${date}.csv`
 
-export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정']
+export const eventHeaders = ['제목', '시작', '종료', '종일 여부', '우선순위', '장소', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '사용자 정의 필드']
 
 export const eventRows = (events, pinnedIds) => events.map(event => [
   event.title,
@@ -236,6 +251,7 @@ export const eventRows = (events, pinnedIds) => events.map(event => [
   colorValueToLabel[event.color] || '',
   checklistSummary(event.checklist),
   pinnedIds?.has(event.id) ? 'Y' : '',
+  customFieldsSummary(event.custom_fields),
 ])
 
 export const eventsToCsv = (events, pinnedIds) => [eventHeaders, ...eventRows(events, pinnedIds)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -247,7 +263,7 @@ export const parseEventsCsv = text => {
   if (!rows.length) return { events: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iStart = col('시작'), iEnd = col('종료'), iAllDay = col('종일 여부'), iPriority = col('우선순위'), iLocation = col('장소'), iTags = col('태그'), iDescription = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트'), iCustomFields = col('사용자 정의 필드')
   const events = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -265,12 +281,13 @@ export const parseEventsCsv = text => {
     if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) event.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) event.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) event.checklist = c }
+    if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) event.custom_fields = f }
     events.push(event)
   })
   return { events, errors }
 }
 
-export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정']
+export const todoHeaders = ['제목', '완료 여부', '우선순위', '반복', '날짜', '시간', '태그', '메모', '링크', '예상 소요시간(분)', '알림(분 전)', '색상', '체크리스트', '고정', '사용자 정의 필드']
 const todoRecurrenceLabels = { daily: '매일', weekly: '매주', biweekly: '격주', monthly: '매월', yearly: '매년', weekdays: '평일마다' }
 
 export const todoRows = (todos, pinnedIds) => todos.map(todo => [
@@ -288,6 +305,7 @@ export const todoRows = (todos, pinnedIds) => todos.map(todo => [
   colorValueToLabel[todo.color] || '',
   checklistSummary(todo.checklist),
   pinnedIds?.has(todo.id) ? 'Y' : '',
+  customFieldsSummary(todo.custom_fields),
 ])
 
 export const todosToCsv = (todos, pinnedIds) => [todoHeaders, ...todoRows(todos, pinnedIds)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -301,7 +319,7 @@ export const parseTodosCsv = text => {
   if (!rows.length) return { todos: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iTitle = col('제목'), iPriority = col('우선순위'), iRecurrence = col('반복'), iDate = col('날짜'), iTime = col('시간'), iTags = col('태그'), iMemo = col('메모'), iLink = col('링크'), iEstimate = col('예상 소요시간(분)'), iReminder = col('알림(분 전)'), iColor = col('색상'), iChecklist = col('체크리스트'), iCustomFields = col('사용자 정의 필드')
   const todos = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const title = (iTitle >= 0 ? cells[iTitle] : '')?.trim()
@@ -318,12 +336,13 @@ export const parseTodosCsv = text => {
     if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) todo.reminder_minutes_before = Number(cells[iReminder])
     if (iColor >= 0 && cells[iColor]) todo.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) todo.checklist = c }
+    if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) todo.custom_fields = f }
     todos.push(todo)
   })
   return { todos, errors }
 }
 
-export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정']
+export const workLogHeaders = ['날짜', '내용', '소요 시간(분)', '예상 소요시간(분)', '우선순위', '연결 업무', '태그', '링크', '청구 가능', '청구 고객', '청구 금액(원)', '시급 재정의(원)', '청구 완료일시', '색상', '체크리스트', '고정', '사용자 정의 필드']
 
 export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.map(log => [
   log.log_date,
@@ -342,6 +361,7 @@ export const workLogRows = (logs, taskTitleById, hourlyRate, pinnedIds) => logs.
   colorValueToLabel[log.color] || '',
   checklistSummary(log.checklist),
   pinnedIds?.has(log.id) ? 'Y' : '',
+  customFieldsSummary(log.custom_fields),
 ])
 
 export const workLogsToCsv = (logs, taskTitleById, hourlyRate, pinnedIds) => [workLogHeaders, ...workLogRows(logs, taskTitleById, hourlyRate, pinnedIds)].map(row => row.map(escapeCsvCell).join(',')).join('\n')
@@ -353,7 +373,7 @@ export const parseWorkLogsCsv = text => {
   if (!rows.length) return { logs: [], errors: [] }
   const header = rows[0].map(h => h.trim())
   const col = name => header.indexOf(name)
-  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iClientName = col('청구 고객'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트')
+  const iDate = col('날짜'), iContent = col('내용'), iDuration = col('소요 시간(분)'), iEstimate = col('예상 소요시간(분)'), iPriority = col('우선순위'), iTaskLink = col('연결 업무'), iTags = col('태그'), iLink = col('링크'), iBillable = col('청구 가능'), iClientName = col('청구 고객'), iRateOverride = col('시급 재정의(원)'), iInvoicedAt = col('청구 완료일시'), iColor = col('색상'), iChecklist = col('체크리스트'), iCustomFields = col('사용자 정의 필드')
   const logs = [], errors = []
   rows.slice(1).forEach((cells, idx) => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
@@ -372,6 +392,7 @@ export const parseWorkLogsCsv = text => {
     if (iInvoicedAt >= 0 && cells[iInvoicedAt]) log.invoiced_at = cells[iInvoicedAt].trim()
     if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) log.checklist = c }
+    if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) log.custom_fields = f }
     logs.push(log)
   })
   return { logs, errors }
