@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
-import { api } from '../api'
+import { api, attachmentSizeError } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
 import { suppressStaleTaskDateErrors, validateTaskForm } from '../formValidation'
@@ -164,6 +164,8 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete,
 
   const uploadAttachmentFile = async file => {
     if (!file) return
+    const sizeError = attachmentSizeError(file)
+    if (sizeError) { setAttachmentError(sizeError); return }
     setAttachmentError('')
     setUploadingAttachment(true)
     try {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { apiErrorMessage, ApiError, request } from './api.js'
+import { apiErrorMessage, ApiError, request, attachmentSizeError, MAX_ATTACHMENT_BYTES } from './api.js'
 
 test('apiErrorMessage keeps plain backend messages intact', () => {
   assert.equal(apiErrorMessage({ detail: 'due_date must not be before start_date' }, 422), 'due_date must not be before start_date')
@@ -21,6 +21,16 @@ test('apiErrorMessage flattens FastAPI validation arrays into readable field mes
 
 test('apiErrorMessage falls back to generic status text when the backend body is empty', () => {
   assert.equal(apiErrorMessage({}, 500), '요청을 처리하지 못했습니다 (500)')
+})
+
+test('attachmentSizeError returns empty string for a file within the limit', () => {
+  assert.equal(attachmentSizeError({ size: MAX_ATTACHMENT_BYTES }), '')
+})
+
+test('attachmentSizeError returns a Korean size-limit message for an oversized file', () => {
+  const message = attachmentSizeError({ size: MAX_ATTACHMENT_BYTES + 1 })
+  assert.match(message, /5MB/)
+  assert.match(message, /최대/)
 })
 
 test('request() surfaces a timeout-specific message when the internal timeout aborts the fetch', async () => {

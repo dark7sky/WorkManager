@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-attachment-size-precheck',
+    timestamp: '2026-07-22T18:47:00+09:00',
+    description: '업무/일정/할 일/업무 기록에 5MB를 초과하는 파일을 첨부하면 서버 응답을 기다린 뒤에야 오류가 표시되던 것을, 파일 선택 즉시 클라이언트에서 크기를 확인해 바로 안내하도록 개선했습니다(`frontend/src/api.js`의 `attachmentSizeError`, `TaskForm.jsx`/`Calendar.jsx`/`Today.jsx`).',
+  },
+  {
     id: '2026-07-22-global-search-arrow-key-nav',
     timestamp: '2026-07-22T18:41:00+09:00',
     description: '전체 검색(Ctrl+/) 모달에서 마우스로 항목을 일일이 클릭해야 했던 것을, 검색어 입력 후 방향키(↑/↓)로 업무/일정/할 일/업무 기록 검색 결과 사이를 이동하며 Enter/클릭으로 바로 열 수 있도록 개선했습니다(`frontend/src/components/GlobalSearch.jsx`).',

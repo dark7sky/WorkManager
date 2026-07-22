@@ -31,7 +31,7 @@ import { findDuplicateTitleEvents } from '../eventDuplicateCheck'
 import { validateEventForm } from '../formValidation'
 import { dropZoneHandlers } from '../fileDrop'
 import { formatDuration } from '../performanceReport'
-import { api } from '../api'
+import { api, attachmentSizeError } from '../api'
 import { deriveTagColorMap } from '../tagColors'
 import { loadCommentLastViewed, saveCommentLastViewed, markCommentsViewed, hasUnseenComments } from '../commentActivity'
 
@@ -229,6 +229,8 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   }, [event?.id])
   const uploadAttachmentFile = async file => {
     if (!file) return
+    const sizeError = attachmentSizeError(file)
+    if (sizeError) { setAttachmentError(sizeError); return }
     setAttachmentError('')
     setUploadingAttachment(true)
     try {

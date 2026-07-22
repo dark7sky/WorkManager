@@ -1,5 +1,9 @@
 const API = '/api'
 export const AUTH_EXPIRED_EVENT = 'workmanager:auth-expired'
+export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
+export const attachmentSizeError = file => file && file.size > MAX_ATTACHMENT_BYTES
+  ? `파일 크기는 최대 ${(MAX_ATTACHMENT_BYTES / (1024 * 1024)).toFixed(0)}MB까지 첨부할 수 있습니다. (${(file.size / (1024 * 1024)).toFixed(1)}MB)`
+  : ''
 
 export class ApiError extends Error {
   constructor(message, status) { super(message); this.name = 'ApiError'; this.status = status }

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, Check, CheckCircle2, ChevronRight, Circle, Clock3, Copy, DollarSign, Download, ExternalLink, FileText, Flag, History, Link2, Paperclip, Palette, Pause, Pencil, Play, Plus, SkipForward, Sparkles, Square, SlidersHorizontal, Star, Tag, Trash2, Upload, X } from 'lucide-react'
 import Header from '../components/Header'
 import TagsInput, { TagChips, TagFilter } from '../components/TagsInput'
-import { api } from '../api'
+import { api, attachmentSizeError } from '../api'
 import { deriveTagColorMap } from '../tagColors'
 import { clearWorkLogTimer, formatTimerElapsed, loadWorkLogTimer, pauseWorkLogTimer, resumeWorkLogTimer, startTimeString, startWorkLogTimer, timerElapsedMinutes } from '../workLogTimer'
 import { loadPinnedTodoIds, loadTodoSort, orderTodosByPin, savePinnedTodoIds, saveTodoSort, togglePinnedTodo } from '../todoPins'
@@ -108,6 +108,8 @@ function TodoAttachments({ todoId }) {
   }, [todoId])
   const uploadFile = async file => {
     if (!file) return
+    const sizeError = attachmentSizeError(file)
+    if (sizeError) { setError(sizeError); return }
     setError('')
     setUploading(true)
     try {
@@ -198,6 +200,8 @@ function WorkLogAttachments({ logId }) {
   }, [logId])
   const uploadFile = async file => {
     if (!file) return
+    const sizeError = attachmentSizeError(file)
+    if (sizeError) { setError(sizeError); return }
     setError('')
     setUploading(true)
     try {
