@@ -610,12 +610,14 @@ export default function Today(props) {
     setTodoEstimate(filled.estimated_minutes || '')
     setTodoColor(filled.color || '')
     setTodoLink(filled.link_url || '')
+    setTodoLinks(filled.links || [])
+    setTodoCustomFields(filled.custom_fields || [])
   }
   const saveTodoTemplate = () => {
     if (!todoDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', todoDraft.trim())
     if (!name) return
-    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags, checklist: todoChecklist, estimated_minutes: todoEstimate, color: todoColor, link_url: todoLink })
+    const template = buildTodoTemplate({ name, title: todoDraft, priority: todoPriority, recurrence_rule: todoRecurrence, tags: todoTags, checklist: todoChecklist, estimated_minutes: todoEstimate, color: todoColor, link_url: todoLink, links: todoLinks, custom_fields: todoCustomFields })
     const next = addTodoTemplate(todoTemplates, template)
     setTodoTemplates(next)
     saveTodoTemplates(next)
@@ -641,12 +643,13 @@ export default function Today(props) {
     setLogPriority(filled.priority)
     setLogLink(filled.link_url || '')
     setLogLinks(filled.links || [])
+    setLogCustomFields(filled.custom_fields || [])
   }
   const saveLogTpl = () => {
     if (!logDraft.trim()) return
     const name = window.prompt('템플릿 이름을 입력하세요.', logDraft.trim())
     if (!name) return
-    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate, priority: logPriority, link_url: logLink, links: logLinks })
+    const template = buildLogTemplate({ name, content: logDraft, tags: logTags, color: logColor, duration_minutes: logMinutes, estimated_minutes: logEstimate, priority: logPriority, link_url: logLink, links: logLinks, custom_fields: logCustomFields })
     const next = addLogTemplate(logTemplates, template)
     setLogTemplates(next)
     saveLogTemplates(next)

@@ -62,7 +62,7 @@ test('removeLogTemplate filters out the matching id only', () => {
 
 test('applyLogTemplate maps template fields onto a draft', () => {
   const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15 })
-  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15, estimated_minutes: '', priority: 'normal', link_url: '', links: [] })
+  assert.deepEqual(applyLogTemplate(template), { content: '데일리 스탠드업 참석', tags: ['미팅'], color: 'blue', duration_minutes: 15, estimated_minutes: '', priority: 'normal', link_url: '', links: [], custom_fields: [] })
 })
 
 test('buildLogTemplate and applyLogTemplate round-trip link_url and links', () => {
@@ -73,6 +73,16 @@ test('buildLogTemplate and applyLogTemplate round-trip link_url and links', () =
   assert.equal(applied.link_url, 'https://a.com')
   assert.equal(applied.links[0].url, 'https://example.com')
   assert.notEqual(applied.links[0].id, links[0].id)
+})
+
+test('buildLogTemplate and applyLogTemplate round-trip custom_fields', () => {
+  const custom_fields = [{ id: 'x', label: '고객사', value: '삼성' }]
+  const template = buildLogTemplate({ name: '스탠드업', content: '데일리 스탠드업 참석', custom_fields })
+  assert.equal(template.custom_fields[0].label, '고객사')
+  assert.notEqual(template.custom_fields[0].id, custom_fields[0].id)
+  const applied = applyLogTemplate(template)
+  assert.equal(applied.custom_fields[0].value, '삼성')
+  assert.notEqual(applied.custom_fields[0].id, template.custom_fields[0].id)
 })
 
 test('buildLogTemplate and applyLogTemplate carry the priority', () => {

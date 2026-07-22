@@ -86,6 +86,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete,
     setDueDateVal(filled.due_date ?? dueDateVal)
     setDueTimeVal(filled.due_time ?? dueTimeVal)
     setLinks(filled.links || [])
+    setCustomFields(filled.custom_fields || [])
   }
 
   const saveAsTemplate = () => {
@@ -104,6 +105,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete,
       color: data.get('color'),
       link_url: data.get('link_url'),
       links,
+      custom_fields: customFields,
     })
     const next = addTaskTemplate(templates, template)
     setTemplates(next)

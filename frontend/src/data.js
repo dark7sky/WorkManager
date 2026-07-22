@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-template-custom-fields-parity',
+    timestamp: '2026-07-22T13:40:00+09:00',
+    description: '업무·일정·할 일·업무 기록의 "템플릿으로 저장" 기능이 사용자 정의 필드(및 할 일 템플릿의 첨부 링크)를 저장/적용하지 않아, 템플릿을 불러오면 입력해둔 필드 값이 조용히 사라졌습니다. `frontend/src/taskTemplates.js`, `eventTemplates.js`, `todoTemplates.js`, `logTemplates.js`의 build/apply 함수에 사용자 정의 필드(및 할 일 템플릿에는 링크)를 추가하고, `TaskForm.jsx`·`Calendar.jsx`·`Today.jsx`의 템플릿 저장/적용 호출부를 연결했습니다.',
+  },
+  {
     id: '2026-07-22-csv-excel-custom-fields-column',
     timestamp: '2026-07-22T13:25:00+09:00',
     description: '업무·일정·할 일·업무 기록 모두 사용자 정의 필드(예: 고객사, 계약 번호)를 등록/수정 화면에서 지원했지만, CSV/Excel 내보내기·가져오기에는 이 데이터가 반영되지 않아 백업이나 일괄 편집 시 값이 누락됐습니다. `frontend/src/csv.js`의 네 항목 헤더/행/파서에 "사용자 정의 필드" 열을 추가해 내보내기·가져오기·열 표시 토글(Excel 내보내기 포함)에서 모두 왕복되도록 했습니다.',

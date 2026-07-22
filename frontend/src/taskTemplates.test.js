@@ -125,6 +125,18 @@ test('buildTaskTemplate and applyTaskTemplate round-trip color, link_url, and li
   assert.notEqual(result.links[0].id, links[0].id)
 })
 
+test('buildTaskTemplate and applyTaskTemplate round-trip custom_fields', () => {
+  const custom_fields = [{ id: 'x', label: '고객사', value: '삼성' }]
+  const template = buildTaskTemplate({ name: '이름', title: '제목', custom_fields })
+  assert.equal(template.custom_fields.length, 1)
+  assert.equal(template.custom_fields[0].label, '고객사')
+  assert.notEqual(template.custom_fields[0].id, custom_fields[0].id)
+  const result = applyTaskTemplate(template, '2026-07-10')
+  assert.equal(result.custom_fields[0].label, '고객사')
+  assert.equal(result.custom_fields[0].value, '삼성')
+  assert.notEqual(result.custom_fields[0].id, template.custom_fields[0].id)
+})
+
 test('durationDaysBetween computes whole days and floors negative spans to zero', () => {
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-13'), 3)
   assert.equal(durationDaysBetween('2026-07-10', '2026-07-10'), 0)

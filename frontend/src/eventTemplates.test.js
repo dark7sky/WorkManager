@@ -61,7 +61,7 @@ test('removeEventTemplate filters out the matching id only', () => {
 
 test('applyEventTemplate maps template fields onto a draft', () => {
   const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', location: '회의실 A', color: 'blue', tags: ['정기'] })
-  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], estimated_minutes: '', checklist: [], link_url: '', links: [] })
+  assert.deepEqual(applyEventTemplate(template), { title: '주간 팀 회의', location: '회의실 A', color: 'blue', priority: '', tags: ['정기'], estimated_minutes: '', checklist: [], link_url: '', links: [], custom_fields: [] })
 })
 
 test('buildEventTemplate and applyEventTemplate round-trip link_url and links', () => {
@@ -72,6 +72,16 @@ test('buildEventTemplate and applyEventTemplate round-trip link_url and links', 
   assert.equal(applied.link_url, 'https://a.com')
   assert.equal(applied.links[0].url, 'https://example.com')
   assert.notEqual(applied.links[0].id, links[0].id)
+})
+
+test('buildEventTemplate and applyEventTemplate round-trip custom_fields', () => {
+  const custom_fields = [{ id: 'x', label: '고객사', value: '삼성' }]
+  const template = buildEventTemplate({ name: '주간 회의', title: '주간 팀 회의', custom_fields })
+  assert.equal(template.custom_fields[0].label, '고객사')
+  assert.notEqual(template.custom_fields[0].id, custom_fields[0].id)
+  const applied = applyEventTemplate(template)
+  assert.equal(applied.custom_fields[0].value, '삼성')
+  assert.notEqual(applied.custom_fields[0].id, template.custom_fields[0].id)
 })
 
 test('buildEventTemplate and applyEventTemplate carry the estimate', () => {
