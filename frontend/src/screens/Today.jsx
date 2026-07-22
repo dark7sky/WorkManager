@@ -481,7 +481,7 @@ export default function Today(props) {
     finally { setEditTodoShareBusy(false) }
   }
   const copyEditTodoShareLink = async () => {
-    try { await navigator.clipboard.writeText(editTodoShareUrl); setEditTodoShareCopied(true) } catch { /* clipboard unavailable */ }
+    try { await navigator.clipboard.writeText(editTodoShareUrl); setEditTodoShareCopied(true) } catch { notify?.('링크 복사에 실패했습니다.', 'error') }
   }
   const addLogCustomField = () => {
     const label = logCustomFieldLabelText.trim()
@@ -513,7 +513,7 @@ export default function Today(props) {
     finally { setEditLogShareBusy(false) }
   }
   const copyEditLogShareLink = async () => {
-    try { await navigator.clipboard.writeText(editLogShareUrl); setEditLogShareCopied(true) } catch { /* clipboard unavailable */ }
+    try { await navigator.clipboard.writeText(editLogShareUrl); setEditLogShareCopied(true) } catch { notify?.('링크 복사에 실패했습니다.', 'error') }
   }
   const addTodoChecklistItem = () => {
     const text = todoChecklistText.trim()

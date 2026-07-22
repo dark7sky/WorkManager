@@ -115,7 +115,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     finally { setShareBusy(false) }
   }
   const copyShareLink = async () => {
-    try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { /* clipboard unavailable */ }
+    try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { setError('링크 복사에 실패했습니다.') }
   }
   const loadSeries = async () => {
     if (seriesItems) { setSeriesItems(null); return }

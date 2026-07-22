@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-share-link-copy-failure-feedback',
+    timestamp: '2026-07-22T18:38:00+09:00',
+    description: '업무/일정 상세의 "공유 링크 만들기" 복사 버튼과 할 일/업무 기록의 공유 링크 복사 버튼은 클립보드 복사가 실패해도(권한 거부, 포커스 이탈 등) 아무 안내 없이 조용히 실패했습니다. 이미 같은 화면의 "링크" 딥링크 복사 버튼들이 사용하던 것과 동일한 실패 안내(오류 메시지/토스트)를 네 곳 모두에 추가했습니다(`frontend/src/components/TaskForm.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-22-export-selected-only-parity',
     timestamp: '2026-07-22T18:22:18+09:00',
     description: '업무(Tasks) 화면에서는 항목을 체크박스로 선택한 뒤 CSV/Excel/ICS/PDF로 내보내면 선택한 항목만 내보내졌지만, 할 일/업무 기록/일정 화면은 선택 여부와 무관하게 항상 화면에 표시된 전체 목록을 내보냈습니다. 세 화면 모두 선택된 항목이 있으면 그 항목만, 없으면 기존처럼 전체를 내보내도록 통일했습니다(`frontend/src/screens/Today.jsx`, `frontend/src/screens/Calendar.jsx`).',
