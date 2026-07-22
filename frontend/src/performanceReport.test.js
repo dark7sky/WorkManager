@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert'
-import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison } from './performanceReport.js'
+import { performanceReportMarkdown, performanceReportFilename, loadReportPresets, saveReportPreset, deleteReportPreset, presetRange, formatDuration, dailyActivityTrend, activityStreak, loadPerformanceGoal, savePerformanceGoal, goalProgress, previousPeriodRange, periodComparison, estimateVariancePercent } from './performanceReport.js'
 
 test('formatDuration: formats minutes as hours/minutes in Korean', () => {
   assert.strictEqual(formatDuration(0), '0분')
@@ -393,4 +393,22 @@ test('goalProgress: returns null percent when a goal is unset', () => {
   const stats = { completed_tasks: 5, tracked_minutes: 100, completed_todos: 2, events: 3 }
   const result = goalProgress(stats, { taskGoal: null, minutesGoal: null, todoGoal: null, eventGoal: null })
   assert.deepStrictEqual(result, { taskPercent: null, minutesPercent: null, todoPercent: null, eventsPercent: null, taskBarPercent: null, minutesBarPercent: null, todoBarPercent: null, eventsBarPercent: null })
+})
+
+test('estimateVariancePercent: returns null when no estimate is set', () => {
+  assert.strictEqual(estimateVariancePercent(120, 0), null)
+  assert.strictEqual(estimateVariancePercent(120, null), null)
+  assert.strictEqual(estimateVariancePercent(120, undefined), null)
+})
+
+test('estimateVariancePercent: positive when actual exceeds estimate', () => {
+  assert.strictEqual(estimateVariancePercent(150, 100), 50)
+})
+
+test('estimateVariancePercent: negative when actual is under estimate', () => {
+  assert.strictEqual(estimateVariancePercent(80, 100), -20)
+})
+
+test('estimateVariancePercent: zero when actual matches estimate exactly', () => {
+  assert.strictEqual(estimateVariancePercent(100, 100), 0)
 })

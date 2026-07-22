@@ -19,6 +19,11 @@ export const formatDuration = minutes => {
   return [h ? `${h}시간` : '', m ? `${m}분` : ''].filter(Boolean).join(' ')
 }
 
+export const estimateVariancePercent = (trackedMinutes, estimatedMinutes) => {
+  if (!(estimatedMinutes > 0)) return null
+  return Math.round((trackedMinutes - estimatedMinutes) / estimatedMinutes * 100)
+}
+
 export const dailyActivityTrend = (timeline, start, end) => {
   if (!start || !end || start > end) return []
   const cursor = new Date(`${start}T00:00:00`)

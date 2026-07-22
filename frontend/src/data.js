@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-performance-estimate-variance',
+    timestamp: '2026-07-22T13:44:00+09:00',
+    description: '성과 화면의 태그별 소요 시간에서 완료 업무의 예상 소요 시간이 서버에서 계산되고도 화면에는 표시되지 않아, 어떤 태그가 예상보다 오래 걸리는지 알 수 없었습니다. 태그별 항목에 "예상 X 대비 +N%/-N%" 편차를 표시하도록 했습니다.',
+  },
+  {
     id: '2026-07-22-worklog-invoiced-edit-warning',
     timestamp: '2026-07-22T13:35:00+09:00',
     description: '이미 청구 완료 처리된 업무 기록도 내용/시간/청구 금액을 아무 경고 없이 수정할 수 있어, 실제 기록과 청구된 금액이 조용히 어긋나는 문제가 있었습니다. 청구 완료(invoiced_at)된 기록을 수정할 때 편집 폼에 경고 문구를 표시하도록 했습니다.',
