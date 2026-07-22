@@ -2074,6 +2074,37 @@ class ApiTests(unittest.TestCase):
         missing_group = b.patch("/api/tasks/series/does-not-exist?from_date=2026-09-01", json={"title": "x"})
         self.assertEqual(missing_group.status_code, 404)
 
+    def test_task_series_delete_removes_only_future_occurrences(self):
+        from app.db import connection
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "task-rec-test-group-2"
+        occurrences = []
+        for day in ("2026-09-01", "2026-09-08", "2026-09-15"):
+            created = b.post("/api/tasks", json={"title": "주간 보고", "due_date": day})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/tasks", json={"title": "지난 보고", "due_date": "2026-08-25"})
+        self.assertEqual(past.status_code, 200, past.text)
+        child = b.post("/api/tasks", json={"title": "하위 업무", "parent_id": occurrences[0]["id"]})
+        self.assertEqual(child.status_code, 200, child.text)
+        with connection() as c:
+            c.execute("UPDATE tasks SET recurrence_group_id=? WHERE id IN (?,?,?,?)",
+                       (group_id, *[o["id"] for o in occurrences], past.json()["id"]))
+        other_user_denied = a.delete(f"/api/tasks/series/{group_id}?from_date=2026-09-01")
+        self.assertEqual(other_user_denied.status_code, 404)
+        response = b.delete(f"/api/tasks/series/{group_id}?from_date=2026-09-01")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["deleted"], 3)
+        for occurrence in occurrences:
+            self.assertEqual(b.get(f"/api/tasks/{occurrence['id']}").status_code, 404)
+        untouched = b.get(f"/api/tasks/{past.json()['id']}")
+        self.assertEqual(untouched.status_code, 200, untouched.text)
+        promoted = b.get(f"/api/tasks/{child.json()['id']}")
+        self.assertEqual(promoted.status_code, 200, promoted.text)
+        self.assertIsNone(promoted.json()["parent_id"])
+        missing_group = b.delete("/api/tasks/series/does-not-exist?from_date=2026-09-01")
+        self.assertEqual(missing_group.status_code, 404)
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_todo_series_links_completed_occurrences_to_the_newly_spawned_one(self, *_):
@@ -2117,6 +2148,32 @@ class ApiTests(unittest.TestCase):
         no_op = b.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={"todo_date": "1999-01-01"})
         self.assertEqual(no_op.status_code, 422)
         missing_group = b.patch("/api/todos/series/does-not-exist?from_todo_date=2026-09-01", json={"title": "x"})
+        self.assertEqual(missing_group.status_code, 404)
+
+    def test_todo_series_delete_removes_only_future_occurrences(self):
+        from app.db import connection
+        b, a = self.client(self.token_b), self.client(self.token_a)
+        group_id = "todo-rec-test-group-2"
+        occurrences = []
+        for day in ("2026-09-01", "2026-09-08", "2026-09-15"):
+            created = b.post("/api/todos", json={"title": "주간 정리", "todo_date": day})
+            self.assertEqual(created.status_code, 200, created.text)
+            occurrences.append(created.json())
+        past = b.post("/api/todos", json={"title": "지난 정리", "todo_date": "2026-08-25"})
+        self.assertEqual(past.status_code, 200, past.text)
+        with connection() as c:
+            c.execute("UPDATE todos SET recurrence_group_id=? WHERE id IN (?,?,?,?)",
+                       (group_id, *[o["id"] for o in occurrences], past.json()["id"]))
+        other_user_denied = a.delete(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01")
+        self.assertEqual(other_user_denied.status_code, 404)
+        response = b.delete(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["deleted"], 3)
+        for occurrence in occurrences:
+            self.assertEqual(b.get(f"/api/todos/{occurrence['id']}").status_code, 404)
+        untouched = b.get(f"/api/todos/{past.json()['id']}")
+        self.assertEqual(untouched.status_code, 200, untouched.text)
+        missing_group = b.delete("/api/todos/series/does-not-exist?from_todo_date=2026-09-01")
         self.assertEqual(missing_group.status_code, 404)
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)

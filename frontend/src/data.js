@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-task-todo-series-delete',
+    timestamp: '2026-07-22T13:28:49+09:00',
+    description: '반복 일정은 "이 일정과 이후 반복 일정에 모두 적용" 옵션으로 한 번에 삭제할 수 있었지만, 반복 업무와 반복 할 일은 삭제 시 회차마다 하나씩 지워야 했습니다. 업무/할 일 삭제 확인창에도 이후 반복 항목을 함께 삭제하는 체크박스를 추가해 세 유형 모두 일관된 반복 삭제를 지원합니다.',
+  },
+  {
     id: '2026-07-22-worklog-client-name-autocomplete',
     timestamp: '2026-07-22T13:21:00+09:00',
     description: '업무 기록에서 청구 고객명을 매번 새로 입력하다 보니 "ABC 상사"와 "ABC상사"처럼 표기가 갈려 청구/실적 집계가 조용히 쪼개지는 문제가 있었습니다. 기존에 입력된 고객명을 자동완성 목록으로 제안하도록 새 기록 작성/수정 폼의 청구 고객명 입력란에 datalist를 연결했습니다.',

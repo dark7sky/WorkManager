@@ -2048,6 +2048,45 @@ def update_task_series(group_id: str, from_date: str, payload: dict = Body(...),
 EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority"}
 
 
+@app.delete("/api/todos/series/{group_id}")
+def delete_todo_series(group_id: str, from_todo_date: str, user=Depends(require_user)):
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM todos WHERE user_id=? AND recurrence_group_id=? AND todo_date>=? AND deleted_at IS NULL ORDER BY todo_date",
+            (user, group_id, from_todo_date)).fetchall()]
+        if not ids:
+            raise HTTPException(404, "반복 할일을 찾을 수 없습니다.")
+        c.executemany("UPDATE todos SET deleted_at=? WHERE id=? AND user_id=?", [(now(), item_id, user) for item_id in ids])
+    for item_id in ids:
+        audit(user, "delete", "todos", item_id, {"series": True})
+    return {"ok": True, "deleted": len(ids)}
+
+
+@app.delete("/api/tasks/series/{group_id}")
+def delete_task_series(group_id: str, from_date: str, user=Depends(require_user)):
+    with connection() as c:
+        ids = [r["id"] for r in c.execute(
+            "SELECT id FROM tasks WHERE user_id=? AND recurrence_group_id=? AND COALESCE(due_date,start_date,'')>=? AND deleted_at IS NULL ORDER BY COALESCE(due_date,start_date,'')",
+            (user, group_id, from_date)).fetchall()]
+        if not ids:
+            raise HTTPException(404, "반복 업무를 찾을 수 없습니다.")
+        id_set = set(ids)
+        promoted_children = []
+        for item_id in ids:
+            c.execute("UPDATE tasks SET deleted_at=? WHERE id=? AND user_id=?", (now(), item_id, user))
+            children = [r["id"] for r in c.execute(
+                "SELECT id FROM tasks WHERE user_id=? AND parent_id=? AND deleted_at IS NULL", (user, item_id)).fetchall()]
+            children = [cid for cid in children if cid not in id_set]
+            if children:
+                c.execute("UPDATE tasks SET parent_id=NULL WHERE user_id=? AND parent_id=?", (user, item_id))
+                promoted_children.extend(children)
+    for item_id in ids:
+        audit(user, "delete", "tasks", item_id, {"series": True})
+    for child_id in promoted_children:
+        audit(user, "update", "tasks", child_id, {"parent_id": None, "reason": "parent_deleted"})
+    return {"ok": True, "deleted": len(ids)}
+
+
 @app.get("/api/events/{item_id}/series")
 def event_series(item_id: int, user=Depends(require_user)):
     with connection() as c:
