@@ -48,6 +48,7 @@ export default function PublicTask({ token }) {
         {task.checklist?.length ? <div><p className="checklist-progress">체크리스트 {task.checklist.filter(i => i.done).length}/{task.checklist.length}</p><ul>{task.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {task.custom_fields?.length ? <dl className="public-task-meta">{task.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}
         {task.link_url ? <a className="task-link" href={task.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
+        {task.links?.length ? <ul className="public-task-links">{task.links.map(l => <li key={l.id}><a className="task-link" href={l.url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>{l.label || l.url}</a></li>)}</ul> : null}
         <p className="empty-state">최종 수정 {formatTimestamp(task.updated_at)}</p>
       </section> : null}
     </div>

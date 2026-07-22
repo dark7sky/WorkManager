@@ -46,6 +46,7 @@ export default function PublicTodo({ token }) {
         {todo.checklist?.length ? <div><p className="checklist-progress">체크리스트 {todo.checklist.filter(i => i.done).length}/{todo.checklist.length}</p><ul>{todo.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {todo.custom_fields?.length ? <dl className="public-task-meta">{todo.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}
         {todo.link_url ? <a className="task-link" href={todo.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
+        {todo.links?.length ? <ul className="public-task-links">{todo.links.map(l => <li key={l.id}><a className="task-link" href={l.url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>{l.label || l.url}</a></li>)}</ul> : null}
         <p className="empty-state">생성 {formatTimestamp(todo.created_at)}</p>
       </section> : null}
     </div>

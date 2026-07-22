@@ -46,6 +46,7 @@ export default function PublicWorkLog({ token }) {
         {log.checklist?.length ? <div><p className="checklist-progress">체크리스트 {log.checklist.filter(i => i.done).length}/{log.checklist.length}</p><ul>{log.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {log.custom_fields?.length ? <dl className="public-task-meta">{log.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}
         {log.link_url ? <a className="task-link" href={log.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>관련 링크</a> : null}
+        {log.links?.length ? <ul className="public-task-links">{log.links.map(l => <li key={l.id}><a className="task-link" href={l.url} target="_blank" rel="noopener noreferrer"><ExternalLink aria-hidden="true"/>{l.label || l.url}</a></li>)}</ul> : null}
         <p className="empty-state">생성 {formatTimestamp(log.created_at)}</p>
       </section> : null}
     </div>

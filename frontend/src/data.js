@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-public-share-attached-links',
+    timestamp: '2026-07-23T05:35:00+09:00',
+    description: '공유 링크로 공개된 업무·일정·할 일·업무일지 화면에 첨부 링크(links) 목록이 표시되지 않던 것을 수정했습니다. 목록 배지·CSV/Excel·수정 폼에는 이미 노출되던 다중 첨부 링크가 공개 조회 API/화면에서만 빠져 있어, 공유 링크를 받은 사람이 관련 링크(link_url) 외의 추가 참고 링크를 볼 수 없던 문제를 맞췄습니다(`backend/app/main.py`의 4개 `/api/public/*` 엔드포인트, `frontend/src/screens/Public*.jsx`).',
+  },
+  {
     id: '2026-07-23-performance-report-excel-export',
     timestamp: '2026-07-23T05:20:00+09:00',
     description: '성과 리포트(활동 타임라인)에 Excel 내보내기 버튼을 추가했습니다. 업무·일정·할 일·업무일지·감사 로그는 이미 CSV와 Excel을 모두 지원했지만 성과 리포트는 CSV/Markdown만 가능했던 마지막 내보내기 형식 공백을 맞췄습니다(`frontend/src/xlsx.js`, `frontend/src/screens/Performance.jsx`).',
