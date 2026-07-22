@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-22-ai-reminder-lead-time-extraction',
+    timestamp: '2026-07-22T19:04:00+09:00',
+    description: 'AI 없이 동작하는 빠른 입력(QuickCapture)의 규칙 기반 파서가 업무/일정/할 일/업무일지 모두에서 예상 소요시간·태그 등은 인식하면서도 "30분 전 알림" 같은 리마인더 시점 표현은 전혀 인식하지 못해 수동으로 다시 설정해야 했던 것을, `_reminder_minutes` 추출기를 추가해 4개 엔티티 생성 시 `reminder_minutes_before`를 자동으로 채우도록 개선했습니다(`backend/app/ai.py`의 `rule_parse`).',
+  },
+  {
     id: '2026-07-22-calendar-feed-worklogs',
     timestamp: '2026-07-22T18:59:00+09:00',
     description: '구독형 캘린더 피드(webcal)에 업무, 일정, 할 일만 포함되고 업무일지는 빠져 있던 것을, 업무일지도 날짜/시간과 리마인더 알림을 반영해 VEVENT로 함께 내보내도록 수정했습니다(`backend/app/main.py`의 `build_calendar_feed`).',

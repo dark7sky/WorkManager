@@ -191,6 +191,34 @@ class RuleParserTests(unittest.TestCase):
         result = ai.rule_parse("오늘 한 일: 배포 완료")
         self.assertNotIn("duration_minutes", result["data"])
 
+    def test_task_extracts_reminder_minutes_before(self):
+        result = ai.rule_parse("분기 보고서 작성 30분 전 알림")
+        self.assertEqual(result["entity"], "task")
+        self.assertEqual(result["data"]["reminder_minutes_before"], 30)
+
+    def test_task_extracts_reminder_hours_before(self):
+        result = ai.rule_parse("분기 보고서 작성 1시간 30분 전 알림")
+        self.assertEqual(result["data"]["reminder_minutes_before"], 90)
+
+    def test_task_without_reminder_phrase_omits_reminder_minutes_before(self):
+        result = ai.rule_parse("분기 보고서 작성")
+        self.assertNotIn("reminder_minutes_before", result["data"])
+
+    def test_event_extracts_reminder_minutes_before(self):
+        result = ai.rule_parse("내일 오후 3시 고객 회의 10분 전 알림")
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["reminder_minutes_before"], 10)
+
+    def test_todo_extracts_reminder_minutes_before(self):
+        result = ai.rule_parse("오늘 보고서 검토 15분 전 알림 해야함")
+        self.assertEqual(result["entity"], "todo")
+        self.assertEqual(result["data"]["reminder_minutes_before"], 15)
+
+    def test_work_log_extracts_reminder_minutes_before(self):
+        result = ai.rule_parse("오늘 한 일: 미팅 준비 20분 전 알림")
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["reminder_minutes_before"], 20)
+
     def test_task_with_multiple_urls_sets_links_array(self):
         result = ai.rule_parse("분기 보고서 작성 https://docs.example.com/a https://sheet.example.com/b")
         self.assertEqual(result["data"]["link_url"], "https://docs.example.com/a")

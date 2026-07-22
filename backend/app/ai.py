@@ -358,6 +358,22 @@ def _duration_minutes(text: str) -> int | None:
     return None
 
 
+_REMINDER_RE = re.compile(r"(\d+)\s*시간\s*(\d+)?\s*분?\s*전\s*알림|(\d+)\s*분\s*전\s*알림|(\d+)\s*시간\s*전\s*알림")
+
+
+def _reminder_minutes(text: str) -> int | None:
+    match = _REMINDER_RE.search(text)
+    if not match:
+        return None
+    if match.group(1):
+        return int(match.group(1)) * 60 + int(match.group(2) or 0)
+    if match.group(3):
+        return int(match.group(3))
+    if match.group(4):
+        return int(match.group(4)) * 60
+    return None
+
+
 _RECURRENCE_WORDS = (("평일마다", "weekdays"), ("매일", "daily"), ("격주", "biweekly"), ("매주", "weekly"), ("매년", "yearly"), ("매월", "monthly"), ("매달", "monthly"))
 _RECURRENCE_UNTIL_RE = re.compile(r"(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}\s*월\s*\d{1,2}\s*일)\s*까지")
 
@@ -439,6 +455,9 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             data["duration_minutes"] = duration
         if any(word in combined for word in ("청구", "billable")):
             data["billable"] = True
+        reminder = _reminder_minutes(combined)
+        if reminder is not None:
+            data["reminder_minutes_before"] = reminder
         return {"action": "create", "entity": "work_log", "data": data,
                 "confidence": 0.78, "source": "local-rules"}
     if any(word in combined for word in ("일정", "회의", "미팅", "약속", "방문")):
@@ -464,6 +483,9 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             if prefix:
                 data["title"] = prefix[:160]
             data["checklist"] = [{"text": item, "done": False} for item in items]
+        reminder = _reminder_minutes(combined)
+        if reminder is not None:
+            data["reminder_minutes_before"] = reminder
         return {"action": "create", "entity": "event", "data": data,
                 "confidence": 0.8, "source": "local-rules"}
     if any(word in combined.lower() for word in ("해야", "체크", "todo", "투두")):
@@ -485,6 +507,9 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             if prefix:
                 data["title"] = prefix[:160]
             data["checklist"] = [{"text": item, "done": False} for item in items]
+        reminder = _reminder_minutes(combined)
+        if reminder is not None:
+            data["reminder_minutes_before"] = reminder
         return {"action": "create", "entity": "todo", "data": data,
                 "confidence": 0.76, "source": "local-rules"}
     data = {"title": title, "description": clean, "status": "todo", "priority": "normal", "progress": 0,
@@ -503,6 +528,9 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
         if prefix:
             data["title"] = prefix[:160]
         data["checklist"] = [{"text": item, "done": False} for item in items]
+    reminder = _reminder_minutes(combined)
+    if reminder is not None:
+        data["reminder_minutes_before"] = reminder
     return {"action": "create", "entity": "task", "data": data,
             "confidence": 0.58, "source": "local-rules"}
 
