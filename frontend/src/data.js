@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-csv-excel-attached-links-column',
+    timestamp: '2026-07-23T05:10:00+09:00',
+    description: '업무·일정·할 일·업무일지 CSV/Excel 내보내기·가져오기에 첨부 링크(links) 열을 추가했습니다. 사용자 정의 필드·체크리스트는 이미 열로 노출되고 있었는데 폼에서 편집 가능한 첨부 링크만 내보내기에서 빠져 있어 백업/재가져오기 시 유실되던 문제를 맞췄습니다(`frontend/src/csv.js`).',
+  },
+  {
     id: '2026-07-23-csv-excel-comment-count-column',
     timestamp: '2026-07-23T04:52:00+09:00',
     description: '업무·일정·할 일·업무일지 CSV/Excel 내보내기에 댓글 수(comment_count) 열을 추가했습니다. 첨부파일 수는 이미 노출되고 있었는데 목록 화면 배지로 표시되는 댓글 수는 내보내기에서 빠져 있던 것을 맞췄습니다(`frontend/src/csv.js`).',
