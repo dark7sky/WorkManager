@@ -1029,7 +1029,8 @@ class ApiTests(unittest.TestCase):
         response = b.patch(f"/api/events/series/{group_id}?from_start_at=2026-09-01T09:00:00", json={
             "title": "주간 회의 (변경)", "location": "3층 회의실", "estimated_minutes": 45, "start_at": "1999-01-01T00:00:00",
             "reminder_minutes_before": 10, "links": [{"label": "문서", "url": "https://example.com"}],
-            "custom_fields": [{"label": "장소코드", "value": "A-3"}]})
+            "custom_fields": [{"label": "장소코드", "value": "A-3"}],
+            "checklist": [{"text": "자료 준비", "done": False}]})
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["updated"], 3)
         for occurrence in occurrences:
@@ -1041,6 +1042,7 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(refreshed["reminder_minutes_before"], 10)
             self.assertEqual([{"label": l["label"], "url": l["url"]} for l in refreshed["links"]], [{"label": "문서", "url": "https://example.com"}])
             self.assertEqual([{"label": f["label"], "value": f["value"]} for f in refreshed["custom_fields"]], [{"label": "장소코드", "value": "A-3"}])
+            self.assertEqual([{"text": c["text"], "done": c["done"]} for c in refreshed["checklist"]], [{"text": "자료 준비", "done": False}])
         untouched = b.get(f"/api/events/{past.json()['id']}").json()
         self.assertEqual(untouched["title"], "지난 회의")
         no_op = b.patch(f"/api/events/series/{group_id}?from_start_at=2026-09-01T09:00:00", json={"start_at": "1999-01-01T00:00:00"})
@@ -2135,7 +2137,8 @@ class ApiTests(unittest.TestCase):
         response = b.patch(f"/api/tasks/series/{group_id}?from_date=2026-09-01", json={
             "title": "주간 보고 (변경)", "priority": "high", "due_date": "1999-01-01",
             "reminder_minutes_before": 30, "links": [{"label": "문서", "url": "https://example.com"}],
-            "custom_fields": [{"label": "부서", "value": "영업"}]})
+            "custom_fields": [{"label": "부서", "value": "영업"}],
+            "checklist": [{"text": "자료 취합", "done": False}]})
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["updated"], 3)
         for occurrence in occurrences:
@@ -2147,6 +2150,7 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(match["reminder_minutes_before"], 30)
             self.assertEqual([{"label": l["label"], "url": l["url"]} for l in match["links"]], [{"label": "문서", "url": "https://example.com"}])
             self.assertEqual([{"label": f["label"], "value": f["value"]} for f in match["custom_fields"]], [{"label": "부서", "value": "영업"}])
+            self.assertEqual([{"text": c["text"], "done": c["done"]} for c in match["checklist"]], [{"text": "자료 취합", "done": False}])
         untouched = next(t for t in b.get("/api/tasks").json() if t["id"] == past.json()["id"])
         self.assertEqual(untouched["title"], "지난 보고")
         no_op = b.patch(f"/api/tasks/series/{group_id}?from_date=2026-09-01", json={"due_date": "1999-01-01"})
@@ -2217,7 +2221,8 @@ class ApiTests(unittest.TestCase):
         response = b.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={
             "title": "주간 정리 (변경)", "memo": "새 메모", "estimated_minutes": 30, "todo_date": "1999-01-01",
             "reminder_minutes_before": 15, "links": [{"label": "문서", "url": "https://example.com"}],
-            "custom_fields": [{"label": "분류", "value": "개인"}]})
+            "custom_fields": [{"label": "분류", "value": "개인"}],
+            "checklist": [{"text": "정리 목록 확인", "done": False}]})
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["updated"], 3)
         for occurrence in occurrences:
@@ -2230,6 +2235,7 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(match["reminder_minutes_before"], 15)
             self.assertEqual([{"label": l["label"], "url": l["url"]} for l in match["links"]], [{"label": "문서", "url": "https://example.com"}])
             self.assertEqual([{"label": f["label"], "value": f["value"]} for f in match["custom_fields"]], [{"label": "분류", "value": "개인"}])
+            self.assertEqual([{"text": c["text"], "done": c["done"]} for c in match["checklist"]], [{"text": "정리 목록 확인", "done": False}])
         untouched = next(t for t in b.get("/api/todos").json() if t["id"] == past.json()["id"])
         self.assertEqual(untouched["title"], "지난 정리")
         no_op = b.patch(f"/api/todos/series/{group_id}?from_todo_date=2026-09-01", json={"todo_date": "1999-01-01"})

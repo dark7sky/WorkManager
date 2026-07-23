@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-series-edit-checklist-parity',
+    timestamp: '2026-07-23T10:12:37+09:00',
+    description: '반복 업무/할 일/일정을 "이 항목과 이후 반복 항목에 모두 적용"으로 수정하면 체크리스트 변경 사항이 저장되지 않고 사라졌습니다. 반복 시리즈 일괄 수정 API(TASK_SERIES_EDITABLE_FIELDS, TODO_SERIES_EDITABLE_FIELDS, EVENT_SERIES_EDITABLE_FIELDS, backend/app/main.py)가 checklist 필드를 허용 목록에서 빠뜨리고 있었습니다. 세 목록 모두에 checklist를 추가하고 각 시리즈 수정 회귀 테스트에 체크리스트 반영 검증을 추가했습니다.',
+  },
+  {
     id: '2026-07-23-promote-to-task-field-parity',
     timestamp: '2026-07-23T10:31:00+09:00',
     description: '할 일/업무 기록/일정을 "업무로 전환"하면 링크, 사용자 지정 필드, 색상, 알림 시점이 새 업무에 복사되지 않고 사라졌습니다. 같은 항목을 복제할 때 쓰이는 build*DuplicatePayload는 이 필드들을 모두 옮기지만, 업무로 전환하는 buildTaskFromTodoPayload/buildTaskFromLogPayload/buildTaskFromEventPayload(todoDuplicate.js, logDuplicate.js, eventDuplicate.js)는 예상 소요 시간만 옮기고 있었습니다. 세 함수 모두 links/custom_fields/color/reminder_minutes_before를 포함하도록 수정했습니다.',

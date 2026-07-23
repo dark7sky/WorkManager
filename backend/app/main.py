@@ -2020,7 +2020,7 @@ def todo_series(item_id: int, user=Depends(require_user)):
     return {"items": [{"id": r["id"], "title": r["title"], "todo_date": r["todo_date"], "completed": bool(r["completed"])} for r in items]}
 
 
-TODO_SERIES_EDITABLE_FIELDS = {"title", "memo", "tags", "link_url", "color", "priority", "todo_time", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields"}
+TODO_SERIES_EDITABLE_FIELDS = {"title", "memo", "tags", "link_url", "color", "priority", "todo_time", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields", "checklist"}
 
 
 @app.patch("/api/todos/series/{group_id}")
@@ -2052,7 +2052,7 @@ def task_series(item_id: int, user=Depends(require_user)):
     return {"items": [{"id": r["id"], "title": r["title"], "start_date": r["start_date"], "due_date": r["due_date"], "status": r["status"], "progress": r["progress"]} for r in items]}
 
 
-TASK_SERIES_EDITABLE_FIELDS = {"title", "description", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields"}
+TASK_SERIES_EDITABLE_FIELDS = {"title", "description", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields", "checklist"}
 
 
 @app.patch("/api/tasks/series/{group_id}")
@@ -2070,7 +2070,7 @@ def update_task_series(group_id: str, from_date: str, payload: dict = Body(...),
     return {"ok": True, "updated": len(items), "items": items}
 
 
-EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields"}
+EVENT_SERIES_EDITABLE_FIELDS = {"title", "description", "location", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields", "checklist"}
 
 
 @app.delete("/api/todos/series/{group_id}")
