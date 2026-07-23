@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-ai-quickcapture-tag-match-parity',
+    timestamp: '2026-07-23T14:44:00+09:00',
+    description: 'AI 키가 설정되지 않은 계정이 사용하는 로컬 규칙 기반 빠른 입력 파서(rule_parse)가 할 일/업무에는 기존 태그를 자동으로 매칭해 붙여주지만, 일정과 업무 기록은 이 매칭 로직 자체가 빠져 있어 같은 문구로 입력해도 태그가 붙지 않았습니다. backend/app/ai.py의 event/work_log 분기에 _match_tags(clean, context) 호출을 추가해 4개 항목 모두 동일하게 태그를 자동 추천하도록 고쳤습니다. 회귀 테스트로 test_rule_parse_matches_existing_tags_for_event/_work_log를 추가했습니다.',
+  },
+  {
     id: '2026-07-23-import-dedup-ui-parity',
     timestamp: '2026-07-23T11:46:34+09:00',
     description: '업무/일정/오늘 화면의 CSV·ICS 가져오기에서, 이미 같은 행이 있거나 같은 파일 안에 중복 행이 섞여 있으면 그대로 추가되지 않고 "중복 건너뜀"으로 표시되도록 가져오기 흐름을 연결했습니다. `dedupeImportedTasks`/`dedupeImportedEvents`/`dedupeImportedTodos`/`dedupeImportedLogs`를 각 화면의 실제 import 핸들러에 적용해, 이전에 내보낸 파일을 다시 넣을 때도 같은 항목이 조용히 두 번 쌓이지 않도록 했습니다(`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',

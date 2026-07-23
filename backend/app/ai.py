@@ -446,7 +446,7 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
                 "data": {"progress": progress, "status": "done" if progress == 100 else "doing"},
                 "confidence": 0.94, "source": "local-rules"}
     if any(word in combined for word in ("한 일", "완료 기록", "작업 기록", "처리함")):
-        data = {"content": title, "log_date": day}
+        data = {"content": title, "log_date": day, "tags": _match_tags(clean, context)}
         if color: data["color"] = color
         if link: data["link_url"] = link
         if links: data["links"] = links
@@ -466,7 +466,8 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
         recurrence = _event_recurrence(combined)
         event_title = _strip_recurrence_phrase(title) if recurrence else title
         data = {"title": event_title or title, "description": "", "start_at": start.isoformat(timespec="minutes"),
-                "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": ""}
+                "end_at": (start + timedelta(hours=1)).isoformat(timespec="minutes"), "location": "",
+                "tags": _match_tags(clean, context)}
         if color: data["color"] = color
         if link: data["link_url"] = link
         if links: data["links"] = links

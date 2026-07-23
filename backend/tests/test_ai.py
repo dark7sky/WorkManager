@@ -46,6 +46,18 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result[0]["data"]["tags"], ["결제", "백엔드"])
         self.assertEqual(result[1]["data"]["tags"], [])
 
+    def test_rule_parse_matches_existing_tags_for_event(self):
+        context = [{"title": "결제 시스템 개선", "tags": ["결제", "백엔드"]}]
+        result = ai.rule_parse("내일 오후 3시 결제 시스템 회의", context=context)
+        self.assertEqual(result["entity"], "event")
+        self.assertEqual(result["data"]["tags"], ["결제", "백엔드"])
+
+    def test_rule_parse_matches_existing_tags_for_work_log(self):
+        context = [{"title": "결제 시스템 개선", "tags": ["결제", "백엔드"]}]
+        result = ai.rule_parse("오늘 한 일: 결제 시스템 점검", context=context)
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["tags"], ["결제", "백엔드"])
+
     def test_rule_parse_multi_single_numbered_item_is_not_split(self):
         result = ai.rule_parse_multi("1. 보고서 작성")
         self.assertEqual(len(result), 1)
