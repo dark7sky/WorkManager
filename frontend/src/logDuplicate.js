@@ -16,6 +16,8 @@ export const buildLogDuplicatePayload = log => ({
   estimated_minutes: log?.estimated_minutes || null,
   custom_fields: Array.isArray(log?.custom_fields) ? log.custom_fields : [],
   reminder_minutes_before: normalizedReminderMinutesBefore(log?.reminder_minutes_before),
+  hourly_rate_override: log?.hourly_rate_override ?? null,
+  client_name: log?.client_name || null,
 })
 
 export const buildTaskFromLogPayload = log => ({

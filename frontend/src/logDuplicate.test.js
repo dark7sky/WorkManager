@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { buildLogDuplicatePayload, buildTaskFromLogPayload } from './logDuplicate.js'
 
 test('buildLogDuplicatePayload copies fields and resets log_date to today', () => {
-  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green', log_time: '09:30', priority: 'high', checklist: [{ id: 'c1', text: '준비', done: true }], estimated_minutes: 45, custom_fields: [{ id: 'f1', label: '고객사', value: 'ACME' }], reminder_minutes_before: 20 }
+  const log = { id: 1, content: '스탠드업 참여', log_date: '2026-07-01', task_id: 7, tags: ['회의'], duration_minutes: 30, link_url: 'https://x.com', links: [{ id: 1, url: 'https://a.com', label: 'A' }], color: 'green', log_time: '09:30', priority: 'high', checklist: [{ id: 'c1', text: '준비', done: true }], estimated_minutes: 45, custom_fields: [{ id: 'f1', label: '고객사', value: 'ACME' }], reminder_minutes_before: 20, hourly_rate_override: 50000, client_name: 'ACME Corp' }
   const result = buildLogDuplicatePayload(log)
   assert.equal(result.content, '스탠드업 참여 (사본)')
   assert.equal(result.log_date, new Date().toLocaleDateString('en-CA'))
@@ -19,6 +19,8 @@ test('buildLogDuplicatePayload copies fields and resets log_date to today', () =
   assert.equal(result.estimated_minutes, 45)
   assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '고객사', value: 'ACME' }])
   assert.equal(result.reminder_minutes_before, 20)
+  assert.equal(result.hourly_rate_override, 50000)
+  assert.equal(result.client_name, 'ACME Corp')
 })
 
 test('buildLogDuplicatePayload handles missing optional fields', () => {
@@ -36,6 +38,8 @@ test('buildLogDuplicatePayload handles missing optional fields', () => {
   assert.equal(result.estimated_minutes, null)
   assert.deepEqual(result.custom_fields, [])
   assert.equal(result.reminder_minutes_before, null)
+  assert.equal(result.hourly_rate_override, null)
+  assert.equal(result.client_name, null)
 })
 
 test('buildTaskFromLogPayload carries title/tags/due date/estimate and marks the task done', () => {

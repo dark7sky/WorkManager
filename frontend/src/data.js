@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-worklog-duplicate-billing-field-parity',
+    timestamp: '2026-07-23T15:22:00+09:00',
+    description: '업무 기록 복제("복제" 버튼)는 태그·체크리스트·예상 소요 시간 등은 그대로 복사하면서도 청구 관련 필드인 시급 재정의(hourly_rate_override)와 청구 고객명(client_name)은 복사 대상에서 빠져 있어, 청구 가능으로 표시된 기록을 복제할 때마다 이 두 값을 매번 다시 입력해야 했습니다. frontend/src/logDuplicate.js의 buildLogDuplicatePayload에 두 필드를 추가해 다른 필드와 동일하게 복제본에 그대로 이어지도록 고쳤습니다. 회귀 테스트를 frontend/src/logDuplicate.test.js에 추가했습니다.',
+  },
+  {
     id: '2026-07-23-csv-import-date-format-validation',
     timestamp: '2026-07-23T15:07:00+09:00',
     description: '업무/일정/할 일/업무 기록 CSV 가져오기에서 날짜·시각 셀(예: "2026/07/06", "930")이 형식에 맞지 않으면 검증 없이 그대로 서버에 전송되어, 일부 행만 저장에 실패해도 나머지 행은 이미 생성된 채 새로고침 없이 원인 불명의 오류 메시지만 표시되는 문제가 있었습니다. frontend/src/csv.js의 parseTasksCsv/parseEventsCsv/parseTodosCsv/parseWorkLogsCsv에 날짜(YYYY-MM-DD)·시각(HH:MM)·일시 형식 검증을 추가해, 형식이 잘못된 셀은 해당 필드만 무시하거나(업무/할 일/기록) 행 전체를 건너뛰고(일정) "N행: ... 형식이 올바르지 않아 무시함/건너뜀" 오류로 안내하도록 고쳤습니다. 회귀 테스트를 frontend/src/csv.test.js에 추가했습니다.',
