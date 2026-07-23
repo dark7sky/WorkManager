@@ -1415,6 +1415,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(patched.json()["duration_minutes"], 45)
         self.assertEqual(a.post("/api/work_logs", json={"content": "too long", "duration_minutes": 1441}).status_code, 422)
 
+    def test_work_log_duration_minutes_and_hourly_rate_override_clear_on_empty_string(self, *_):
+        a = self.client(self.token_a)
+        log = a.post("/api/work_logs", json={"content": "billable work", "log_date": "2026-07-06", "duration_minutes": 60, "hourly_rate_override": 50000})
+        self.assertEqual(log.status_code, 200, log.text)
+        cleared = a.patch(f"/api/work_logs/{log.json()['id']}", json={"duration_minutes": "", "hourly_rate_override": ""})
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertIsNone(cleared.json()["duration_minutes"])
+        self.assertIsNone(cleared.json()["hourly_rate_override"])
+
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_work_log_link_url_is_persisted_and_validated(self, *_):

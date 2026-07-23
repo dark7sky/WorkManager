@@ -646,7 +646,7 @@ class WorkLogPayload(StrictPayload):
     client_name: str | None = Field(None, max_length=200)
     reminder_minutes_before: int | None = Field(None, ge=0, le=1440)
 
-    @field_validator("link_url", "color", "log_time", "priority", "estimated_minutes", "client_name", "reminder_minutes_before", mode="before")
+    @field_validator("link_url", "color", "log_time", "priority", "estimated_minutes", "client_name", "reminder_minutes_before", "duration_minutes", "hourly_rate_override", mode="before")
     @classmethod
     def empty_link_url_to_null(cls, value):
         return None if value == "" else value

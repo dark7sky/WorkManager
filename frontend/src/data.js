@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-worklog-empty-string-clear-fix',
+    timestamp: '2026-07-23T10:47:00+09:00',
+    description: '업무 기록(work log)의 소요 시간(duration_minutes)과 시급 재정의(hourly_rate_override) 필드는 빈 문자열("")을 보내 값을 지우는 것이 다른 모든 항목(예상 소요 시간, 고객명 등)과 달리 지원되지 않아 422 오류가 발생했습니다. backend/app/main.py의 WorkLogPayload 빈 문자열→null 변환 검증기에 두 필드를 추가해 API를 직접 호출하는 경우에도 다른 필드와 동일하게 값을 지울 수 있도록 고쳤습니다.',
+  },
+  {
     id: '2026-07-23-task-series-time-parity',
     timestamp: '2026-07-23T10:19:27+09:00',
     description: '반복 업무를 "이 업무와 이후 반복 업무에 모두 적용"으로 수정할 때 제목·태그·색상 등은 반영되지만 시작 시각/완료 예정 시각(start_time/due_time)은 조용히 무시되어, 반복 업무의 시간대를 한꺼번에 바꾸려던 사용자가 개별 회차를 일일이 다시 고쳐야 했습니다. backend/app/main.py의 TASK_SERIES_EDITABLE_FIELDS에 start_time·due_time을 추가해 일괄 반영되도록 고쳤습니다.',
