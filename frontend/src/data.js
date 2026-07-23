@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-share-link-native-share',
+    timestamp: '2026-07-23T10:20:00+09:00',
+    description: '업무/일정/할 일/업무 기록의 공유 링크 패널에 "공유하기" 버튼을 추가했습니다. 모바일 등 Web Share API를 지원하는 환경에서는 링크 복사 대신 기기의 공유 시트(카카오톡, 문자, 메일 등)로 바로 보낼 수 있습니다.',
+  },
+  {
     id: '2026-07-23-shortcuts-help-arrow-key-coverage',
     timestamp: '2026-07-23T10:12:00+09:00',
     description: '단축키 안내(?)의 ↑/↓ 항목이 업무 관리/오늘 화면 목록만 설명하고 있어, 이미 구현되어 있던 캘린더 일정 목록 보기와 전체 검색(Ctrl/⌘+K) 결과 창의 ↑/↓ 이동 기능은 안내에서 누락되어 있었습니다. KeyboardShortcuts.jsx의 해당 항목 설명에 두 화면을 추가했습니다.',

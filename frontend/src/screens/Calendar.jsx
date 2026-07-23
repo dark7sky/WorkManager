@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, CheckSquare, ChevronLeft, ChevronRight, Copy, Download, ExternalLink, FileText, Flag, History, Link2, MapPin, Paperclip, Palette, Plus, Search, SlidersHorizontal, Star, Tag, Upload } from 'lucide-react'
+import { AlertTriangle, Archive, ArrowUpRight, CalendarClock, CheckSquare, ChevronLeft, ChevronRight, Copy, Download, ExternalLink, FileText, Flag, History, Link2, MapPin, Paperclip, Palette, Plus, Search, Share2, SlidersHorizontal, Star, Tag, Upload } from 'lucide-react'
 import Header from '../components/Header'
 import Modal from '../components/Modal'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -28,7 +28,7 @@ import { normalizedLinks, normalizedEstimatedMinutes, normalizedCustomFields, no
 import { allIdsSelected, selectExportRows, toggleSelectAllIds } from '../taskFilters'
 import { findOverlappingEvents } from '../eventOverlap'
 import { findDuplicateTitleEvents } from '../eventDuplicateCheck'
-import { isShareActive } from '../shareLink'
+import { hasNativeShare, isShareActive } from '../shareLink'
 import { validateEventForm } from '../formValidation'
 import { dropZoneHandlers } from '../fileDrop'
 import { formatDuration } from '../performanceReport'
@@ -119,6 +119,9 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
   }
   const copyShareLink = async () => {
     try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { setError('링크 복사에 실패했습니다.') }
+  }
+  const nativeShareLink = async () => {
+    try { await navigator.share({ title: event?.title || '일정 공유', url: shareUrl }) } catch (e) { if (e?.name !== 'AbortError') setError('공유에 실패했습니다.') }
   }
   const loadSeries = async () => {
     if (seriesItems) { setSeriesItems(null); return }
@@ -379,7 +382,7 @@ function EventForm({ event, date, allEvents = [], onSave, onDelete, onDuplicate,
     </div>
     {event?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
       {shareToken
-        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
+        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button>{hasNativeShare() ? <button type="button" className="text-button" onClick={nativeShareLink}><Share2 aria-hidden="true"/>공유하기</button> : null}<button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
         : <div className="checklist-editor-add"><select value={shareExpiryDays} onChange={e => setShareExpiryDays(e.target.value)} aria-label="공유 링크 만료 기간"><option value="">무제한</option><option value="7">7일 후 만료</option><option value="30">30일 후 만료</option><option value="90">90일 후 만료</option></select><input type="password" value={sharePassword} onChange={e => setSharePassword(e.target.value)} placeholder="비밀번호(선택)" aria-label="공유 링크 비밀번호" autoComplete="new-password"/><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
       {shareToken ? <p className="muted">{shareExpiresAt ? `${new Date(shareExpiresAt).toLocaleDateString('ko-KR')}에 만료됩니다.` : '만료 없이 유지됩니다.'}{shareHasPassword ? ' · 비밀번호로 보호됨' : ''} · 조회 {event.public_token_view_count || 0}회{event.public_token_last_viewed_at ? ` (최근 ${new Date(event.public_token_last_viewed_at).toLocaleString('ko-KR')})` : ''}</p> : null}
       <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 일정을 읽기 전용으로 볼 수 있습니다.</p>

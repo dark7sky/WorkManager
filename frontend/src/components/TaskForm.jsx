@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Share2 } from 'lucide-react'
 import { api, attachmentSizeError } from '../api'
 import { EVENT_COLORS } from '../eventColors'
 import { buildTaskPayload, checklistProgress, clampedTaskProgress, initialTaskDateValue, moveChecklistItem } from '../taskFormPayload'
+import { hasNativeShare } from '../shareLink'
 import { suppressStaleTaskDateErrors, validateTaskForm } from '../formValidation'
 import { directDependentTasks, matchesDependencyFilter, taskDependencyOptions, taskParentOptions } from '../taskHierarchy'
 import { addTaskTemplate, applyTaskTemplate, buildTaskTemplate, durationDaysBetween, loadTaskTemplates, removeTaskTemplate, saveTaskTemplates } from '../taskTemplates'
@@ -204,6 +205,9 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete,
   }
   const copyShareLink = async () => {
     try { await navigator.clipboard.writeText(shareUrl); setShareCopied(true) } catch { setError('링크 복사에 실패했습니다.') }
+  }
+  const nativeShareLink = async () => {
+    try { await navigator.share({ title: task?.title || '업무 공유', url: shareUrl }) } catch (e) { if (e?.name !== 'AbortError') setError('공유에 실패했습니다.') }
   }
 
   const addComment = async () => {
@@ -428,7 +432,7 @@ export default function TaskForm({ task, tasks = [], onSave, onCancel, onDelete,
     </div> : null}
     {task?.id ? <div className="span-2 checklist-editor"><span className="dependency-picker-label">공유 링크</span>
       {shareToken
-        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button><button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
+        ? <div className="checklist-editor-add"><input type="text" readOnly value={shareUrl} onFocus={e => e.target.select()}/><button type="button" className="text-button" onClick={copyShareLink}>{shareCopied ? '복사됨' : '링크 복사'}</button>{hasNativeShare() ? <button type="button" className="text-button" onClick={nativeShareLink}><Share2 aria-hidden="true"/>공유하기</button> : null}<button type="button" className="text-button" disabled={shareBusy} onClick={revokeShareLink}>공유 해제</button></div>
         : <div className="checklist-editor-add"><select value={shareExpiryDays} onChange={e => setShareExpiryDays(e.target.value)} aria-label="공유 링크 만료 기간"><option value="">무제한</option><option value="7">7일 후 만료</option><option value="30">30일 후 만료</option><option value="90">90일 후 만료</option></select><input type="password" value={sharePassword} onChange={e => setSharePassword(e.target.value)} placeholder="비밀번호(선택)" aria-label="공유 링크 비밀번호" autoComplete="new-password"/><button type="button" className="text-button" disabled={shareBusy} onClick={createShareLink}>{shareBusy ? '생성 중…' : '공유 링크 만들기'}</button></div>}
       {shareToken ? <p className="muted">{shareExpiresAt ? `${new Date(shareExpiresAt).toLocaleDateString('ko-KR')}에 만료됩니다.` : '만료 없이 유지됩니다.'}{shareHasPassword ? ' · 비밀번호로 보호됨' : ''} · 조회 {task.public_token_view_count || 0}회{task.public_token_last_viewed_at ? ` (최근 ${new Date(task.public_token_last_viewed_at).toLocaleString('ko-KR')})` : ''}</p> : null}
       <p className="muted">공유 링크가 있으면 로그인 없이 누구나 이 업무를 읽기 전용으로 볼 수 있습니다.</p>
