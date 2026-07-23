@@ -455,6 +455,15 @@ def rule_parse(text: str, hint: str = "", context: list[dict] | None = None) -> 
             data["duration_minutes"] = duration
         if any(word in combined for word in ("청구", "billable")):
             data["billable"] = True
+        estimate = _estimated_minutes(combined)
+        if estimate is not None:
+            data["estimated_minutes"] = estimate
+        checklist = _checklist(combined)
+        if checklist:
+            prefix, items = checklist
+            if prefix:
+                data["content"] = prefix[:160]
+            data["checklist"] = [{"text": item, "done": False} for item in items]
         reminder = _reminder_minutes(combined)
         if reminder is not None:
             data["reminder_minutes_before"] = reminder
@@ -625,10 +634,10 @@ async def parse_text(text: str, context: list[dict] | None = None, user_id: str 
         "input contains two or more distinguishable URLs for one item, also set data.links as a list of "
         "{url, label} objects (label is a short description of what the link is, or empty string). "
         "Todos may also set data.todo_time (HH:MM) when a specific time is mentioned and data.memo for "
-        "extra detail beyond the title. Tasks, events, and todos may all set data.checklist as a list of "
+        "extra detail beyond the title. Tasks, events, todos, and work logs may all set data.checklist as a list of "
         "{text} sub-steps when the input lists multiple steps for one item, and data.estimated_minutes "
         "(integer) when the input states an expected effort/duration (e.g. '예상 2시간', '예상 30분'). "
-        "Work logs may set data.duration_minutes "
+        "Work logs may also set data.duration_minutes "
         "(integer) when the input states time actually spent (e.g. '2시간 했음', '30분 소요'), and data.billable "
         "(boolean true) when the input mentions billing/청구. When creating an event that repeats (e.g. '매주 회의 8월 30일까지'), "
         "set data.recurrence_rule to daily|weekly|biweekly|monthly|yearly|weekdays and data.recurrence_end_date to the ISO end date; "

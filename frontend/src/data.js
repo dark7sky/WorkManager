@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-ai-worklog-checklist-estimate-parity',
+    timestamp: '2026-07-23T15:00:00+09:00',
+    description: 'AI로 업무 기록(work_log)을 만들 때는 체크리스트와 예상 소요 시간이 인식되지 않아, 업무/일정/할 일과 달리 "예상 2시간" 같은 문구나 번호 매긴 단계 목록을 입력해도 값이 저장되지 않는 문제가 있었습니다. backend/app/ai.py의 규칙 기반 파서와 LLM 프롬프트에 업무 기록도 estimated_minutes·checklist를 추출하도록 맞춰, 수동 입력과 동일하게 동작하도록 고쳤습니다.',
+  },
+  {
     id: '2026-07-23-worklog-timer-cross-tab-sync',
     timestamp: '2026-07-23T14:56:00+09:00',
     description: '업무 기록 타이머를 한 탭에서 시작하면 다른 탭에는 반영되지 않아, 다른 탭을 열어 두면 타이머가 없는 것처럼 보이거나 이미 시작된 타이머를 몰라서 중복으로 다시 시작하는 문제가 있었습니다. frontend/src/screens/Today.jsx에 storage 이벤트 리스너를 추가해 다른 탭에서 타이머를 시작·일시정지·재개·중지하면 열려 있는 모든 탭의 타이머 표시가 즉시 동기화되도록 고쳤습니다.',

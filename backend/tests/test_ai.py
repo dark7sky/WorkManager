@@ -226,6 +226,19 @@ class RuleParserTests(unittest.TestCase):
         self.assertEqual(result["entity"], "todo")
         self.assertEqual(result["data"]["reminder_minutes_before"], 15)
 
+    def test_work_log_extracts_estimated_minutes(self):
+        result = ai.rule_parse("오늘 한 일: 보고서 작성, 예상 2시간")
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["estimated_minutes"], 120)
+
+    def test_work_log_extracts_checklist_from_numbered_steps(self):
+        result = ai.rule_parse("오늘 한 일: 보고서 작성 단계: 1. 초안 작성 2. 검토 요청")
+        self.assertEqual(result["entity"], "work_log")
+        self.assertEqual(result["data"]["checklist"], [
+            {"text": "초안 작성", "done": False},
+            {"text": "검토 요청", "done": False},
+        ])
+
     def test_work_log_extracts_reminder_minutes_before(self):
         result = ai.rule_parse("오늘 한 일: 미팅 준비 20분 전 알림")
         self.assertEqual(result["entity"], "work_log")
