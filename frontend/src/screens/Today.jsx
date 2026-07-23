@@ -432,6 +432,12 @@ export default function Today(props) {
     return () => clearInterval(id)
   }, [timer])
 
+  useEffect(() => {
+    const onStorage = e => { if (e.key === 'wm-worklog-timer') setTimer(loadWorkLogTimer()) }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   const startTimer = () => setTimer(startWorkLogTimer(logTaskId ? Number(logTaskId) : null))
   const pauseTimer = () => setTimer(pauseWorkLogTimer())
   const resumeTimer = () => setTimer(resumeWorkLogTimer())

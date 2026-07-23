@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-worklog-timer-cross-tab-sync',
+    timestamp: '2026-07-23T14:56:00+09:00',
+    description: '업무 기록 타이머를 한 탭에서 시작하면 다른 탭에는 반영되지 않아, 다른 탭을 열어 두면 타이머가 없는 것처럼 보이거나 이미 시작된 타이머를 몰라서 중복으로 다시 시작하는 문제가 있었습니다. frontend/src/screens/Today.jsx에 storage 이벤트 리스너를 추가해 다른 탭에서 타이머를 시작·일시정지·재개·중지하면 열려 있는 모든 탭의 타이머 표시가 즉시 동기화되도록 고쳤습니다.',
+  },
+  {
     id: '2026-07-23-worklog-duplicate-billing-field-parity',
     timestamp: '2026-07-23T15:22:00+09:00',
     description: '업무 기록 복제("복제" 버튼)는 태그·체크리스트·예상 소요 시간 등은 그대로 복사하면서도 청구 관련 필드인 시급 재정의(hourly_rate_override)와 청구 고객명(client_name)은 복사 대상에서 빠져 있어, 청구 가능으로 표시된 기록을 복제할 때마다 이 두 값을 매번 다시 입력해야 했습니다. frontend/src/logDuplicate.js의 buildLogDuplicatePayload에 두 필드를 추가해 다른 필드와 동일하게 복제본에 그대로 이어지도록 고쳤습니다. 회귀 테스트를 frontend/src/logDuplicate.test.js에 추가했습니다.',
