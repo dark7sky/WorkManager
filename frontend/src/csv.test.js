@@ -200,6 +200,16 @@ test('parseEventsCsv returns nothing for empty input', () => {
   assert.deepEqual(parseEventsCsv(''), { events: [], errors: [] })
 })
 
+test('parseEventsCsv skips rows whose start/end datetime cannot be parsed', () => {
+  const csv = '제목,시작,종료\n워크숍,2026-13-40T09:00:00,\n세미나,2026-07-18T09:00:00,not-a-date\n'
+  const { events, errors } = parseEventsCsv(csv)
+  assert.deepEqual(events, [])
+  assert.deepEqual(errors, [
+    '2행: 시작 일시 형식이 올바르지 않아 건너뜀',
+    '3행: 종료 일시 형식이 올바르지 않아 건너뜀',
+  ])
+})
+
 test('eventsToCsv and parseEventsCsv round-trip estimated minutes', () => {
   const csv = eventsToCsv([{ title: '워크숍', start_at: '2026-07-18T09:00:00', estimated_minutes: 120 }])
   assert.match(csv, /,120,,,,,,,,$/m)
@@ -262,6 +272,17 @@ test('parseTasksCsv skips rows without a title and reports the row number', () =
 
 test('parseTasksCsv returns nothing for empty input', () => {
   assert.deepEqual(parseTasksCsv(''), { tasks: [], errors: [] })
+})
+
+test('parseTasksCsv ignores malformed date/time cells and reports an error instead of forwarding bad data', () => {
+  const csv = '제목,시작일,시작 시각,기한,완료 시각,반복 종료일\n업무,2026/07/06,930,2026-07-10,18:00,26-07-15\n'
+  const { tasks, errors } = parseTasksCsv(csv)
+  assert.deepEqual(tasks, [{ title: '업무', due_date: '2026-07-10', due_time: '18:00' }])
+  assert.deepEqual(errors, [
+    '2행: 시작일 형식이 올바르지 않아 무시함 (YYYY-MM-DD)',
+    '2행: 시작 시각 형식이 올바르지 않아 무시함 (HH:MM)',
+    '2행: 반복 종료일 형식이 올바르지 않아 무시함 (YYYY-MM-DD)',
+  ])
 })
 
 test('dedupeImportedTasks skips rows matching an existing task by title/start/due', () => {
@@ -398,6 +419,16 @@ test('parseTodosCsv skips rows without a title and reports the row number', () =
 
 test('parseTodosCsv returns nothing for empty input', () => {
   assert.deepEqual(parseTodosCsv(''), { todos: [], errors: [] })
+})
+
+test('parseTodosCsv ignores malformed date/time cells and reports an error', () => {
+  const csv = '제목,날짜,시간\n할 일,2026/07/06,930\n'
+  const { todos, errors } = parseTodosCsv(csv)
+  assert.deepEqual(todos, [{ title: '할 일' }])
+  assert.deepEqual(errors, [
+    '2행: 날짜 형식이 올바르지 않아 무시함 (YYYY-MM-DD)',
+    '2행: 시간 형식이 올바르지 않아 무시함 (HH:MM)',
+  ])
 })
 
 test('todosToCsv and parseTodosCsv round-trip a monthly recurring todo', () => {
@@ -583,6 +614,13 @@ test('parseWorkLogsCsv skips rows without content and reports the row number', (
 
 test('parseWorkLogsCsv returns nothing for empty input', () => {
   assert.deepEqual(parseWorkLogsCsv(''), { logs: [], errors: [] })
+})
+
+test('parseWorkLogsCsv ignores a malformed date cell and reports an error', () => {
+  const csv = '날짜,내용\n2026/07/06,회의 진행\n'
+  const { logs, errors } = parseWorkLogsCsv(csv)
+  assert.deepEqual(logs, [{ content: '회의 진행' }])
+  assert.deepEqual(errors, ['2행: 날짜 형식이 올바르지 않아 무시함 (YYYY-MM-DD)'])
 })
 
 test('checklist column exports each item with its done state across all four CSV exports and round-trips on import', () => {

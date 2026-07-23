@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-csv-import-date-format-validation',
+    timestamp: '2026-07-23T15:07:00+09:00',
+    description: '업무/일정/할 일/업무 기록 CSV 가져오기에서 날짜·시각 셀(예: "2026/07/06", "930")이 형식에 맞지 않으면 검증 없이 그대로 서버에 전송되어, 일부 행만 저장에 실패해도 나머지 행은 이미 생성된 채 새로고침 없이 원인 불명의 오류 메시지만 표시되는 문제가 있었습니다. frontend/src/csv.js의 parseTasksCsv/parseEventsCsv/parseTodosCsv/parseWorkLogsCsv에 날짜(YYYY-MM-DD)·시각(HH:MM)·일시 형식 검증을 추가해, 형식이 잘못된 셀은 해당 필드만 무시하거나(업무/할 일/기록) 행 전체를 건너뛰고(일정) "N행: ... 형식이 올바르지 않아 무시함/건너뜀" 오류로 안내하도록 고쳤습니다. 회귀 테스트를 frontend/src/csv.test.js에 추가했습니다.',
+  },
+  {
     id: '2026-07-23-ai-quickcapture-tag-match-parity',
     timestamp: '2026-07-23T14:44:00+09:00',
     description: 'AI 키가 설정되지 않은 계정이 사용하는 로컬 규칙 기반 빠른 입력 파서(rule_parse)가 할 일/업무에는 기존 태그를 자동으로 매칭해 붙여주지만, 일정과 업무 기록은 이 매칭 로직 자체가 빠져 있어 같은 문구로 입력해도 태그가 붙지 않았습니다. backend/app/ai.py의 event/work_log 분기에 _match_tags(clean, context) 호출을 추가해 4개 항목 모두 동일하게 태그를 자동 추천하도록 고쳤습니다. 회귀 테스트로 test_rule_parse_matches_existing_tags_for_event/_work_log를 추가했습니다.',

@@ -101,6 +101,10 @@ export const rowsToCsv = (headers, rows) => [headers, ...rows].map(row => row.ma
 
 const priorityLabelToValue = { 낮음: 'low', 보통: 'normal', 높음: 'high', low: 'low', normal: 'normal', high: 'high' }
 
+const isValidDateCell = cell => /^\d{4}-\d{2}-\d{2}$/.test(cell)
+const isValidTimeCell = cell => /^\d{2}:\d{2}$/.test(cell)
+const isValidDateTimeCell = cell => !Number.isNaN(new Date(cell).getTime())
+
 const parseCsvRows = text => {
   const rows = []
   let row = [], cell = '', inQuotes = false
@@ -132,10 +136,10 @@ export const parseTasksCsv = text => {
     if (!title) { errors.push(`${idx + 2}행: 제목이 없어 건너뜀`); return }
     const task = { title }
     if (iPriority >= 0 && cells[iPriority]) task.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
-    if (iStart >= 0 && cells[iStart]) task.start_date = cells[iStart].trim()
-    if (iStartTime >= 0 && cells[iStartTime]) task.start_time = cells[iStartTime].trim()
-    if (iDue >= 0 && cells[iDue]) task.due_date = cells[iDue].trim()
-    if (iDueTime >= 0 && cells[iDueTime]) task.due_time = cells[iDueTime].trim()
+    if (iStart >= 0 && cells[iStart]) { const v = cells[iStart].trim(); if (isValidDateCell(v)) task.start_date = v; else errors.push(`${idx + 2}행: 시작일 형식이 올바르지 않아 무시함 (YYYY-MM-DD)`) }
+    if (iStartTime >= 0 && cells[iStartTime]) { const v = cells[iStartTime].trim(); if (isValidTimeCell(v)) task.start_time = v; else errors.push(`${idx + 2}행: 시작 시각 형식이 올바르지 않아 무시함 (HH:MM)`) }
+    if (iDue >= 0 && cells[iDue]) { const v = cells[iDue].trim(); if (isValidDateCell(v)) task.due_date = v; else errors.push(`${idx + 2}행: 기한 형식이 올바르지 않아 무시함 (YYYY-MM-DD)`) }
+    if (iDueTime >= 0 && cells[iDueTime]) { const v = cells[iDueTime].trim(); if (isValidTimeCell(v)) task.due_time = v; else errors.push(`${idx + 2}행: 완료 시각 형식이 올바르지 않아 무시함 (HH:MM)`) }
     if (iTags >= 0 && cells[iTags]) task.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iDescription >= 0 && cells[iDescription]) task.description = cells[iDescription]
     if (iLink >= 0 && cells[iLink]) task.link_url = cells[iLink].trim()
@@ -144,7 +148,7 @@ export const parseTasksCsv = text => {
     if (iColor >= 0 && cells[iColor]) task.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) task.checklist = c }
     if (iRecurrence >= 0 && cells[iRecurrence]) task.recurrence_rule = taskRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
-    if (iRecurrenceEnd >= 0 && cells[iRecurrenceEnd]) task.recurrence_end_date = cells[iRecurrenceEnd].trim()
+    if (iRecurrenceEnd >= 0 && cells[iRecurrenceEnd]) { const v = cells[iRecurrenceEnd].trim(); if (isValidDateCell(v)) task.recurrence_end_date = v; else errors.push(`${idx + 2}행: 반복 종료일 형식이 올바르지 않아 무시함 (YYYY-MM-DD)`) }
     if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) task.custom_fields = f }
     if (iLinks >= 0 && cells[iLinks]) { const l = parseLinksCell(cells[iLinks]); if (l) task.links = l }
     tasks.push(task)
@@ -289,7 +293,10 @@ export const parseEventsCsv = text => {
     if (!title) { errors.push(`${idx + 2}행: 제목이 없어 건너뜀`); return }
     const start = (iStart >= 0 ? cells[iStart] : '')?.trim()
     if (!start) { errors.push(`${idx + 2}행: 시작 일시가 없어 건너뜀`); return }
-    const event = { title, start_at: start, end_at: (iEnd >= 0 && cells[iEnd]?.trim()) || start }
+    if (!isValidDateTimeCell(start)) { errors.push(`${idx + 2}행: 시작 일시 형식이 올바르지 않아 건너뜀`); return }
+    const end = (iEnd >= 0 && cells[iEnd]?.trim()) || start
+    if (end !== start && !isValidDateTimeCell(end)) { errors.push(`${idx + 2}행: 종료 일시 형식이 올바르지 않아 건너뜀`); return }
+    const event = { title, start_at: start, end_at: end }
     if (iAllDay >= 0 && cells[iAllDay]) event.google_is_all_day = cells[iAllDay].trim().toUpperCase() === 'Y'
     if (iPriority >= 0 && cells[iPriority]) event.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iLocation >= 0 && cells[iLocation]) event.location = cells[iLocation].trim()
@@ -350,8 +357,8 @@ export const parseTodosCsv = text => {
     const todo = { title }
     if (iPriority >= 0 && cells[iPriority]) todo.priority = priorityLabelToValue[cells[iPriority].trim()] || 'normal'
     if (iRecurrence >= 0 && cells[iRecurrence]) todo.recurrence_rule = todoRecurrenceLabelToValue[cells[iRecurrence].trim()] || null
-    if (iDate >= 0 && cells[iDate]) todo.todo_date = cells[iDate].trim()
-    if (iTime >= 0 && cells[iTime]) todo.todo_time = cells[iTime].trim()
+    if (iDate >= 0 && cells[iDate]) { const v = cells[iDate].trim(); if (isValidDateCell(v)) todo.todo_date = v; else errors.push(`${idx + 2}행: 날짜 형식이 올바르지 않아 무시함 (YYYY-MM-DD)`) }
+    if (iTime >= 0 && cells[iTime]) { const v = cells[iTime].trim(); if (isValidTimeCell(v)) todo.todo_time = v; else errors.push(`${idx + 2}행: 시간 형식이 올바르지 않아 무시함 (HH:MM)`) }
     if (iTags >= 0 && cells[iTags]) todo.tags = cells[iTags].split(';').map(t => t.trim()).filter(Boolean)
     if (iMemo >= 0 && cells[iMemo]) todo.memo = cells[iMemo]
     if (iLink >= 0 && cells[iLink]) todo.link_url = cells[iLink].trim()
@@ -407,7 +414,7 @@ export const parseWorkLogsCsv = text => {
     const content = (iContent >= 0 ? cells[iContent] : '')?.trim()
     if (!content) { errors.push(`${idx + 2}행: 내용이 없어 건너뜀`); return }
     const log = { content }
-    if (iDate >= 0 && cells[iDate]) log.log_date = cells[iDate].trim()
+    if (iDate >= 0 && cells[iDate]) { const v = cells[iDate].trim(); if (isValidDateCell(v)) log.log_date = v; else errors.push(`${idx + 2}행: 날짜 형식이 올바르지 않아 무시함 (YYYY-MM-DD)`) }
     if (iDuration >= 0 && cells[iDuration] && !Number.isNaN(Number(cells[iDuration]))) log.duration_minutes = Number(cells[iDuration])
     if (iEstimate >= 0 && cells[iEstimate] && !Number.isNaN(Number(cells[iEstimate]))) log.estimated_minutes = Number(cells[iEstimate])
     if (iReminder >= 0 && cells[iReminder] && !Number.isNaN(Number(cells[iReminder]))) log.reminder_minutes_before = Number(cells[iReminder])
@@ -418,7 +425,7 @@ export const parseWorkLogsCsv = text => {
     if (iBillable >= 0 && cells[iBillable]) log.billable = cells[iBillable].trim().toUpperCase() === 'Y'
     if (iClientName >= 0 && cells[iClientName]) log.client_name = cells[iClientName].trim()
     if (iRateOverride >= 0 && cells[iRateOverride] && !Number.isNaN(Number(cells[iRateOverride]))) log.hourly_rate_override = Number(cells[iRateOverride])
-    if (iInvoicedAt >= 0 && cells[iInvoicedAt]) log.invoiced_at = cells[iInvoicedAt].trim()
+    if (iInvoicedAt >= 0 && cells[iInvoicedAt]) { const v = cells[iInvoicedAt].trim(); if (isValidDateTimeCell(v)) log.invoiced_at = v; else errors.push(`${idx + 2}행: 청구 완료일시 형식이 올바르지 않아 무시함`) }
     if (iColor >= 0 && cells[iColor]) log.color = colorLabelToValue[cells[iColor].trim()] || ''
     if (iChecklist >= 0 && cells[iChecklist]) { const c = parseChecklistCell(cells[iChecklist]); if (c) log.checklist = c }
     if (iCustomFields >= 0 && cells[iCustomFields]) { const f = parseCustomFieldsCell(cells[iCustomFields]); if (f) log.custom_fields = f }
