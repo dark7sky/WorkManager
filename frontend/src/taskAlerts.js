@@ -1,9 +1,11 @@
 export const TASK_ALERT_LEAD_STORAGE_KEY = 'wm-task-alert-lead-minutes'
-export const TASK_ALERT_LEAD_OPTIONS = [5, 10, 15, 30]
+export const TASK_ALERT_LEAD_OPTIONS = [0, 5, 10, 15, 30]
 export const DEFAULT_TASK_ALERT_LEAD_MINUTES = 15
 
 export const loadTaskAlertLeadMinutes = () => {
-  const stored = Number(localStorage.getItem(TASK_ALERT_LEAD_STORAGE_KEY))
+  const raw = localStorage.getItem(TASK_ALERT_LEAD_STORAGE_KEY)
+  if (raw === null) return DEFAULT_TASK_ALERT_LEAD_MINUTES
+  const stored = Number(raw)
   return TASK_ALERT_LEAD_OPTIONS.includes(stored) ? stored : DEFAULT_TASK_ALERT_LEAD_MINUTES
 }
 

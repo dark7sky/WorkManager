@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { tasksDueForAlert, DEFAULT_TASK_ALERT_LEAD_MINUTES } from './taskAlerts.js'
+import { tasksDueForAlert, DEFAULT_TASK_ALERT_LEAD_MINUTES, TASK_ALERT_LEAD_OPTIONS } from './taskAlerts.js'
 
 const now = new Date(2026, 0, 1, 9, 0).getTime()
 const time = minutesFromNow => {
@@ -43,4 +43,9 @@ test('tasksDueForAlert lets a per-task reminder_minutes_before override the glob
   const tasks = [{ id: 1, status: 'pending', reminder_minutes_before: 30, ...time(25) }, { id: 2, status: 'pending', reminder_minutes_before: 5, ...time(10) }]
   const due = tasksDueForAlert(tasks, now, 15)
   assert.deepEqual(due.map(t => t.id), [1])
+})
+
+test('TASK_ALERT_LEAD_OPTIONS offers an off (0) choice while keeping the 15 minute default', () => {
+  assert.ok(TASK_ALERT_LEAD_OPTIONS.includes(0))
+  assert.equal(DEFAULT_TASK_ALERT_LEAD_MINUTES, 15)
 })

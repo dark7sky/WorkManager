@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { logsDueForAlert, DEFAULT_LOG_ALERT_LEAD_MINUTES } from './logAlerts.js'
+import { logsDueForAlert, DEFAULT_LOG_ALERT_LEAD_MINUTES, LOG_ALERT_LEAD_OPTIONS } from './logAlerts.js'
 
 const now = new Date(2026, 0, 1, 9, 0).getTime()
 const time = minutesFromNow => {
@@ -37,4 +37,9 @@ test('logsDueForAlert lets a per-log reminder_minutes_before override the global
   const logs = [{ id: 1, reminder_minutes_before: 30, ...time(25) }, { id: 2, reminder_minutes_before: 5, ...time(10) }]
   const due = logsDueForAlert(logs, now, 15)
   assert.deepEqual(due.map(l => l.id), [1])
+})
+
+test('LOG_ALERT_LEAD_OPTIONS offers an off (0) choice while keeping the 15 minute default', () => {
+  assert.ok(LOG_ALERT_LEAD_OPTIONS.includes(0))
+  assert.equal(DEFAULT_LOG_ALERT_LEAD_MINUTES, 15)
 })

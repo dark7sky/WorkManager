@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { eventsDueForAlert, DEFAULT_EVENT_ALERT_LEAD_MINUTES, isWithinQuietHours } from './eventAlerts.js'
+import { eventsDueForAlert, DEFAULT_EVENT_ALERT_LEAD_MINUTES, EVENT_ALERT_LEAD_OPTIONS, isWithinQuietHours } from './eventAlerts.js'
 
 const at = minutesFromNow => new Date(Date.UTC(2026, 0, 1, 0, minutesFromNow)).toISOString()
 const now = new Date(Date.UTC(2026, 0, 1, 0, 0)).getTime()
@@ -34,6 +34,11 @@ test('eventsDueForAlert lets a per-event reminder_minutes_before override the gl
   const events = [{ id: 1, start_at: at(25), reminder_minutes_before: 30 }, { id: 2, start_at: at(10), reminder_minutes_before: 5 }]
   const due = eventsDueForAlert(events, now, 15)
   assert.deepEqual(due.map(e => e.id), [1])
+})
+
+test('EVENT_ALERT_LEAD_OPTIONS offers an off (0) choice while keeping the 15 minute default', () => {
+  assert.ok(EVENT_ALERT_LEAD_OPTIONS.includes(0))
+  assert.equal(DEFAULT_EVENT_ALERT_LEAD_MINUTES, 15)
 })
 
 test('isWithinQuietHours is always false when disabled', () => {

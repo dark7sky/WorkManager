@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-alert-lead-time-off-option',
+    timestamp: '2026-07-23T10:02:00+09:00',
+    description: '업무/일정/할 일/업무 기록의 알림 시점 설정이 5·10·15·30분 중 하나만 고를 수 있어, 특정 항목의 마감/예정 알림만 끄고 싶어도 브라우저 알림 권한을 통째로 꺼야 했습니다. 각 알림 시점 옵션(taskAlerts.js, eventAlerts.js, todoAlerts.js, logAlerts.js)에 "끄기"(0분)를 추가하고 설정 화면 셀렉트에 표시하며, App.jsx의 4개 알림 폴링 이펙트가 시점이 0이면 해당 항목군 확인을 건너뛰도록 했습니다. 값을 저장한 적 없는 기존 사용자가 기본값(15분) 대신 꺼짐으로 오인식되지 않도록 load*AlertLeadMinutes()가 저장 여부를 raw 문자열로 먼저 확인하도록 수정. 각 *Alerts.test.js에 옵션 배열 회귀 테스트 추가.',
+  },
+  {
     id: '2026-07-23-share-link-view-tracking',
     timestamp: '2026-07-23T09:42:51+09:00',
     description: '공유 링크를 만든 뒤에도 실제로 누가 열람했는지 알 방법이 없었습니다. 업무/일정/할 일/업무 기록 4종의 공개 조회 API(`/api/public/{tasks,events,todos,work_logs}/{token}`)에서 비밀번호 확인을 통과하면 public_token_view_count를 증가시키고 public_token_last_viewed_at을 갱신하도록 했고, 각 편집 화면(TaskForm, Calendar 일정, Today의 할 일/업무 기록)의 공유 링크 안내 문구에 "조회 N회 (최근 방문 시각)"을 표시합니다. 테스트는 test_task_share_link_tracks_view_count 추가.',

@@ -1,9 +1,11 @@
 export const EVENT_ALERT_LEAD_STORAGE_KEY = 'wm-event-alert-lead-minutes'
-export const EVENT_ALERT_LEAD_OPTIONS = [5, 10, 15, 30]
+export const EVENT_ALERT_LEAD_OPTIONS = [0, 5, 10, 15, 30]
 export const DEFAULT_EVENT_ALERT_LEAD_MINUTES = 15
 
 export const loadEventAlertLeadMinutes = () => {
-  const stored = Number(localStorage.getItem(EVENT_ALERT_LEAD_STORAGE_KEY))
+  const raw = localStorage.getItem(EVENT_ALERT_LEAD_STORAGE_KEY)
+  if (raw === null) return DEFAULT_EVENT_ALERT_LEAD_MINUTES
+  const stored = Number(raw)
   return EVENT_ALERT_LEAD_OPTIONS.includes(stored) ? stored : DEFAULT_EVENT_ALERT_LEAD_MINUTES
 }
 

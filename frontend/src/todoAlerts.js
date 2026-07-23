@@ -1,9 +1,11 @@
 export const TODO_ALERT_LEAD_STORAGE_KEY = 'wm-todo-alert-lead-minutes'
-export const TODO_ALERT_LEAD_OPTIONS = [5, 10, 15, 30]
+export const TODO_ALERT_LEAD_OPTIONS = [0, 5, 10, 15, 30]
 export const DEFAULT_TODO_ALERT_LEAD_MINUTES = 15
 
 export const loadTodoAlertLeadMinutes = () => {
-  const stored = Number(localStorage.getItem(TODO_ALERT_LEAD_STORAGE_KEY))
+  const raw = localStorage.getItem(TODO_ALERT_LEAD_STORAGE_KEY)
+  if (raw === null) return DEFAULT_TODO_ALERT_LEAD_MINUTES
+  const stored = Number(raw)
   return TODO_ALERT_LEAD_OPTIONS.includes(stored) ? stored : DEFAULT_TODO_ALERT_LEAD_MINUTES
 }
 

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { todosDueForAlert, DEFAULT_TODO_ALERT_LEAD_MINUTES } from './todoAlerts.js'
+import { todosDueForAlert, DEFAULT_TODO_ALERT_LEAD_MINUTES, TODO_ALERT_LEAD_OPTIONS } from './todoAlerts.js'
 
 const now = new Date(2026, 0, 1, 9, 0).getTime()
 const time = minutesFromNow => {
@@ -43,4 +43,9 @@ test('todosDueForAlert lets a per-todo reminder_minutes_before override the glob
   const todos = [{ id: 1, completed: false, reminder_minutes_before: 30, ...time(25) }, { id: 2, completed: false, reminder_minutes_before: 5, ...time(10) }]
   const due = todosDueForAlert(todos, now, 15)
   assert.deepEqual(due.map(t => t.id), [1])
+})
+
+test('TODO_ALERT_LEAD_OPTIONS offers an off (0) choice while keeping the 15 minute default', () => {
+  assert.ok(TODO_ALERT_LEAD_OPTIONS.includes(0))
+  assert.equal(DEFAULT_TODO_ALERT_LEAD_MINUTES, 15)
 })
