@@ -8,6 +8,46 @@ const logs = [
   { log_date: '2026-07-03', content: '개발', duration_minutes: 30, billable: true, tags: [] },
 ]
 
+test('billableWorkLogs filters to a single client when a client name is given', () => {
+  const perClient = [
+    { log_date: '2026-07-01', content: 'A사 작업', duration_minutes: 60, billable: true, client_name: 'A사' },
+    { log_date: '2026-07-02', content: 'B사 작업', duration_minutes: 90, billable: true, client_name: 'B사' },
+  ]
+  assert.equal(billableWorkLogs(perClient, 'A사').length, 1)
+  assert.equal(billableWorkLogs(perClient, 'A사')[0].content, 'A사 작업')
+  assert.equal(billableWorkLogs(perClient).length, 2)
+})
+
+test('invoicedWorkLogs filters to a single client when a client name is given', () => {
+  const perClient = [
+    { log_date: '2026-07-01', content: 'A사 작업', duration_minutes: 60, billable: true, invoiced_at: '2026-07-05T00:00:00+09:00', client_name: 'A사' },
+    { log_date: '2026-07-02', content: 'B사 작업', duration_minutes: 90, billable: true, invoiced_at: '2026-07-05T00:00:00+09:00', client_name: 'B사' },
+  ]
+  assert.equal(invoicedWorkLogs(perClient, 'B사').length, 1)
+  assert.equal(invoicedWorkLogs(perClient, 'B사')[0].content, 'B사 작업')
+})
+
+test('invoiceTotals restricts the total to a single client when given', () => {
+  const perClient = [
+    { log_date: '2026-07-01', content: 'A사 작업', duration_minutes: 60, billable: true, client_name: 'A사' },
+    { log_date: '2026-07-02', content: 'B사 작업', duration_minutes: 120, billable: true, client_name: 'B사' },
+  ]
+  const totals = invoiceTotals(perClient, 60000, 'A사')
+  assert.equal(totals.minutes, 60)
+  assert.equal(totals.amount, 60000)
+})
+
+test('workLogsToPrintableInvoice restricts rows to filterClientName while clientName still labels the header', () => {
+  const perClient = [
+    { log_date: '2026-07-01', content: 'A사 작업', duration_minutes: 60, billable: true, client_name: 'A사' },
+    { log_date: '2026-07-02', content: 'B사 작업', duration_minutes: 90, billable: true, client_name: 'B사' },
+  ]
+  const html = workLogsToPrintableInvoice(perClient, { start: '2026-07-01', end: '2026-07-02', clientName: 'A사', filterClientName: 'A사' })
+  assert.match(html, /A사 작업/)
+  assert.doesNotMatch(html, /B사 작업/)
+  assert.match(html, /청구 대상: A사/)
+})
+
 test('billableWorkLogs filters to billable rows only', () => {
   assert.equal(billableWorkLogs(logs).length, 2)
 })

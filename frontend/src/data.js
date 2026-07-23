@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-per-client-invoice-actions',
+    timestamp: '2026-07-23T10:18:29+09:00',
+    description: 'Performance 화면의 "고객별 소요 시간" 항목은 고객별 시간/청구액을 보여주면서도 정작 청구서 PDF/청구 완료 표시/청구 완료 취소는 항상 조회 기간 전체 고객을 한데 묶어서만 처리했습니다. 여러 고객을 병행하는 프리랜서/에이전시가 고객 한 명분만 따로 청구서를 뽑거나 청구 완료 처리할 방법이 없었습니다. billableWorkLogs/invoicedWorkLogs/invoiceTotals/workLogsToPrintableInvoice(frontend/src/invoiceReport.js)에 선택적 client_name 필터를 추가하고, 고객별 소요 시간 행마다 청구서 PDF·청구 완료 표시·청구 완료 취소 버튼을 달아(frontend/src/screens/Performance.jsx) 고객 단위로 바로 처리할 수 있게 했습니다.',
+  },
+  {
     id: '2026-07-23-series-edit-checklist-parity',
     timestamp: '2026-07-23T10:12:37+09:00',
     description: '반복 업무/할 일/일정을 "이 항목과 이후 반복 항목에 모두 적용"으로 수정하면 체크리스트 변경 사항이 저장되지 않고 사라졌습니다. 반복 시리즈 일괄 수정 API(TASK_SERIES_EDITABLE_FIELDS, TODO_SERIES_EDITABLE_FIELDS, EVENT_SERIES_EDITABLE_FIELDS, backend/app/main.py)가 checklist 필드를 허용 목록에서 빠뜨리고 있었습니다. 세 목록 모두에 checklist를 추가하고 각 시리즈 수정 회귀 테스트에 체크리스트 반영 검증을 추가했습니다.',

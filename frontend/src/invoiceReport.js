@@ -8,13 +8,13 @@ const escapeHtml = value => String(value ?? '')
 const formatMinutesAsHours = minutes => (Number(minutes || 0) / 60).toFixed(2)
 const formatWon = amount => Math.round(Number(amount || 0)).toLocaleString('ko-KR')
 
-export const billableWorkLogs = logs => (logs || []).filter(log => log?.billable && !log?.invoiced_at)
-export const invoicedWorkLogs = logs => (logs || []).filter(log => log?.billable && log?.invoiced_at)
+export const billableWorkLogs = (logs, clientName) => (logs || []).filter(log => log?.billable && !log?.invoiced_at && (!clientName || log?.client_name === clientName))
+export const invoicedWorkLogs = (logs, clientName) => (logs || []).filter(log => log?.billable && log?.invoiced_at && (!clientName || log?.client_name === clientName))
 
 const logRate = (log, hourlyRate) => (log.hourly_rate_override != null ? Number(log.hourly_rate_override) : Number(hourlyRate) || 0)
 
-export const invoiceTotals = (logs, hourlyRate) => {
-  const billable = billableWorkLogs(logs)
+export const invoiceTotals = (logs, hourlyRate, clientName) => {
+  const billable = billableWorkLogs(logs, clientName)
   const minutes = billable.reduce((sum, log) => sum + Number(log.duration_minutes || 0), 0)
   const amount = Math.round(billable.reduce((sum, log) => sum + Number(log.duration_minutes || 0) / 60 * logRate(log, hourlyRate), 0))
   return { minutes, amount }
@@ -28,9 +28,9 @@ export const vatBreakdown = amount => {
   return { supplyAmount, vatAmount, totalAmount: supplyAmount + vatAmount }
 }
 
-export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, bizRegNumber, vatIncluded, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
-  const billable = billableWorkLogs(logs)
-  const { minutes, amount } = invoiceTotals(logs, hourlyRate)
+export const workLogsToPrintableInvoice = (logs, { start, end, hourlyRate, clientName, filterClientName, bizRegNumber, vatIncluded, invoiceNumber, generatedAt = new Date().toISOString(), title = 'WorkManager 청구서' } = {}) => {
+  const billable = billableWorkLogs(logs, filterClientName)
+  const { minutes, amount } = invoiceTotals(logs, hourlyRate, filterClientName)
   const number = invoiceNumber || defaultInvoiceNumber(start, end)
   const { supplyAmount, vatAmount, totalAmount } = vatBreakdown(amount)
   const rows = billable.map(log => `<tr>
