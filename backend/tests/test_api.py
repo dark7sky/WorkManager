@@ -2138,7 +2138,7 @@ class ApiTests(unittest.TestCase):
             "title": "주간 보고 (변경)", "priority": "high", "due_date": "1999-01-01",
             "reminder_minutes_before": 30, "links": [{"label": "문서", "url": "https://example.com"}],
             "custom_fields": [{"label": "부서", "value": "영업"}],
-            "checklist": [{"text": "자료 취합", "done": False}]})
+            "checklist": [{"text": "자료 취합", "done": False}], "due_time": "15:30"})
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["updated"], 3)
         for occurrence in occurrences:
@@ -2148,6 +2148,7 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(match["priority"], "high")
             self.assertEqual(match["due_date"], occurrence["due_date"])
             self.assertEqual(match["reminder_minutes_before"], 30)
+            self.assertEqual(match["due_time"], "15:30")
             self.assertEqual([{"label": l["label"], "url": l["url"]} for l in match["links"]], [{"label": "문서", "url": "https://example.com"}])
             self.assertEqual([{"label": f["label"], "value": f["value"]} for f in match["custom_fields"]], [{"label": "부서", "value": "영업"}])
             self.assertEqual([{"text": c["text"], "done": c["done"]} for c in match["checklist"]], [{"text": "자료 취합", "done": False}])

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-task-series-time-parity',
+    timestamp: '2026-07-23T10:19:27+09:00',
+    description: '반복 업무를 "이 업무와 이후 반복 업무에 모두 적용"으로 수정할 때 제목·태그·색상 등은 반영되지만 시작 시각/완료 예정 시각(start_time/due_time)은 조용히 무시되어, 반복 업무의 시간대를 한꺼번에 바꾸려던 사용자가 개별 회차를 일일이 다시 고쳐야 했습니다. backend/app/main.py의 TASK_SERIES_EDITABLE_FIELDS에 start_time·due_time을 추가해 일괄 반영되도록 고쳤습니다.',
+  },
+  {
     id: '2026-07-23-per-client-invoice-actions',
     timestamp: '2026-07-23T10:18:29+09:00',
     description: 'Performance 화면의 "고객별 소요 시간" 항목은 고객별 시간/청구액을 보여주면서도 정작 청구서 PDF/청구 완료 표시/청구 완료 취소는 항상 조회 기간 전체 고객을 한데 묶어서만 처리했습니다. 여러 고객을 병행하는 프리랜서/에이전시가 고객 한 명분만 따로 청구서를 뽑거나 청구 완료 처리할 방법이 없었습니다. billableWorkLogs/invoicedWorkLogs/invoiceTotals/workLogsToPrintableInvoice(frontend/src/invoiceReport.js)에 선택적 client_name 필터를 추가하고, 고객별 소요 시간 행마다 청구서 PDF·청구 완료 표시·청구 완료 취소 버튼을 달아(frontend/src/screens/Performance.jsx) 고객 단위로 바로 처리할 수 있게 했습니다.',

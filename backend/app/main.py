@@ -2052,7 +2052,7 @@ def task_series(item_id: int, user=Depends(require_user)):
     return {"items": [{"id": r["id"], "title": r["title"], "start_date": r["start_date"], "due_date": r["due_date"], "status": r["status"], "progress": r["progress"]} for r in items]}
 
 
-TASK_SERIES_EDITABLE_FIELDS = {"title", "description", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields", "checklist"}
+TASK_SERIES_EDITABLE_FIELDS = {"title", "description", "tags", "link_url", "color", "priority", "estimated_minutes", "reminder_minutes_before", "links", "custom_fields", "checklist", "start_time", "due_time"}
 
 
 @app.patch("/api/tasks/series/{group_id}")
