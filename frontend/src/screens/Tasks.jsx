@@ -132,7 +132,9 @@ export default function Tasks({tasks,logs,loading,onNew,onEdit,onProgress,onAppr
     if(!file||!onImport)return
     const parsed=icsToTasks(await file.text())
     if(!parsed.length){notify?.('가져올 업무가 없습니다.','error');return}
-    await onImport(parsed,[])
+    const {tasks:unique,duplicates}=dedupeImportedTasks(parsed,tasks)
+    if(!unique.length){notify?.('이미 동일한 업무가 있어 가져올 항목이 없습니다.','error');return}
+    await onImport(unique,duplicates.map(d=>`중복 건너뜀: ${d.title}`))
   }
   const togglePin=(e,t)=>{e.stopPropagation();setPinnedIds(ids=>{const next=togglePinnedTask(ids,t.id);savePinnedTaskIds(next);return next})}
   const copyTaskLink=async(e,t)=>{e.stopPropagation();try{await navigator.clipboard.writeText(taskDeepLink(location.origin,location.pathname,t.id));notify?.('업무 링크를 복사했습니다.')}catch{notify?.('링크 복사에 실패했습니다.','error')}}

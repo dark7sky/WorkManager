@@ -853,7 +853,9 @@ export default function Today(props) {
     if (!file || !onImportTodos) return
     const parsed = icsToTodos(await file.text())
     if (!parsed.length) { notify?.('가져올 항목이 없습니다.', 'error'); return }
-    await onImportTodos(parsed, [])
+    const { todos: unique, duplicates } = dedupeImportedTodos(parsed, todos)
+    if (!unique.length) { notify?.('이미 동일한 항목이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onImportTodos(unique, duplicates.map(d => `중복 건너뜀: ${d.title}`))
   }
   const toggleTodoSelected = id => setSelectedTodoIds(current => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next })
   const clearSelectedTodos = () => setSelectedTodoIds(new Set())
@@ -918,7 +920,9 @@ export default function Today(props) {
     if (!file || !onImportLogs) return
     const parsed = icsToLogs(await file.text())
     if (!parsed.length) { notify?.('가져올 항목이 없습니다.', 'error'); return }
-    await onImportLogs(parsed, [])
+    const { logs: unique, duplicates } = dedupeImportedLogs(parsed, logs)
+    if (!unique.length) { notify?.('이미 동일한 항목이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onImportLogs(unique, duplicates.map(d => `중복 건너뜀: ${d.content}`))
   }
   return <>
     <datalist id="client-name-options">{knownClientNames.map(name => <option key={name} value={name}/>)}</datalist>

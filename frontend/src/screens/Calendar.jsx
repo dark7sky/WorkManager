@@ -569,8 +569,12 @@ export default function Calendar({ events, tasks = [], loading, onOpenTask, onCr
     const file = e.target.files?.[0]; e.target.value = ''
     if (!file) return
     const parsed = parseIcs(await file.text()).filter(e => e.end_at)
+      .map(({ title, description, location, start_at, end_at, priority, estimated_minutes, link_url, color, checklist }) => ({ title, description: description || '', location: location || '', start_at, end_at, tags: [], ...(priority ? { priority } : {}), ...(estimated_minutes ? { estimated_minutes } : {}), ...(link_url ? { link_url } : {}), ...(color ? { color } : {}), ...(checklist ? { checklist } : {}) }))
     if (!parsed.length) { notify?.('가져올 일정이 없습니다.', 'error'); return }
-    await onCreate(parsed.map(({ title, description, location, start_at, end_at, priority, estimated_minutes, link_url, color, checklist }) => ({ title, description: description || '', location: location || '', start_at, end_at, tags: [], ...(priority ? { priority } : {}), ...(estimated_minutes ? { estimated_minutes } : {}), ...(link_url ? { link_url } : {}), ...(color ? { color } : {}), ...(checklist ? { checklist } : {}) })))
+    const { events: unique, duplicates } = dedupeImportedEvents(parsed, events)
+    if (!unique.length) { notify?.('이미 동일한 일정이 있어 가져올 항목이 없습니다.', 'error'); return }
+    await onCreate(unique)
+    if (duplicates.length) notify?.(duplicates.map(d => `중복 건너뜀: ${d.title}`).join('\n'), 'error')
   }
   const importCsv = async e => {
     const file = e.target.files?.[0]; e.target.value = ''

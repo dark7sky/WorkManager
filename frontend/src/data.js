@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-import-dedup-ui-parity',
+    timestamp: '2026-07-23T11:46:34+09:00',
+    description: '업무/일정/오늘 화면의 CSV·ICS 가져오기에서, 이미 같은 행이 있거나 같은 파일 안에 중복 행이 섞여 있으면 그대로 추가되지 않고 "중복 건너뜀"으로 표시되도록 가져오기 흐름을 연결했습니다. `dedupeImportedTasks`/`dedupeImportedEvents`/`dedupeImportedTodos`/`dedupeImportedLogs`를 각 화면의 실제 import 핸들러에 적용해, 이전에 내보낸 파일을 다시 넣을 때도 같은 항목이 조용히 두 번 쌓이지 않도록 했습니다(`frontend/src/screens/Tasks.jsx`, `frontend/src/screens/Calendar.jsx`, `frontend/src/screens/Today.jsx`).',
+  },
+  {
     id: '2026-07-23-worklog-empty-string-clear-fix',
     timestamp: '2026-07-23T10:47:00+09:00',
     description: '업무 기록(work log)의 소요 시간(duration_minutes)과 시급 재정의(hourly_rate_override) 필드는 빈 문자열("")을 보내 값을 지우는 것이 다른 모든 항목(예상 소요 시간, 고객명 등)과 달리 지원되지 않아 422 오류가 발생했습니다. backend/app/main.py의 WorkLogPayload 빈 문자열→null 변환 검증기에 두 필드를 추가해 API를 직접 호출하는 경우에도 다른 필드와 동일하게 값을 지울 수 있도록 고쳤습니다.',
