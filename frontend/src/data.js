@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-share-link-view-tracking',
+    timestamp: '2026-07-23T09:42:51+09:00',
+    description: '공유 링크를 만든 뒤에도 실제로 누가 열람했는지 알 방법이 없었습니다. 업무/일정/할 일/업무 기록 4종의 공개 조회 API(`/api/public/{tasks,events,todos,work_logs}/{token}`)에서 비밀번호 확인을 통과하면 public_token_view_count를 증가시키고 public_token_last_viewed_at을 갱신하도록 했고, 각 편집 화면(TaskForm, Calendar 일정, Today의 할 일/업무 기록)의 공유 링크 안내 문구에 "조회 N회 (최근 방문 시각)"을 표시합니다. 테스트는 test_task_share_link_tracks_view_count 추가.',
+  },
+  {
     id: '2026-07-23-share-link-estimated-minutes',
     timestamp: '2026-07-23T09:32:00+09:00',
     description: '공유 링크로 열람하는 업무/일정/할 일/업무 기록 화면에 예상 소요 시간이 표시되지 않아, 다른 필드는 모두 보이는데 유독 이 정보만 링크를 받은 사람에게 전달되지 않았습니다. 백엔드 공개 조회 4종(`/api/public/{tasks,events,todos,work_logs}/{token}`)의 SELECT에 estimated_minutes를 추가하고, PublicTask/PublicEvent/PublicTodo/PublicWorkLog.jsx에 "예상 소요 시간" 항목을 추가했습니다. 테스트는 `backend/tests/test_api.py`의 각 공유 링크 테스트에 estimated_minutes 검증을 추가.',

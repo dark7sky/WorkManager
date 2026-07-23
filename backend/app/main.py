@@ -2725,9 +2725,10 @@ def public_task(token: str, request: Request, password: str | None = None):
           tags,link_url,links,checklist,custom_fields,estimated_minutes,created_at,updated_at,public_token_password_hash FROM tasks
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
-    if not item:
-        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    _check_share_password(item["public_token_password_hash"], password)
+        if not item:
+            raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+        _check_share_password(item["public_token_password_hash"], password)
+        c.execute("UPDATE tasks SET public_token_view_count=public_token_view_count+1, public_token_last_viewed_at=? WHERE public_token=?", (now(), token))
     result = row_dict(item)
     result.pop("public_token_password_hash", None)
     return result
@@ -2741,9 +2742,10 @@ def public_event(token: str, request: Request, password: str | None = None):
         item = c.execute("""SELECT title,description,location,start_at,end_at,tags,link_url,links,checklist,custom_fields,estimated_minutes,created_at,updated_at,public_token_password_hash FROM events
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
-    if not item:
-        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    _check_share_password(item["public_token_password_hash"], password)
+        if not item:
+            raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+        _check_share_password(item["public_token_password_hash"], password)
+        c.execute("UPDATE events SET public_token_view_count=public_token_view_count+1, public_token_last_viewed_at=? WHERE public_token=?", (now(), token))
     result = row_dict(item)
     result.pop("public_token_password_hash", None)
     return result
@@ -2757,9 +2759,10 @@ def public_todo(token: str, request: Request, password: str | None = None):
         item = c.execute("""SELECT title,memo,priority,completed,todo_date,todo_time,tags,link_url,links,checklist,custom_fields,estimated_minutes,created_at,public_token_password_hash FROM todos
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
-    if not item:
-        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    _check_share_password(item["public_token_password_hash"], password)
+        if not item:
+            raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+        _check_share_password(item["public_token_password_hash"], password)
+        c.execute("UPDATE todos SET public_token_view_count=public_token_view_count+1, public_token_last_viewed_at=? WHERE public_token=?", (now(), token))
     result = row_dict(item)
     result.pop("public_token_password_hash", None)
     return result
@@ -2773,9 +2776,10 @@ def public_work_log(token: str, request: Request, password: str | None = None):
         item = c.execute("""SELECT content,log_date,log_time,duration_minutes,billable,priority,tags,link_url,links,checklist,custom_fields,estimated_minutes,created_at,public_token_password_hash FROM work_logs
           WHERE public_token=? AND deleted_at IS NULL
           AND (public_token_expires_at IS NULL OR public_token_expires_at > ?)""", (token, now())).fetchone()
-    if not item:
-        raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
-    _check_share_password(item["public_token_password_hash"], password)
+        if not item:
+            raise HTTPException(404, "공유 링크를 찾을 수 없습니다.")
+        _check_share_password(item["public_token_password_hash"], password)
+        c.execute("UPDATE work_logs SET public_token_view_count=public_token_view_count+1, public_token_last_viewed_at=? WHERE public_token=?", (now(), token))
     result = row_dict(item)
     result.pop("public_token_password_hash", None)
     return result

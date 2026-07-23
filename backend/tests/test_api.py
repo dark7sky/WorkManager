@@ -458,6 +458,21 @@ class ApiTests(unittest.TestCase):
 
     @patch("app.main.google_calendar.selected_calendar", return_value=None)
     @patch("app.main.google_calendar.token_status", return_value={"connected": False})
+    def test_task_share_link_tracks_view_count(self, *_):
+        a = self.client(self.token_a)
+        task = a.post("/api/tasks", json={"title": "viewed plan"}).json()
+        no_auth = TestClient(self.app)
+        shared = a.post(f"/api/tasks/{task['id']}/share")
+        token = shared.json()["public_token"]
+        self.assertEqual(a.get(f"/api/tasks/{task['id']}").json()["public_token_view_count"], 0)
+        no_auth.get(f"/api/public/tasks/{token}")
+        no_auth.get(f"/api/public/tasks/{token}")
+        updated = a.get(f"/api/tasks/{task['id']}").json()
+        self.assertEqual(updated["public_token_view_count"], 2)
+        self.assertTrue(updated["public_token_last_viewed_at"])
+
+    @patch("app.main.google_calendar.selected_calendar", return_value=None)
+    @patch("app.main.google_calendar.token_status", return_value={"connected": False})
     def test_task_share_link_can_expire(self, *_):
         a = self.client(self.token_a)
         task = a.post("/api/tasks", json={"title": "expiring plan"}).json()
