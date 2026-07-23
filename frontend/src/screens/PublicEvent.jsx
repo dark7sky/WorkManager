@@ -42,6 +42,7 @@ export default function PublicEvent({ token }) {
           {event.start_at ? <div><dt>시작</dt><dd>{formatTimestamp(event.start_at)}</dd></div> : null}
           {event.end_at ? <div><dt>종료</dt><dd>{formatTimestamp(event.end_at)}</dd></div> : null}
           {event.tags?.length ? <div><dt>태그</dt><dd>{event.tags.join(', ')}</dd></div> : null}
+          {event.estimated_minutes ? <div><dt>예상 소요 시간</dt><dd>{event.estimated_minutes}분</dd></div> : null}
         </dl>
         {event.checklist?.length ? <div><p className="checklist-progress">체크리스트 {event.checklist.filter(i => i.done).length}/{event.checklist.length}</p><ul>{event.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {event.custom_fields?.length ? <dl className="public-task-meta">{event.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}

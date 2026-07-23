@@ -44,6 +44,7 @@ export default function PublicTask({ token }) {
           {task.start_date ? <div><dt>시작일</dt><dd>{task.start_date}</dd></div> : null}
           {task.due_date ? <div><dt>마감일</dt><dd>{task.due_date}</dd></div> : null}
           {task.tags?.length ? <div><dt>태그</dt><dd>{task.tags.join(', ')}</dd></div> : null}
+          {task.estimated_minutes ? <div><dt>예상 소요 시간</dt><dd>{task.estimated_minutes}분</dd></div> : null}
         </dl>
         {task.checklist?.length ? <div><p className="checklist-progress">체크리스트 {task.checklist.filter(i => i.done).length}/{task.checklist.length}</p><ul>{task.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {task.custom_fields?.length ? <dl className="public-task-meta">{task.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}

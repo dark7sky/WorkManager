@@ -42,6 +42,7 @@ export default function PublicWorkLog({ token }) {
           {log.log_date ? <div><dt>날짜</dt><dd>{log.log_date}{log.log_time ? ` ${log.log_time}` : ''}</dd></div> : null}
           {log.duration_minutes ? <div><dt>소요 시간</dt><dd>{log.duration_minutes}분</dd></div> : null}
           {log.tags?.length ? <div><dt>태그</dt><dd>{log.tags.join(', ')}</dd></div> : null}
+          {log.estimated_minutes ? <div><dt>예상 소요 시간</dt><dd>{log.estimated_minutes}분</dd></div> : null}
         </dl>
         {log.checklist?.length ? <div><p className="checklist-progress">체크리스트 {log.checklist.filter(i => i.done).length}/{log.checklist.length}</p><ul>{log.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {log.custom_fields?.length ? <dl className="public-task-meta">{log.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}

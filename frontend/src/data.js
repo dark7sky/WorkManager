@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-share-link-estimated-minutes',
+    timestamp: '2026-07-23T09:32:00+09:00',
+    description: '공유 링크로 열람하는 업무/일정/할 일/업무 기록 화면에 예상 소요 시간이 표시되지 않아, 다른 필드는 모두 보이는데 유독 이 정보만 링크를 받은 사람에게 전달되지 않았습니다. 백엔드 공개 조회 4종(`/api/public/{tasks,events,todos,work_logs}/{token}`)의 SELECT에 estimated_minutes를 추가하고, PublicTask/PublicEvent/PublicTodo/PublicWorkLog.jsx에 "예상 소요 시간" 항목을 추가했습니다. 테스트는 `backend/tests/test_api.py`의 각 공유 링크 테스트에 estimated_minutes 검증을 추가.',
+  },
+  {
     id: '2026-07-23-performance-report-pdf-export',
     timestamp: '2026-07-23T05:41:00+09:00',
     description: '성과 화면에서 Markdown/CSV/Excel 내보내기만 가능하고, 청구서 PDF는 청구 가능한 업무 기록이 있을 때만 노출되어 요약·목표·태그별/고객별 소요 시간 등 전체 성과 데이터를 인쇄용 PDF로 공유할 방법이 없었습니다. Tasks/Calendar 화면과 동일한 인쇄창 방식으로 "PDF 내보내기" 버튼을 추가했습니다(`frontend/src/performanceReport.js`의 performanceReportToPrintableReport, `frontend/src/screens/Performance.jsx`). 테스트는 `frontend/src/performanceReport.test.js`에 추가.',

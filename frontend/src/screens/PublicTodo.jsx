@@ -42,6 +42,7 @@ export default function PublicTodo({ token }) {
         <dl className="public-task-meta">
           {todo.todo_date ? <div><dt>날짜</dt><dd>{todo.todo_date}{todo.todo_time ? ` ${todo.todo_time}` : ''}</dd></div> : null}
           {todo.tags?.length ? <div><dt>태그</dt><dd>{todo.tags.join(', ')}</dd></div> : null}
+          {todo.estimated_minutes ? <div><dt>예상 소요 시간</dt><dd>{todo.estimated_minutes}분</dd></div> : null}
         </dl>
         {todo.checklist?.length ? <div><p className="checklist-progress">체크리스트 {todo.checklist.filter(i => i.done).length}/{todo.checklist.length}</p><ul>{todo.checklist.map(item => <li key={item.id} className={item.done ? 'checklist-done-text' : undefined}>{item.text}</li>)}</ul></div> : null}
         {todo.custom_fields?.length ? <dl className="public-task-meta">{todo.custom_fields.map((f, i) => <div key={i}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl> : null}
