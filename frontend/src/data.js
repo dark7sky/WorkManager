@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-shortcuts-help-arrow-key-coverage',
+    timestamp: '2026-07-23T10:12:00+09:00',
+    description: '단축키 안내(?)의 ↑/↓ 항목이 업무 관리/오늘 화면 목록만 설명하고 있어, 이미 구현되어 있던 캘린더 일정 목록 보기와 전체 검색(Ctrl/⌘+K) 결과 창의 ↑/↓ 이동 기능은 안내에서 누락되어 있었습니다. KeyboardShortcuts.jsx의 해당 항목 설명에 두 화면을 추가했습니다.',
+  },
+  {
     id: '2026-07-23-alert-lead-time-off-option',
     timestamp: '2026-07-23T10:02:00+09:00',
     description: '업무/일정/할 일/업무 기록의 알림 시점 설정이 5·10·15·30분 중 하나만 고를 수 있어, 특정 항목의 마감/예정 알림만 끄고 싶어도 브라우저 알림 권한을 통째로 꺼야 했습니다. 각 알림 시점 옵션(taskAlerts.js, eventAlerts.js, todoAlerts.js, logAlerts.js)에 "끄기"(0분)를 추가하고 설정 화면 셀렉트에 표시하며, App.jsx의 4개 알림 폴링 이펙트가 시점이 0이면 해당 항목군 확인을 건너뛰도록 했습니다. 값을 저장한 적 없는 기존 사용자가 기본값(15분) 대신 꺼짐으로 오인식되지 않도록 load*AlertLeadMinutes()가 저장 여부를 raw 문자열로 먼저 확인하도록 수정. 각 *Alerts.test.js에 옵션 배열 회귀 테스트 추가.',
