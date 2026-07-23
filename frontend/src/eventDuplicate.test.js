@@ -83,3 +83,20 @@ test('buildTaskFromEventPayload handles missing optional fields', () => {
   assert.equal(result.estimated_minutes, null)
   assert.deepEqual(result.checklist, [])
 })
+
+test('buildTaskFromEventPayload carries links, custom_fields, color and reminder_minutes_before', () => {
+  const event = { title: '주간 회의', links: [{ id: '1', url: 'https://a.com', label: 'A' }], custom_fields: [{ id: 'f1', label: '담당', value: '홍길동' }], color: 'blue', reminder_minutes_before: 15 }
+  const result = buildTaskFromEventPayload(event)
+  assert.deepEqual(result.links, [{ id: '1', url: 'https://a.com', label: 'A' }])
+  assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '담당', value: '홍길동' }])
+  assert.equal(result.color, 'blue')
+  assert.equal(result.reminder_minutes_before, 15)
+})
+
+test('buildTaskFromEventPayload defaults links, custom_fields, color and reminder_minutes_before when missing', () => {
+  const result = buildTaskFromEventPayload({ title: '휴가' })
+  assert.deepEqual(result.links, [])
+  assert.deepEqual(result.custom_fields, [])
+  assert.equal(result.color, null)
+  assert.equal(result.reminder_minutes_before, null)
+})

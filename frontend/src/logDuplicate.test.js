@@ -61,3 +61,20 @@ test('buildTaskFromLogPayload handles missing optional fields', () => {
   assert.deepEqual(result.checklist, [])
   assert.equal(result.estimated_minutes, null)
 })
+
+test('buildTaskFromLogPayload carries links, custom_fields, color and reminder_minutes_before', () => {
+  const log = { content: '스탠드업 참여', links: [{ id: '1', url: 'https://a.com', label: 'A' }], custom_fields: [{ id: 'f1', label: '고객사', value: 'ACME' }], color: 'green', reminder_minutes_before: 20 }
+  const result = buildTaskFromLogPayload(log)
+  assert.deepEqual(result.links, [{ id: '1', url: 'https://a.com', label: 'A' }])
+  assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '고객사', value: 'ACME' }])
+  assert.equal(result.color, 'green')
+  assert.equal(result.reminder_minutes_before, 20)
+})
+
+test('buildTaskFromLogPayload defaults links, custom_fields, color and reminder_minutes_before when missing', () => {
+  const result = buildTaskFromLogPayload({ content: '문서 정리' })
+  assert.deepEqual(result.links, [])
+  assert.deepEqual(result.custom_fields, [])
+  assert.equal(result.color, null)
+  assert.equal(result.reminder_minutes_before, null)
+})

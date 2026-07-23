@@ -113,3 +113,20 @@ test('buildTodoDuplicatePayload defaults reminder_minutes_before and custom_fiel
   assert.equal(result.reminder_minutes_before, null)
   assert.deepEqual(result.custom_fields, [])
 })
+
+test('buildTaskFromTodoPayload carries links, custom_fields, color and reminder_minutes_before', () => {
+  const todo = { title: '보고서 제출', links: [{ id: '1', url: 'https://a.com', label: 'A' }], custom_fields: [{ id: 'f1', label: '고객', value: 'ACME' }], color: 'purple', reminder_minutes_before: 30 }
+  const result = buildTaskFromTodoPayload(todo)
+  assert.deepEqual(result.links, [{ id: '1', url: 'https://a.com', label: 'A' }])
+  assert.deepEqual(result.custom_fields, [{ id: 'f1', label: '고객', value: 'ACME' }])
+  assert.equal(result.color, 'purple')
+  assert.equal(result.reminder_minutes_before, 30)
+})
+
+test('buildTaskFromTodoPayload defaults links, custom_fields, color and reminder_minutes_before when missing', () => {
+  const result = buildTaskFromTodoPayload({ title: '무제' })
+  assert.deepEqual(result.links, [])
+  assert.deepEqual(result.custom_fields, [])
+  assert.equal(result.color, null)
+  assert.equal(result.reminder_minutes_before, null)
+})

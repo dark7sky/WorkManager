@@ -31,4 +31,8 @@ export const buildTaskFromEventPayload = event => ({
   description: (event?.description || '').trim() || null,
   checklist: normalizedChecklist(event?.checklist),
   estimated_minutes: normalizedEstimatedMinutes(event?.estimated_minutes),
+  links: normalizedLinks(event?.links),
+  custom_fields: normalizedCustomFields(event?.custom_fields),
+  color: event?.color || null,
+  reminder_minutes_before: normalizedReminderMinutesBefore(event?.reminder_minutes_before),
 })

@@ -12,6 +12,11 @@ export const seedEvents = [
 
 export const changelogUpdates = [
   {
+    id: '2026-07-23-promote-to-task-field-parity',
+    timestamp: '2026-07-23T10:31:00+09:00',
+    description: '할 일/업무 기록/일정을 "업무로 전환"하면 링크, 사용자 지정 필드, 색상, 알림 시점이 새 업무에 복사되지 않고 사라졌습니다. 같은 항목을 복제할 때 쓰이는 build*DuplicatePayload는 이 필드들을 모두 옮기지만, 업무로 전환하는 buildTaskFromTodoPayload/buildTaskFromLogPayload/buildTaskFromEventPayload(todoDuplicate.js, logDuplicate.js, eventDuplicate.js)는 예상 소요 시간만 옮기고 있었습니다. 세 함수 모두 links/custom_fields/color/reminder_minutes_before를 포함하도록 수정했습니다.',
+  },
+  {
     id: '2026-07-23-share-link-native-share',
     timestamp: '2026-07-23T10:20:00+09:00',
     description: '업무/일정/할 일/업무 기록의 공유 링크 패널에 "공유하기" 버튼을 추가했습니다. 모바일 등 Web Share API를 지원하는 환경에서는 링크 복사 대신 기기의 공유 시트(카카오톡, 문자, 메일 등)로 바로 보낼 수 있습니다.',

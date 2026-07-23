@@ -1,4 +1,4 @@
-import { normalizedEstimatedMinutes, normalizedReminderMinutesBefore } from './taskFormPayload.js'
+import { normalizedEstimatedMinutes, normalizedReminderMinutesBefore, normalizedLinks, normalizedCustomFields } from './taskFormPayload.js'
 
 export const buildLogDuplicatePayload = log => ({
   content: `${(log?.content || '').trim()} (사본)`,
@@ -28,4 +28,8 @@ export const buildTaskFromLogPayload = log => ({
   link_url: log?.link_url || null,
   checklist: Array.isArray(log?.checklist) ? log.checklist : [],
   estimated_minutes: normalizedEstimatedMinutes(log?.estimated_minutes),
+  links: normalizedLinks(log?.links),
+  custom_fields: normalizedCustomFields(log?.custom_fields),
+  color: log?.color || null,
+  reminder_minutes_before: normalizedReminderMinutesBefore(log?.reminder_minutes_before),
 })
